@@ -474,15 +474,24 @@ button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);co
   display:flex;flex-direction:column;gap:6px;z-index:60;min-width:180px}
 .colFilterPop button{font-size:12px;padding:4px 8px;text-align:left;width:100%}
 .colFilterPop .row input{width:64px}
-.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+/* KPI strip is always ONE row: grid-auto-flow:column lays every tile in its
+   own column whatever the count, and minmax(0,1fr) lets them share the width
+   evenly and shrink below their content instead of wrapping onto a second
+   row. Type steps down a little as the strip gets tight. Below 760px the
+   strip becomes a horizontal scroller rather than squeezing to nothing. */
+.tiles{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:8px}
 .tile{background:var(--panel);border:1px solid var(--ring);border-radius:10px;
-  padding:9px 11px}
-.tile .nm{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted2);
-  margin-bottom:3px}
-.tile .big{font-size:19px;font-weight:600;letter-spacing:-.02em;
-  overflow-wrap:anywhere}
-.tile .meta{font-size:11px;color:var(--muted);margin-top:2px;
-  font-variant-numeric:tabular-nums}
+  padding:8px 10px;min-width:0}
+.tile .nm{display:flex;align-items:flex-start;gap:5px;font-size:11px;color:var(--muted2);
+  margin-bottom:3px;line-height:1.3;overflow-wrap:anywhere}
+.tile .nm .sw{flex:none;margin-top:2px}
+.tile .big{font-size:18px;font-weight:600;letter-spacing:-.02em;
+  overflow-wrap:anywhere;line-height:1.2}
+.tile .meta{font-size:10.5px;color:var(--muted);margin-top:2px;line-height:1.35;
+  font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+@media (max-width:760px){
+  .tiles{overflow-x:auto;grid-auto-columns:minmax(140px,1fr);padding-bottom:4px}
+}
 .mix-bar{display:flex;height:14px;border-radius:4px;overflow:hidden;
   margin-top:7px;background:var(--border)}
 .mix-bar>div{min-width:2px}
@@ -568,7 +577,9 @@ table.data thead th.sortable:hover{background:var(--accent-soft)}
   </div>
 </div>
 
-<div class="tiles" id="kpiTiles" style="margin-bottom:var(--gap)"></div>
+<div id="viewInfo"></div>
+<div class="tiles" id="kpiTiles"></div>
+<div id="mixStrip" style="margin:8px 0 var(--gap)"></div>
 <div id="resSummary"></div>
 
 <div class="card" id="controlsCard">
@@ -1865,9 +1876,49 @@ const seriesArr=(m,s="SIN")=>DATA.series[skey(m,s)]||[];
 const lastIdx=arr=>{ for(let i=arr.length-1;i>=0;i--) if(arr[i]!=null) return i;
   return -1; };
 
+// One orientation line per tab, carried on the KPI strip: what this view
+// shows and how to read its headline numbers. The sweep (2026-09-05) took
+// the prose off these tabs; this puts it back one hover away instead of as
+// a paragraph.
+const VIEW_INFO={
+  subsystems:"National and per-subsystem balance: load, generation by source, "+
+    "hydrology and CMO, on a daily grid. Toggle SIN/SE/S/NE/N to fan any picked "+
+    "series across subsystems. Net interchange is positive when a subsystem is a "+
+    "net exporter.",
+  plants:"One row per dispatched thermal plant, filterable by region and fuel. The "+
+    "five pinned Total rows are synthetic subsystem/national aggregates of the "+
+    "gas-fired fleet, not plants, and are excluded from fleet-wide KPI sums. A "+
+    "combined-cycle block appears both as its individual dispatch phases and as one "+
+    "combined row — don't sum the two together. Installed capacity, utilization and "+
+    "estimated gas consumption are derived, not published by ONS: see Methodology "+
+    "in the footer for the heat-rate assumption behind the gas figures.",
+  reservoirs:"Every reservoir ONS tracks, charted as usable volume % or upstream "+
+    "level, with region and basin rollups above the per-reservoir picker. EAR is "+
+    "stored energy rather than raw volume, which is what makes cascades comparable."
+};
+function renderViewInfo(){
+  const hostv=document.getElementById("viewInfo");
+  if(!hostv) return;
+  hostv.innerHTML="";
+  const text=VIEW_INFO[state.view];
+  if(!text){ hostv.hidden=true; return; }
+  hostv.hidden=false;
+  const wrap=el("div");
+  wrap.style.cssText="display:flex;align-items:center;gap:0;margin:0 0 6px";
+  const lab=el("span");
+  lab.style.cssText="font-size:11px;text-transform:uppercase;letter-spacing:.06em;"+
+    "color:var(--muted);font-weight:600";
+  lab.textContent="About this view";
+  wrap.appendChild(lab);
+  wrap.appendChild(infodot(text,"About this view"));
+  hostv.appendChild(wrap);
+}
 function renderKpis(){
   const host=document.getElementById("kpiTiles");
   const extra=document.getElementById("resSummary");
+  renderViewInfo();
+  const mix0=document.getElementById("mixStrip");
+  if(mix0){ mix0.hidden=true; mix0.innerHTML=""; }
   if(!host) return;
   if(state.view==="reservoirs"){
     host.hidden=false; host.innerHTML="";
@@ -1968,13 +2019,15 @@ function renderKpis(){
       " MWmed · "+asOfDate));
   }
 
+  const mixHost=document.getElementById("mixStrip");
+  if(mixHost){ mixHost.hidden=false; mixHost.innerHTML=""; }
   // Generation by fuel -- one row per subsystem currently toggled in the
   // Subsystems selector above (SIN by default; switch to SE/S/NE/N for a
   // regional breakdown). Full fuel granularity, shares sum to production.
   DATA.subsystems.filter(s=>state.subs.has(s)).forEach(s=>{
     const mix=fuelMix(s);
     if(!mix || !mix.prod || !mix.parts.length) return;
-    const wide=el("div","tile"); wide.style.gridColumn="1 / -1";
+    const wide=el("div","tile"); wide.style.marginTop="8px";
     const label=DATA.subsystemLabels[s]||s;
     let h='<div class="nm">Generation by fuel — '+label+' · '+mix.date+'</div>';
     h+='<div class="mix-bar">'+mix.parts.map(([nm,v,c])=>
@@ -1985,7 +2038,7 @@ function renderKpis(){
         '"></span>'+nm+' '+fmtNum(v,0)+' MWmed · '+
         (100*v/mix.prod).toFixed(0)+'%</span>').join("")+'</div>';
     wide.innerHTML=h;
-    host.appendChild(wide);
+    mixHost.appendChild(wide);
   });
 }
 
@@ -2565,6 +2618,12 @@ function renderTables(){
   const card=document.getElementById("tablesTableCard");
   card.innerHTML="";
 
+  // Which dataset these rows are is otherwise only legible from which
+  // source button happens to be pressed further up the page.
+  const title=el("p","panel-title");
+  title.textContent=src.label;
+  card.appendChild(title);
+
   const head=el("div","row");
   head.style.cssText="justify-content:space-between;align-items:baseline;margin-bottom:10px;flex-wrap:wrap;gap:8px";
   const count=el("div","muted");
@@ -2755,7 +2814,7 @@ function render(){
   // per-view "Download CSV" button (which exports the plotted series) has
   // nothing to export, so the tables card carries its own instead.
   const isTables = state.view==="tables";
-  ["controlsCard","pickCard","charts","kpiTiles","resSummary","tableCard"]
+  ["controlsCard","pickCard","charts","viewInfo","kpiTiles","mixStrip","resSummary","tableCard"]
     .forEach(id=>{ const e=document.getElementById(id); if(e) e.hidden=isTables; });
   ["tablesCard","tablesTableCard"].forEach(id=>{
     const e=document.getElementById(id); if(e) e.hidden=!isTables; });
