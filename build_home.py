@@ -125,33 +125,43 @@ body {
   display: flex; align-items: center; justify-content: center;
 }
 #theme-toggle svg { width: 17px; height: 17px; }
-main.hub { flex: 1; width: var(--content-w); max-width: 820px; margin: 0 auto;
-  padding: 72px 0 40px; }
-@media (max-width: 900px) { main.hub { width: auto; padding: 72px 16px 40px; } }
-.wordmark { font-size: 30px; font-weight: 700; letter-spacing: -.01em; }
+main.hub { flex: 1; width: var(--content-w); max-width: 720px; margin: 0 auto;
+  padding: 56px 0 40px; }
+@media (max-width: 900px) { main.hub { width: auto; padding: 40px 16px 40px; } }
+/* Home's own header row -- wordmark left, PT/theme controls right, same
+   idea as the pill-row-below-title header every dashboard uses, just
+   without a redundant nav-pill row here since the four cards below already
+   link to every other page (see ADR-001 / nav_links_html). */
+.hub-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.hub-controls { display: flex; gap: 6px; flex: none; }
+.hub-controls #theme-toggle { position: static; }
+.wordmark { font-size: 26px; font-weight: 700; letter-spacing: -.01em; }
 .wordmark .dot { color: var(--accent); }
 .wordmark a { color: inherit; text-decoration: none; }
-.tagline { color: var(--muted); font-size: 15px; margin-top: 8px; max-width: 40em; line-height: 1.5; }
-.flagbar { width: 120px; margin: 22px 0 0; }
-.lead { margin-top: 22px; font-size: 14.5px; line-height: 1.55; max-width: 42em; }
-.lead strong { font-weight: 650; }
-.lead .muted { color: var(--muted2); display: block; margin-top: 8px; }
-.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-  gap: 12px; margin-top: 26px; }
+.tagline { color: var(--muted); font-size: 14.5px; margin-top: 8px; max-width: 40em; line-height: 1.5; }
+.flagbar { width: 120px; margin: 18px 0 0; }
+.lead {
+  margin-top: 18px; font-size: 13.5px; line-height: 1.55; max-width: 100%;
+  background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+  padding: 12px 14px;
+}
+.lead .muted { color: var(--muted2); display: block; }
+.cards { display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: 10px; margin-top: 20px; }
+@media (max-width: 560px) { .cards { grid-template-columns: 1fr; } }
 .card {
-  background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 16px;
+  background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 13px 14px;
   text-align: left; text-decoration: none; color: var(--text);
   transition: box-shadow .15s ease, transform .15s ease, border-color .15s ease;
   display: flex; flex-direction: column;
 }
-.card:hover { box-shadow: 0 8px 24px var(--ring); transform: translateY(-2px); border-color: var(--accent); }
-.card .name { font-size: 16px; font-weight: 700; display: flex; align-items: center;
-  justify-content: space-between; gap: 8px; }
-.card .name .arrow { color: var(--accent); font-weight: 400; transition: transform .15s ease; }
-.card:hover .name .arrow { transform: translateX(3px); }
-.card .desc { color: var(--muted); font-size: 13px; margin-top: 8px; line-height: 1.5; flex: 1; }
-.card .kpi { margin-top: 12px; font-size: 13px; font-weight: 650; color: var(--text); }
-.card .when { color: var(--muted); font-size: 11.5px; margin-top: 4px; }
+.card:hover { box-shadow: 0 6px 18px var(--ring); transform: translateY(-2px); border-color: var(--accent); }
+.card .name { font-size: 14px; font-weight: 700; display: flex; align-items: center;
+  gap: 7px; }
+.card .name .dot { width: 7px; height: 7px; border-radius: 50%; flex: none; background: var(--accent); }
+.card .desc { color: var(--muted); font-size: 12px; margin-top: 6px; line-height: 1.45; flex: 1; }
+.card .kpi { margin-top: 10px; font-size: 12px; font-weight: 650; color: var(--text); min-height: 1em; }
+.card .when { color: var(--muted); font-size: 11px; margin-top: 3px; min-height: 1em; }
 .sources-block { margin-top: 28px; }
 .sources-block .label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em;
   color: var(--muted); font-weight: 600; margin-bottom: 8px; }
@@ -216,36 +226,41 @@ initLangToggle("lang-toggle");
 
 HOME_TEMPLATE = """__HEAD__
 <body>
-__TOPBAR__
+<a class="skip-link" href="#main" data-i18n="skip">Skip to content</a>
 <main class="hub" id="main">
-  <div class="wordmark">GasBrazil<span class="dot">.</span>com</div>
+  <div class="hub-header">
+    <div class="wordmark">GasBrazil<span class="dot">.</span>com</div>
+    <div class="hub-controls">
+      <button type="button" id="lang-toggle" class="langBtn" aria-label="Português">PT</button>
+      <button id="theme-toggle" title="Toggle theme" aria-label="Toggle theme"></button>
+    </div>
+  </div>
   <p class="tagline" data-i18n="tagline">Data tools for Brazil's natural gas market &mdash; grid balances, pipeline flows and capacity, and contracted transport activity, refreshed daily.</p>
   <div class="flagbar" aria-hidden="true"></div>
   <div class="lead">
-    <strong data-i18n="aboutLead">Independent, public-data dashboards. Nothing here is an official ONS, ANP, CCEE, or transportadora product.</strong>
     <span class="muted" data-i18n="aboutBody">GasBrazil.com consolidates open Brazilian gas and power data into self-contained tools you can filter, chart, and export. Numbers come from public APIs and open-data portals; caveats live on each dashboard and on the About page.</span>
   </div>
   <div class="cards">
     <a class="card" href="ons/">
-      <div class="name"><span data-i18n="cardOns">ONS Balances</span><span class="arrow">&rarr;</span></div>
+      <div class="name"><span class="dot" aria-hidden="true"></span><span data-i18n="cardOns">ONS Balances</span></div>
       <div class="desc" data-i18n="cardOnsDesc">Daily grid balances, thermal generation by plant, and gas-fired dispatch across Brazil's interconnected power system.</div>
       <div class="kpi" data-en="__ONS_KPI__" data-pt="__ONS_KPI_PT__">__ONS_KPI__</div>
       <div class="when" data-refresh="__ONS_WHEN__"></div>
     </a>
     <a class="card" href="poc/">
-      <div class="name"><span data-i18n="cardPoc">POC Results</span><span class="arrow">&rarr;</span></div>
+      <div class="name"><span class="dot" aria-hidden="true"></span><span data-i18n="cardPoc">POC Results</span></div>
       <div class="desc" data-i18n="cardPocDesc">Pipeline capacity offer results — balancing, GUS acquisition, and linepack trades across TBG, TAG, and NTS.</div>
       <div class="kpi" data-en="__POC_KPI__" data-pt="__POC_KPI_PT__">__POC_KPI__</div>
       <div class="when" data-refresh="__POC_WHEN__"></div>
     </a>
     <a class="card" href="contratos/">
-      <div class="name"><span data-i18n="cardContratos">POC Contracts</span><span class="arrow">&rarr;</span></div>
+      <div class="name"><span class="dot" aria-hidden="true"></span><span data-i18n="cardContratos">POC Contracts</span></div>
       <div class="desc" data-i18n="cardContratosDesc">Active transport and master transport contracts across TBG, TAG, and NTS. Legacy and access-connection contracts are not yet included.</div>
       <div class="kpi" data-en="__CON_KPI__" data-pt="__CON_KPI_PT__">__CON_KPI__</div>
       <div class="when" data-refresh="__CON_WHEN__"></div>
     </a>
     <a class="card" href="flows/">
-      <div class="name"><span data-i18n="cardFlows">Pipeline Flows</span><span class="arrow">&rarr;</span></div>
+      <div class="name"><span class="dot" aria-hidden="true"></span><span data-i18n="cardFlows">Pipeline Flows</span></div>
       <div class="desc" data-i18n="cardFlowsDesc">Daily physical gas flow at every receipt and delivery point on Brazil's transport pipelines, plus system-use gas, losses, imbalance, and linepack.</div>
       <div class="kpi" data-en="__FLOWS_KPI__" data-pt="__FLOWS_KPI_PT__">__FLOWS_KPI__</div>
       <div class="when" data-refresh="__FLOWS_WHEN__"></div>
@@ -326,11 +341,11 @@ __TOPBAR__
   <p class="tagline" data-i18n="notFoundBody">The hub and dashboards are linked below.</p>
   <div class="flagbar" aria-hidden="true"></div>
   <div class="cards" style="margin-top:22px">
-    <a class="card" href="./"><div class="name"><span data-i18n="backHome">Back to GasBrazil.com</span><span class="arrow">&rarr;</span></div></a>
-    <a class="card" href="ons/"><div class="name"><span data-i18n="cardOns">ONS Balances</span><span class="arrow">&rarr;</span></div></a>
-    <a class="card" href="poc/"><div class="name"><span data-i18n="cardPoc">POC Results</span><span class="arrow">&rarr;</span></div></a>
-    <a class="card" href="contratos/"><div class="name"><span data-i18n="cardContratos">POC Contracts</span><span class="arrow">&rarr;</span></div></a>
-    <a class="card" href="flows/"><div class="name"><span data-i18n="cardFlows">Pipeline Flows</span><span class="arrow">&rarr;</span></div></a>
+    <a class="card" href="./" style="grid-column: 1 / -1"><div class="name"><span class="dot" aria-hidden="true"></span><span data-i18n="backHome">Back to GasBrazil.com</span></div></a>
+    <a class="card" href="ons/"><div class="name"><span class="dot" aria-hidden="true"></span><span data-i18n="cardOns">ONS Balances</span></div></a>
+    <a class="card" href="poc/"><div class="name"><span class="dot" aria-hidden="true"></span><span data-i18n="cardPoc">POC Results</span></div></a>
+    <a class="card" href="contratos/"><div class="name"><span class="dot" aria-hidden="true"></span><span data-i18n="cardContratos">POC Contracts</span></div></a>
+    <a class="card" href="flows/"><div class="name"><span class="dot" aria-hidden="true"></span><span data-i18n="cardFlows">Pipeline Flows</span></div></a>
   </div>
 </main>
 __FOOTER__
@@ -357,7 +372,6 @@ def write_home(out_path: Path | str = DEFAULT_OUT) -> Path:
         "Independent data tools for Brazil's natural gas market: ONS grid balances, POC capacity results, and transport contracts.",
         "/",
     ))
-    html = html.replace("__TOPBAR__", _topbar())
     html = html.replace("__FOOTER__", _footer("./"))
     html = html.replace("__ONS_KPI__", st["ons_kpi"] or "")
     html = html.replace("__ONS_KPI_PT__", st["ons_kpi_pt"] or st["ons_kpi"] or "")
