@@ -55,7 +55,7 @@ LEDGER_VAR_ORDER = [
     ("Linepack (thousand m3)", "thousand m3"),
 ]
 
-TSO_ORDER = ["NTS", "TAG", "TBG", "GOM"]  # TSB excluded -- see load_payload()
+TSO_ORDER = ["NTS", "TAG", "TBG"]  # TSB, GOM excluded -- see load_payload()
 
 
 def _short_label(full_label: str) -> str:
@@ -87,14 +87,15 @@ def load_payload() -> dict:
     points_df = pd.read_parquet(POINTS_PARQUET) if POINTS_PARQUET.exists() else pd.DataFrame()
     ledger_df = pd.read_parquet(LEDGER_PARQUET) if LEDGER_PARQUET.exists() else pd.DataFrame()
 
-    # TSB is a real ANP-registered TSO with a "tso" code of its own in the
-    # source data, but it's not one Eric tracks -- drop it here, before
-    # anything else derives from these frames, so it never enters the
-    # embedded payload (not just hidden behind a UI filter). Re-including it
-    # is a one-line revert if that changes.
+    # TSB and GOM are real ANP-registered TSOs with a "tso" code of their own
+    # in the source data, but they're not ones Eric tracks -- drop them here,
+    # before anything else derives from these frames, so they never enter the
+    # embedded payload (not just hidden behind a UI filter). Re-including
+    # either is a one-line revert if that changes.
+    EXCLUDED_TSOS = {"TSB", "GOM"}
     for _df in (points_df, ledger_df):
         if len(_df) and "tso" in _df.columns:
-            _df.drop(_df.index[_df["tso"] == "TSB"], inplace=True)
+            _df.drop(_df.index[_df["tso"].isin(EXCLUDED_TSOS)], inplace=True)
 
     all_dates = pd.concat([
         points_df["date"] if len(points_df) else pd.Series(dtype="datetime64[ns]"),
