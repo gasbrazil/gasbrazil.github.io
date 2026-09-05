@@ -183,6 +183,7 @@ TEMPLATE = """<!doctype html>
 <style>
 __SHARED_THEME_CSS__
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; }
 header { display: flex; flex-wrap: wrap; gap: 12px; align-items: baseline; justify-content: space-between; margin-bottom: var(--gap); }
 h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
@@ -243,9 +244,23 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .chart-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: var(--card-pad); margin-bottom: var(--gap); }
 .panel-title { font-size: 13px; font-weight: 600; margin: 0 0 2px; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
 .panel-note { font-size: 11.5px; color: var(--muted); margin: 6px 0 10px; }
+.meter-view-row { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; }
+.meter-view-toggle { display: flex; gap: 6px; }
+.meter-view-btn { background: var(--bg); border: 1px solid var(--border-strong); border-radius: 999px; padding: 3px 12px; font-size: 11.5px; cursor: pointer; color: var(--text); font-family: var(--font); font-weight: 600; }
+.meter-view-btn:hover { background: var(--accent-soft); }
+.meter-view-btn.active { background: var(--text); color: var(--panel); border-color: var(--text); }
 .chip-scroll { display: flex; flex-wrap: wrap; gap: 6px; max-height: 168px; overflow: auto; padding: 2px; margin-bottom: 4px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); }
-.pipeline-group-label { flex-basis: 100%; font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 700; margin: 5px 0 0 2px; }
-.pipeline-group-label:first-child { margin-top: 2px; }
+.meter-table-wrap { max-height: 320px; overflow: auto; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 4px; }
+.meter-table-wrap table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.meter-table-wrap th { position: sticky; top: 0; background: var(--panel); color: var(--muted2); font-weight: 600; text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--border); z-index: 1; }
+.meter-table-wrap td { padding: 5px 10px; border-bottom: 1px solid var(--border); }
+.meter-table-wrap tr.meter-row { cursor: pointer; }
+.meter-table-wrap tr.meter-row:hover { background: var(--accent-soft); }
+.meter-table-wrap tr.meter-row.picked { background: var(--accent-soft); font-weight: 600; }
+.meter-table-wrap .sw-cell { width: 18px; }
+.meter-table-wrap .type-badge { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
+.meter-table-wrap .type-badge.recv { background: rgba(27,175,122,0.16); color: #1baf7a; }
+.meter-table-wrap .type-badge.del { background: rgba(235,104,52,0.16); color: #eb6834; }
 .series-btn { display: inline-flex; align-items: center; gap: 6px; background: var(--panel); border: 1px solid var(--border); border-radius: 999px; padding: 4px 12px 4px 8px; font-size: 12px; cursor: pointer; color: var(--text); font-family: var(--font); }
 .series-btn:hover { background: var(--accent-soft); }
 .series-btn.active { border-color: var(--border-strong); font-weight: 600; }
@@ -349,8 +364,13 @@ footer a { color: var(--accent); }
     </span>
   </p>
   <p class="panel-note" id="chart-note">Totals summed across every matching receipt/delivery point.</p>
+  <div class="meter-view-row" id="meter-view-row" hidden>
+    <span class="filter-label">Meters</span>
+    <div class="meter-view-toggle" id="meter-view-toggle"></div>
+  </div>
   <div class="chip-scroll" id="chip-scroll" hidden></div>
   <div class="chip-truncate-note" id="chip-truncate-note" hidden></div>
+  <div class="meter-table-wrap" id="meter-table-wrap" hidden></div>
   <div id="chart-host"></div>
 </div>
 
@@ -399,6 +419,7 @@ let datePreset = "12m";
 let smoothing = "raw";
 let picked = new Set();      // detail-mode picks only
 let chartSlots = new Map();
+let meterViewMode = "chips"; // "chips" | "table" -- points-level detail mode only
 let sortDir = -1; // table date sort: 1 asc, -1 desc
 let tableRows = []; // last rendered table rows, kept for CSV/XLSX export
 let tableCols = [];
@@ -543,14 +564,39 @@ function buildViewToggle() {
 
 function onViewModeChanged() {
   const isDetail = viewMode === "detail";
-  document.getElementById("chip-scroll").hidden = !isDetail;
+  const isPointsDetail = isDetail && level === "points";
+  document.getElementById("meter-view-row").hidden = !isPointsDetail;
+  document.getElementById("chip-scroll").hidden = !isDetail || (isPointsDetail && meterViewMode === "table");
+  document.getElementById("meter-table-wrap").hidden = !isPointsDetail || meterViewMode !== "table";
   document.getElementById("btn-clear-picks").hidden = !isDetail;
   document.getElementById("chart-note").textContent = isDetail
     ? "Pick one or more pipelines/points below to chart. Values summed across every shipper and contract active at that point/pipeline."
     : (level === "points"
         ? "Totals summed across every matching receipt/delivery point (use the filters above to narrow by pipeline or state)."
         : "Totals summed across every matching pipeline (use the filters above to narrow by pipeline)");
+  if (isPointsDetail) buildMeterViewToggle();
   render();
+}
+
+function buildMeterViewToggle() {
+  const host = document.getElementById("meter-view-toggle");
+  host.innerHTML = "";
+  const defs = [{ v: "chips", label: "Chips" }, { v: "table", label: "Table (all meters)" }];
+  for (const d of defs) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "meter-view-btn" + (meterViewMode === d.v ? " active" : "");
+    btn.textContent = d.label;
+    btn.addEventListener("click", () => {
+      if (meterViewMode === d.v) return;
+      meterViewMode = d.v;
+      document.getElementById("chip-scroll").hidden = meterViewMode === "table";
+      document.getElementById("meter-table-wrap").hidden = meterViewMode !== "table";
+      buildMeterViewToggle();
+      buildChips();
+    });
+    host.appendChild(btn);
+  }
 }
 
 function buildTsoToggles() {
@@ -606,58 +652,102 @@ function buildDependentSelects() {
   }
 }
 
+// Sort points by pipeline, then receipts before deliveries, then name --
+// used for both the chip list and the meter table so a pipeline's meters
+// stay adjacent and grouped by flow type without needing a visible
+// section header for it.
+function pointsSortOrder(a, b) {
+  if (a.pipeline !== b.pipeline) return a.pipeline.localeCompare(b.pipeline);
+  if (a.type !== b.type) return a.type === RECEIPT ? -1 : 1;
+  return a.name.localeCompare(b.name);
+}
+
 function buildChips() {
-  const host = document.getElementById("chip-scroll");
-  host.innerHTML = "";
-  if (viewMode !== "detail") return;
-  let matches = availableEntities();
-  matches.sort((a, b) => rankScore(b.id) - rankScore(a.id));
+  const chipHost = document.getElementById("chip-scroll");
+  chipHost.innerHTML = "";
   const note = document.getElementById("chip-truncate-note");
+  if (viewMode !== "detail") { note.hidden = true; return; }
+
+  let matches = availableEntities();
+
+  if (level === "points" && meterViewMode === "table") {
+    note.hidden = true;
+    renderMeterTable(matches.slice().sort(pointsSortOrder));
+    return;
+  }
+
+  matches.sort((a, b) => rankScore(b.id) - rankScore(a.id));
   if (matches.length > MAX_CHIPS_SHOWN) {
     note.hidden = false;
-    note.textContent = `Showing the ${MAX_CHIPS_SHOWN} largest of ${matches.length} matches by average volume -- narrow the filters or search to see the rest.`;
+    note.textContent = level === "points"
+      ? `Showing the ${MAX_CHIPS_SHOWN} largest of ${matches.length} matches by average volume -- narrow the filters, or switch to the table view above to browse all of them.`
+      : `Showing the ${MAX_CHIPS_SHOWN} largest of ${matches.length} matches by average volume -- narrow the filters or search to see the rest.`;
     matches = matches.slice(0, MAX_CHIPS_SHOWN);
   } else {
     note.hidden = true;
   }
   if (level === "points") {
-    matches.sort((a, b) => (a.pipeline + a.name).localeCompare(b.pipeline + b.name));
-    let lastPipeline = null;
-    for (const e of matches) {
-      if (e.pipeline !== lastPipeline) {
-        const lbl = document.createElement("div");
-        lbl.className = "pipeline-group-label";
-        lbl.textContent = e.pipeline;
-        host.appendChild(lbl);
-        lastPipeline = e.pipeline;
-      }
-      host.appendChild(makeChip(e));
-    }
+    matches.sort(pointsSortOrder);
   } else {
     matches.sort((a, b) => a.name.localeCompare(b.name));
-    for (const e of matches) host.appendChild(makeChip(e));
   }
+  for (const e of matches) chipHost.appendChild(makeChip(e));
   if (!matches.length) {
     const empty = document.createElement("div");
     empty.style.cssText = "color:var(--muted);font-size:12.5px;padding:8px 4px";
     empty.textContent = "No pipelines/points match the current filters for this variable.";
-    host.appendChild(empty);
+    chipHost.appendChild(empty);
   }
+}
+
+function togglePick(id) {
+  if (picked.has(id)) { picked.delete(id); chartSlots.delete(id); }
+  else { picked.add(id); chartClaimSlot(id); }
+  render();
 }
 
 function makeChip(e) {
   const btn = document.createElement("button");
   btn.type = "button";
   btn.className = "series-btn" + (picked.has(e.id) ? " active" : "");
-  btn.title = [e.muni, e.uf].filter(Boolean).join(", ");
-  btn.innerHTML = '<span class="sw"></span>' + escapeHtml(level === "points" ? e.name + " (" + (e.type === "Receipt Point" ? "Recv" : "Del") + ")" : e.name);
+  btn.title = [e.pipeline, e.muni, e.uf].filter(Boolean).join(", ");
+  btn.innerHTML = '<span class="sw"></span>' + escapeHtml(entityLabel(e));
   if (picked.has(e.id)) btn.querySelector(".sw").style.background = chartColorOf(e.id);
-  btn.addEventListener("click", () => {
-    if (picked.has(e.id)) { picked.delete(e.id); chartSlots.delete(e.id); }
-    else { picked.add(e.id); chartClaimSlot(e.id); }
-    render();
-  });
+  btn.addEventListener("click", () => togglePick(e.id));
   return btn;
+}
+
+// Full, uncapped listing of every matching meter -- an alternative to the
+// chip picker for browsing/selecting from all of them at once, sorted by
+// pipeline with receipts before deliveries within each.
+function renderMeterTable(sortedMatches) {
+  const host = document.getElementById("meter-table-wrap");
+  host.innerHTML = "";
+  if (!sortedMatches.length) {
+    host.innerHTML = '<div style="color:var(--muted);font-size:12.5px;padding:10px">No pipelines/points match the current filters for this variable.</div>';
+    return;
+  }
+  const table = document.createElement("table");
+  const thead = document.createElement("thead");
+  thead.innerHTML = "<tr><th></th><th>Pipeline</th><th>Meter</th><th>Type</th><th>State</th></tr>";
+  table.appendChild(thead);
+  const tbody = document.createElement("tbody");
+  for (const e of sortedMatches) {
+    const tr = document.createElement("tr");
+    tr.className = "meter-row" + (picked.has(e.id) ? " picked" : "");
+    const swColor = picked.has(e.id) ? chartColorOf(e.id) : "transparent";
+    const isRecv = e.type === RECEIPT;
+    tr.innerHTML =
+      '<td class="sw-cell"><span class="sw" style="display:inline-block;width:9px;height:9px;border-radius:2px;background:' + swColor + '"></span></td>' +
+      "<td>" + escapeHtml(e.pipeline) + "</td>" +
+      "<td>" + escapeHtml(e.name) + "</td>" +
+      '<td><span class="type-badge ' + (isRecv ? "recv" : "del") + '">' + (isRecv ? "Receipt" : "Delivery") + "</span></td>" +
+      "<td>" + escapeHtml(e.uf || "") + "</td>";
+    tr.addEventListener("click", () => togglePick(e.id));
+    tbody.appendChild(tr);
+  }
+  table.appendChild(tbody);
+  host.appendChild(table);
 }
 
 function defaultPicks() {
