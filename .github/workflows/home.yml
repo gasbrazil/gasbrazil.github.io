@@ -1,0 +1,50 @@
+name: Rebuild home page
+
+# Static landing page, no data pipeline -- only rebuilds when something that
+# could change its rendered output actually changes: the shared kit (a
+# shared/theme.css color edit should reach this page too, same as the three
+# dashboards) or its own template.
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths:
+      - "shared/**"
+      - "build_home.py"
+      - ".github/workflows/home.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: home-refresh
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build home page
+        run: python build_home.py index.html
+
+      - name: Commit refreshed home page
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git commit -m "home: rebuild from shared theme $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          for i in 1 2 3 4 5; do
+            if git push; then break; fi
+            echo "Push rejected (another workflow likely pushed first) -- rebasing and retrying ($i)..."
+            git pull --rebase origin main
+          done

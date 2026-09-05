@@ -1,0 +1,123 @@
+name: Refresh ONS dashboard
+
+# The per-plant thermal dispatch and CMO bulletins update through the day, but
+# the subsystem grid-balance bulletin (Balanco de Energia nos Subsistemas) --
+# the Subsystems tab's main source -- appears to post its finalized figures
+# for the prior day only once daily, in the evening UTC. Two runs a day --
+# one earlier for the frequently-updated sources, one later to catch the
+# balance bulletin's evening post -- narrows that gap without permanently
+# pinning to one guessed minute. Carried over unchanged from the standalone
+# ons-dashboard repo's schedule.
+on:
+  schedule:
+    - cron: "40 20 * * *"
+    - cron: "30 23 * * *"
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths:
+      - "ons/**"
+      - "shared/**"
+      - ".github/workflows/ons.yml"
+
+permissions:
+  contents: write
+
+# Scoped to this workflow only (not a repo-wide "pages" group) -- ons, poc,
+# and contratos each own a different subfolder and can build concurrently.
+# This only serializes overlapping runs of *this* workflow (e.g. a manual
+# dispatch landing mid-schedule).
+concurrency:
+  group: ons-refresh
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    defaults:
+      run:
+        working-directory: ons
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: ons/requirements.txt
+
+      - run: pip install -r requirements.txt
+
+      # Raw ONS files are cached per calendar month. Within a month the key
+      # hits and nothing is re-saved; only the current month's file is
+      # re-downloaded each day, since `fetch` compares Content-Length against
+      # the local copy.
+      - name: Cache key for this month
+        id: ym
+        run: echo "ym=$(date -u +%Y-%m)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore ONS source files
+        uses: actions/cache@v4
+        with:
+          path: |
+            ons/raw
+            ons/data/_cache
+          key: ons-raw-${{ steps.ym.outputs.ym }}
+          restore-keys: |
+            ons-raw-
+
+      - name: Check every source URL is reachable
+        run: python ons_pipeline.py verify
+
+      - name: Download new and revised files
+        run: python ons_pipeline.py fetch
+
+      - name: Aggregate to the daily store
+        run: python ons_pipeline.py build
+
+      # Refuse to publish a store that is stale or has lost data -- on
+      # failure the previous deploy stays live rather than being replaced
+      # with a broken one.
+      - name: Health gate
+        run: |
+          python ons_pipeline.py health \
+            --max-age-days 5 \
+            --min-rows 100000 \
+            --min-series 15 \
+            --min-plants 50 \
+            --min-reservoirs 50
+
+      - name: Build the dashboard page
+        run: python ons_pipeline.py dashboard --html index.html
+
+      # Static wiki pages (Wiki/*.md -> wiki-html/*.html), linked from the
+      # dashboard's own "Wiki" header button. No data dependency -- pure
+      # documentation, rebuilt every run so it always matches whatever's in
+      # Wiki/ on main.
+      - name: Build the wiki pages
+        run: python build_wiki_site.py Wiki wiki-html
+
+      # Legacy branch-based Pages deployment (Settings -> Pages -> Deploy
+      # from a branch -> main / root), not actions/deploy-pages: that API
+      # publishes one artifact as the *entire* site per repo, which would
+      # make this workflow's deploy race with poc's and contratos's. Three
+      # independent workflows each committing straight into their own
+      # subfolder is what lets `shared/**` changes flow to all three without
+      # any of them stepping on each other's deploy.
+      - name: Commit refreshed dashboard
+        working-directory: .
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ons/index.html ons/wiki-html
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git commit -m "ons: automated refresh $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          for i in 1 2 3 4 5; do
+            if git push; then break; fi
+            echo "Push rejected (another workflow likely pushed first) -- rebasing and retrying ($i)..."
+            git pull --rebase origin main
+          done
