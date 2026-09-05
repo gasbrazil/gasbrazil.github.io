@@ -1,13 +1,22 @@
 name: Refresh Pipeline Flows dashboard
 
 # ANP publishes one file per month, typically with a lag of several weeks,
-# and revises recently-published months in place -- daily is more than
-# enough to catch both a new month landing and a revision to an old one.
-# fetch_pipeline.py's own REFRESH_LAST_N_MONTHS handles not re-downloading
-# everything every run.
+# and revises recently-published months in place. In practice ANP itself
+# only refreshes every 2-4 weeks, so the schedule below pulls fresh data
+# twice a month (the 8th and 20th, UTC) rather than daily -- comfortably
+# ahead of ANP's own cadence without hammering their site on days nothing
+# has changed. fetch_pipeline.py's own REFRESH_LAST_N_MONTHS handles not
+# re-downloading the full history on a normal run (just the last few
+# months, to catch revisions).
+#
+# A push (a code/style change to flows/** or shared/**, not a data refresh)
+# still rebuilds and redeploys the dashboard immediately, but does NOT hit
+# ANP's site again -- it reuses whatever raw ANP data is already cached
+# from the last scheduled fetch. Only the twice-monthly schedule, or an
+# on-demand "Run workflow" dispatch, actually pulls fresh data from ANP.
 on:
   schedule:
-    - cron: "15 12 * * *"
+    - cron: "15 12 8,20 * *"
   workflow_dispatch: {}
   push:
     branches: [main]
@@ -59,8 +68,27 @@ jobs:
           restore-keys: |
             flows-raw-
 
+      # A code-only push doesn't need fresh data from ANP -- skip the
+      # network fetch and rebuild from whatever raw/ the cache restored
+      # (from the last scheduled run). The one exception is a cold/evicted
+      # cache with nothing in it at all (e.g. this workflow's very first
+      # run): fetch anyway so a push never produces an empty dashboard.
+      - name: Check for cached raw data
+        id: rawcheck
+        run: |
+          if [ -n "$(ls -A raw 2>/dev/null)" ]; then
+            echo "has_data=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_data=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Fetch new and revised monthly files
+        if: github.event_name != 'push' || steps.rawcheck.outputs.has_data != 'true'
         run: python flows_pipeline.py fetch
+
+      - name: Skip fetch (code-only push, using cached ANP data)
+        if: github.event_name == 'push' && steps.rawcheck.outputs.has_data == 'true'
+        run: echo "Code-only push -- rebuilding from the raw ANP data already cached from the last scheduled fetch (8th/20th), not re-fetching from ANP."
 
       # Health gate (zero rows, staleness, missing point codes) runs inside
       # `build` and exits non-zero on failure -- a bad build stops here
