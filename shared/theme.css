@@ -1,0 +1,83 @@
+/*
+ * GasBrazil.com shared design tokens + a couple of small shared components.
+ *
+ * Per Eric's direction (2026-09-04): the whole GasBrazil.com family shares
+ * one accent -- ons-dashboard's Brazilian-flag blue -- plus explicit
+ * references to the flag's green/yellow/blue everywhere, not just on the
+ * ONS dashboard. A color or font change is now a one-line edit here that
+ * applies to every dashboard on its next scheduled rebuild (see ADR-001,
+ * Decision 2 Option C).
+ *
+ * __FONT_FACE__ is filled in by shared/dashboard_kit.py's embed_font_face()
+ * at build time with a base64-embedded @font-face rule (or left blank if
+ * shared/fonts/Degular.ttf is missing from the checkout).
+ */
+__FONT_FACE__
+:root {
+  --bg: #f4f4f1;
+  --panel: #fcfcfb;
+  --border: #e1e0d9;
+  --border-strong: #c3c2b7;
+  --text: #0b0b0b;
+  --muted: #898781;
+  --muted2: #52514e;
+  --ring: rgba(11,11,11,.10);
+  --shadow: none;
+  --font: "Degular", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  /* Brazilian flag palette, shared across the whole GasBrazil.com family.
+     --brz-* are the flag's own values, used for fills/borders/gradients
+     where the surface behind them is dark enough. --ok-ink/--warn-ink are
+     text-safe stand-ins for green/yellow at small sizes on a near-white
+     background: #009C3B reads at about 3:1 here and #FFDF00 at under 2:1,
+     neither legible at 11-12px, so small text and icons use the darkened
+     forms while the flag values stay for solid fills/gradients. */
+  --brz-green: #009C3B;
+  --brz-yellow: #FFDF00;
+  --brz-blue: #002776;
+  --ok-ink: #00752c;
+  --warn-ink: #8a6a00;
+
+  --accent: #002776;
+  --accent-soft: rgba(0,39,118,.08);
+  --pos: #002776;
+  --neg: #b3441e;
+}
+[data-theme="dark"] {
+  --bg: #0d0d0d;
+  --panel: #1a1a19;
+  --border: #2c2c2a;
+  --border-strong: #383835;
+  --text: #ffffff;
+  --muted: #898781;
+  --muted2: #c3c2b7;
+  --ring: rgba(255,255,255,.10);
+
+  /* The flag blue itself is too dark to read as a link/button label against
+     a near-black background, so dark mode lightens it while keeping the
+     same hue. Yellow needs no adjustment -- it's the one flag color that
+     works better on dark than on light. */
+  --brz-green: #009C3B;
+  --brz-yellow: #FFDF00;
+  --brz-blue: #002776;
+  --ok-ink: #22b757;
+  --warn-ink: #FFDF00;
+
+  --accent: #3f74d9;
+  --accent-soft: rgba(63,116,217,.16);
+  --pos: #3f74d9;
+  --neg: #e08a5f;
+}
+
+/* Green/yellow/blue band, proportioned like the flag itself (green field,
+   yellow lozenge, blue disc) rather than three equal thirds -- the one place
+   the flag appears as itself rather than as an accent on something else.
+   Every dashboard's header markup includes
+   <div class="flagbar" aria-hidden="true"></div> right after </header>. */
+.flagbar {
+  height: 4px;
+  border-radius: 2px;
+  margin: 0 0 12px;
+  background: linear-gradient(90deg,
+    var(--brz-green) 0 46%, var(--brz-yellow) 46% 73%, var(--accent) 73% 100%);
+}

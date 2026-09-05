@@ -1,0 +1,16 @@
+# The Actions runner is Linux. If this repo is ever pushed from Windows,
+# shell scripts and YAML must still arrive with LF endings or bash
+# mis-parses them.
+* text=auto eol=lf
+
+*.py   text eol=lf
+*.yml  text eol=lf
+*.yaml text eol=lf
+*.md   text eol=lf
+*.css  text eol=lf
+
+# Never touched by line-ending conversion
+*.parquet binary
+*.xlsx    binary
+*.png     binary
+*.ttf     binary

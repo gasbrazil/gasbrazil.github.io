@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Architecture & Deployment — ONS Balances Wiki</title>
+<style>
+:root{
+  color-scheme: light;
+  --surface-1:#fcfcfb; --plane:#f4f4f1; --text-1:#0b0b0b; --text-2:#52514e;
+  --muted:#898781; --grid:#e1e0d9; --axis:#c3c2b7; --ring:rgba(11,11,11,.10);
+  --accent:#03183D; --wash:rgba(3,24,61,.08);
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --surface-1:#1a1a19; --plane:#0d0d0d; --text-1:#fff; --text-2:#c3c2b7;
+  --muted:#898781; --grid:#2c2c2a; --axis:#383835; --ring:rgba(255,255,255,.10);
+  --accent:#4a78c2; --wash:rgba(74,120,194,.16);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--plane);color:var(--text-1);
+  font:15px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;}
+.wrap{max-width:920px;margin:0 auto;padding:20px 20px 64px;display:flex;gap:32px}
+aside{width:200px;flex:0 0 200px;position:sticky;top:20px;align-self:flex-start}
+main{min-width:0;flex:1}
+header.top{display:flex;flex-wrap:wrap;gap:12px;align-items:center;
+  justify-content:space-between;margin-bottom:18px;padding:14px 20px;
+  border-bottom:1px solid var(--ring);max-width:1160px;margin-left:auto;margin-right:auto}
+header.top .brand{display:flex;align-items:baseline;gap:10px}
+header.top h1{font-size:19px;margin:0;font-weight:700}
+header.top .tag{color:var(--text-2);font-size:12.5px}
+header.top .row{display:flex;gap:8px;align-items:center}
+a{color:var(--accent)}
+.navlink,button.iconBtn{border:1px solid var(--ring);background:var(--surface-1);
+  color:var(--accent);border-radius:8px;padding:6px 11px;font-size:12.5px;
+  font-weight:600;text-decoration:none;cursor:pointer}
+.navlink:hover,button.iconBtn:hover{background:var(--wash)}
+button.iconBtn{padding:6px 9px}
+button.iconBtn svg{width:14px;height:14px;display:block}
+aside nav{background:var(--surface-1);border:1px solid var(--ring);border-radius:10px;
+  padding:14px}
+aside nav .label{font-size:11px;text-transform:uppercase;letter-spacing:.04em;
+  color:var(--muted);margin-bottom:8px}
+aside nav a{display:block;padding:6px 4px;font-size:13.5px;color:var(--text-1);
+  text-decoration:none;border-radius:6px}
+aside nav a:hover{background:var(--wash);color:var(--accent)}
+aside nav a.active{color:var(--accent);font-weight:700}
+aside .back{display:block;margin-top:14px;font-size:12.5px}
+main .card{background:var(--surface-1);border:1px solid var(--ring);border-radius:10px;
+  padding:26px 30px}
+main h1{font-size:26px;margin:0 0 6px}
+main h2{font-size:18px;margin:28px 0 10px;padding-top:14px;border-top:1px solid var(--ring)}
+main h2:first-of-type{border-top:none;padding-top:0}
+main h3{font-size:15px;margin:20px 0 8px}
+main p{margin:0 0 12px;color:var(--text-1)}
+main li{margin-bottom:6px}
+main ul,main ol{padding-left:22px;margin:0 0 14px}
+main code{background:var(--wash);border-radius:4px;padding:1px 5px;font-size:12.5px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+main pre{background:var(--plane);border:1px solid var(--ring);border-radius:8px;
+  padding:12px 14px;overflow-x:auto;font-size:12.5px;line-height:1.5}
+main pre code{background:none;padding:0}
+main table{border-collapse:collapse;width:100%;margin:10px 0 16px;font-size:13px}
+main th,main td{border:1px solid var(--ring);padding:6px 9px;text-align:left;
+  vertical-align:top}
+main th{background:var(--wash);font-weight:700}
+main hr{border:0;border-top:1px solid var(--ring);margin:22px 0}
+footer.site{max-width:1160px;margin:28px auto 0;padding:0 20px;color:var(--muted);
+  font-size:12px;line-height:1.6}
+footer.site a{color:var(--muted)}
+@media (max-width:720px){
+  .wrap{flex-direction:column}
+  aside{position:static;width:auto;flex:none}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <h1>ONS Balances — Wiki</h1>
+    <span class="tag">gas-first ONS grid data dashboard</span>
+  </div>
+  <div class="row">
+    <a class="navlink" href="../index.html">&larr; Back to dashboard</a>
+    <button id="themeBtn" class="iconBtn" title="Toggle light/dark" aria-label="Toggle light/dark"></button>
+  </div>
+</header>
+<div class="wrap">
+  <aside>
+    <nav>
+      <div class="label">Pages</div>
+      <a href="index.html">Home</a>
+<a href="using-the-dashboard.html">Using the Dashboard</a>
+<a href="architecture-and-deployment.html" class="active">Architecture & Deployment</a>
+<a href="known-limitations.html">Known Limitations</a>
+      <a class="back" href="https://github.com/caissonpoint/ons-dashboard/blob/main/README.md" target="_blank" rel="noopener">README (GitHub) &#8599;</a>
+    </nav>
+  </aside>
+  <main>
+    <div class="card">
+<h1>Architecture and Deployment</h1>
+<h2>Pipeline</h2>
+<pre><code>fetch  →  build  →  dashboard  →  (health gate)  →  deploy
+</code></pre>
+<p><code>ons_pipeline.py</code> is the CLI for the first three steps plus <code>health</code> and
+<code>verify</code>; <code>dashboard.py</code> (imported by it) generates the HTML. Nothing here
+needs a database or a server — the output is one static file.</p>
+<p><strong>fetch</strong> downloads ONS's <code>.parquet</code> resources (falling back to <code>.csv</code> with
+delimiter/decimal sniffing for years before ONS published parquet) into
+<code>raw/</code>, comparing <code>Content-Length</code> against the local copy so a normal daily
+run only re-downloads the current month's files.</p>
+<p><strong>build</strong> aggregates <code>raw/</code> into <code>data/daily.parquet</code> (+ <code>.csv</code>), classifying
+plant-level fuel types, joining installed capacity, and running the
+data-integrity tripwires described below. Per-file aggregates are cached
+under <code>data/_cache/</code>, keyed by a version tag bumped whenever the aggregation
+logic changes (forcing a clean re-aggregate rather than silently reusing
+stale cache entries).</p>
+<p><strong>dashboard</strong> reads the store and writes the single HTML file — the JSON
+payload is gzip-compressed and base64-embedded, inflated client-side via
+<code>DecompressionStream</code> (requires Chrome/Edge 80+, Firefox 113+, or Safari
+16.4+; older browsers get a message instead of a blank page). <code>SERIES_META</code>
+in <code>dashboard.py</code> (Python) is the single source of truth that drives both
+what gets aggregated and what the JS UI can chart.</p>
+<h3>Data sources</h3>
+<table>
+<thead>
+<tr>
+<th>Dataset</th>
+<th>ONS <code>dados.ons.org.br</code> slug</th>
+<th>Granularity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Balanço de Energia nos Subsistemas</td>
+<td><code>balanco-energia-subsistema</code></td>
+<td>hourly</td>
+</tr>
+<tr>
+<td>Geração Térmica por Motivo de Despacho</td>
+<td><code>geracao-termica-despacho-2</code></td>
+<td>hourly, per plant</td>
+</tr>
+<tr>
+<td>Capacidade Instalada de Geração</td>
+<td><code>capacidade-geracao</code></td>
+<td>current snapshot, per generating unit</td>
+</tr>
+<tr>
+<td>Dados Hidrológicos por Reservatório</td>
+<td><code>dados-hidrologicos-res</code></td>
+<td>daily, per reservoir</td>
+</tr>
+<tr>
+<td>EAR Diário por Subsistema</td>
+<td><code>ear-diario-por-subsistema</code></td>
+<td>daily</td>
+</tr>
+<tr>
+<td>EAR Diário por REE</td>
+<td>(S3 dir <code>ear_ree_di</code>)</td>
+<td>daily, per REE</td>
+</tr>
+<tr>
+<td>ENA Diário por Subsistema</td>
+<td><code>ena-diario-por-subsistema</code></td>
+<td>daily</td>
+</tr>
+<tr>
+<td>CMO Semi-Horário</td>
+<td><code>cmo-semi-horario</code></td>
+<td>30-minute</td>
+</tr>
+</tbody>
+</table>
+<p>The public dataset-page slugs above do <strong>not</strong> reliably match the internal
+S3 folder names (<code>s3_dir</code> in <code>ons_pipeline.py</code>'s <code>Source</code> config) — always
+confirm a dataset's real landing-page URL directly on <code>dados.ons.org.br</code>
+rather than deriving it from the S3 slug.</p>
+<h3>Capacity, utilization &amp; gas consumption</h3>
+<p><code>geracao-termica-despacho-2</code> reports by dispatch <em>phase</em>, not physical
+plant — a combined-cycle block can dispatch as several separately-named
+phases sharing one CEG (ANEEL's venture ID). Capacity comes from a separate
+dataset (<code>capacidade-geracao</code>, one row per generating unit) and is joined by
+CEG, not by name. A CEG with multiple phases gets one synthesized combined
+entity (summed generation, real total capacity); the original phase entities
+are left with their own generation but no capacity/utilization/gas figure of
+their own, so nothing is double-counted or overstated at the phase level.
+Estimated gas consumption applies a heat-rate assumption ONS does not
+publish per plant — see <a href="known-limitations.html">Known Limitations</a>
+for the exact figures and why they're an assumption, not a sourced number.</p>
+<h2>Single-file HTML</h2>
+<p>Everything the page needs — data, fonts, styling — is embedded, so it works
+from a <code>file://</code> path, as an email attachment, or from any static host with
+no build step at request time. <code>fonts/Degular.ttf</code> is read and base64-embedded
+as a <code>@font-face</code> at build time (falls back to the system font stack if the
+file is ever missing from a checkout).</p>
+<h2>CI/CD (<code>.github/workflows/refresh.yml</code>)</h2>
+<p>Runs on a daily cron (<code>40 20 * * *</code> UTC — after ONS's second daily publish
+at 19:00 UTC), on push to <code>main</code> when the pipeline files change, and on
+manual dispatch (including the dashboard's own "Refresh data" button, below).</p>
+<pre><code>checkout → setup Python 3.12 → pip install →
+restore raw-file cache (keyed by calendar month) →
+verify → fetch → build →
+health gate →
+build the page (site/index.html) →
+[mirror publishes — see below] →
+upload Pages artifact → stamp last-refresh commit
+</code></pre>
+<p><strong>Health gate</strong>: runs <code>ons_pipeline.py health --max-age-days 5 --min-rows
+100000 --min-series 15 --min-plants 50 --min-reservoirs 50</code> between build and
+deploy. A failed gate blocks the deploy entirely — yesterday's working
+dashboard stays live rather than being replaced with a broken one.</p>
+<p><strong>Keep-alive stamp</strong>: a scheduled GitHub Actions workflow disables itself
+after 60 days with no repository activity. The final step commits
+<code>.state/last_refresh.json</code> every run (tagged <code>[skip ci]</code> so it doesn't
+trigger another run) — this is what keeps the daily cron alive, and doubles
+as a visible record of when the data last refreshed.</p>
+<p><strong>Data-integrity tripwires</strong>, printed to the build log every run:</p>
+<ul>
+<li><strong>Interchange sign</strong>: <code>normalize_balance</code> reconciles <code>Load = Production −
+  Interchange</code> per calendar year (not once across the whole history — ONS
+  has changed its reporting sign convention mid-window before), logging the
+  residual for each year.</li>
+<li><strong>Fuel splits vs. balance thermal</strong>: the per-fuel numbers come from the
+  thermal dispatch file; <code>gen_thermal</code> comes from the balance file — two
+  separate ONS publications. Every build logs the median/p95 gap between
+  them and flags anything above 3%.</li>
+<li><strong>Ambiguous fuel labels</strong>: an ONS fuel string containing "gas" that isn't
+  an exact match in <code>GAS_FUELS</code> prints a one-time warning naming the exact
+  raw label and falls into "Thermal — other" rather than being guessed as
+  gas — see <a href="known-limitations.html">Known Limitations</a>.</li>
+</ul>
+<h2>Multi-site hosting topology</h2>
+<p>Three properties, one <code>gasbrazil</code> account used purely as a firewall-friendly
+hub — some corporate DNS/proxy filters flag a newly-registered custom domain
+like <code>gasbrazil.com</code> (or its subdomains) as suspicious regardless of content,
+where a plain <code>*.github.io</code> URL has no such reputation problem:</p>
+<table>
+<thead>
+<tr>
+<th>Repo</th>
+<th>Primary URL</th>
+<th>Mirror(s)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>caissonpoint/ons-dashboard</code> (this repo)</td>
+<td><code>ons.gasbrazil.com</code></td>
+<td><code>ons-dashboard.github.io</code>, <code>gasbrazil.github.io/ons</code></td>
+</tr>
+<tr>
+<td><code>caissonpoint/poc-dashboard</code></td>
+<td><code>poc.gasbrazil.com</code></td>
+<td><code>caissonpoint.github.io/poc-dashboard</code>, <code>gasbrazil.github.io/poc</code></td>
+</tr>
+<tr>
+<td><code>caissonpoint/gasbrazil-com</code></td>
+<td><code>gasbrazil.com</code></td>
+<td><code>gasbrazil.github.io</code></td>
+</tr>
+</tbody>
+</table>
+<p>Each mirror is a separate GitHub Pages repo, classic branch-based (not
+Actions-build) since it only ever receives one already-built <code>index.html</code>.
+<code>refresh.yml</code>'s mirror steps clone the mirror repo, copy <code>site/index.html</code>
+in, commit, and push — using an SSH deploy key scoped to that one repo only
+(GitHub doesn't allow reusing one SSH key across multiple repos, so each
+mirror has its own keypair). Every mirror step is <code>continue-on-error: true</code>
+and gated on its secret being set, so a mirror failure can never break the
+real build or deploy. The dashboard's own header links (see
+<a href="using-the-dashboard.html">Using the Dashboard</a>) resolve to the right sibling URL
+based on <code>location.hostname</code> at load time — <code>SITE_LINKS</code>/<code>siteFlavor()</code> in
+<code>dashboard.py</code>.</p>
+<p>The landing page (<code>gasbrazil-com</code> → <code>gasbrazil.github.io</code>) is a one-time
+snapshot, not on its own sync schedule — it changes rarely, so there's no CI
+step for it currently.</p>
+<h2>"Refresh data" button infrastructure</h2>
+<p>The dashboard is a public static file with no backend, so triggering
+<code>refresh.yml</code>'s <code>workflow_dispatch</code> on demand needs an authenticated call to
+GitHub's API — and a token that can do that must never live in the page's
+own client-side JS. A small Cloudflare Worker sits in between: it validates
+the request <code>Origin</code> against the known dashboard hostnames, applies a
+lightweight cooldown, and calls GitHub's dispatch endpoint using a
+<code>GITHUB_TOKEN</code> held as an encrypted Cloudflare Worker secret (never in the
+Worker's own script, never in the page). The dashboard's <code>REFRESH_WORKER_URL</code>
+constant points at the deployed Worker.</p>
+<h2>Local development</h2>
+<ul>
+<li><code>make_mock.py</code> generates a full synthetic raw-data tree (including mock
+  capacity/CEG and multi-phase combined-cycle data) so the whole pipeline can
+  be exercised offline, without ONS access.</li>
+<li><code>requirements.txt</code> deliberately upper-bounds <code>pandas&lt;3.1</code> — a routine CI
+  run once picked up pandas 3.0 the day it released, which turns every text
+  metric column into <code>str</code> dtype and breaks <code>groupby().mean()</code> with no
+  commit behind the failure. Keep that upper bound when bumping dependencies.</li>
+<li>The standing local-dev limitation: an older local Python/pandas
+  installation can't run the pinned pandas version, so end-to-end
+  verification (mock rebuild + Playwright regression pass) may need to run
+  in a separate environment with the pinned versions installed rather than
+  wherever the repo is checked out day to day.</li>
+</ul>
+    </div>
+  </main>
+</div>
+<footer class="site">
+  <div class="wrap" style="padding:0;display:block;max-width:1160px">
+    Source: <a href="https://github.com/caissonpoint/ons-dashboard" target="_blank" rel="noopener">caissonpoint/ons-dashboard</a> on GitHub.
+    Data via <a href="https://dados.ons.org.br" target="_blank" rel="noopener">ONS Dados Abertos</a> (CC-BY).
+    Questions or feedback: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>.
+  </div>
+</footer>
+<script>
+(function(){
+  var b=document.getElementById('themeBtn');
+  var sun='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+  var moon='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+  function paint(){
+    var dark=document.documentElement.getAttribute('data-theme')==='dark';
+    b.innerHTML = dark ? sun : moon;
+    b.title = dark ? 'Switch to light mode' : 'Switch to dark mode';
+  }
+  var saved=null;
+  try{ saved=localStorage.getItem('ons-wiki-theme'); }catch(e){}
+  if(saved==='dark') document.documentElement.setAttribute('data-theme','dark');
+  paint();
+  b.addEventListener('click', function(){
+    var dark=document.documentElement.getAttribute('data-theme')==='dark';
+    if(dark){ document.documentElement.removeAttribute('data-theme'); }
+    else{ document.documentElement.setAttribute('data-theme','dark'); }
+    try{ localStorage.setItem('ons-wiki-theme', dark ? 'light' : 'dark'); }catch(e){}
+    paint();
+  });
+})();
+</script>
+</body>
+</html>

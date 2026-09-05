@@ -1,0 +1,24 @@
+__pycache__/
+*.pyc
+.DS_Store
+
+# Personal-machine trigger scripts / local secrets -- these can embed a
+# GitHub PAT, never commit them.
+run_refresh.local.bat
+*.local.bat
+gh_pat.local
+
+# ons/: downloaded source files and the derived daily store, both
+# rebuildable and both far too large for git. CI keeps them in the Actions
+# cache instead (see .github/workflows/ons.yml). ons/index.html and
+# ons/wiki-html/ ARE committed -- they're the deployed output, same as poc/ and
+# contratos/'s index.html.
+ons/raw/
+ons/data/
+
+# poc/ and contratos/: the aggregated parquet stores ARE committed (small,
+# and the whole point of the "docs/index.html on main" deploy model is that
+# the repo's working tree IS the deployed site); only the raw fetched JSON
+# is excluded.
+poc/data/raw_processos.json
+contratos/data/raw_contratos.json
