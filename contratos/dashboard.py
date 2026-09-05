@@ -1347,6 +1347,60 @@ function updateArrows() {
   });
 }
 
+// Shareable view state in the URL. Toolbar + quick chips + TSO/shipper drill
+// + the expired/future validity toggles. Header-menu column Sets stay local.
+// `refreshed` is a cache-bust token and is stripped from shared links.
+function applyQueryFilters() {
+  const sp = new URLSearchParams(location.search);
+  const category = sp.get("category");
+  if (category) {
+    const sel = document.getElementById("f-category");
+    if ([...sel.options].some(o => o.value === category)) sel.value = category;
+  }
+  const q = sp.get("q");
+  if (q) document.getElementById("f-search").value = q;
+  const qfRaw = sp.get("qf");
+  if (qfRaw) {
+    for (const key of qfRaw.split(",").map(s => s.trim()).filter(Boolean)) {
+      const qf = QUICK_FILTERS.find(x => x.key === key);
+      if (!qf) continue;
+      if (qf.type === "set") columnFilters[qf.col] = new Set(qf.values);
+      else columnFilters[qf.col] = daysAgoRange(qf.days);
+    }
+  }
+  const tso = sp.get("tso");
+  if (tso && orderedTsos().includes(tso)) {
+    drillTso = tso;
+    columnFilters["Transporter (TSO)"] = new Set([tso]);
+  }
+  const shipper = sp.get("shipper");
+  if (shipper) columnFilters["Shipper"] = new Set([shipper]);
+  if (sp.get("expired") === "1") showExpired = true;
+  if (sp.get("future") === "1") showFuture = true;
+}
+
+function writeQueryFilters() {
+  const u = new URL(location.href);
+  const sp = u.searchParams;
+  sp.delete("refreshed");
+  const category = document.getElementById("f-category").value;
+  if (category) sp.set("category", category); else sp.delete("category");
+  const q = document.getElementById("f-search").value.trim();
+  if (q) sp.set("q", q); else sp.delete("q");
+  const activeQf = QUICK_FILTERS.filter(quickFilterActive).map(qf => qf.key);
+  if (activeQf.length) sp.set("qf", activeQf.join(",")); else sp.delete("qf");
+  if (drillTso) sp.set("tso", drillTso); else sp.delete("tso");
+  const shipper = columnFilters["Shipper"] && columnFilters["Shipper"].size === 1
+    ? [...columnFilters["Shipper"]][0] : null;
+  if (shipper) sp.set("shipper", shipper); else sp.delete("shipper");
+  if (showExpired) sp.set("expired", "1"); else sp.delete("expired");
+  if (showFuture) sp.set("future", "1"); else sp.delete("future");
+  const qs = sp.toString();
+  const next = u.pathname + (qs ? "?" + qs : "") + u.hash;
+  if (next !== location.pathname + location.search + location.hash)
+    history.replaceState(null, "", next);
+}
+
 function render() {
   applyFilters();
   sortRows();
@@ -1356,6 +1410,7 @@ function render() {
   updateArrows();
   updateQuickFilterButtons();
   updateTsoChips();
+  writeQueryFilters();
 }
 
 function downloadCsv() {
@@ -1424,6 +1479,8 @@ async function init() {
   buildQuickFilters();
   initChartDefaults();
   buildChartPicker();
+  applyQueryFilters();
+  updateFilterIcons();
   render();
   document.getElementById("f-category").addEventListener("change", render);
   document.getElementById("f-search").addEventListener("input", render);
@@ -1446,9 +1503,12 @@ async function init() {
   document.getElementById("btn-xlsx").addEventListener("click", downloadAllXLSX);
   // Cache-busting reload -- fetches whatever the most recently published build
   // is. It does NOT trigger a new pull from the source API: that can only
-  // happen server-side (scheduled/manual GitHub Actions run).
+  // happen server-side (scheduled/manual GitHub Actions run). Preserve other
+  // query params so an open filter view survives the reload.
   document.getElementById("btn-refresh").addEventListener("click", () => {
-    location.href = location.pathname + "?refreshed=" + Date.now();
+    const u = new URL(location.href);
+    u.searchParams.set("refreshed", String(Date.now()));
+    location.href = u.pathname + u.search + u.hash;
   });
   window.addEventListener("resize", () => {
     clearTimeout(chartResizeTimer);

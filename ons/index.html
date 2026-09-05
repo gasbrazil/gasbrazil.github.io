@@ -395,13 +395,13 @@ table.data thead th.sortable:hover{background:var(--accent-soft)}
 
 <div class="card" id="controlsCard">
   <div class="controls">
-    <div class="ctl"><label>Date range</label><div class="row" id="presets"></div></div>
-    <div class="ctl"><label>From</label><input type="date" id="from"></div>
-    <div class="ctl"><label>To</label><input type="date" id="to"></div>
-    <div class="ctl"><label>Smoothing</label><div class="row" id="smooth"></div></div>
-    <div class="ctl" id="subsCtl"><label>Subsystems</label><div class="row" id="subs"></div></div>
-    <div class="ctl"><label>View</label>
-      <div class="row"><button id="tableBtn" aria-pressed="false">Table</button></div>
+    <div class="ctl"><label data-ons-i18n="dateRange">Date range</label><div class="row" id="presets"></div></div>
+    <div class="ctl"><label data-ons-i18n="from">From</label><input type="date" id="from"></div>
+    <div class="ctl"><label data-ons-i18n="to">To</label><input type="date" id="to"></div>
+    <div class="ctl"><label data-ons-i18n="smoothing">Smoothing</label><div class="row" id="smooth"></div></div>
+    <div class="ctl" id="subsCtl"><label data-ons-i18n="subsystems">Subsystems</label><div class="row" id="subs"></div></div>
+    <div class="ctl"><label data-ons-i18n="view">View</label>
+      <div class="row"><button id="tableBtn" aria-pressed="false" data-ons-i18n="table">Table</button></div>
     </div>
   </div>
 </div>
@@ -458,13 +458,13 @@ const fmtAxisNum = (v, d=0) => {
 
 /* ---------- views ---------------------------------------------------------- */
 const VIEWS = [
-  {id:"subsystems", label:"Subsystems", kind:""},
-  {id:"plants",     label:"Thermal plants", kind:"plant"},
-  {id:"reservoirs", label:"Reservoirs", kind:"reservoir"},
+  {id:"subsystems", labelKey:"viewSubsystems", kind:""},
+  {id:"plants",     labelKey:"viewPlants", kind:"plant"},
+  {id:"reservoirs", labelKey:"viewReservoirs", kind:"reservoir"},
   // kind:null marks a view with no entity picker, no chart panels and no
   // series selection of its own -- render() branches on it entirely. See the
   // Data Tables block further down.
-  {id:"tables",     label:"Data Tables", kind:null},
+  {id:"tables",     labelKey:"viewTables", kind:null},
 ];
 const VIEW_ALIASES = {thermal:"plants", plant:"plants", table:"tables"};
 function viewFromQuery(){
@@ -724,6 +724,60 @@ function initLangToggle(buttonId, onChange) {
   });
 }
 
+/* ONS-local chrome strings (tabs, control labels, view blurbs). Shared kit
+   covers site-wide nav; this pack covers what is unique to this dashboard. */
+const ONS_I18N = {
+  en: {
+    viewSubsystems: "Subsystems",
+    viewPlants: "Thermal plants",
+    viewReservoirs: "Reservoirs",
+    viewTables: "Data Tables",
+    aboutView: "About this view",
+    dateRange: "Date range",
+    from: "From",
+    to: "To",
+    smoothing: "Smoothing",
+    subsystems: "Subsystems",
+    view: "View",
+    table: "Table",
+    smoothDaily: "Daily",
+    smooth7: "7d avg",
+    smooth30: "30d avg",
+    tipSubsystems: "National and per-subsystem balance: load, generation by source, hydrology and CMO, on a daily grid. Toggle SIN/SE/S/NE/N to fan any picked series across subsystems. Net interchange is positive when a subsystem is a net exporter.",
+    tipPlants: "One row per dispatched thermal plant, filterable by region and fuel. The five pinned Total rows are synthetic subsystem/national aggregates of the gas-fired fleet, not plants, and are excluded from fleet-wide KPI sums. A combined-cycle block appears both as its individual dispatch phases and as one combined row — don't sum the two together. Installed capacity, utilization and estimated gas consumption are derived, not published by ONS: see Methodology in the footer for the heat-rate assumption behind the gas figures.",
+    tipReservoirs: "Every reservoir ONS tracks, charted as usable volume % or upstream level, with region and basin rollups above the per-reservoir picker. EAR is stored energy rather than raw volume, which is what makes cascades comparable. Reservoirs down usually means more thermal (and gas) later."
+  },
+  pt: {
+    viewSubsystems: "Subsistemas",
+    viewPlants: "Usinas térmicas",
+    viewReservoirs: "Reservatórios",
+    viewTables: "Tabelas",
+    aboutView: "Sobre esta visão",
+    dateRange: "Período",
+    from: "De",
+    to: "Até",
+    smoothing: "Suavização",
+    subsystems: "Subsistemas",
+    view: "Visão",
+    table: "Tabela",
+    smoothDaily: "Diário",
+    smooth7: "Média 7d",
+    smooth30: "Média 30d",
+    tipSubsystems: "Balanço nacional e por subsistema: carga, geração por fonte, hidrologia e CMO, em grade diária. Alternar SIN/SE/S/NE/N espalha qualquer série escolhida pelos subsistemas. Intercâmbio líquido positivo = subsistema exportador líquido.",
+    tipPlants: "Uma linha por usina térmica despachada, filtrável por região e combustível. As cinco linhas Total fixas são agregados sintéticos da frota a gás — não são usinas — e ficam de fora das somas de frota. Um bloco ciclo combinado aparece como fases e como linha combinada: não some as duas. Capacidade, utilização e consumo estimado de gás são derivados, não publicados pela ONS: ver Metodologia no rodapé.",
+    tipReservoirs: "Cada reservatório acompanhado pela ONS, em volume útil % ou nível de montante, com totais por região e bacia. EAR é energia armazenada, não volume bruto — por isso as cascadas são comparáveis. Reservatórios baixos costumam antecipar mais térmica (e gás)."
+  }
+};
+function ot(key) {
+  const pack = ONS_I18N[currentLang()] || ONS_I18N.en;
+  return pack[key] || ONS_I18N.en[key] || key;
+}
+function applyOnsI18n() {
+  document.querySelectorAll("[data-ons-i18n]").forEach(el => {
+    const key = el.getAttribute("data-ons-i18n");
+    if (key) el.textContent = ot(key);
+  });
+}
 
 /* ---------- series keys: "<metric>|<subsystem>|<entity>" -------------------- */
 const skey = (m,s,e="") => m+"|"+s+"|"+e;
@@ -973,7 +1027,7 @@ function makeSortable(table,id){
 function buildTabs(){
   const host=document.getElementById("tabs"); host.innerHTML="";
   VIEWS.forEach(v=>{
-    const b=el("button",null,v.label);
+    const b=el("button",null,ot(v.labelKey));
     b.setAttribute("aria-pressed",String(state.view===v.id));
     b.onclick=()=>{ state.view=v.id; writeViewQuery(); buildTabs(); buildSubs(); updateSubsVisibility();
       buildPickCard(); render(); };
@@ -995,7 +1049,7 @@ function buildPresets(){
 }
 function buildSmooth(){
   const host=document.getElementById("smooth"); host.innerHTML="";
-  [["Daily",1],["7d avg",7],["30d avg",30]].forEach(([nm,w])=>{
+  [[ot("smoothDaily"),1],[ot("smooth7"),7],[ot("smooth30"),30]].forEach(([nm,w])=>{
     const b=el("button",null,nm);
     b.setAttribute("aria-pressed",String(state.smooth===w));
     b.onclick=()=>{ state.smooth=w; buildSmooth(); render(); };
@@ -2000,40 +2054,29 @@ const lastIdx=arr=>{ for(let i=arr.length-1;i>=0;i--) if(arr[i]!=null) return i;
   return -1; };
 
 // One orientation line per tab, carried on the KPI strip: what this view
-// shows and how to read its headline numbers. The sweep (2026-09-05) took
-// the prose off these tabs; this puts it back one hover away instead of as
-// a paragraph.
-const VIEW_INFO={
-  subsystems:"National and per-subsystem balance: load, generation by source, "+
-    "hydrology and CMO, on a daily grid. Toggle SIN/SE/S/NE/N to fan any picked "+
-    "series across subsystems. Net interchange is positive when a subsystem is a "+
-    "net exporter.",
-  plants:"One row per dispatched thermal plant, filterable by region and fuel. The "+
-    "five pinned Total rows are synthetic subsystem/national aggregates of the "+
-    "gas-fired fleet, not plants, and are excluded from fleet-wide KPI sums. A "+
-    "combined-cycle block appears both as its individual dispatch phases and as one "+
-    "combined row — don't sum the two together. Installed capacity, utilization and "+
-    "estimated gas consumption are derived, not published by ONS: see Methodology "+
-    "in the footer for the heat-rate assumption behind the gas figures.",
-  reservoirs:"Every reservoir ONS tracks, charted as usable volume % or upstream "+
-    "level, with region and basin rollups above the per-reservoir picker. EAR is "+
-    "stored energy rather than raw volume, which is what makes cascades comparable."
+// shows and how to read its headline numbers. Copy lives in ONS_I18N so EN/PT
+// stay in sync with the rest of the chrome.
+const VIEW_INFO_KEYS={
+  subsystems:"tipSubsystems",
+  plants:"tipPlants",
+  reservoirs:"tipReservoirs"
 };
 function renderViewInfo(){
   const hostv=document.getElementById("viewInfo");
   if(!hostv) return;
   hostv.innerHTML="";
-  const text=VIEW_INFO[state.view];
-  if(!text){ hostv.hidden=true; return; }
+  const key=VIEW_INFO_KEYS[state.view];
+  if(!key){ hostv.hidden=true; return; }
+  const text=ot(key);
   hostv.hidden=false;
   const wrap=el("div");
   wrap.style.cssText="display:flex;align-items:center;gap:0;margin:0 0 6px";
   const lab=el("span");
   lab.style.cssText="font-size:11px;text-transform:uppercase;letter-spacing:.06em;"+
     "color:var(--muted);font-weight:600";
-  lab.textContent="About this view";
+  lab.textContent=ot("aboutView");
   wrap.appendChild(lab);
-  wrap.appendChild(infodot(text,"About this view"));
+  wrap.appendChild(infodot(text,ot("aboutView")));
   hostv.appendChild(wrap);
 }
 function renderKpis(){
@@ -3145,7 +3188,13 @@ async function boot(){
     refreshBtn.onclick=triggerRefresh;
   }
   initThemeToggle("themeBtn", () => { buildPickCard(); render(); });
-  initLangToggle("lang-toggle");
+  initLangToggle("lang-toggle", () => {
+    applyOnsI18n();
+    buildTabs();
+    buildSmooth();
+    renderViewInfo();
+  });
+  applyOnsI18n();
   initCrossLinks();
   let rz; window.addEventListener("resize",()=>{
     clearTimeout(rz); rz=setTimeout(renderCharts,140);
@@ -3193,6 +3242,7 @@ async function boot(){
   seedEnts("reservoirs","res_volutil_pct",DATA.defaults.reservoir);
 
   buildTabs(); buildPresets(); buildSmooth(); buildSubs(); updateSubsVisibility();
+  writeViewQuery();
   syncInputs(); buildPickCard(); render();
 }
 boot();
