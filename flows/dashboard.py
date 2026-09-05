@@ -229,8 +229,13 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .filters-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: var(--card-pad); margin-bottom: var(--gap); }
 .filters-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .filters-row + .filters-row { margin-top: 8px; }
-.filters-row select, .filters-row input { background: var(--bg); border: 1px solid var(--border-strong); border-radius: 6px; padding: 5px 10px; color: var(--text); font-size: 12.5px; font-family: var(--font); }
-.filters-row select:hover, .filters-row input:hover { background: var(--accent-soft); }
+/* Page-wide, not just .filters-row -- the KPI month select and the
+   variable/date-range/granularity selects above the chart live outside
+   .filters-row and need the same treatment, or they fall back to the
+   browser's native (unstyled) select/input look. */
+select, input { background: var(--bg); border: 1px solid var(--border-strong); border-radius: 6px; padding: 5px 10px; color: var(--text); font-size: 12.5px; font-family: var(--font); cursor: pointer; }
+input[type="search"] { cursor: text; }
+select:hover, input:hover { background: var(--accent-soft); }
 .tso-toggle-row { display: flex; gap: 6px; flex-wrap: wrap; }
 .tso-toggle { background: var(--bg); border: 1px solid var(--border-strong); border-radius: 999px; padding: 4px 12px; font-size: 12px; cursor: pointer; color: var(--text); font-family: var(--font); font-weight: 600; }
 .tso-toggle:hover { background: var(--accent-soft); }
