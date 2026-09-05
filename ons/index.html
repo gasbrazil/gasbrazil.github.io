@@ -4,7 +4,22 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ONS Balances</title>
+<meta name="description" content="Daily Brazilian grid balances, thermal generation by plant, and estimated gas-fired dispatch from ONS open data.">
+<link rel="canonical" href="https://gasbrazil.com/ons/">
 <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAWfmNhQlgAABZ+anVtYgAAAB5qdW1kYzJwYQARABCAAACqADibcQNjMnBhAAAAFlhqdW1iAAAAR2p1bWRjMm1hABEAEIAAAKoAOJtxA3VybjpjMnBhOjU2MTg4OGQwLWVlMGUtNDUxMi1iMWFlLWIxZDA1ZTJlMGVkNwAAAAOTanVtYgAAAClqdW1kYzJhcwARABCAAACqADibcQNjMnBhLmFzc2VydGlvbnMAAAAAuGp1bWIAAABEanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5pbmdyZWRpZW50LnYzAAAAABhjMnNo4gTgaH9XqZkctQOIQbs5UwAAAGxjYm9yo2lkYzpmb3JtYXRpaW1hZ2UvcG5namluc3RhbmNlSUR4LHhtcDppaWQ6OWExYjNhMzgtMzFlMC00MDEzLTlhYzgtNzBkYWQ5YzI5ZmZhbHJlbGF0aW9uc2hpcGhwYXJlbnRPZgAAAeJqdW1iAAAAQWp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuYWN0aW9ucy52MgAAAAAYYzJzaBmwAaQCOClUt1pakePxtPYAAAGZY2JvcqJnYWN0aW9uc4KiZmFjdGlvbmtjMnBhLm9wZW5lZGpwYXJhbWV0ZXJzoWtpbmdyZWRpZW50c4GiY3VybHgtc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5pbmdyZWRpZW50LnYzZGhhc2hYILgXQJmB90FCeWpU9yM5wck2ssm8gNMSOTKsbIqM7JMWpGZhY3Rpb254HWNvbS5hbnRocm9waWMuY2xhdWRlLnByb3ZpZGVkanBhcmFtZXRlcnOheB9jb20uYW50aHJvcGljLm9yaWdpbi1jb25maWRlbmNlZ3Vua25vd25rZGVzY3JpcHRpb254ZkNsYXVkZSBwcm92aWRlZCB0aGlzIGZpbGUgYXQgdGhlIHJlcXVlc3Qgb2YgYSB1c2VyIGFuZCBtYXkgaGF2ZSBjcmVhdGVkIG9yIG1vZGlmaWVkIHRoZSBmaWxlIGNvbnRlbnRzLm1zb2Z0d2FyZUFnZW50oWRuYW1lZkNsYXVkZXJhbGxBY3Rpb25zSW5jbHVkZWT1AAAAyGp1bWIAAABAanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5oYXNoLmRhdGEAAAAAGGMyc2hvaBcg8egxuusfvaLjEh3ZAAAAgGNib3KlY2FsZ2ZzaGEyNTZjcGFkTQAAAAAAAAAAAAAAAABkaGFzaFggEHs/X0eRoBfqXKonxqhtPZAtAxLhW4MPGl6h8m4o19VkbmFtZW5qdW1iZiBtYW5pZmVzdGpleGNsdXNpb25zgaJlc3RhcnQYIWZsZW5ndGgZFooAAAI+anVtYgAAACdqdW1kYzJjbAARABCAAACqADibcQNjMnBhLmNsYWltLnYyAAAAAg9jYm9ypWNhbGdmc2hhMjU2aXNpZ25hdHVyZXhNc2VsZiNqdW1iZj0vYzJwYS91cm46YzJwYTo1NjE4ODhkMC1lZTBlLTQ1MTItYjFhZS1iMWQwNWUyZTBlZDcvYzJwYS5zaWduYXR1cmVqaW5zdGFuY2VJRHgseG1wOmlpZDowODE5OWU3ZS0xMzQxLTQ5NDYtOGQ5NS04NTE4ZmM4ZWE3NjJyY3JlYXRlZF9hc3NlcnRpb25zg6JjdXJseC1zZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmluZ3JlZGllbnQudjNkaGFzaFgguBdAmYH3QUJ5alT3IznByTayybyA0xI5MqxsiozskxaiY3VybHgqc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5hY3Rpb25zLnYyZGhhc2hYIEVjoyjLpTwDTmNpz5hKDTtjzeLLTMILWtWsgonEOBnRomN1cmx4KXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaGFzaC5kYXRhZGhhc2hYIHT+73+MbebY3SG+rgnZzuxTRaWczwct0guW356j8KCSdGNsYWltX2dlbmVyYXRvcl9pbmZvo2RuYW1lb0FudGhyb3BpYyBGaWxlc2d2ZXJzaW9uZTEuMC4wa3NwZWNWZXJzaW9uZTIuNC4wAAAQOGp1bWIAAAAoanVtZGMyY3MAEQAQgAAAqgA4m3EDYzJwYS5zaWduYXR1cmUAAAAQCGNib3LShFkCEqIBJhghWQIKMIICBjCCAY2gAwIBAgIUQOWgCu7COdC+uIP6BkIFPWdVEwAwCgYIKoZIzj0EAwMwSTEXMBUGA1UEChMOQW50aHJvcGljLCBQQkMxLjAsBgNVBAMTJUFudGhyb3BpYyBDb250ZW50IENyZWRlbnRpYWxzIFJvb3QgQ0EwHhcNMjYwODA3MTg0MzU2WhcNMjgwODA2MTk0MzU2WjBEMRcwFQYDVQQKEw5BbnRocm9waWMsIFBCQzEpMCcGA1UEAxMgQW50aHJvcGljIENsYXVkZSBDb250ZW50IFNpZ25pbmcwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAASYegpry1AYBRTVNL1CpTlbROnY3dey+UrsF9C3phYrATN3ZHf93Mo8RQN0KOUuOn19P4oWNFWe5n2/She9N7eTo1gwVjAOBgNVHQ8BAf8EBAMCB4AwFQYDVR0lBA4wDAYKKwYBBAGD6F4CATAMBgNVHRMBAf8EAjAAMB8GA1UdIwQYMBaAFM5R4gSBTmRbI/jjxM+aPpzB11zCMAoGCCqGSM49BAMDA2cAMGQCMDFzHRSeAXrSy1WOzkbhPZ6Km2wGTmZ/2gK18k8BQGXyqz88Rdrz6CTX9flAnYNVxgIwcF9c3fVhqmJKpi+UhasNUMko69cyX6STPfta3Q8EjyzDjzoyrol46FP6VFHhvUcJoWNwYWRZDZ4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA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o889xfcw1vWutvm7jAkYGx2ASNynWB3Ru+8PROSOI+78wSd/vPxX714ePRdEzrlyUCKIKCOih5Ot9pa197zvphWLl587f8E3xhNiiQh9S2p66eBSe+uT/z744V9/9U3DjQ22Yrp06EIHYT1/rwP12+a94cGPL7joA0S0NBOal6KF7WW36lLPNfrJLc8c96FffvmuV9/wTgmueoPQl061lavOcOUvnc745xNt37cvbT22/tmzAWCxLB6XIdgLFlcNANy/8cnaqd//gOAfT47pCwsTfPYEmfv18+WdN3/62V88dd87RPxlKfvrdb2ziardfokILaguMOnP+jerl73v72774sojv3mh4HOvF3zmJKuuPDVR/3gKv73+iWhjsvVNAHDdsuuCl+o7VKvVbLgRHt72XPWMH3xI8OFXhaidKLOvPlfe+uNPNOorf/MvIrJX0U+Y2L2XcFULJ1REem59+ndvu/zWL6w8/lvvkUmfP13w2dcLBv8qufCng81E5CwAqKYa+z8O99IN/den//3zx37t3YKPHCtHXPsOeedNn932o5V3fF1EDiuiFk3o/I4xCyLS83S09m1fvucHt57/o49uPeZb75KuL5wm5/3wY/LbF1b+9VjB+e9sflVErRxdP/ufbvvWb8+48SPSt+j9UlvynftvX33/xSKyf/bc/nr/BNzvSLNQFATtR7Tsd/fah977uTtvuLH/B//w/Idvvqp5+8O/PxUA1et1/d/9HBExP/rtrd+s/ey6f7thxS+vEJFTMhtf2PgJuN95giB6bDgrIr1/3LL64Bt/938PKsL4/+BzXmRKqourZkLjdyUfoVpV1cWLDfr7x4cL6O/X1cWLTV0mPPvdAhmqImpioybWxJpYE2tiTayJNbEm1sSaWBNr7Pr/AXXJwfiNDfvfAAAAAElFTkSuQmCC">
+<script>
+(function(){
+  try {
+    if (localStorage.getItem("gasbrazil-theme") === "dark")
+      document.documentElement.setAttribute("data-theme", "dark");
+    var lang = localStorage.getItem("gasbrazil-lang");
+    if (!lang)
+      lang = ((navigator.language || "en").toLowerCase().indexOf("pt") === 0) ? "pt" : "en";
+    document.documentElement.setAttribute("data-lang", lang);
+    document.documentElement.setAttribute("lang", lang === "pt" ? "pt-BR" : "en");
+  } catch (e) {}
+})();
+</script>
 <style>
 /*
  * GasBrazil.com shared design tokens + a couple of small shared components.
@@ -150,6 +165,22 @@
 .infodot:hover::after, .infodot:focus-visible::after {
   opacity: 1; visibility: visible;
 }
+
+.skip-link {
+  position: absolute; left: 12px; top: -40px; z-index: 80;
+  background: var(--accent); color: #fff; padding: 6px 10px;
+  border-radius: 6px; font: 600 12.5px var(--font); text-decoration: none;
+}
+.skip-link:focus { top: 12px; }
+.langBtn, #lang-toggle {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 34px; height: 34px; padding: 0 8px;
+  background: var(--panel); border: 1px solid var(--border-strong);
+  border-radius: 6px; color: var(--text); cursor: pointer;
+  font: 700 11.5px/1 var(--font); letter-spacing: .04em;
+}
+.langBtn:hover, #lang-toggle:hover { background: var(--accent-soft); }
+.chrome-tools { display: flex; align-items: center; gap: 6px; }
 
 /* Everything below is ons-dashboard's own layout/components. The palette
    (neutral tokens + the shared Brazilian-flag accent) now lives entirely in
@@ -325,18 +356,21 @@ table.data thead th.sortable:hover{background:var(--accent-soft)}
 </style>
 </head>
 <body>
+<a class="skip-link" href="#app" data-i18n="skip">Skip to content</a>
 <div class="wrap">
 <header>
   <div>
-    <h1>ONS Balances</h1>
+    <h1 data-i18n="navOns">ONS Balances</h1>
     <div class="sub" id="subtitle">Loading&hellip;</div>
   </div>
   <div class="row">
-    <a class="navlink" id="link-home" href="https://gasbrazil.com">&larr; GasBrazil.com</a>
+    <a class="navlink" id="link-home" href="https://gasbrazil.com/">&larr; GasBrazil.com</a>
     <a class="navlink" id="link-poc" href="https://gasbrazil.com/poc/">POC Results Dashboard &rarr;</a>
     <a class="navlink" id="link-contratos" href="https://gasbrazil.com/contratos/">POC Contracts &rarr;</a>
-    <a class="navlink" href="wiki-html/">Wiki</a>
+    <a class="navlink" href="wiki-html/" data-i18n="navWiki">Wiki</a>
+    <a class="navlink" href="../about/" data-i18n="navAbout">About</a>
     <button id="refreshBtn" hidden>&#8635; Refresh data</button>
+    <button type="button" id="lang-toggle" class="langBtn" aria-label="Português">PT</button>
     <button id="themeBtn" class="iconBtn" title="Toggle light/dark" aria-label="Toggle light/dark"></button>
   </div>
 </header>
@@ -361,13 +395,13 @@ table.data thead th.sortable:hover{background:var(--accent-soft)}
 
 <div class="card" id="controlsCard">
   <div class="controls">
-    <div class="ctl"><label>Date range</label><div class="row" id="presets"></div></div>
-    <div class="ctl"><label>From</label><input type="date" id="from"></div>
-    <div class="ctl"><label>To</label><input type="date" id="to"></div>
-    <div class="ctl"><label>Smoothing</label><div class="row" id="smooth"></div></div>
-    <div class="ctl" id="subsCtl"><label>Subsystems</label><div class="row" id="subs"></div></div>
-    <div class="ctl"><label>View</label>
-      <div class="row"><button id="tableBtn" aria-pressed="false">Table</button></div>
+    <div class="ctl"><label data-ons-i18n="dateRange">Date range</label><div class="row" id="presets"></div></div>
+    <div class="ctl"><label data-ons-i18n="from">From</label><input type="date" id="from"></div>
+    <div class="ctl"><label data-ons-i18n="to">To</label><input type="date" id="to"></div>
+    <div class="ctl"><label data-ons-i18n="smoothing">Smoothing</label><div class="row" id="smooth"></div></div>
+    <div class="ctl" id="subsCtl"><label data-ons-i18n="subsystems">Subsystems</label><div class="row" id="subs"></div></div>
+    <div class="ctl"><label data-ons-i18n="view">View</label>
+      <div class="row"><button id="tableBtn" aria-pressed="false" data-ons-i18n="table">Table</button></div>
     </div>
   </div>
 </div>
@@ -424,17 +458,39 @@ const fmtAxisNum = (v, d=0) => {
 
 /* ---------- views ---------------------------------------------------------- */
 const VIEWS = [
-  {id:"subsystems", label:"Subsystems", kind:""},
-  {id:"plants",     label:"Thermal plants", kind:"plant"},
-  {id:"reservoirs", label:"Reservoirs", kind:"reservoir"},
+  {id:"subsystems", labelKey:"viewSubsystems", kind:""},
+  {id:"plants",     labelKey:"viewPlants", kind:"plant"},
+  {id:"reservoirs", labelKey:"viewReservoirs", kind:"reservoir"},
   // kind:null marks a view with no entity picker, no chart panels and no
   // series selection of its own -- render() branches on it entirely. See the
   // Data Tables block further down.
-  {id:"tables",     label:"Data Tables", kind:null},
+  {id:"tables",     labelKey:"viewTables", kind:null},
 ];
+const VIEW_ALIASES = {thermal:"plants", plant:"plants", table:"tables"};
+function viewFromQuery(){
+  const q = new URLSearchParams(location.search).get("tab");
+  if(!q) return null;
+  const id = VIEW_ALIASES[q] || q;
+  return VIEWS.some(v=>v.id===id) ? id : null;
+}
+function writeViewQuery(){
+  const u = new URL(location.href);
+  u.searchParams.set("tab", state.view);
+  history.replaceState(null, "", u.pathname + u.search + u.hash);
+  try { localStorage.setItem("ons-view", state.view); } catch(e){}
+}
+function initialView(){
+  const fromUrl = viewFromQuery();
+  if(fromUrl) return fromUrl;
+  try {
+    const saved = localStorage.getItem("ons-view");
+    if(saved && VIEWS.some(v=>v.id===saved)) return saved;
+  } catch(e){}
+  return "plants";
+}
 
 const state = {
-  view: "plants",
+  view: initialView(),
   from: null, to: null, smooth: 1,
   subs: new Set(["SIN"]),
   table: false,
@@ -512,6 +568,7 @@ const colorOf = (k, v) => {
 
 const SUN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>';
 const MOON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+const THEME_KEY = "gasbrazil-theme";
 function isDarkTheme() { return document.documentElement.getAttribute("data-theme") === "dark"; }
 function initThemeToggle(buttonId, onChange) {
   const btn = document.getElementById(buttonId);
@@ -519,18 +576,208 @@ function initThemeToggle(buttonId, onChange) {
   function paint() {
     const dark = isDarkTheme();
     btn.innerHTML = dark ? SUN_SVG : MOON_SVG;
-    const label = dark ? "Switch to light mode" : "Switch to dark mode";
+    const label = dark ? (typeof t === "function" ? t("themeLight") : "Switch to light mode")
+                       : (typeof t === "function" ? t("themeDark") : "Switch to dark mode");
     btn.title = label; btn.setAttribute("aria-label", label);
   }
   paint();
   btn.addEventListener("click", () => {
-    if (isDarkTheme()) document.documentElement.removeAttribute("data-theme");
-    else document.documentElement.setAttribute("data-theme", "dark");
+    const nextDark = !isDarkTheme();
+    if (nextDark) document.documentElement.setAttribute("data-theme", "dark");
+    else document.documentElement.removeAttribute("data-theme");
+    try { localStorage.setItem(THEME_KEY, nextDark ? "dark" : "light"); } catch (e) {}
     paint();
-    if (onChange) onChange(isDarkTheme());
+    if (onChange) onChange(nextDark);
   });
 }
 
+
+const LANG_KEY = "gasbrazil-lang";
+const GB_I18N = {
+  en: {
+    themeDark: "Switch to dark mode",
+    themeLight: "Switch to light mode",
+    langSwitch: "Português",
+    skip: "Skip to content",
+    navHome: "GasBrazil.com",
+    navOns: "ONS Balances",
+    navPoc: "POC Results",
+    navContratos: "POC Contracts",
+    navAbout: "About",
+    navWiki: "Wiki",
+    contact: "Contact",
+    tagline: "Data tools for Brazil's natural gas market — grid balances, pipeline capacity, and contracted transport activity, refreshed daily.",
+    aboutLead: "Independent, public-data dashboards. Nothing here is an official ONS, ANP, CCEE, or transportadora product.",
+    aboutBody: "GasBrazil.com consolidates open Brazilian gas and power data into three self-contained tools you can filter, chart, and export. Numbers come from public APIs and open-data portals; caveats live on each dashboard and on the About page.",
+    cardOns: "ONS Balances",
+    cardOnsDesc: "Daily grid balances, thermal generation by plant, and gas-fired dispatch across Brazil's interconnected power system.",
+    cardPoc: "POC Results",
+    cardPocDesc: "Pipeline capacity offer results — balancing, GUS acquisition, and linepack trades across TBG, TAG, and NTS.",
+    cardContratos: "POC Contracts",
+    cardContratosDesc: "Active transport and master transport contracts across TBG, TAG, and NTS. Legacy and access-connection contracts are not yet included.",
+    kpiRefresh: "Last refreshed",
+    sources: "Official sources",
+    sourceOns: "ONS open data",
+    sourcePoc: "Portal de Oferta de Capacidade",
+    sourceAnp: "ANP gas transport movement",
+    footerAbout: "About & methodology",
+    aboutH1: "About GasBrazil",
+    aboutWho: "What this is",
+    aboutWhoBody: "A small independent site that republishes public Brazilian natural-gas and power-system data as filterable dashboards. It is not affiliated with ONS, ANP, CCEE, TBG, TAG, or NTS.",
+    aboutHow: "How the data is built",
+    aboutHowBody: "Each dashboard is a single static HTML file. GitHub Actions fetch the source, transform it, and embed a compressed payload in the page. There is no live API behind the published site.",
+    aboutGloss: "Glossary",
+    glossGus: "GUS — gas acquired by a transportadora for system use.",
+    glossLinepack: "Linepack — inventory held inside the pipeline, traded to balance the network.",
+    glossBal: "Residual / operational balancing — short-term PEG processes that clear imbalances.",
+    glossCmo: "CMO — ONS marginal operating cost (R$/MWh). Not the same as CCEE's PLD settlement price.",
+    glossMaster: "Master transport contract — framework that enables later transport nominations; not itself a firm capacity booking.",
+    aboutCover: "Coverage limits",
+    aboutCoverBody: "POC Contracts currently include Transport Contract and Master Contract rows. Legacy transport contracts and access connections are on the official portal but are not in this feed yet.",
+    notFound: "This page is not here.",
+    notFoundBody: "The hub and three dashboards are linked below.",
+    backHome: "Back to GasBrazil.com"
+  },
+  pt: {
+    themeDark: "Mudar para o modo escuro",
+    themeLight: "Mudar para o modo claro",
+    langSwitch: "English",
+    skip: "Ir para o conteúdo",
+    navHome: "GasBrazil.com",
+    navOns: "Balanços ONS",
+    navPoc: "Resultados POC",
+    navContratos: "Contratos POC",
+    navAbout: "Sobre",
+    navWiki: "Wiki",
+    contact: "Contato",
+    tagline: "Ferramentas de dados para o mercado de gás natural do Brasil — balanços do SIN, capacidade de gasodutos e contratos de transporte, atualizados diariamente.",
+    aboutLead: "Painéis independentes com dados públicos. Isto não é um produto oficial da ONS, da ANP, da CCEE ou das transportadoras.",
+    aboutBody: "O GasBrazil.com reúne dados abertos de gás e energia do Brasil em três ferramentas que você pode filtrar, graficar e exportar. Os números vêm de APIs e portais públicos; as ressalvas estão em cada painel e na página Sobre.",
+    cardOns: "Balanços ONS",
+    cardOnsDesc: "Balanços diários do SIN, geração térmica por usina e despacho a gás no sistema interligado.",
+    cardPoc: "Resultados POC",
+    cardPocDesc: "Resultados da oferta de capacidade — balanceamento, aquisição de GUS e linepack em TBG, TAG e NTS.",
+    cardContratos: "Contratos POC",
+    cardContratosDesc: "Contratos de transporte e contratos master ativos em TBG, TAG e NTS. Contratos legados e conexões de acesso ainda não entram.",
+    kpiRefresh: "Última atualização",
+    sources: "Fontes oficiais",
+    sourceOns: "Dados abertos da ONS",
+    sourcePoc: "Portal de Oferta de Capacidade",
+    sourceAnp: "Movimentação de gás da ANP",
+    footerAbout: "Sobre e metodologia",
+    aboutH1: "Sobre o GasBrazil",
+    aboutWho: "O que é isto",
+    aboutWhoBody: "Um site independente que republica dados públicos de gás natural e do sistema elétrico brasileiro em painéis filtráveis. Não tem vínculo com ONS, ANP, CCEE, TBG, TAG ou NTS.",
+    aboutHow: "Como os dados são montados",
+    aboutHowBody: "Cada painel é um único arquivo HTML estático. O GitHub Actions busca a fonte, transforma e embute o payload compactado na página. O site publicado não tem API ao vivo.",
+    aboutGloss: "Glossário",
+    glossGus: "GUS — gás adquirido pela transportadora para uso do sistema.",
+    glossLinepack: "Linepack — estoque dentro do gasoduto, negociado para balancear a rede.",
+    glossBal: "Balanceamento residual / operacional — processos de curto prazo da PEG que zeram desequilíbrios.",
+    glossCmo: "CMO — custo marginal de operação da ONS (R$/MWh). Não é o PLD da CCEE.",
+    glossMaster: "Contrato master de transporte — quadro que habilita nomeações posteriores; não é, por si, uma reserva firme de capacidade.",
+    aboutCover: "Limites de cobertura",
+    aboutCoverBody: "Contratos POC incluem hoje Contrato de Transporte e Contrato Master. Contratos de transporte legado e conexões de acesso estão no portal oficial, mas ainda não neste feed.",
+    notFound: "Esta página não existe.",
+    notFoundBody: "O hub e os três painéis estão nos links abaixo.",
+    backHome: "Voltar ao GasBrazil.com"
+  }
+};
+function currentLang() {
+  return document.documentElement.getAttribute("data-lang") === "pt" ? "pt" : "en";
+}
+function t(key) {
+  const pack = GB_I18N[currentLang()] || GB_I18N.en;
+  return pack[key] || GB_I18N.en[key] || key;
+}
+function applyI18n() {
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const key = el.getAttribute("data-i18n");
+    if (key) el.textContent = t(key);
+  });
+  document.querySelectorAll("[data-i18n-aria]").forEach(el => {
+    const key = el.getAttribute("data-i18n-aria");
+    if (key) el.setAttribute("aria-label", t(key));
+  });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+    const key = el.getAttribute("data-i18n-placeholder");
+    if (key) el.setAttribute("placeholder", t(key));
+  });
+  const langBtn = document.getElementById("lang-toggle");
+  if (langBtn) {
+    langBtn.textContent = currentLang() === "pt" ? "EN" : "PT";
+    langBtn.title = t("langSwitch");
+    langBtn.setAttribute("aria-label", t("langSwitch"));
+  }
+}
+function initLangToggle(buttonId, onChange) {
+  const btn = document.getElementById(buttonId || "lang-toggle");
+  applyI18n();
+  if (!btn) return;
+  btn.addEventListener("click", () => {
+    const next = currentLang() === "pt" ? "en" : "pt";
+    document.documentElement.setAttribute("data-lang", next);
+    document.documentElement.setAttribute("lang", next === "pt" ? "pt-BR" : "en");
+    try { localStorage.setItem(LANG_KEY, next); } catch (e) {}
+    applyI18n();
+    if (onChange) onChange(next);
+  });
+}
+
+/* ONS-local chrome strings (tabs, control labels, view blurbs). Shared kit
+   covers site-wide nav; this pack covers what is unique to this dashboard. */
+const ONS_I18N = {
+  en: {
+    viewSubsystems: "Subsystems",
+    viewPlants: "Thermal plants",
+    viewReservoirs: "Reservoirs",
+    viewTables: "Data Tables",
+    aboutView: "About this view",
+    dateRange: "Date range",
+    from: "From",
+    to: "To",
+    smoothing: "Smoothing",
+    subsystems: "Subsystems",
+    view: "View",
+    table: "Table",
+    smoothDaily: "Daily",
+    smooth7: "7d avg",
+    smooth30: "30d avg",
+    tipSubsystems: "National and per-subsystem balance: load, generation by source, hydrology and CMO, on a daily grid. Toggle SIN/SE/S/NE/N to fan any picked series across subsystems. Net interchange is positive when a subsystem is a net exporter.",
+    tipPlants: "One row per dispatched thermal plant, filterable by region and fuel. The five pinned Total rows are synthetic subsystem/national aggregates of the gas-fired fleet, not plants, and are excluded from fleet-wide KPI sums. A combined-cycle block appears both as its individual dispatch phases and as one combined row — don't sum the two together. Installed capacity, utilization and estimated gas consumption are derived, not published by ONS: see Methodology in the footer for the heat-rate assumption behind the gas figures.",
+    tipReservoirs: "Every reservoir ONS tracks, charted as usable volume % or upstream level, with region and basin rollups above the per-reservoir picker. EAR is stored energy rather than raw volume, which is what makes cascades comparable. Reservoirs down usually means more thermal (and gas) later."
+  },
+  pt: {
+    viewSubsystems: "Subsistemas",
+    viewPlants: "Usinas térmicas",
+    viewReservoirs: "Reservatórios",
+    viewTables: "Tabelas",
+    aboutView: "Sobre esta visão",
+    dateRange: "Período",
+    from: "De",
+    to: "Até",
+    smoothing: "Suavização",
+    subsystems: "Subsistemas",
+    view: "Visão",
+    table: "Tabela",
+    smoothDaily: "Diário",
+    smooth7: "Média 7d",
+    smooth30: "Média 30d",
+    tipSubsystems: "Balanço nacional e por subsistema: carga, geração por fonte, hidrologia e CMO, em grade diária. Alternar SIN/SE/S/NE/N espalha qualquer série escolhida pelos subsistemas. Intercâmbio líquido positivo = subsistema exportador líquido.",
+    tipPlants: "Uma linha por usina térmica despachada, filtrável por região e combustível. As cinco linhas Total fixas são agregados sintéticos da frota a gás — não são usinas — e ficam de fora das somas de frota. Um bloco ciclo combinado aparece como fases e como linha combinada: não some as duas. Capacidade, utilização e consumo estimado de gás são derivados, não publicados pela ONS: ver Metodologia no rodapé.",
+    tipReservoirs: "Cada reservatório acompanhado pela ONS, em volume útil % ou nível de montante, com totais por região e bacia. EAR é energia armazenada, não volume bruto — por isso as cascadas são comparáveis. Reservatórios baixos costumam antecipar mais térmica (e gás)."
+  }
+};
+function ot(key) {
+  const pack = ONS_I18N[currentLang()] || ONS_I18N.en;
+  return pack[key] || ONS_I18N.en[key] || key;
+}
+function applyOnsI18n() {
+  document.querySelectorAll("[data-ons-i18n]").forEach(el => {
+    const key = el.getAttribute("data-ons-i18n");
+    if (key) el.textContent = ot(key);
+  });
+}
 
 /* ---------- series keys: "<metric>|<subsystem>|<entity>" -------------------- */
 const skey = (m,s,e="") => m+"|"+s+"|"+e;
@@ -780,9 +1027,9 @@ function makeSortable(table,id){
 function buildTabs(){
   const host=document.getElementById("tabs"); host.innerHTML="";
   VIEWS.forEach(v=>{
-    const b=el("button",null,v.label);
+    const b=el("button",null,ot(v.labelKey));
     b.setAttribute("aria-pressed",String(state.view===v.id));
-    b.onclick=()=>{ state.view=v.id; buildTabs(); buildSubs(); updateSubsVisibility();
+    b.onclick=()=>{ state.view=v.id; writeViewQuery(); buildTabs(); buildSubs(); updateSubsVisibility();
       buildPickCard(); render(); };
     host.appendChild(b);
   });
@@ -802,7 +1049,7 @@ function buildPresets(){
 }
 function buildSmooth(){
   const host=document.getElementById("smooth"); host.innerHTML="";
-  [["Daily",1],["7d avg",7],["30d avg",30]].forEach(([nm,w])=>{
+  [[ot("smoothDaily"),1],[ot("smooth7"),7],[ot("smooth30"),30]].forEach(([nm,w])=>{
     const b=el("button",null,nm);
     b.setAttribute("aria-pressed",String(state.smooth===w));
     b.onclick=()=>{ state.smooth=w; buildSmooth(); render(); };
@@ -1807,40 +2054,29 @@ const lastIdx=arr=>{ for(let i=arr.length-1;i>=0;i--) if(arr[i]!=null) return i;
   return -1; };
 
 // One orientation line per tab, carried on the KPI strip: what this view
-// shows and how to read its headline numbers. The sweep (2026-09-05) took
-// the prose off these tabs; this puts it back one hover away instead of as
-// a paragraph.
-const VIEW_INFO={
-  subsystems:"National and per-subsystem balance: load, generation by source, "+
-    "hydrology and CMO, on a daily grid. Toggle SIN/SE/S/NE/N to fan any picked "+
-    "series across subsystems. Net interchange is positive when a subsystem is a "+
-    "net exporter.",
-  plants:"One row per dispatched thermal plant, filterable by region and fuel. The "+
-    "five pinned Total rows are synthetic subsystem/national aggregates of the "+
-    "gas-fired fleet, not plants, and are excluded from fleet-wide KPI sums. A "+
-    "combined-cycle block appears both as its individual dispatch phases and as one "+
-    "combined row — don't sum the two together. Installed capacity, utilization and "+
-    "estimated gas consumption are derived, not published by ONS: see Methodology "+
-    "in the footer for the heat-rate assumption behind the gas figures.",
-  reservoirs:"Every reservoir ONS tracks, charted as usable volume % or upstream "+
-    "level, with region and basin rollups above the per-reservoir picker. EAR is "+
-    "stored energy rather than raw volume, which is what makes cascades comparable."
+// shows and how to read its headline numbers. Copy lives in ONS_I18N so EN/PT
+// stay in sync with the rest of the chrome.
+const VIEW_INFO_KEYS={
+  subsystems:"tipSubsystems",
+  plants:"tipPlants",
+  reservoirs:"tipReservoirs"
 };
 function renderViewInfo(){
   const hostv=document.getElementById("viewInfo");
   if(!hostv) return;
   hostv.innerHTML="";
-  const text=VIEW_INFO[state.view];
-  if(!text){ hostv.hidden=true; return; }
+  const key=VIEW_INFO_KEYS[state.view];
+  if(!key){ hostv.hidden=true; return; }
+  const text=ot(key);
   hostv.hidden=false;
   const wrap=el("div");
   wrap.style.cssText="display:flex;align-items:center;gap:0;margin:0 0 6px";
   const lab=el("span");
   lab.style.cssText="font-size:11px;text-transform:uppercase;letter-spacing:.06em;"+
     "color:var(--muted);font-weight:600";
-  lab.textContent="About this view";
+  lab.textContent=ot("aboutView");
   wrap.appendChild(lab);
-  wrap.appendChild(infodot(text,"About this view"));
+  wrap.appendChild(infodot(text,ot("aboutView")));
   hostv.appendChild(wrap);
 }
 function renderKpis(){
@@ -2952,6 +3188,13 @@ async function boot(){
     refreshBtn.onclick=triggerRefresh;
   }
   initThemeToggle("themeBtn", () => { buildPickCard(); render(); });
+  initLangToggle("lang-toggle", () => {
+    applyOnsI18n();
+    buildTabs();
+    buildSmooth();
+    renderViewInfo();
+  });
+  applyOnsI18n();
   initCrossLinks();
   let rz; window.addEventListener("resize",()=>{
     clearTimeout(rz); rz=setTimeout(renderCharts,140);
@@ -2999,6 +3242,7 @@ async function boot(){
   seedEnts("reservoirs","res_volutil_pct",DATA.defaults.reservoir);
 
   buildTabs(); buildPresets(); buildSmooth(); buildSubs(); updateSubsVisibility();
+  writeViewQuery();
   syncInputs(); buildPickCard(); render();
 }
 boot();

@@ -1004,8 +1004,12 @@ function renderTsoRow() {
     const avg = mean(rows.map(r => r["R$/m3"]));
     const chip = document.createElement("div");
     if (rows.length) {
+      const vol = rows.reduce((a, r) => a + (Number(r["Volume Accepted"]) || 0), 0);
+      const volLabel = vol >= 1e6
+        ? (vol / 1e6).toLocaleString("en-US", { maximumFractionDigits: 1 }) + "M m³"
+        : vol.toLocaleString("en-US", { maximumFractionDigits: 0 }) + " m³";
       chip.className = "tso-chip";
-      chip.innerHTML = `<b>${tso}</b> &middot; ${avg !== null ? avg.toFixed(2) : "—"} R$/m³ avg &middot; ${rows.length} trade${rows.length === 1 ? "" : "s"} <span class="muted">(7d)</span>`;
+      chip.innerHTML = `<b>${tso}</b> &middot; ${avg !== null ? avg.toFixed(2) : "—"} R$/m³ avg &middot; ${volLabel} &middot; ${rows.length} trade${rows.length === 1 ? "" : "s"} <span class="muted">(7d)</span>`;
     } else {
       chip.className = "tso-chip empty";
       chip.innerHTML = `<b>${tso}</b> &middot; no trades <span class="muted">(7d)</span>`;
