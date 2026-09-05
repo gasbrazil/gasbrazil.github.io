@@ -85,13 +85,12 @@ __SHARED_THEME_CSS__
    via that one shared file. */
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; }
-.wrap { max-width: 1440px; margin: 0 auto; padding: 20px 20px 64px; }
-header { display: flex; flex-wrap: wrap; gap: 12px; align-items: baseline; justify-content: space-between; margin-bottom: 14px; }
+header { display: flex; flex-wrap: wrap; gap: 12px; align-items: baseline; justify-content: space-between; margin-bottom: var(--gap); }
 h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .subtitle { color: var(--muted2); font-size: 13px; }
 .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .header-links { display: flex; gap: 8px; flex-wrap: wrap; }
-.sources { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0 0 14px; }
+.sources { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0 0 var(--gap); }
 .sources-label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; margin-right: 2px; }
 .pill { font-size: 11.5px; color: var(--muted2); text-decoration: none; border: 1px solid var(--border); border-radius: 999px; padding: 3px 10px; white-space: nowrap; }
 .pill:hover { background: var(--accent-soft); color: var(--text); border-color: var(--border-strong); }
@@ -100,7 +99,7 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 #theme-toggle { display: inline-flex; align-items: center; justify-content: center; background: var(--panel); border: 1px solid var(--border-strong); border-radius: 6px; padding: 5px 9px; line-height: 0; cursor: pointer; color: var(--text); }
 #theme-toggle:hover { background: var(--accent-soft); }
 #theme-toggle svg { width: 16px; height: 16px; display: block; }
-.tso-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.tso-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: var(--gap); }
 .tso-chip { background: var(--panel); border: 1px solid var(--border); border-radius: 999px; padding: 4px 12px; font-size: 12px; box-shadow: var(--shadow); white-space: nowrap; cursor: pointer; color: var(--text); font-family: var(--font); }
 .tso-chip:hover { background: var(--accent-soft); }
 .tso-chip.selected { background: var(--accent); color: #fff; border-color: var(--accent); }
@@ -110,12 +109,12 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .tso-chip.empty { color: var(--muted); }
 .tso-chip b { font-weight: 700; }
 .tso-chip .muted { color: var(--muted); }
-.quick-filters { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+.quick-filters { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: var(--gap); }
 .qf-sep { width: 1px; align-self: stretch; background: var(--border-strong); margin: 0 4px; }
 .qf-btn.qf-validity { border-style: dashed; }
-.drill-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 14px; }
+.drill-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: var(--card-pad); margin-bottom: var(--gap); }
 .drill-card table { border-collapse: collapse; width: 100%; font-size: 12.5px; white-space: nowrap; }
-.drill-card th, .drill-card td { padding: 5px 10px; border-bottom: 1px solid var(--border); text-align: left; }
+.drill-card th, .drill-card td { padding: 4px 8px; border-bottom: 1px solid var(--border); text-align: left; }
 .drill-card th { color: var(--muted2); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; cursor: default; position: static; }
 .drill-card thead tr:first-child th { border-bottom: none; padding-bottom: 0; }
 .drill-card th.grp { text-align: center; color: var(--text); letter-spacing: .04em; }
@@ -131,7 +130,7 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .qf-btn { background: var(--panel); border: 1px solid var(--border); border-radius: 999px; padding: 4px 12px; font-size: 12px; cursor: pointer; color: var(--text); font-family: var(--font); }
 .qf-btn:hover { background: var(--accent-soft); }
 .qf-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-.toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+.toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: var(--gap); }
 .toolbar select, .toolbar input { background: var(--panel); border: 1px solid var(--border-strong); border-radius: 6px; padding: 5px 10px; color: var(--text); font-size: 12.5px; font-family: var(--font); }
 .toolbar select:hover { background: var(--accent-soft); }
 .toolbar button { background: var(--panel); color: var(--text); border: 1px solid var(--border-strong); border-radius: 6px; padding: 5px 10px; font-size: 12.5px; cursor: pointer; font-family: var(--font); }
@@ -140,7 +139,7 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .count { color: var(--muted); font-size: 12px; margin-left: auto; }
 .table-wrap { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; overflow: auto; box-shadow: var(--shadow); max-height: 65vh; }
 table { border-collapse: collapse; width: auto; min-width: 100%; font-size: 12.5px; white-space: nowrap; table-layout: auto; }
-th, td { padding: 6px 10px; text-align: left; border-bottom: 1px solid var(--border); }
+th, td { padding: 4px 8px; text-align: left; border-bottom: 1px solid var(--border); }
 th { position: sticky; top: 0; background: var(--panel); cursor: pointer; user-select: none; color: var(--muted2); font-weight: 600; z-index: 2; position: relative; }
 th:hover { background: var(--accent-soft); }
 th.dragging { opacity: .4; }
@@ -169,7 +168,7 @@ footer a { color: var(--accent); }
 .filter-menu label.fm-date { display: block; font-size: 11px; color: var(--muted); margin: 6px 0 3px; }
 .filter-menu input[type="date"] { width: 100%; }
 .filter-menu input[type="text"].fm-search { width: 100%; box-sizing: border-box; padding: 4px 6px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 12px; margin-bottom: 6px; }
-.chart-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin: 18px 0 14px; }
+.chart-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: var(--card-pad); margin: 12px 0 var(--gap); }
 .panel-title { font-size: 13px; font-weight: 600; margin: 0 0 2px; }
 .panel-note { font-size: 11.5px; color: var(--muted); margin: 0 0 12px; }
 .chart-picker { display: flex; flex-wrap: wrap; gap: 14px 18px; margin-bottom: 12px; }
@@ -233,14 +232,13 @@ footer a { color: var(--accent); }
 </div>
 <div class="chart-card">
   <p class="panel-title">Allocated Tariff Trend</p>
-  <p class="panel-note">Pick pipeline / contract-category combinations below &mdash; capacity-weighted average allocated tariff (R$/MMBtu) by contract start date. Reflects the filters above.</p>
+  <p class="panel-note">Capacity-weighted avg allocated tariff, R$/MMBtu, by contract start date.</p>
   <div class="chart-picker" id="chart-picker"></div>
   <div id="chart-host"></div>
 </div>
 <footer>
   &copy; <span id="year"></span> GasBrazil.com &middot; Data: Portal de Oferta de Capacidade (public API) &middot; Contact: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
-  <br>Covers "Transport Contract" and "Master Contract" contract types. "Legacy Transport Contract" and "Access Connection" are not yet included (small, separately-sourced categories on the source site).
-  <br><span id="footer-note"></span>
+  <br><span id="coverage-note">Active Transport &amp; Master contracts</span><button class="infodot" type="button" aria-label="About contract coverage" data-info="Covers the &quot;Transport Contract&quot; and &quot;Master Contract&quot; contract types. &quot;Legacy Transport Contract&quot; and &quot;Access Connection&quot; are small, separately-sourced categories on the source site and are not yet included. Concluded contracts are excluded from the view.">i</button>
 </footer>
 </div>
 <div class="tt" id="chart-tt"></div>
@@ -1237,8 +1235,7 @@ function renderDrill() {
   card.innerHTML = `
     <p class="panel-title">Top Shippers by Held Capacity &mdash; ${scope}</p>
     <p class="panel-note">Capacity in 000 m&sup3;/d on active contracts currently within their term &middot;
-      ${all.length.toLocaleString("en-US")} shipper${all.length === 1 ? "" : "s"} &middot; ${mix} &middot; total ${fmtNum(grand, 0)}.
-      Reflects every filter in effect. Click a pipeline chip above to isolate it${drillTso ? " (click " + scope + " again to clear)" : ""}; click a shipper to drill the table to it.</p>
+      ${all.length.toLocaleString("en-US")} shipper${all.length === 1 ? "" : "s"} &middot; ${mix} &middot; total ${fmtNum(grand, 0)}</p>
     <table>
       <thead>
         <tr><th></th><th></th><th></th>${head1}<th class="sep"></th><th></th></tr>
@@ -1411,8 +1408,8 @@ async function init() {
   }
   document.getElementById("subtitle").textContent = "Last refreshed " + DATA.generated;
   if (DATA.excludedConcluded) {
-    document.getElementById("footer-note").textContent =
-      `Excludes ${DATA.excludedConcluded.toLocaleString("en-US")} concluded contract(s) -- full history is retained in the repo's data store.`;
+    document.getElementById("coverage-note").textContent =
+      `Active Transport & Master contracts \u00b7 ${DATA.excludedConcluded.toLocaleString("en-US")} concluded excluded`;
   }
   populateSelect(document.getElementById("f-category"), DATA.rows.map(r => r["Contract Category"]));
   buildHeader();

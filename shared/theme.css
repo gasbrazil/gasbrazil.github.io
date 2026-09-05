@@ -25,6 +25,14 @@ __FONT_FACE__
   --shadow: none;
   --font: "Degular", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 
+  /* Shared layout + density tokens (2026-09-05). Every page's .wrap uses
+     these, so the site-wide content width and breathing room are a one-line
+     edit here rather than four separate template edits. */
+  --content-w: 80%;
+  --content-max: 1280px;
+  --card-pad: 10px 12px;
+  --gap: 10px;
+
   /* Brazilian flag palette, shared across the whole GasBrazil.com family.
      --brz-* are the flag's own values, used for fills/borders/gradients
      where the surface behind them is dark enough. --ok-ink/--warn-ink are
@@ -80,4 +88,57 @@ __FONT_FACE__
   margin: 0 0 12px;
   background: linear-gradient(90deg,
     var(--brz-green) 0 46%, var(--brz-yellow) 46% 73%, var(--accent) 73% 100%);
+}
+
+/* Shared content column. 80% of the viewport, capped so it doesn't sprawl on
+   an ultrawide monitor, and released to full width below 900px where 80%
+   would waste more than it gains. */
+.wrap {
+  width: var(--content-w);
+  max-width: var(--content-max);
+  min-width: 0;
+  margin: 0 auto;
+  padding: 14px 0 32px;
+}
+@media (max-width: 900px) {
+  .wrap { width: auto; padding: 14px 12px 32px; }
+}
+
+/* Inline "i" affordance. Replaces the paragraphs of explanatory copy that
+   used to sit under panel titles: the explanation is still one hover or tap
+   away, but the page reads as a tool rather than a tutorial.
+   Markup: <button class="infodot" aria-label="About this panel"
+                   data-info="...">i</button> */
+.infodot {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 14px; height: 14px; flex: none;
+  margin-left: 6px; padding: 0;
+  border: 1px solid var(--border-strong); border-radius: 50%;
+  background: transparent; color: var(--muted);
+  font: 600 9.5px/1 var(--font); font-style: italic;
+  cursor: help; vertical-align: middle; position: relative;
+}
+.infodot:hover, .infodot:focus-visible {
+  border-color: var(--accent); color: var(--accent); outline: none;
+}
+/* Anchored below-left of the dot rather than centered above it: dots sit near
+   the top-left of the panel they annotate, and a centered-above tooltip clips
+   against the viewport there. .infodot--right flips the anchor for a dot
+   placed near the right edge of the page. */
+.infodot::after {
+  content: attr(data-info);
+  position: absolute; left: -5px; top: calc(100% + 7px);
+  width: max-content; max-width: 300px;
+  background: var(--panel); color: var(--text);
+  border: 1px solid var(--border-strong); border-radius: 8px;
+  padding: 7px 9px;
+  font: 400 11.5px/1.5 var(--font); font-style: normal;
+  text-align: left; white-space: normal;
+  box-shadow: 0 6px 20px rgba(0,0,0,.16);
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity .12s ease; z-index: 60;
+}
+.infodot--right::after { left: auto; right: -5px; }
+.infodot:hover::after, .infodot:focus-visible::after {
+  opacity: 1; visibility: visible;
 }

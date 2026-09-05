@@ -40,70 +40,71 @@ def fix_internal_links(text: str) -> str:
         return m.group(0)
     return re.sub(r"\[([^\]]+)\]\(([A-Za-z0-9_-]+)\)", repl, text)
 
-CSS = """
-:root{
-  color-scheme: light;
-  --surface-1:#fcfcfb; --plane:#f4f4f1; --text-1:#0b0b0b; --text-2:#52514e;
-  --muted:#898781; --grid:#e1e0d9; --axis:#c3c2b7; --ring:rgba(11,11,11,.10);
-  --accent:#03183D; --wash:rgba(3,24,61,.08);
-}
-:root[data-theme="dark"]{
-  color-scheme: dark;
-  --surface-1:#1a1a19; --plane:#0d0d0d; --text-1:#fff; --text-2:#c3c2b7;
-  --muted:#898781; --grid:#2c2c2a; --axis:#383835; --ring:rgba(255,255,255,.10);
-  --accent:#4a78c2; --wash:rgba(74,120,194,.16);
-}
+# The wiki now draws its palette from shared/theme.css like every other page
+# in the family, instead of carrying its own copy of the tokens. Only the
+# wiki-specific layout (sidebar shell, prose typography) lives below.
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "shared"))
+import dashboard_kit as kit
+
+CSS = kit.render_theme_css() + """
+:root{ color-scheme: light; }
+:root[data-theme="dark"]{ color-scheme: dark; }
 *{box-sizing:border-box}
-body{margin:0;background:var(--plane);color:var(--text-1);
-  font:15px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;}
-.wrap{max-width:920px;margin:0 auto;padding:20px 20px 64px;display:flex;gap:32px}
-aside{width:200px;flex:0 0 200px;position:sticky;top:20px;align-self:flex-start}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.6 var(--font);}
+/* .wrap's width/centering come from shared/theme.css; the wiki only adds the
+   sidebar-plus-prose layout on top of it. */
+.wrap{display:flex;gap:28px}
+aside{width:190px;flex:0 0 190px;position:sticky;top:16px;align-self:flex-start}
 main{min-width:0;flex:1}
 header.top{display:flex;flex-wrap:wrap;gap:12px;align-items:center;
-  justify-content:space-between;margin-bottom:18px;padding:14px 20px;
-  border-bottom:1px solid var(--ring);max-width:1160px;margin-left:auto;margin-right:auto}
+  justify-content:space-between;margin:0 auto 4px;padding:12px 0;
+  border-bottom:1px solid var(--ring);width:var(--content-w);max-width:var(--content-max)}
 header.top .brand{display:flex;align-items:baseline;gap:10px}
-header.top h1{font-size:19px;margin:0;font-weight:700}
-header.top .tag{color:var(--text-2);font-size:12.5px}
+header.top h1{font-size:18px;margin:0;font-weight:700}
+header.top .tag{color:var(--muted2);font-size:12.5px}
 header.top .row{display:flex;gap:8px;align-items:center}
+.flagbar{width:var(--content-w);max-width:var(--content-max);margin:0 auto 10px}
 a{color:var(--accent)}
-.navlink,button.iconBtn{border:1px solid var(--ring);background:var(--surface-1);
-  color:var(--accent);border-radius:8px;padding:6px 11px;font-size:12.5px;
-  font-weight:600;text-decoration:none;cursor:pointer}
-.navlink:hover,button.iconBtn:hover{background:var(--wash)}
-button.iconBtn{padding:6px 9px}
+.navlink,button.iconBtn{border:1px solid var(--ring);background:var(--panel);
+  color:var(--accent);border-radius:8px;padding:5px 10px;font-size:12.5px;
+  font-weight:600;text-decoration:none;cursor:pointer;font-family:var(--font)}
+.navlink:hover,button.iconBtn:hover{background:var(--accent-soft)}
+button.iconBtn{padding:5px 8px;color:var(--text)}
 button.iconBtn svg{width:14px;height:14px;display:block}
-aside nav{background:var(--surface-1);border:1px solid var(--ring);border-radius:10px;
-  padding:14px}
+aside nav{background:var(--panel);border:1px solid var(--border);border-radius:10px;
+  padding:10px 12px}
 aside nav .label{font-size:11px;text-transform:uppercase;letter-spacing:.04em;
-  color:var(--muted);margin-bottom:8px}
-aside nav a{display:block;padding:6px 4px;font-size:13.5px;color:var(--text-1);
+  color:var(--muted);margin-bottom:6px}
+aside nav a{display:block;padding:5px 4px;font-size:13px;color:var(--text);
   text-decoration:none;border-radius:6px}
-aside nav a:hover{background:var(--wash);color:var(--accent)}
+aside nav a:hover{background:var(--accent-soft);color:var(--accent)}
 aside nav a.active{color:var(--accent);font-weight:700}
-aside .back{display:block;margin-top:14px;font-size:12.5px}
-main .card{background:var(--surface-1);border:1px solid var(--ring);border-radius:10px;
-  padding:26px 30px}
-main h1{font-size:26px;margin:0 0 6px}
-main h2{font-size:18px;margin:28px 0 10px;padding-top:14px;border-top:1px solid var(--ring)}
+aside .back{display:block;margin-top:10px;font-size:12.5px}
+main .card{background:var(--panel);border:1px solid var(--border);border-radius:10px;
+  padding:18px 22px}
+main h1{font-size:23px;margin:0 0 6px}
+main h2{font-size:17px;margin:22px 0 8px;padding-top:12px;border-top:1px solid var(--ring)}
 main h2:first-of-type{border-top:none;padding-top:0}
-main h3{font-size:15px;margin:20px 0 8px}
-main p{margin:0 0 12px;color:var(--text-1)}
-main li{margin-bottom:6px}
-main ul,main ol{padding-left:22px;margin:0 0 14px}
-main code{background:var(--wash);border-radius:4px;padding:1px 5px;font-size:12.5px;
+main h3{font-size:14.5px;margin:16px 0 6px}
+main p{margin:0 0 10px;color:var(--text)}
+main li{margin-bottom:4px}
+main ul,main ol{padding-left:22px;margin:0 0 12px}
+main code{background:var(--accent-soft);border-radius:4px;padding:1px 5px;font-size:12.5px;
   font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
-main pre{background:var(--plane);border:1px solid var(--ring);border-radius:8px;
-  padding:12px 14px;overflow-x:auto;font-size:12.5px;line-height:1.5}
+main pre{background:var(--bg);border:1px solid var(--border);border-radius:8px;
+  padding:10px 12px;overflow-x:auto;font-size:12.5px;line-height:1.5}
 main pre code{background:none;padding:0}
-main table{border-collapse:collapse;width:100%;margin:10px 0 16px;font-size:13px}
-main th,main td{border:1px solid var(--ring);padding:6px 9px;text-align:left;
+main table{border-collapse:collapse;width:100%;margin:8px 0 14px;font-size:13px}
+main th,main td{border:1px solid var(--border);padding:4px 8px;text-align:left;
   vertical-align:top}
-main th{background:var(--wash);font-weight:700}
-main hr{border:0;border-top:1px solid var(--ring);margin:22px 0}
-footer.site{max-width:1160px;margin:28px auto 0;padding:0 20px;color:var(--muted);
-  font-size:12px;line-height:1.6}
+main th{background:var(--accent-soft);font-weight:700}
+main hr{border:0;border-top:1px solid var(--ring);margin:18px 0}
+footer.site{width:var(--content-w);max-width:var(--content-max);margin:20px auto 0;
+  color:var(--muted);font-size:12px;line-height:1.6}
 footer.site a{color:var(--muted)}
+@media (max-width:900px){
+  header.top,.flagbar,footer.site{width:auto;max-width:none;padding-left:12px;padding-right:12px}
+}
 @media (max-width:720px){
   .wrap{flex-direction:column}
   aside{position:static;width:auto;flex:none}
@@ -164,6 +165,7 @@ def page_template(title, body_html, current_html):
     <button id="themeBtn" class="iconBtn" title="Toggle light/dark" aria-label="Toggle light/dark"></button>
   </div>
 </header>
+<div class="flagbar" aria-hidden="true"></div>
 <div class="wrap">
   <aside>
     <nav>
@@ -179,7 +181,7 @@ def page_template(title, body_html, current_html):
   </main>
 </div>
 <footer class="site">
-  <div class="wrap" style="padding:0;display:block;max-width:1160px">
+  <div style="display:block">
     Source: <a href="https://github.com/caissonpoint/ons-dashboard" target="_blank" rel="noopener">caissonpoint/ons-dashboard</a> on GitHub.
     Data via <a href="https://dados.ons.org.br" target="_blank" rel="noopener">ONS Dados Abertos</a> (CC-BY).
     Questions or feedback: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>.

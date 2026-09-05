@@ -42,14 +42,14 @@ body {
   display: flex; align-items: center; justify-content: center;
 }
 #theme-toggle svg { width: 17px; height: 17px; }
-main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 24px; text-align: center; }
+main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 24px; text-align: center; }
 .wordmark { font-size: 30px; font-weight: 700; letter-spacing: -.01em; }
 .wordmark .dot { color: var(--accent); }
 .tagline { color: var(--muted); font-size: 15px; margin-top: 8px; max-width: 32em; }
 .flagbar { width: 120px; margin: 22px auto 0; }
-.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; margin-top: 32px; width: 100%; max-width: 720px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; margin-top: 26px; width: 80%; max-width: 720px; }
 .card {
-  background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 22px 20px;
+  background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 16px 16px;
   text-align: left; text-decoration: none; color: var(--text);
   transition: box-shadow .15s ease, transform .15s ease, border-color .15s ease;
 }
@@ -59,7 +59,7 @@ main { flex: 1; display: flex; flex-direction: column; align-items: center; just
 .card:hover .name .arrow { transform: translateX(3px); }
 .card .desc { color: var(--muted); font-size: 13px; margin-top: 8px; line-height: 1.5; }
 .card .url { color: var(--accent); font-size: 11.5px; margin-top: 14px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
-footer { padding: 20px 24px; color: var(--muted); font-size: 11.5px; text-align: center; flex: none; }
+footer { padding: 14px 24px; color: var(--muted); font-size: 11.5px; text-align: center; flex: none; }
 footer a { color: var(--muted); }
 </style>
 </head>

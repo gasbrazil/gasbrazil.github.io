@@ -388,9 +388,8 @@ __SHARED_THEME_CSS__
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);
   font:14px/1.5 "Degular",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;}
-.wrap{max-width:1440px;margin:0 auto;padding:20px 20px 64px}
 header{display:flex;flex-wrap:wrap;gap:12px;align-items:baseline;
-  justify-content:space-between;margin-bottom:14px}
+  justify-content:space-between;margin-bottom:var(--gap)}
 h1{font-size:25px;margin:0;letter-spacing:-.01em}
 .sub{color:var(--muted2);font-size:13px}
 /* Green/yellow/blue band under the header -- the one place the flag appears
@@ -399,7 +398,7 @@ h1{font-size:25px;margin:0;letter-spacing:-.01em}
    equal thirds. The blue segment tracks --accent rather than --brz-blue so it
    picks up dark mode's lightened blue; the flag value itself is nearly
    invisible against a near-black background. */
-.sources{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 14px}
+.sources{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 var(--gap)}
 .sources-label{font-size:11px;text-transform:uppercase;letter-spacing:.06em;
   color:var(--muted);font-weight:600;margin-right:2px}
 .sources a{font-size:11.5px;color:var(--muted2);text-decoration:none;
@@ -421,17 +420,14 @@ h1{font-size:25px;margin:0;letter-spacing:-.01em}
   padding:5px 9px;line-height:0}
 .iconBtn svg{width:16px;height:16px;display:block}
 .card{background:var(--panel);border:1px solid var(--ring);border-radius:10px;
-  padding:14px 16px;margin-bottom:14px}
+  padding:var(--card-pad);margin-bottom:var(--gap)}
 .tabbar{display:flex;align-items:flex-end;justify-content:space-between;
-  flex-wrap:wrap;gap:10px;border-bottom:1px solid var(--ring);margin-bottom:14px}
+  flex-wrap:wrap;gap:10px;border-bottom:1px solid var(--ring);margin-bottom:var(--gap)}
 .tabs{display:flex;gap:4px}
 .tabs button{border:0;border-bottom:2px solid transparent;background:none;
   border-radius:0;padding:9px 14px;color:var(--muted2);font-weight:600;font-size:13.5px}
 .tabs button[aria-pressed=true]{color:#fff;background:var(--accent);
-  border-bottom-color:var(--accent);border-radius:6px 6px 0 0;
-  /* yellow on blue, the flag's own pairing, marking the active tab with
-     something other than the fill alone */
-  box-shadow:inset 0 -3px 0 var(--brz-yellow)}
+  border-bottom-color:var(--accent);border-radius:6px 6px 0 0}
 .tabs button:hover{background:var(--accent-soft)}
 .tabs button[aria-pressed=true]:hover{background:var(--accent)}
 .controls{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-end}
@@ -459,7 +455,7 @@ button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);co
 .entlist{max-height:460px;overflow:auto;border:1px solid var(--ring);
   border-radius:8px;padding:0;margin-top:8px}
 .entlist table.data{font-size:12px}
-.entlist table.data th,.entlist table.data td{padding:5px 8px}
+.entlist table.data th,.entlist table.data td{padding:3px 7px}
 .entlist th.l,.entlist td.l{text-align:left}
 .entlist tr.total-row{background:var(--accent-soft)}
 .entlist tr.total-row td.l{font-weight:600}
@@ -512,7 +508,7 @@ svg{display:block;width:100%;overflow:hidden}
 .tt td.v{text-align:right;padding-left:14px;font-variant-numeric:tabular-nums}
 table.data{border-collapse:collapse;width:100%;font-size:12.5px;
   font-variant-numeric:tabular-nums}
-table.data th,table.data td{padding:5px 9px;border-bottom:1px solid var(--border);
+table.data th,table.data td{padding:4px 8px;border-bottom:1px solid var(--border);
   text-align:right;white-space:nowrap}
 table.data th:first-child,table.data td:first-child{text-align:left}
 table.data th.l,table.data td.l{text-align:left}
@@ -522,7 +518,16 @@ table.data thead th.sortable{cursor:pointer;user-select:none}
 table.data thead th.sortable:hover{background:var(--accent-soft)}
 .scroll{overflow-x:auto;max-height:460px;overflow-y:auto}
 .empty{color:var(--muted);padding:26px 0;text-align:center}
-.foot{color:var(--muted);font-size:11.5px;margin-top:22px;line-height:1.7}
+.foot{color:var(--muted);font-size:11.5px;margin-top:18px;line-height:1.6}
+/* Methodology lives behind a disclosure rather than as 450 words of footer
+   prose: nothing is lost, but the page reads as a tool. */
+.foot details{margin-top:4px}
+.foot summary{cursor:pointer;color:var(--accent);font-weight:600;
+  list-style:none;display:inline-block}
+.foot summary::-webkit-details-marker{display:none}
+.foot summary::after{content:"\00a0\25B8";display:inline-block;transition:transform .12s ease}
+.foot details[open] summary::after{transform:rotate(90deg)}
+.foot details > div{margin-top:8px;max-width:78ch}
 .foot a{color:var(--accent)}
 #boot{padding:60px 0;text-align:center;color:var(--muted)}
 /* The `hidden` attribute is how every view toggle here shows and hides its
@@ -552,18 +557,6 @@ table.data thead th.sortable:hover{background:var(--accent-soft)}
 
 <div class="flagbar" aria-hidden="true"></div>
 
-<div class="sources" id="sources">
-  <span class="sources-label">Data sources</span>
-  <a href="https://dados.ons.org.br/dataset/balanco-energia-subsistema" target="_blank" rel="noopener">Grid balances<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
-  <a href="https://dados.ons.org.br/dataset/geracao-termica-despacho-2" target="_blank" rel="noopener">Thermal plants<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
-  <a href="https://dados.ons.org.br/dataset/capacidade-geracao" target="_blank" rel="noopener">Installed capacity<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
-  <a href="https://dados.ons.org.br/dataset/dados-hidrologicos-res" target="_blank" rel="noopener">Hydro reservoir levels<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
-  <a href="https://dados.ons.org.br/dataset/ear-diario-por-subsistema" target="_blank" rel="noopener">Reservoir storage (EAR)<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
-  <a href="https://dados.ons.org.br/dataset/ena-diario-por-subsistema" target="_blank" rel="noopener">Inflow energy (ENA)<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
-  <a href="https://dados.ons.org.br/dataset/cmo-semi-horario" target="_blank" rel="noopener">Marginal cost (CMO)<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
-  <a href="https://dados.ons.org.br/dataset/cvu-usitermica" target="_blank" rel="noopener">Thermal dispatch cost (CVU)<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
-</div>
-
 <div id="boot">Unpacking data&hellip;</div>
 <div id="app" hidden>
 
@@ -575,7 +568,7 @@ table.data thead th.sortable:hover{background:var(--accent-soft)}
   </div>
 </div>
 
-<div class="tiles" id="kpiTiles" style="margin-bottom:14px"></div>
+<div class="tiles" id="kpiTiles" style="margin-bottom:var(--gap)"></div>
 <div id="resSummary"></div>
 
 <div class="card" id="controlsCard">
@@ -611,6 +604,17 @@ table.data thead th.sortable:hover{background:var(--accent-soft)}
 let DATA = null;
 const PALETTE_SIZE = 8;   // colour palette length -- selection itself is unlimited
 const CHART_MAX = 40;     // beyond this many picks, charts/tiles defer to the table
+// Explanatory copy lives in an "i" affordance beside the thing it explains
+// rather than as a paragraph under it (sweep, 2026-09-05). .infodot's styling
+// is in shared/theme.css so every dashboard gets the same behaviour.
+function infodot(text, label){
+  const b=document.createElement("button");
+  b.className="infodot"; b.type="button"; b.textContent="i";
+  b.setAttribute("data-info", text);
+  b.setAttribute("aria-label", label || "More about this");
+  b.title = "";
+  return b;
+}
 const fmtNum = (v, d=0) => v==null||!isFinite(v) ? "–"
   : v.toLocaleString(undefined,{minimumFractionDigits:d,maximumFractionDigits:d});
 // Compact form for chart y-axis ticks only (tiles/table/tooltip keep the full
@@ -2086,11 +2090,12 @@ function renderReeTable(host){
   const rows=ents.map(reeRow).filter(r=>r && r.pct!=null).sort((a,b)=>a.pct-b.pct);
   if(!rows.length) return;
   const card=el("div","card"); card.style.marginBottom="14px";
-  let h='<p class="panel-title">EAR by Reservoir Equivalent (REE)</p>'+
-    '<p class="panel-note">ONS’s own cascade-level storage figures — finer '+
-    'than the 4-region view above; the region table is these REEs summed up, so two '+
-    'can be moving in opposite directions underneath one steady regional number. '+
-    'Lowest first.</p>';
+  let h='<p class="panel-title">EAR by Reservoir Equivalent (REE)'+
+    '<button class="infodot" type="button" aria-label="About EAR by REE" '+
+    'data-info="ONS’s own cascade-level storage figures, finer than the 4-region '+
+    'view above. The region table is these REEs summed up, so two can be moving in '+
+    'opposite directions underneath one steady regional number.">i</button></p>'+
+    '<p class="panel-note">Lowest first.</p>';
   h+='<div class="scroll"><table class="data"><thead><tr>'+
     '<th class="l">Reservoir Equivalent</th><th class="l">Region</th>'+
     '<th class="l">Capacity filled</th><th>Stored / capacity (MWmês)</th>'+
@@ -2115,10 +2120,11 @@ function renderReservoirRegionTable(host){
   const rows=DATA.subsystems.map(s=>earRow(s)).filter(r=>r && r.pct!=null);
   if(!rows.length) return;
   const card=el("div","card"); card.style.marginBottom="14px";
-  let h='<p class="panel-title">Hydro reservoirs by region</p>'+
-    '<p class="panel-note">Stored energy (EAR) — how ONS aggregates reservoir '+
-    'levels across a cascade, since raw volume % alone can be misleading when '+
-    'reservoirs differ in generating potential per unit of water.</p>';
+  let h='<p class="panel-title">Hydro reservoirs by region'+
+    '<button class="infodot" type="button" aria-label="About stored energy (EAR)" '+
+    'data-info="Stored energy (EAR) is how ONS aggregates reservoir levels across a '+
+    'cascade. Raw volume % alone can mislead when reservoirs differ in generating '+
+    'potential per unit of water.">i</button></p>';
   h+='<div class="scroll"><table class="data"><thead><tr>'+
     '<th class="l">Region</th><th class="l">Capacity filled</th>'+
     '<th>Stored / capacity (MWmês)</th><th>30d change</th>'+
@@ -2159,8 +2165,7 @@ function renderBasinSummary(host){
   if(!rows.length) return;
   const card=el("div","card");
   let h='<p class="panel-title">Usable volume by basin</p>'+
-    '<p class="panel-note">Latest reading per reservoir, averaged by basin · '+
-    'lowest first · individual reservoirs are still selectable below.</p>';
+    '<p class="panel-note">Latest reading per reservoir, averaged by basin · lowest first.</p>';
   h+='<div class="scroll"><table class="data"><thead><tr>'+
     '<th class="l">Basin</th><th class="l">Region</th><th>Reservoirs</th>'+
     '<th>Avg</th><th>Min</th><th>Max</th></tr></thead><tbody>';
@@ -2348,43 +2353,41 @@ const TABLE_SOURCES = [
   {id:"balanco", label:"Grid balances", slug:"balanco-energia-subsistema", kind:"",
    metrics:["load","production_total","gen_hydro","gen_thermal","gen_gas",
             "thermal_nongas","gen_wind","gen_solar","net_interchange"],
-   note:"Balanço de Energia nos Subsistemas. Hourly, averaged to daily means. "+
+   info:"Balanço de Energia nos Subsistemas. Hourly, averaged to daily means. "+
         "Net interchange is positive when the subsystem is a net exporter."},
   {id:"termica", label:"Thermal dispatch by plant", slug:"geracao-termica-despacho-2",
    kind:"plant",
    metrics:["plant_prog","plant_verif","plant_desvio_pct","plant_capacity_mw",
             "plant_utilization_pct","plant_gas_m3"],
-   note:"Geração Térmica por Motivo de Despacho (bulletin sheet 09), hourly per "+
-        "plant, averaged to daily. Capacity, utilization and estimated gas "+
-        "consumption are derived — see the footer for the heat-rate assumption. "+
-        "A combined-cycle block appears both as its individual dispatch phases "+
-        "and as one combined plant row; don't sum the two together."},
+   info:"Geração Térmica por Motivo de Despacho (bulletin sheet 09), hourly per "+
+        "plant, averaged to daily. A combined-cycle block appears both as its "+
+        "individual dispatch phases and as one combined plant row — don't sum "+
+        "the two together. Capacity, utilization and estimated gas consumption "+
+        "are derived; see Methodology in the footer for the heat-rate assumption."},
   {id:"fuel", label:"Thermal generation by fuel", slug:"geracao-termica-despacho-2",
    kind:"",
    metrics:["thermal_gas","thermal_coal","thermal_oil","thermal_nuclear",
             "thermal_biomass","thermal_other","thermal_utilization_pct",
             "gas_consumption_m3"],
-   note:"Per-fuel splits summed from the same per-plant dispatch data, plus the "+
+   info:"Per-fuel splits summed from the same per-plant dispatch data, plus the "+
         "fleet-level utilization and estimated gas consumption rollups."},
   {id:"hidraulico", label:"Hydro reservoirs", slug:"dados-hidrologicos-res",
-   kind:"reservoir", metrics:["res_volutil_pct","res_level_m"],
-   note:"Dados Hidráulicos por Reservatório (bulletin sheets 23–26). Already daily."},
+   kind:"reservoir", metrics:["res_volutil_pct","res_level_m"]},
   {id:"ear", label:"Reservoir storage (EAR)", slug:"ear-diario-por-subsistema",
-   kind:"", metrics:["ear_mwmes","ear_max_mwmes","ear_pct"],
-   note:"EAR Diário por Subsistema. Already daily."},
+   kind:"", metrics:["ear_mwmes","ear_max_mwmes","ear_pct"]},
   {id:"ear_ree", label:"Reservoir storage by REE", slug:"ear-diario-por-ree",
    kind:"ree", metrics:["ear_ree_mwmes","ear_ree_max_mwmes","ear_ree_pct"],
-   note:"EAR Diário por REE — reservoir-equivalent cascades, finer than the "+
+   info:"EAR Diário por REE — reservoir-equivalent cascades, finer than the "+
         "subsystem totals above, which are just these summed up."},
   {id:"ena", label:"Inflow energy (ENA)", slug:"ena-diario-por-subsistema", kind:"",
    metrics:["ena_gross_mwmes","ena_storable_mwmes","ena_pct_mlt","ena_storable_pct_mlt"],
-   note:"ENA Diário por Subsistema. Already daily. %MLT is against the long-term mean."},
+   sub:"%MLT is against the long-term mean."},
   {id:"cmo", label:"Marginal cost (CMO)", slug:"cmo-semi-horario", kind:"",
    metrics:["cmo"],
-   note:"CMO Semi-Horário, 30-minute settlement prices averaged to a daily mean."},
+   info:"CMO Semi-Horário, 30-minute settlement prices averaged to a daily mean."},
   {id:"cvu", label:"Thermal dispatch cost (CVU)", slug:"cvu-usitermica", kind:"",
    metrics:["cvu_gas_min","cvu_gas_med","cvu_gas_max"],
-   note:"CVU das Usinas Térmicas. Published weekly per plant and held flat across "+
+   info:"CVU das Usinas Térmicas. Published weekly per plant and held flat across "+
         "each PMO operative week. These are the cheapest, median and priciest CVU "+
         "among gas-fired plants with a CVU above zero — a CVU of exactly zero is "+
         "an inflexible/must-run unit, not a cheap dispatchable megawatt."},
@@ -2403,7 +2406,7 @@ const TABLE_SOURCES = [
       fn:v=>(v[0]==null||v[1]==null)?null:v[0]-v[1]},
      {label:"CMO \u2212 median CVU (R$/MWh)", dec:2,
       fn:v=>(v[0]==null||v[2]==null)?null:v[0]-v[2]}],
-   note:"The marginal cost of the system (CMO) next to what gas plants charge "+
+   info:"The marginal cost of the system (CMO) next to what gas plants charge "+
         "to run (CVU), on the same daily grid. The two spread columns are "+
         "CMO minus that CVU: positive means the plant is in the money at that "+
         "day\u2019s marginal price, negative means it is out of merit. CMO is a "+
@@ -2412,7 +2415,7 @@ const TABLE_SOURCES = [
         "CMO day to day and steps on CVU week to week."},
   {id:"capacidade", label:"Installed capacity", slug:"capacidade-geracao",
    kind:"plant", static:true,
-   note:"Capacidade Instalada de Geração — a live snapshot with no history, joined "+
+   info:"Capacidade Instalada de Geração — a live snapshot with no history, joined "+
         "to the dispatch data by ANEEL venture ID (CEG). One row per plant entity."},
 ];
 const tblSource = () => TABLE_SOURCES.find(s=>s.id===state.tbl.src) || TABLE_SOURCES[0];
@@ -2634,7 +2637,9 @@ function renderTablesControls(src){
 
   // source picker
   const pickWrap=el("div","ctl");
-  pickWrap.appendChild(el("label",null,"Data source"));
+  const srcLabel=el("label",null,"Data source");
+  if(src.info) srcLabel.appendChild(infodot(src.info, "About "+src.label));
+  pickWrap.appendChild(srcLabel);
   const pills=el("div","row"); pills.style.flexWrap="wrap";
   TABLE_SOURCES.forEach(s=>{
     const b=el("button",null,s.label);
@@ -2647,8 +2652,8 @@ function renderTablesControls(src){
   card.appendChild(pickWrap);
 
   const note=el("div","muted");
-  note.style.cssText="margin:10px 0 4px;line-height:1.6;font-size:11.5px";
-  note.textContent=src.note+" ";
+  note.style.cssText="margin:8px 0 4px;line-height:1.5;font-size:11.5px";
+  if(src.sub) note.textContent=src.sub+" ";
   // A source drawing on more than one ONS dataset links to each of them by
   // name; the single-dataset case keeps the plain "open this dataset" wording.
   const links = src.links || [[null, src.slug]];
@@ -2864,45 +2869,53 @@ async function boot(){
     }
   } catch (e) { /* fall back to UTC-only text above */ }
   document.getElementById("subtitle").textContent = subtitleText;
+  // Visible footer is one line: attribution, the single averaging rule that
+  // changes how every number reads, and a disclosure. Everything that used to
+  // sit here as prose is intact inside the disclosure -- see the sweep
+  // proposal (2026-09-05): hidden, not deleted.
   document.getElementById("foot").innerHTML =
     'Source: <a href="https://dados.ons.org.br" target="_blank" rel="noopener">ONS '+
-    'Dados Abertos</a> (CC-BY). Balanço de Energia nos Subsistemas · Geração por '+
-    'Usina em Base Horária · Geração Térmica por Motivo de Despacho (sheet 09) · '+
-    'ENA/EAR Diário por Subsistema · EAR Diário por REE · Dados Hidráulicos por '+
-    'Reservatório (sheets 23–26) · CMO Semi-Horário · CVU das Usinas Térmicas · '+
-    'Capacidade Instalada de '+
-    'Geração. Hourly and semi-hourly sources are averaged to '+
-    'daily means. The national Total row is summed for absolute series; EAR % and '+
-    'ENA %MLT are '+
-    'rebuilt from their components, CMO is an unweighted subsystem mean. '+
-    'CVU is published weekly per plant (one figure per PMO operative week) and is '+
-    'held flat across that week’s days rather than interpolated; the subsystem '+
-    'figures are the cheapest, median and priciest CVU among gas-fired plants with '+
-    'a CVU above zero, since a CVU of exactly zero marks an inflexible/must-run '+
-    'unit rather than the cheapest dispatchable megawatt. CVU is joined to the '+
-    'dispatch data by ONS’s planning-model plant code (cod_usinaplanejamento), not '+
-    'by plant name — the two datasets name plants differently. SIN CVU is an exact '+
-    'min/max across subsystems; the national Total median is a subsystem mean, as '+
-    'CMO is. '+
-    'Net interchange is positive when the subsystem is a net exporter, matching the '+
-    'bulletin. ONS revises recent days after publication.<br>'+
-    'Capacity, utilization &amp; gas consumption: installed capacity is joined from '+
-    'ONS’s Capacidade Instalada de Geração by ANEEL venture ID (CEG), summing each '+
-    'venture’s active generating units. A plant ONS dispatches as several named '+
-    'phases sharing one CEG (a combined-cycle block, e.g. "Plant P0/P1/P2") is shown '+
-    'as one combined entity with the venture’s real total capacity; the individual '+
-    'phases keep their own generation figures but no capacity/utilization of their '+
-    'own, to avoid overstating either. Estimated gas consumption applies a heat-rate '+
-    '<b>assumption</b> ONS does not publish per plant — 1,800 kcal/kWh for '+
+    'Dados Abertos</a> (CC-BY) &middot; hourly and semi-hourly series averaged to '+
+    'daily means &middot; built '+DATA.generated+' &middot; '+
+    '<a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>'+
+    '<details><summary>Methodology &amp; assumptions</summary><div>'+
+    '<b>Datasets.</b> Balan\u00e7o de Energia nos Subsistemas \u00b7 Gera\u00e7\u00e3o por '+
+    'Usina em Base Hor\u00e1ria \u00b7 Gera\u00e7\u00e3o T\u00e9rmica por Motivo de Despacho (sheet 09) '+
+    '\u00b7 ENA/EAR Di\u00e1rio por Subsistema \u00b7 EAR Di\u00e1rio por REE \u00b7 Dados Hidr\u00e1ulicos por '+
+    'Reservat\u00f3rio (sheets 23\u201326) \u00b7 CMO Semi-Hor\u00e1rio \u00b7 CVU das Usinas T\u00e9rmicas '+
+    '\u00b7 Capacidade Instalada de Gera\u00e7\u00e3o, all at '+
+    '<a href="https://dados.ons.org.br" target="_blank" rel="noopener">dados.ons.org.br</a>.<br><br>'+
+    '<b>Aggregation.</b> Hourly and semi-hourly sources are averaged to daily '+
+    'means. The national Total row is summed for absolute series; EAR % and '+
+    'ENA %MLT are rebuilt from their components, CMO is an unweighted subsystem '+
+    'mean. Net interchange is positive when the subsystem is a net exporter, '+
+    'matching the bulletin. ONS revises recent days after publication.<br><br>'+
+    '<b>CVU.</b> Published weekly per plant (one figure per PMO operative week) '+
+    'and held flat across that week\u2019s days rather than interpolated. The '+
+    'subsystem figures are the cheapest, median and priciest CVU among gas-fired '+
+    'plants with a CVU above zero, since a CVU of exactly zero marks an '+
+    'inflexible/must-run unit rather than the cheapest dispatchable megawatt. '+
+    'CVU is joined to the dispatch data by ONS\u2019s planning-model plant code '+
+    '(cod_usinaplanejamento), not by plant name \u2014 the two datasets name plants '+
+    'differently. SIN CVU is an exact min/max across subsystems; the national '+
+    'Total median is a subsystem mean, as CMO is.<br><br>'+
+    '<b>Capacity &amp; utilization.</b> Installed capacity is joined from ONS\u2019s '+
+    'Capacidade Instalada de Gera\u00e7\u00e3o by ANEEL venture ID (CEG), summing each '+
+    'venture\u2019s active generating units. A plant ONS dispatches as several named '+
+    'phases sharing one CEG (a combined-cycle block, e.g. "Plant P0/P1/P2") is '+
+    'shown as one combined entity with the venture\u2019s real total capacity; the '+
+    'individual phases keep their own generation figures but no capacity or '+
+    'utilization of their own, to avoid overstating either. A plant whose CEG '+
+    'could not be matched (older bulletins predate the ceg column, or the plant '+
+    'has since been deactivated or renamed) shows no capacity, utilization or '+
+    'gas-consumption figure.<br><br>'+
+    '<b>Estimated gas consumption is an assumption, not an ONS figure.</b> It '+
+    'applies a heat rate ONS does not publish per plant \u2014 1,800 kcal/kWh for '+
     'combined-cycle blocks, 2,500 kcal/kWh for single-phase (simple-cycle) gas '+
-    'plants, both typical industry figures, not plant-specific — against '+
-    '9,400 kcal/m³ for natural gas (Brazil’s standard calorific value). A plant '+
-    'whose CEG could not be matched (older bulletins predate the ceg column, or the '+
-    'plant has since been deactivated/renamed) shows no capacity, utilization, or '+
-    'gas-consumption figure. Built '+DATA.generated+'.<br>'+
-    '© '+new Date().getFullYear()+' GasBrazil.com. Data via ONS Dados Abertos '+
-    '(CC-BY) &mdash; see the sources above for the underlying datasets. Questions '+
-    'or feedback: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>.';
+    'plants, both typical industry figures and not plant-specific \u2014 against '+
+    '9,400 kcal/m\u00b3 for natural gas, Brazil\u2019s standard calorific value.<br><br>'+
+    '\u00a9 '+new Date().getFullYear()+' GasBrazil.com.'+
+    '</div></details>';
 
   ["from","to"].forEach(id=>{
     const inp=document.getElementById(id);

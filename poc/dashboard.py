@@ -83,17 +83,16 @@ __SHARED_THEME_CSS__
    one shared file. */
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; }
-/* Same outer shell as ons-dashboard: a centered 1440px column with identical
+/* Same outer shell as ons-dashboard: the shared .wrap column with identical
    padding, in normal document flow -- that page scrolls normally too; only
    its own data tables cap their height and scroll internally (see the
    .table-wrap comment below). */
-.wrap { max-width: 1440px; margin: 0 auto; padding: 20px 20px 64px; }
-header { display: flex; flex-wrap: wrap; gap: 12px; align-items: baseline; justify-content: space-between; margin-bottom: 14px; }
+header { display: flex; flex-wrap: wrap; gap: 12px; align-items: baseline; justify-content: space-between; margin-bottom: var(--gap); }
 h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .subtitle { color: var(--muted2); font-size: 13px; }
 .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .header-links { display: flex; gap: 8px; flex-wrap: wrap; }
-.sources { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0 0 14px; }
+.sources { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0 0 var(--gap); }
 .sources-label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; margin-right: 2px; }
 .pill { font-size: 11.5px; color: var(--muted2); text-decoration: none; border: 1px solid var(--border); border-radius: 999px; padding: 3px 10px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; }
 .pill:hover { background: var(--accent-soft); color: var(--text); border-color: var(--border-strong); }
@@ -103,16 +102,16 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 #theme-toggle { display: inline-flex; align-items: center; justify-content: center; background: var(--panel); border: 1px solid var(--border-strong); border-radius: 6px; padding: 5px 9px; line-height: 0; cursor: pointer; color: var(--text); }
 #theme-toggle:hover { background: var(--accent-soft); }
 #theme-toggle svg { width: 16px; height: 16px; display: block; }
-.tso-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.tso-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: var(--gap); }
 .tso-chip { background: var(--panel); border: 1px solid var(--border); border-radius: 999px; padding: 4px 12px; font-size: 12px; box-shadow: var(--shadow); white-space: nowrap; }
 .tso-chip.empty { color: var(--muted); }
 .tso-chip b { font-weight: 700; }
 .tso-chip .muted { color: var(--muted); }
-.quick-filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.quick-filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: var(--gap); }
 .qf-btn { background: var(--panel); border: 1px solid var(--border); border-radius: 999px; padding: 4px 12px; font-size: 12px; cursor: pointer; color: var(--text); font-family: var(--font); }
 .qf-btn:hover { background: var(--accent-soft); }
 .qf-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-.toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+.toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: var(--gap); }
 .toolbar select, .toolbar input { background: var(--panel); border: 1px solid var(--border-strong); border-radius: 6px; padding: 5px 10px; color: var(--text); font-size: 12.5px; font-family: var(--font); }
 .toolbar select:hover { background: var(--accent-soft); }
 .toolbar button { background: var(--panel); color: var(--text); border: 1px solid var(--border-strong); border-radius: 6px; padding: 5px 10px; font-size: 12.5px; cursor: pointer; font-family: var(--font); }
@@ -125,7 +124,7 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
    primary content rather than a small secondary widget. */
 .table-wrap { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; overflow: auto; box-shadow: var(--shadow); max-height: 65vh; }
 table { border-collapse: collapse; width: auto; min-width: 100%; font-size: 12.5px; white-space: nowrap; table-layout: auto; }
-th, td { padding: 6px 10px; text-align: left; border-bottom: 1px solid var(--border); }
+th, td { padding: 4px 8px; text-align: left; border-bottom: 1px solid var(--border); }
 th { position: sticky; top: 0; background: var(--panel); cursor: pointer; user-select: none; color: var(--muted2); font-weight: 600; z-index: 2; position: relative; }
 th:hover { background: var(--accent-soft); }
 th.dragging { opacity: .4; }
@@ -154,7 +153,7 @@ footer a { color: var(--accent); }
 .filter-menu label.fm-date { display: block; font-size: 11px; color: var(--muted); margin: 6px 0 3px; }
 .filter-menu input[type="date"] { width: 100%; }
 .filter-menu input[type="text"].fm-search { width: 100%; box-sizing: border-box; padding: 4px 6px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 12px; margin-bottom: 6px; }
-.chart-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 14px; }
+.chart-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: var(--card-pad); margin-bottom: var(--gap); }
 .panel-title { font-size: 13px; font-weight: 600; margin: 0 0 2px; }
 .panel-note { font-size: 11.5px; color: var(--muted); margin: 0 0 12px; }
 .chart-picker { display: flex; flex-wrap: wrap; gap: 14px 18px; margin-bottom: 12px; }
@@ -200,7 +199,6 @@ footer a { color: var(--accent); }
 <div class="tso-row" id="tso-row"></div>
 <div class="chart-card">
   <p class="panel-title">Price Trend</p>
-  <p class="panel-note">Pick pipeline / transaction type combinations below — left axis R$/MMBtu, right axis R$/m³. Reflects the filters above.</p>
   <div class="chart-picker" id="chart-picker"></div>
   <div id="chart-host"></div>
 </div>
