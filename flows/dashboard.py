@@ -185,7 +185,11 @@ __SHARED_THEME_CSS__
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; }
-header { display: flex; flex-wrap: wrap; gap: 12px; align-items: baseline; justify-content: space-between; margin-bottom: var(--gap); }
+/* Title row, then the nav-links/controls row always on its own line below
+   it -- deterministic, not dependent on flex-wrap kicking in at a given
+   viewport width or pill count (see ADR-001: same layout on every
+   GasBrazil.com dashboard, not just whichever happens to wrap). */
+header { display: flex; flex-direction: column; gap: 10px; margin-bottom: var(--gap); }
 h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .subtitle { color: var(--muted2); font-size: 13px; }
 .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
@@ -307,11 +311,7 @@ footer a { color: var(--accent); }
   </div>
   <div class="header-right">
     <div class="header-links">
-      <a class="navlink" id="link-home" href="https://gasbrazil.com/">&larr; GasBrazil.com</a>
-      <a class="navlink" id="link-ons" href="https://gasbrazil.com/ons/">ONS Balances Dashboard &rarr;</a>
-      <a class="navlink" id="link-poc" href="https://gasbrazil.com/poc/">POC Results &rarr;</a>
-      <a class="navlink" id="link-contratos" href="https://gasbrazil.com/contratos/">POC Contracts &rarr;</a>
-      <a class="navlink" href="../about/" data-i18n="navAbout">About</a>
+      __SHARED_NAV_LINKS__
     </div>
     <button type="button" id="lang-toggle" class="langBtn" aria-label="Português">PT</button>
     <button id="theme-toggle" title="Toggle theme" aria-label="Toggle theme"></button>
@@ -1369,6 +1369,7 @@ def write_dashboard(out_path=DEFAULT_OUT):
         SHARED_JS_CSV=kit.JS_CSV_HELPERS,
         SHARED_JS_XLSX=kit.JS_XLSX_ENGINE,
         SHARED_SITE_LINKS_JS=kit.site_links_js("flows"),
+        SHARED_NAV_LINKS=kit.nav_links_html("flows"),
         FAVICON_DATA_URI=kit.embed_favicon(),
     )
     out_path = Path(out_path)
