@@ -358,6 +358,9 @@ def write_dashboard(df: pd.DataFrame, dest: Path,
         SHARED_JS_BOOT=kit.JS_BOOT,
         SHARED_JS_I18N=kit.JS_I18N,
         SHARED_SITE_LINKS_JS=kit.site_links_js("ons"),
+        SHARED_NAV_LINKS=kit.nav_links_html(
+            "ons", extra_links_html='<a class="navlink" href="wiki-html/" data-i18n="navWiki">Wiki</a>'
+        ),
         FAVICON_DATA_URI=kit.embed_favicon(),
     )
     dest.parent.mkdir(parents=True, exist_ok=True)
@@ -392,9 +395,14 @@ __SHARED_THEME_CSS__
 :root[data-theme="dark"]{ color-scheme: dark; }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);
-  font:14px/1.5 "Degular",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;}
-header{display:flex;flex-wrap:wrap;gap:12px;align-items:baseline;
-  justify-content:space-between;margin-bottom:var(--gap)}
+  font:14px/1.5 var(--font);}
+/* Title row, then the nav-links/controls row always on its own line below
+   it -- deterministic, not dependent on flex-wrap kicking in at a given
+   viewport width or pill count (see ADR-001: same layout on every
+   GasBrazil.com dashboard, not just whichever happens to wrap). */
+header{display:flex;flex-direction:column;gap:10px;margin-bottom:var(--gap)}
+.header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.header-links{display:flex;gap:8px;flex-wrap:wrap}
 h1{font-size:25px;margin:0;letter-spacing:-.01em}
 .sub{color:var(--muted2);font-size:13px}
 /* Green/yellow/blue band under the header -- the one place the flag appears
@@ -560,12 +568,10 @@ table.data thead th.sortable:hover{background:var(--accent-soft)}
     <h1 data-i18n="navOns">ONS Balances</h1>
     <div class="sub" id="subtitle">Loading&hellip;</div>
   </div>
-  <div class="row">
-    <a class="navlink" id="link-home" href="https://gasbrazil.com/">&larr; GasBrazil.com</a>
-    <a class="navlink" id="link-poc" href="https://gasbrazil.com/poc/">POC Results Dashboard &rarr;</a>
-    <a class="navlink" id="link-contratos" href="https://gasbrazil.com/contratos/">POC Contracts &rarr;</a>
-    <a class="navlink" href="wiki-html/" data-i18n="navWiki">Wiki</a>
-    <a class="navlink" href="../about/" data-i18n="navAbout">About</a>
+  <div class="header-right">
+    <div class="header-links">
+      __SHARED_NAV_LINKS__
+    </div>
     <button id="refreshBtn" hidden>&#8635; Refresh data</button>
     <button type="button" id="lang-toggle" class="langBtn" aria-label="Português">PT</button>
     <button id="themeBtn" class="iconBtn" title="Toggle light/dark" aria-label="Toggle light/dark"></button>
@@ -3074,7 +3080,6 @@ async function boot(){
     renderViewInfo();
   });
   applyOnsI18n();
-  initCrossLinks();
   let rz; window.addEventListener("resize",()=>{
     clearTimeout(rz); rz=setTimeout(renderCharts,140);
   });
@@ -3123,6 +3128,11 @@ async function boot(){
   buildTabs(); buildPresets(); buildSmooth(); buildSubs(); updateSubsVisibility();
   writeViewQuery();
   syncInputs(); buildPickCard(); render();
+  // Last, defensively: a nav-link wiring issue (e.g. a newly-added sibling
+  // site whose #link-<id> anchor hasn't been added to this page's header
+  // yet) should never take down the whole dashboard -- everything that
+  // actually renders data runs before this.
+  initCrossLinks();
 }
 boot();
 </script>

@@ -527,25 +527,25 @@ _SITES = {
         "hub": "https://gasbrazil.github.io/",
     },
     "ons": {
-        "label": "ONS Balances Dashboard",
+        "label": "ONS Balances",
         "custom": "https://gasbrazil.com/ons/",
         "caissonpoint": "https://caissonpoint.github.io/ons-dashboard/",
         "hub": "https://gasbrazil.github.io/ons/",
     },
     "poc": {
-        "label": "POC Results Dashboard",
+        "label": "POC Results",
         "custom": "https://gasbrazil.com/poc/",
         "caissonpoint": "https://caissonpoint.github.io/poc-dashboard/",
         "hub": "https://gasbrazil.github.io/poc/",
     },
     "contratos": {
-        "label": "POC Contracts Dashboard",
+        "label": "POC Contracts",
         "custom": "https://gasbrazil.com/contratos/",
         "caissonpoint": "https://caissonpoint.github.io/poc-contratos/",
         "hub": "https://gasbrazil.github.io/contratos/",
     },
     "flows": {
-        "label": "Pipeline Flows Dashboard",
+        "label": "Pipeline Flows",
         "custom": "https://gasbrazil.com/flows/",
         "caissonpoint": "https://gasbrazil.com/flows/",
         "hub": "https://gasbrazil.github.io/flows/",
@@ -558,11 +558,17 @@ def site_links_js(self_id: str) -> str:
     and initCrossLinks(), which sets `#link-<id>` anchors' href from
     location.hostname at view time (so one build can be published to more
     than one hostname -- custom domain, caissonpoint Pages, gasbrazil hub
-    mirror -- and each copy still links to its own equivalent siblings)."""
+    mirror -- and each copy still links to its own equivalent siblings).
+
+    Each assignment is null-guarded: a page whose nav markup hasn't been
+    updated yet for a newly-added site (missing that #link-<k> anchor)
+    should just not get that one link wired up, not throw and abort every
+    initCrossLinks() call after it in the page's init sequence -- that's
+    exactly how a stale nav once took down the whole ONS dashboard."""
     others = {k: v for k, v in _SITES.items() if k != self_id}
     links_obj = {k: {kk: vv for kk, vv in v.items() if kk != "label"} for k, v in others.items()}
     set_lines = "\n  ".join(
-        f'document.getElementById("link-{k}").href = SITE_LINKS.{k}[flavor];'
+        f'{{ const el = document.getElementById("link-{k}"); if (el) el.href = SITE_LINKS.{k}[flavor]; }}'
         for k in others
     )
     return (
@@ -578,3 +584,27 @@ def site_links_js(self_id: str) -> str:
         f"  {set_lines}\n"
         "}\n"
     )
+
+
+def nav_links_html(self_id: str, about_href: str = "../about/", extra_links_html: str = "") -> str:
+    """Standard header nav pills: every site in _SITES except self_id, in
+    _SITES' fixed order (home, ons, poc, contratos, flows), then any
+    page-specific extra links (e.g. ONS's Wiki), then About last. No
+    direction arrows -- these are sibling pages, not a sequence, so
+    there's no "forward"/"back" to indicate. href defaults to each site's
+    custom-domain URL (correct on the primary domain even before JS
+    runs); initCrossLinks() rewrites it at view time to match whichever
+    hostname/flavor the page is actually being viewed on.
+
+    Single source of truth for this markup so every dashboard's nav stays
+    in the same order with the same labels, and so a newly-added site
+    (like flows was) gets added to every existing page's nav in one place
+    instead of by hand, one dashboard at a time."""
+    parts = [
+        f'<a class="navlink" id="link-{k}" href="{v["custom"]}">{v["label"]}</a>'
+        for k, v in _SITES.items() if k != self_id
+    ]
+    if extra_links_html:
+        parts.append(extra_links_html)
+    parts.append(f'<a class="navlink" href="{about_href}" data-i18n="navAbout">About</a>')
+    return "\n      ".join(parts)
