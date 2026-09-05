@@ -40,9 +40,9 @@ DEFAULT_OUT = HERE / "index.html"
 # leaves it out to keep the page a reasonable size across ~3.5 years of
 # daily history.
 POINT_VAR_ORDER = [
-    ("Volume Realized (thousand m3)", "thousand m3/d"),
-    ("Volume Scheduled (thousand m3)", "thousand m3/d"),
-    ("Volume Requested (thousand m3)", "thousand m3/d"),
+    ("Actual Volume (thousand m3)", "thousand m3/d"),
+    ("Scheduled Volume (thousand m3)", "thousand m3/d"),
+    ("Requested Volume (thousand m3)", "thousand m3/d"),
     ("Allocation (%)", "%"),
 ]
 LEDGER_VAR_ORDER = [
@@ -51,15 +51,15 @@ LEDGER_VAR_ORDER = [
     ("Operational Losses (thousand m3)", "thousand m3/d"),
     ("Extraordinary Losses (thousand m3)", "thousand m3/d"),
     ("Daily Imbalance (thousand m3)", "thousand m3/d"),
-    ("Cumulative Daily Imbalance (thousand m3)", "thousand m3"),
-    ("Linepack (thousand m3)", "thousand m3"),
+    ("Accumulated Daily Imbalance (thousand m3)", "thousand m3"),
+    ("Line Pack (thousand m3)", "thousand m3"),
 ]
 
 TSO_ORDER = ["NTS", "TAG", "TBG"]  # TSB, GOM excluded -- see load_payload()
 
 
 def _short_label(full_label: str) -> str:
-    """'Volume Realized (thousand m3)' -> 'Volume Realized'."""
+    """'Actual Volume (thousand m3)' -> 'Actual Volume'."""
     return full_label.split(" (")[0]
 
 
@@ -133,7 +133,7 @@ def load_payload() -> dict:
     # row on the page itself.
     kpi_by_tso = {}
     if len(points_df):
-        realized = points_df[points_df["variable"] == "Volume Realized (thousand m3)"]
+        realized = points_df[points_df["variable"] == "Actual Volume (thousand m3)"]
         if len(realized):
             last_date = realized["date"].max()
             cutoff = last_date - pd.Timedelta(days=6)
@@ -347,7 +347,7 @@ footer a { color: var(--accent); }
 
 <div class="chart-card">
   <p class="panel-title">
-    <span id="chart-title">Volume Realized</span>
+    <span id="chart-title">Actual Volume</span>
     <span style="display:flex;gap:6px;flex-wrap:wrap">
       <select id="f-variable"></select>
       <select id="f-preset">
@@ -876,7 +876,7 @@ function monthIdxRange(ym) {
 }
 
 function monthlyTotal(tso, pointType, startIdx, endIdx) {
-  const seriesMap = DATA.pointSeries["Volume Realized (thousand m3)"] || {};
+  const seriesMap = DATA.pointSeries["Actual Volume (thousand m3)"] || {};
   let total = 0, any = false;
   for (const pt of DATA.points) {
     if (pt.type !== pointType) continue;

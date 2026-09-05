@@ -116,9 +116,9 @@ META_COLS = [
 # Point-level variables: recorded per (pipeline, point, shipper, contract).
 # Summed across shipper/contract at build time -> total flow at that point.
 POINT_VARIABLES_EN = {
-    "Volume Solicitado (mil m³)": "Volume Requested (thousand m3)",
-    "Volume Programado (mil m³)": "Volume Scheduled (thousand m3)",
-    "Volume Realizado (mil m³)": "Volume Realized (thousand m3)",
+    "Volume Solicitado (mil m³)": "Requested Volume (thousand m3)",
+    "Volume Programado (mil m³)": "Scheduled Volume (thousand m3)",
+    "Volume Realizado (mil m³)": "Actual Volume (thousand m3)",
     "Alocação (%)": "Allocation (%)",
     "Pressão Média (kgf/cm²)": "Average Pressure (kgf/cm2)",
 }
@@ -131,8 +131,8 @@ LEDGER_VARIABLES_EN = {
     "Perdas Operacionais (mil m³)": "Operational Losses (thousand m3)",
     "Perdas Extraordinárias (mil m³)": "Extraordinary Losses (thousand m3)",
     "Desequilíbrio Diário (mil m³)": "Daily Imbalance (thousand m3)",
-    "Desequilíbrio Diário Acumulado (mil m³)": "Cumulative Daily Imbalance (thousand m3)",
-    "Empacotamento (mil m³)": "Linepack (thousand m3)",
+    "Desequilíbrio Diário Acumulado (mil m³)": "Accumulated Daily Imbalance (thousand m3)",
+    "Empacotamento (mil m³)": "Line Pack (thousand m3)",
 }
 
 POINT_TYPE_EN = {

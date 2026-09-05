@@ -31,7 +31,7 @@ from pathlib import Path
 
 HERE = Path(__file__).parent
 THEME_CSS_PATH = HERE / "theme.css"
-DEFAULT_FONT_PATH = HERE / "fonts" / "Degular.ttf"
+DEFAULT_FONT_PATH = HERE / "fonts" / "Pacaembu-Light.ttf"
 DEFAULT_FAVICON_PATH = HERE / "favicon.png"
 
 # Raw theme.css text, __FONT_FACE__ placeholder still unresolved -- callers
@@ -41,7 +41,7 @@ THEME_CSS = THEME_CSS_PATH.read_text(encoding="utf-8")
 
 
 def embed_font_face(font_path: Path | str = DEFAULT_FONT_PATH) -> str:
-    """Return a base64-embedded @font-face rule for Degular, or "" if the
+    """Return a base64-embedded @font-face rule for Pacaembu, or "" if the
     font file isn't present in this checkout (degrade to the system font
     stack rather than ship a broken @font-face rule)."""
     font_path = Path(font_path)
@@ -49,7 +49,7 @@ def embed_font_face(font_path: Path | str = DEFAULT_FONT_PATH) -> str:
         return ""
     font_b64 = base64.b64encode(font_path.read_bytes()).decode("ascii")
     return (
-        "@font-face{font-family:'Degular';font-weight:400;font-style:normal;"
+        "@font-face{font-family:'Pacaembu';font-weight:300;font-style:normal;"
         "font-display:swap;src:url(data:font/ttf;base64," + font_b64 +
         ") format('truetype');}"
     )

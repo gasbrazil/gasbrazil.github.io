@@ -10,7 +10,7 @@
  *
  * __FONT_FACE__ is filled in by shared/dashboard_kit.py's embed_font_face()
  * at build time with a base64-embedded @font-face rule (or left blank if
- * shared/fonts/Degular.ttf is missing from the checkout).
+ * shared/fonts/Pacaembu-Light.ttf is missing from the checkout).
  */
 __FONT_FACE__
 :root {
@@ -23,7 +23,7 @@ __FONT_FACE__
   --muted2: #52514e;
   --ring: rgba(11,11,11,.10);
   --shadow: none;
-  --font: "Degular", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font: "Pacaembu", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 
   /* Shared layout + density tokens (2026-09-05). Every page's .wrap uses
      these, so the site-wide content width and breathing room are a one-line
