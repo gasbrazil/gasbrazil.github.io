@@ -1105,6 +1105,47 @@ function updateArrows() {
   });
 }
 
+// Shareable view state in the URL. Covers the toolbar + quick-filter chips
+// (the filters people actually want to send a colleague). Excel-style header
+// menus are still local-only -- encoding arbitrary column Sets in the query
+// string gets noisy fast. `refreshed` is a cache-bust token and is stripped
+// so shared links stay clean.
+function applyQueryFilters() {
+  const sp = new URLSearchParams(location.search);
+  const timing = sp.get("timing");
+  if (timing) {
+    const sel = document.getElementById("f-timing");
+    if ([...sel.options].some(o => o.value === timing)) sel.value = timing;
+  }
+  const q = sp.get("q");
+  if (q) document.getElementById("f-search").value = q;
+  const qfRaw = sp.get("qf");
+  if (qfRaw) {
+    for (const key of qfRaw.split(",").map(s => s.trim()).filter(Boolean)) {
+      const qf = QUICK_FILTERS.find(x => x.key === key);
+      if (!qf) continue;
+      if (qf.type === "set") columnFilters[qf.col] = new Set(qf.values);
+      else columnFilters[qf.col] = daysAgoRange(qf.days);
+    }
+  }
+}
+
+function writeQueryFilters() {
+  const u = new URL(location.href);
+  const sp = u.searchParams;
+  sp.delete("refreshed");
+  const timing = document.getElementById("f-timing").value;
+  if (timing) sp.set("timing", timing); else sp.delete("timing");
+  const q = document.getElementById("f-search").value.trim();
+  if (q) sp.set("q", q); else sp.delete("q");
+  const activeQf = QUICK_FILTERS.filter(quickFilterActive).map(qf => qf.key);
+  if (activeQf.length) sp.set("qf", activeQf.join(",")); else sp.delete("qf");
+  const qs = sp.toString();
+  const next = u.pathname + (qs ? "?" + qs : "") + u.hash;
+  if (next !== location.pathname + location.search + location.hash)
+    history.replaceState(null, "", next);
+}
+
 function render() {
   applyFilters();
   sortRows();
@@ -1112,6 +1153,7 @@ function render() {
   renderChart();
   updateArrows();
   updateQuickFilterButtons();
+  writeQueryFilters();
 }
 
 function downloadCsv() {
@@ -1186,6 +1228,8 @@ async function init() {
   buildQuickFilters();
   initChartDefaults();
   buildChartPicker();
+  applyQueryFilters();
+  updateFilterIcons();
   render();
   document.getElementById("f-timing").addEventListener("change", render);
   document.getElementById("f-search").addEventListener("input", render);
@@ -1206,9 +1250,12 @@ async function init() {
   // is (refreshed automatically every 6 hours by GitHub Actions). It does NOT
   // trigger a new pull from the source API: that can only happen server-side,
   // since the source has no CORS headers and a write-capable GitHub token
-  // can't safely be embedded in a public static page.
+  // can't safely be embedded in a public static page. Preserve other query
+  // params so an open filter view survives the reload.
   document.getElementById("btn-refresh").addEventListener("click", () => {
-    location.href = location.pathname + "?refreshed=" + Date.now();
+    const u = new URL(location.href);
+    u.searchParams.set("refreshed", String(Date.now()));
+    location.href = u.pathname + u.search + u.hash;
   });
   window.addEventListener("resize", () => {
     clearTimeout(chartResizeTimer);
