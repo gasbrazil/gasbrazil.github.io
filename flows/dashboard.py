@@ -55,7 +55,7 @@ LEDGER_VAR_ORDER = [
     ("Linepack (thousand m3)", "thousand m3"),
 ]
 
-TSO_ORDER = ["NTS", "TAG", "TBG", "TSB", "GOM"]
+TSO_ORDER = ["NTS", "TAG", "TBG", "GOM"]  # TSB excluded -- see load_payload()
 
 
 def _short_label(full_label: str) -> str:
@@ -86,6 +86,15 @@ def _pivot_series(df: pd.DataFrame, id_col: str, dates: list[str]) -> dict:
 def load_payload() -> dict:
     points_df = pd.read_parquet(POINTS_PARQUET) if POINTS_PARQUET.exists() else pd.DataFrame()
     ledger_df = pd.read_parquet(LEDGER_PARQUET) if LEDGER_PARQUET.exists() else pd.DataFrame()
+
+    # TSB is a real ANP-registered TSO with a "tso" code of its own in the
+    # source data, but it's not one Eric tracks -- drop it here, before
+    # anything else derives from these frames, so it never enters the
+    # embedded payload (not just hidden behind a UI filter). Re-including it
+    # is a one-line revert if that changes.
+    for _df in (points_df, ledger_df):
+        if len(_df) and "tso" in _df.columns:
+            _df.drop(_df.index[_df["tso"] == "TSB"], inplace=True)
 
     all_dates = pd.concat([
         points_df["date"] if len(points_df) else pd.Series(dtype="datetime64[ns]"),
