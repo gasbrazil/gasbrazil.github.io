@@ -3,6 +3,15 @@ Builds the single-file Pipeline Flows dashboard from data/flows_points.parquet
 and data/flows_ledger.parquet.
 
 Usage: python dashboard.py [output_path]  (default: index.html)
+
+UX model (redesigned 2026-09):
+  The page leads with a TSO-level answer (receipts vs. deliveries, by
+  transporter, for a chosen month) and a matching aggregate trend chart.
+  Picking individual receipt/delivery meters or pipelines is a secondary,
+  explicit "Individual meters" view -- present, but no longer the default
+  or the only way to see a number. All of the aggregation below is done
+  client-side in JS from the same per-point/per-pipeline series this page
+  already embeds; no change to the data pipeline or payload shape.
 """
 import datetime as dt
 import sys
@@ -107,10 +116,11 @@ def load_payload() -> dict:
     ledger_series = _pivot_series(ledger_df, "pipeline_code", dates) if len(ledger_df) else {}
 
     # Headline KPI: total realized flow at every point, last 7 days we have
-    # data for, grouped by TSO. Computed here (not client-side) so the chip
-    # row above the fold doesn't need the full payload decoded to render its
-    # first paint in a future version; today it's decoded up front regardless,
-    # but keeping the aggregation server-side keeps init() simple either way.
+    # data for, grouped by TSO. Kept for the home-page teaser marker below
+    # (../build_home.py scrapes it from the HTML comment); the dashboard's
+    # own header now computes receipts/deliveries by month client-side from
+    # pointSeries directly, so this is no longer rendered as its own chip
+    # row on the page itself.
     kpi_by_tso = {}
     if len(points_df):
         realized = points_df[points_df["variable"] == "Volume Realized (thousand m3)"]
@@ -179,15 +189,32 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 #theme-toggle { display: inline-flex; align-items: center; justify-content: center; background: var(--panel); border: 1px solid var(--border-strong); border-radius: 6px; padding: 5px 9px; line-height: 0; cursor: pointer; color: var(--text); }
 #theme-toggle:hover { background: var(--accent-soft); }
 #theme-toggle svg { width: 16px; height: 16px; display: block; }
-.tso-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: var(--gap); }
-.tso-chip { background: var(--panel); border: 1px solid var(--border); border-radius: 999px; padding: 4px 12px; font-size: 12px; box-shadow: var(--shadow); white-space: nowrap; }
-.tso-chip.empty { color: var(--muted); }
-.tso-chip b { font-weight: 700; }
-.tso-chip .muted { color: var(--muted); }
-.level-toggle { display: flex; gap: 6px; margin-bottom: var(--gap); }
+
+.kpi-card-wrap { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: var(--card-pad); margin-bottom: var(--gap); }
+.kpi-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.kpi-title { font-size: 13px; font-weight: 600; }
+.kpi-title .muted { color: var(--muted); font-weight: 400; }
+.kpi-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(168px, 1fr)); gap: 8px; }
+.kpi-card { text-align: left; background: var(--bg); border: 1px solid var(--border-strong); border-radius: 10px; padding: 10px 12px; cursor: pointer; font-family: var(--font); color: var(--text); }
+.kpi-card:hover { background: var(--accent-soft); }
+.kpi-card.active { border-color: var(--accent); border-width: 2px; padding: 9px 11px; box-shadow: var(--shadow); }
+.kpi-card .tso-name { font-size: 13px; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; }
+.kpi-card .tso-name .all-badge { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.kpi-stat-row { display: flex; justify-content: space-between; gap: 8px; font-size: 11.5px; padding: 2px 0; }
+.kpi-stat-row .lbl { color: var(--muted); }
+.kpi-stat-row .val { font-variant-numeric: tabular-nums; font-weight: 600; }
+.kpi-stat-row.recv .val { color: var(--flow-recv, #1baf7a); }
+.kpi-stat-row.del .val { color: var(--flow-del, #eb6834); }
+.kpi-card.empty { color: var(--muted); font-style: italic; }
+.kpi-balance-bar { height: 5px; border-radius: 3px; overflow: hidden; display: flex; margin: 7px 0 2px; background: var(--border); }
+.kpi-balance-bar .recv-seg { background: var(--flow-recv, #1baf7a); }
+.kpi-balance-bar .del-seg { background: var(--flow-del, #eb6834); }
+
+.level-toggle, .view-toggle { display: flex; gap: 6px; margin-bottom: var(--gap); flex-wrap: wrap; }
 .level-btn { background: var(--panel); border: 1px solid var(--border-strong); border-radius: 8px; padding: 7px 16px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--text); font-family: var(--font); }
 .level-btn:hover { background: var(--accent-soft); }
 .level-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.view-toggle .level-btn { padding: 6px 14px; font-size: 12.5px; }
 .filters-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: var(--card-pad); margin-bottom: var(--gap); }
 .filters-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .filters-row + .filters-row { margin-top: 8px; }
@@ -197,7 +224,12 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .tso-toggle { background: var(--bg); border: 1px solid var(--border-strong); border-radius: 999px; padding: 4px 12px; font-size: 12px; cursor: pointer; color: var(--text); font-family: var(--font); font-weight: 600; }
 .tso-toggle:hover { background: var(--accent-soft); }
 .tso-toggle.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.flowtype-toggle { background: var(--bg); border: 1px solid var(--border-strong); border-radius: 999px; padding: 4px 12px; font-size: 12px; cursor: pointer; color: var(--text); font-family: var(--font); font-weight: 600; }
+.flowtype-toggle:hover { background: var(--accent-soft); }
+.flowtype-toggle.active { background: var(--text); color: var(--panel); border-color: var(--text); }
 .filter-label { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; margin-right: 2px; }
+.reset-btn { margin-left: auto; background: transparent; border: 1px solid var(--border-strong); border-radius: 6px; padding: 5px 10px; font-size: 12px; cursor: pointer; color: var(--muted2); font-family: var(--font); }
+.reset-btn:hover { background: var(--accent-soft); color: var(--text); }
 .chart-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: var(--card-pad); margin-bottom: var(--gap); }
 .panel-title { font-size: 13px; font-weight: 600; margin: 0 0 2px; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
 .panel-note { font-size: 11.5px; color: var(--muted); margin: 6px 0 10px; }
@@ -260,24 +292,31 @@ footer a { color: var(--accent); }
   <span class="sources-label">Data source</span>
   <a class="pill" href="https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/dados-consolidados-movimentacao-de-gas-natural-em-gasodutos-de-transporte" target="_blank" rel="noopener">ANP &mdash; movimentação de gás em gasodutos de transporte<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
 </div>
-<div class="tso-row" id="tso-row"></div>
+
+<div class="kpi-card-wrap">
+  <div class="kpi-header">
+    <span class="kpi-title">Receipts &amp; deliveries by transporter <span class="muted" id="kpi-month-label"></span></span>
+    <span style="display:flex;gap:8px;align-items:center">
+      <span class="filter-label">Month</span>
+      <select id="f-kpi-month"></select>
+    </span>
+  </div>
+  <div class="kpi-cards" id="kpi-cards"></div>
+</div>
 
 <div class="level-toggle" id="level-toggle"></div>
+<div class="view-toggle" id="view-toggle"></div>
 
 <div class="filters-card">
   <div class="filters-row" id="tso-toggle-row"></div>
+  <div class="filters-row" id="flowtype-toggle-row"></div>
   <div class="filters-row">
     <span class="filter-label">Pipeline</span>
     <select id="f-pipeline"><option value="">All pipelines</option></select>
-    <span class="filter-label" id="f-pointtype-label">Point type</span>
-    <select id="f-pointtype">
-      <option value="">All points</option>
-      <option value="Receipt Point">Receipt points</option>
-      <option value="Delivery Point">Delivery points</option>
-    </select>
     <span class="filter-label" id="f-uf-label">State</span>
     <select id="f-uf"><option value="">All states</option></select>
     <input id="f-search" type="search" placeholder="Search pipeline / point&hellip;" style="min-width:200px">
+    <button type="button" id="btn-reset-filters" class="reset-btn">Reset all filters</button>
   </div>
 </div>
 
@@ -299,14 +338,14 @@ footer a { color: var(--accent); }
       </select>
     </span>
   </p>
-  <p class="panel-note" id="chart-note">Pick one or more pipelines/points below to chart. Values summed across every shipper and contract active at that point/pipeline.</p>
-  <div class="chip-scroll" id="chip-scroll"></div>
+  <p class="panel-note" id="chart-note">Totals summed across every matching receipt/delivery point.</p>
+  <div class="chip-scroll" id="chip-scroll" hidden></div>
   <div class="chip-truncate-note" id="chip-truncate-note" hidden></div>
   <div id="chart-host"></div>
 </div>
 
 <div class="toolbar">
-  <button id="btn-clear-picks">Clear selection</button>
+  <button id="btn-clear-picks" hidden>Clear selection</button>
   <button id="btn-csv">Download CSV</button>
   <button id="btn-xlsx">Export table (Excel)</button>
   <span class="count" id="row-count"></span>
@@ -335,23 +374,26 @@ const CHART_PALETTE_LIGHT = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba
 const CHART_PALETTE_DARK = ["#3987e5", "#d95926", "#199e70", "#c98500", "#d55181", "#008300", "#9085e9", "#e66767", "#2ba9c2", "#c46b63"];
 const MAX_CHIPS_SHOWN = 60;
 const DEFAULT_PICK_COUNT = 5;
+const RECEIPT = "Receipt Point", DELIVERY = "Delivery Point";
 
 let DATA = null;
 let level = "points";        // "points" | "ledger"
+let viewMode = "aggregate";  // "aggregate" (TSO totals) | "detail" (individual meters/pipelines)
 let variable = null;         // current variable string
-let tsoFilter = new Set();   // empty == all
+let tsoFilter = new Set();   // empty == all TSOs
+let flowTypeFilter = "";     // "" | "Receipt Point" | "Delivery Point" -- points level only
 let pipelineFilter = "";
-let pointTypeFilter = "";
 let ufFilter = "";
 let searchText = "";
 let datePreset = "12m";
 let smoothing = "raw";
-let picked = new Set();
+let picked = new Set();      // detail-mode picks only
 let chartSlots = new Map();
 let sortDir = -1; // table date sort: 1 asc, -1 desc
 let tableRows = []; // last rendered table rows, kept for CSV/XLSX export
 let tableCols = [];
 let chartResizeTimer = null;
+let kpiMonth = null; // "YYYY-MM"
 
 function chartClaimSlot(key) {
   if (chartSlots.has(key)) return chartSlots.get(key);
@@ -373,6 +415,7 @@ function currentSeriesMap() {
 }
 function entityById(id) { return currentEntities().find(e => e.id === id); }
 function entityLabel(e) {
+  if (e.isAggregate) return e.name;
   if (level === "points") return e.pipeline + " · " + e.name + " (" + (e.type === "Receipt Point" ? "Recv" : "Del") + ")";
   return e.name;
 }
@@ -381,9 +424,25 @@ function matchesFilters(e) {
   if (tsoFilter.size && !tsoFilter.has(e.tso)) return false;
   if (pipelineFilter && (level === "points" ? e.pipeline : e.name) !== pipelineFilter) return false;
   if (level === "points") {
-    if (pointTypeFilter && e.type !== pointTypeFilter) return false;
+    if (flowTypeFilter && e.type !== flowTypeFilter) return false;
     if (ufFilter && e.uf !== ufFilter) return false;
   }
+  if (searchText) {
+    const hay = (entityLabel(e) + " " + (e.muni || "")).toLowerCase();
+    if (!hay.includes(searchText)) return false;
+  }
+  return true;
+}
+
+// Like matchesFilters, but for a specific (tso, pointType) aggregate group
+// rather than the globally-selected tsoFilter/flowTypeFilter -- used when
+// building the "totals" lines in aggregate mode, where each line has its
+// own fixed TSO/flow-type regardless of how many TSOs are toggled on.
+function matchesGroup(e, tso, pointType) {
+  if (tso && e.tso !== tso) return false;
+  if (level === "points" && pointType && e.type !== pointType) return false;
+  if (pipelineFilter && (level === "points" ? e.pipeline : e.name) !== pipelineFilter) return false;
+  if (level === "points" && ufFilter && e.uf !== ufFilter) return false;
   if (searchText) {
     const hay = (entityLabel(e) + " " + (e.muni || "")).toLowerCase();
     if (!hay.includes(searchText)) return false;
@@ -437,9 +496,8 @@ function buildLevelToggle() {
     btn.addEventListener("click", () => {
       if (level === d.id) return;
       level = d.id;
-      pipelineFilter = ""; pointTypeFilter = ""; ufFilter = "";
+      pipelineFilter = ""; flowTypeFilter = ""; ufFilter = "";
       document.getElementById("f-pipeline").value = "";
-      document.getElementById("f-pointtype").value = "";
       document.getElementById("f-uf").value = "";
       variable = currentVarList()[0];
       picked = new Set();
@@ -448,8 +506,41 @@ function buildLevelToggle() {
     });
     host.appendChild(btn);
   }
-  const pointOnly = document.querySelectorAll("#f-pointtype-label, #f-pointtype, #f-uf-label, #f-uf");
+  const pointOnly = document.querySelectorAll("#f-uf-label, #f-uf, #flowtype-toggle-row");
   pointOnly.forEach(el => { el.style.display = level === "points" ? "" : "none"; });
+}
+
+function buildViewToggle() {
+  const host = document.getElementById("view-toggle");
+  host.innerHTML = "";
+  const defs = [
+    { id: "aggregate", label: "Totals by transporter" },
+    { id: "detail", label: level === "points" ? "Individual meters" : "Individual pipelines" },
+  ];
+  for (const d of defs) {
+    const btn = document.createElement("button");
+    btn.className = "level-btn" + (viewMode === d.id ? " active" : "");
+    btn.textContent = d.label;
+    btn.addEventListener("click", () => {
+      if (viewMode === d.id) return;
+      viewMode = d.id;
+      if (viewMode === "detail" && picked.size === 0) defaultPicks();
+      onViewModeChanged();
+    });
+    host.appendChild(btn);
+  }
+}
+
+function onViewModeChanged() {
+  const isDetail = viewMode === "detail";
+  document.getElementById("chip-scroll").hidden = !isDetail;
+  document.getElementById("btn-clear-picks").hidden = !isDetail;
+  document.getElementById("chart-note").textContent = isDetail
+    ? "Pick one or more pipelines/points below to chart. Values summed across every shipper and contract active at that point/pipeline."
+    : (level === "points"
+        ? "Totals summed across every matching receipt/delivery point (use the filters above to narrow by pipeline or state)."
+        : "Totals summed across every matching pipeline (use the filters above to narrow by pipeline)");
+  render();
 }
 
 function buildTsoToggles() {
@@ -464,6 +555,19 @@ function buildTsoToggles() {
       if (tsoFilter.has(tso)) tsoFilter.delete(tso); else tsoFilter.add(tso);
       render();
     });
+    host.appendChild(btn);
+  }
+}
+
+function buildFlowTypeToggles() {
+  const host = document.getElementById("flowtype-toggle-row");
+  host.innerHTML = '<span class="filter-label">Flow type</span>';
+  const defs = [{ v: "", label: "All" }, { v: RECEIPT, label: "Receipts" }, { v: DELIVERY, label: "Deliveries" }];
+  for (const d of defs) {
+    const btn = document.createElement("button");
+    btn.className = "flowtype-toggle" + (flowTypeFilter === d.v ? " active" : "");
+    btn.textContent = d.label;
+    btn.addEventListener("click", () => { flowTypeFilter = d.v; render(); });
     host.appendChild(btn);
   }
 }
@@ -495,6 +599,7 @@ function buildDependentSelects() {
 function buildChips() {
   const host = document.getElementById("chip-scroll");
   host.innerHTML = "";
+  if (viewMode !== "detail") return;
   let matches = availableEntities();
   matches.sort((a, b) => rankScore(b.id) - rankScore(a.id));
   const note = document.getElementById("chip-truncate-note");
@@ -554,11 +659,13 @@ function defaultPicks() {
 
 function onLevelOrVariableChanged() {
   buildLevelToggle();
+  buildViewToggle();
   buildTsoToggles();
+  buildFlowTypeToggles();
   buildDependentSelects();
   buildVariableSelect();
-  if (picked.size === 0) defaultPicks();
-  render();
+  if (viewMode === "detail" && picked.size === 0) defaultPicks();
+  onViewModeChanged();
 }
 
 function dateRangeForPreset() {
@@ -584,6 +691,169 @@ function smoothedValues(arr) {
     out[i] = n ? sum / n : null;
   }
   return out;
+}
+
+// ---- Aggregate ("Totals by transporter") support -------------------------
+//
+// Every point/pipeline's full series is already in the payload, so an
+// "aggregate" line is computed on the fly by summing (or, for a %
+// variable, averaging) across whichever entities match a given
+// (tso, pointType) group -- no server-side changes needed.
+
+function aggregateGroups() {
+  if (level === "points") {
+    const tsos = tsoFilter.size ? [...tsoFilter] : [null];
+    const types = flowTypeFilter ? [flowTypeFilter] : [RECEIPT, DELIVERY];
+    const groups = [];
+    for (const tso of tsos) {
+      for (const t of types) {
+        groups.push({
+          key: (tso || "ALL") + ":" + t,
+          tso, pointType: t,
+          label: (tso ? tso + " " : "All Brazil — ") + (t === RECEIPT ? "Receipts" : "Deliveries"),
+        });
+      }
+    }
+    return groups;
+  }
+  // Ledger: no receipt/delivery split -- one aggregate line per TSO. With
+  // nothing toggled on, show every TSO so "the system as a whole" is the
+  // default comparison; narrowing to specific TSOs shows just those.
+  const tsos = tsoFilter.size ? [...tsoFilter] : [...new Set(DATA.pipelines.map(p => p.tso).filter(Boolean))].sort();
+  return tsos.map(tso => ({ key: tso, tso, pointType: null, label: tso }));
+}
+
+function aggregateValuesForGroup(tso, pointType, fromIdx, toIdx) {
+  const seriesMap = currentSeriesMap();
+  const ids = currentEntities().filter(e => matchesGroup(e, tso, pointType)).map(e => e.id);
+  const isMean = variable === "Allocation (%)";
+  const out = [];
+  for (let i = fromIdx; i <= toIdx; i++) {
+    let sum = 0, n = 0, any = false;
+    for (const id of ids) {
+      const arr = seriesMap[id];
+      if (!arr) continue;
+      const v = arr[i];
+      if (v !== null && v !== undefined) { sum += v; n++; any = true; }
+    }
+    out.push(any ? (isMean ? sum / n : sum) : null);
+  }
+  return out;
+}
+
+function aggregateSeriesList(range) {
+  const dates = DATA.dates.slice(range.fromIdx, range.toIdx + 1);
+  return aggregateGroups().map(g => {
+    const raw = aggregateValuesForGroup(g.tso, g.pointType, range.fromIdx, range.toIdx);
+    const vals = smoothedValues(raw);
+    const pts = [];
+    for (let i = 0; i < dates.length; i++) if (vals[i] !== null && vals[i] !== undefined) pts.push({ date: dates[i], v: vals[i] });
+    const entity = { id: "AGG:" + g.key, name: g.label, tso: g.tso, pipeline: g.tso || "All Brazil", type: g.pointType, isAggregate: true };
+    return { id: entity.id, entity, pts };
+  }).filter(s => s.pts.length);
+}
+
+// ---- KPI cards: receipts vs. deliveries by transporter, for one month ----
+
+function availableMonths() {
+  const set = new Set(DATA.dates.map(d => d.slice(0, 7)));
+  return [...set].sort().reverse();
+}
+
+function monthLabel(ym) {
+  const [y, m] = ym.split("-").map(Number);
+  const d = new Date(Date.UTC(y, m - 1, 1));
+  return d.toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
+}
+
+function monthIdxRange(ym) {
+  const dates = DATA.dates;
+  let startIdx = -1, endIdx = -1;
+  for (let i = 0; i < dates.length; i++) {
+    if (dates[i].slice(0, 7) === ym) { if (startIdx < 0) startIdx = i; endIdx = i; }
+  }
+  return { startIdx, endIdx };
+}
+
+function monthlyTotal(tso, pointType, startIdx, endIdx) {
+  const seriesMap = DATA.pointSeries["Volume Realized (thousand m3)"] || {};
+  let total = 0, any = false;
+  for (const pt of DATA.points) {
+    if (pt.type !== pointType) continue;
+    if (tso && pt.tso !== tso) continue;
+    const arr = seriesMap[pt.id];
+    if (!arr) continue;
+    for (let i = startIdx; i <= endIdx; i++) {
+      const v = arr[i];
+      if (v !== null && v !== undefined) { total += v; any = true; }
+    }
+  }
+  return any ? total : null;
+}
+
+function fmtVolume(v) {
+  if (v === null || v === undefined) return "–";
+  const abs = Math.abs(v);
+  return abs >= 1000
+    ? (v / 1000).toLocaleString("en-US", { maximumFractionDigits: 1 }) + "M m³"
+    : v.toLocaleString("en-US", { maximumFractionDigits: 0 }) + " thousand m³";
+}
+
+function buildKpiMonthSelect() {
+  const sel = document.getElementById("f-kpi-month");
+  const months = availableMonths();
+  if (!kpiMonth || !months.includes(kpiMonth)) kpiMonth = months[0];
+  sel.innerHTML = "";
+  for (const ym of months) {
+    const opt = document.createElement("option");
+    opt.value = ym; opt.textContent = monthLabel(ym);
+    sel.appendChild(opt);
+  }
+  sel.value = kpiMonth;
+}
+
+function renderKpiCards() {
+  const cardsHost = document.getElementById("kpi-cards");
+  const labelHost = document.getElementById("kpi-month-label");
+  cardsHost.innerHTML = "";
+  if (!DATA.points.length) { document.querySelector(".kpi-card-wrap").hidden = true; return; }
+  const { startIdx, endIdx } = monthIdxRange(kpiMonth);
+  const lastOverallIdx = DATA.dates.length - 1;
+  const isPartial = endIdx < lastOverallIdx ? false : (DATA.dates[endIdx].slice(8, 10) !== new Date(Date.UTC(+kpiMonth.slice(0, 4), +kpiMonth.slice(5, 7), 0)).getUTCDate().toString().padStart(2, "0"));
+  labelHost.textContent = isPartial ? ("— partial, through " + DATA.dates[endIdx]) : "";
+
+  const tsos = [...new Set(DATA.points.map(p => p.tso).filter(Boolean))].sort();
+
+  const makeCard = (tso, label, isAll) => {
+    const recv = monthlyTotal(tso, RECEIPT, startIdx, endIdx);
+    const del = monthlyTotal(tso, DELIVERY, startIdx, endIdx);
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "kpi-card" + (isAll ? "" : (tsoFilter.has(tso) && tsoFilter.size === 1 ? " active" : "")) + (isAll && tsoFilter.size === 0 ? " active" : "");
+    if (recv === null && del === null) card.classList.add("empty");
+    let bar = "";
+    if (recv !== null && del !== null && (recv + del) > 0) {
+      const pct = (100 * recv / (recv + del)).toFixed(1);
+      bar = `<div class="kpi-balance-bar"><div class="recv-seg" style="width:${pct}%"></div><div class="del-seg" style="width:${100 - pct}%"></div></div>`;
+    }
+    card.innerHTML = `
+      <div class="tso-name">${label}${isAll ? '<span class="all-badge">nationwide</span>' : ""}</div>
+      <div class="kpi-stat-row recv"><span class="lbl">Receipts</span><span class="val">${fmtVolume(recv)}</span></div>
+      <div class="kpi-stat-row del"><span class="lbl">Deliveries</span><span class="val">${fmtVolume(del)}</span></div>
+      ${bar}`;
+    card.addEventListener("click", () => {
+      if (isAll) { tsoFilter = new Set(); } else {
+        tsoFilter = (tsoFilter.size === 1 && tsoFilter.has(tso)) ? new Set() : new Set([tso]);
+      }
+      level = "points"; viewMode = "aggregate"; flowTypeFilter = "";
+      onLevelOrVariableChanged();
+      document.querySelector(".chart-card").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    return card;
+  };
+
+  cardsHost.appendChild(makeCard(null, "All Brazil", true));
+  for (const tso of tsos) cardsHost.appendChild(makeCard(tso, tso, false));
 }
 
 function chartNiceTicks(lo, hi, n) {
@@ -613,21 +883,26 @@ function chartSvgEl(n, a) {
 function renderChart() {
   const host = document.getElementById("chart-host");
   host.innerHTML = "";
-  document.getElementById("chart-title").textContent = shortLabel(variable);
+  document.getElementById("chart-title").textContent = shortLabel(variable) + (viewMode === "aggregate" ? " — totals" : "");
   const range = dateRangeForPreset();
   const dates = DATA.dates.slice(range.fromIdx, range.toIdx + 1);
-  const seriesMap = currentSeriesMap();
   const unit = currentUnits()[variable];
 
-  const seriesList = [...picked].map(id => {
-    const raw = (seriesMap[id] || []).slice(range.fromIdx, range.toIdx + 1);
-    const vals = smoothedValues(raw);
-    const pts = [];
-    for (let i = 0; i < dates.length; i++) if (vals[i] !== null && vals[i] !== undefined) pts.push({ date: dates[i], v: vals[i] });
-    return { id, entity: entityById(id), pts };
-  }).filter(s => s.entity && s.pts.length);
+  let seriesList;
+  if (viewMode === "aggregate") {
+    seriesList = aggregateSeriesList(range);
+  } else {
+    const seriesMap = currentSeriesMap();
+    seriesList = [...picked].map(id => {
+      const raw = (seriesMap[id] || []).slice(range.fromIdx, range.toIdx + 1);
+      const vals = smoothedValues(raw);
+      const pts = [];
+      for (let i = 0; i < dates.length; i++) if (vals[i] !== null && vals[i] !== undefined) pts.push({ date: dates[i], v: vals[i] });
+      return { id, entity: entityById(id), pts };
+    }).filter(s => s.entity && s.pts.length);
+  }
 
-  if (!picked.size) {
+  if (viewMode === "detail" && !picked.size) {
     host.innerHTML = '<div class="chart-empty">Pick one or more pipelines/points above to see the trend.</div>';
     renderTable([], dates);
     return;
@@ -814,22 +1089,6 @@ function renderTable(seriesList, dates) {
   }
 }
 
-function renderKpiRow() {
-  const el = document.getElementById("tso-row");
-  el.innerHTML = "";
-  if (!DATA.kpiLastDate) { el.hidden = true; return; }
-  const entries = Object.entries(DATA.kpiByTso).sort((a, b) => b[1] - a[1]);
-  for (const [tso, total] of entries) {
-    const chip = document.createElement("div");
-    chip.className = "tso-chip";
-    const label = total >= 1000
-      ? (total / 1000).toLocaleString("en-US", { maximumFractionDigits: 1 }) + "M m³"
-      : total.toLocaleString("en-US", { maximumFractionDigits: 0 }) + " thousand m³";
-    chip.innerHTML = `<b>${tso}</b> &middot; ${label} realized <span class="muted">(7d thru ${DATA.kpiLastDate})</span>`;
-    el.appendChild(chip);
-  }
-}
-
 function downloadCsv() {
   const cols = ["Date", ...tableCols.map(entityLabel)];
   const lines = [cols.map(csvEscape).join(",")];
@@ -862,9 +1121,13 @@ function applyQueryState() {
   const sp = new URLSearchParams(location.search);
   const lv = sp.get("level");
   if (lv === "points" || lv === "ledger") level = lv;
+  const vw = sp.get("view");
+  if (vw === "aggregate" || vw === "detail") viewMode = vw;
   const v = sp.get("var");
   const tso = sp.get("tso");
   if (tso) tsoFilter = new Set(tso.split(","));
+  const ft = sp.get("flow");
+  if (ft === RECEIPT || ft === DELIVERY) flowTypeFilter = ft;
   const pl = sp.get("pipeline");
   if (pl) pipelineFilter = pl;
   const pt = sp.get("preset");
@@ -874,7 +1137,9 @@ function applyQueryState() {
   const q = sp.get("q");
   if (q) searchText = q.toLowerCase();
   buildLevelToggle();
+  buildViewToggle();
   buildTsoToggles();
+  buildFlowTypeToggles();
   buildDependentSelects();
   if (pipelineFilter) document.getElementById("f-pipeline").value = pipelineFilter;
   document.getElementById("f-preset").value = datePreset;
@@ -890,13 +1155,15 @@ function writeQueryState() {
   const u = new URL(location.href);
   const sp = u.searchParams;
   sp.set("level", level);
+  sp.set("view", viewMode);
   sp.set("var", variable);
   if (tsoFilter.size) sp.set("tso", [...tsoFilter].join(",")); else sp.delete("tso");
+  if (flowTypeFilter) sp.set("flow", flowTypeFilter); else sp.delete("flow");
   if (pipelineFilter) sp.set("pipeline", pipelineFilter); else sp.delete("pipeline");
   sp.set("preset", datePreset);
   sp.set("smooth", smoothing);
   if (searchText) sp.set("q", searchText); else sp.delete("q");
-  if (picked.size) sp.set("picks", [...picked].join(",")); else sp.delete("picks");
+  if (viewMode === "detail" && picked.size) sp.set("picks", [...picked].join(",")); else sp.delete("picks");
   const qs = sp.toString();
   const next = u.pathname + (qs ? "?" + qs : "") + u.hash;
   if (next !== location.pathname + location.search + location.hash) history.replaceState(null, "", next);
@@ -904,10 +1171,27 @@ function writeQueryState() {
 
 function render() {
   buildTsoToggles();
+  buildFlowTypeToggles();
   buildDependentSelects();
+  renderKpiCards();
   buildChips();
   renderChart();
   writeQueryState();
+}
+
+function resetAllFilters() {
+  tsoFilter = new Set();
+  flowTypeFilter = ""; pipelineFilter = ""; ufFilter = ""; searchText = "";
+  document.getElementById("f-pipeline").value = "";
+  document.getElementById("f-uf").value = "";
+  document.getElementById("f-search").value = "";
+  level = "points";
+  viewMode = "aggregate";
+  variable = DATA.pointVars[0];
+  datePreset = "12m"; document.getElementById("f-preset").value = "12m";
+  smoothing = "raw"; document.getElementById("f-smooth").value = "raw";
+  picked = new Set(); chartSlots = new Map();
+  onLevelOrVariableChanged();
 }
 
 __SHARED_JS_THEME_TOGGLE__
@@ -931,20 +1215,23 @@ async function init() {
   } catch (e) {}
   document.getElementById("subtitle").textContent = subtitleText;
 
-  renderKpiRow();
+  buildKpiMonthSelect();
   applyQueryState();
   onLevelOrVariableChanged();
 
+  document.getElementById("f-kpi-month").addEventListener("change", e => { kpiMonth = e.target.value; renderKpiCards(); });
   document.getElementById("f-pipeline").addEventListener("change", e => { pipelineFilter = e.target.value; render(); });
-  document.getElementById("f-pointtype").addEventListener("change", e => { pointTypeFilter = e.target.value; render(); });
   document.getElementById("f-uf").addEventListener("change", e => { ufFilter = e.target.value; render(); });
   document.getElementById("f-search").addEventListener("input", e => { searchText = e.target.value.trim().toLowerCase(); render(); });
   document.getElementById("f-variable").addEventListener("change", e => {
-    variable = e.target.value; picked = new Set(); chartSlots = new Map(); defaultPicks(); render();
+    variable = e.target.value; picked = new Set(); chartSlots = new Map();
+    if (viewMode === "detail") defaultPicks();
+    render();
   });
   document.getElementById("f-preset").addEventListener("change", e => { datePreset = e.target.value; renderChart(); writeQueryState(); });
   document.getElementById("f-smooth").addEventListener("change", e => { smoothing = e.target.value; renderChart(); writeQueryState(); });
   document.getElementById("btn-clear-picks").addEventListener("click", () => { picked = new Set(); chartSlots = new Map(); render(); });
+  document.getElementById("btn-reset-filters").addEventListener("click", resetAllFilters);
   document.getElementById("btn-csv").addEventListener("click", downloadCsv);
   document.getElementById("btn-xlsx").addEventListener("click", downloadXlsx);
   window.addEventListener("resize", () => { clearTimeout(chartResizeTimer); chartResizeTimer = setTimeout(renderChart, 140); });
@@ -988,4 +1275,3 @@ def write_dashboard(out_path=DEFAULT_OUT):
 if __name__ == "__main__":
     out = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_OUT
     write_dashboard(out)
-
