@@ -149,6 +149,22 @@
   opacity: 1; visibility: visible;
 }
 
+.skip-link {
+  position: absolute; left: 12px; top: -40px; z-index: 80;
+  background: var(--accent); color: #fff; padding: 6px 10px;
+  border-radius: 6px; font: 600 12.5px var(--font); text-decoration: none;
+}
+.skip-link:focus { top: 12px; }
+.langBtn, #lang-toggle {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 34px; height: 34px; padding: 0 8px;
+  background: var(--panel); border: 1px solid var(--border-strong);
+  border-radius: 6px; color: var(--text); cursor: pointer;
+  font: 700 11.5px/1 var(--font); letter-spacing: .04em;
+}
+.langBtn:hover, #lang-toggle:hover { background: var(--accent-soft); }
+.chrome-tools { display: flex; align-items: center; gap: 6px; }
+
 :root{ color-scheme: light; }
 :root[data-theme="dark"]{ color-scheme: dark; }
 *{box-sizing:border-box}
@@ -233,7 +249,7 @@ footer.site a{color:var(--muted)}
 <a href="using-the-dashboard.html">Using the Dashboard</a>
 <a href="architecture-and-deployment.html" class="active">Architecture & Deployment</a>
 <a href="known-limitations.html">Known Limitations</a>
-      <a class="back" href="https://github.com/caissonpoint/ons-dashboard/blob/main/README.md" target="_blank" rel="noopener">README (GitHub) &#8599;</a>
+      <a class="back" href="https://github.com/gasbrazil/gasbrazil.github.io/blob/main/ons/README.md" target="_blank" rel="noopener">README (GitHub) &#8599;</a>
     </nav>
   </aside>
   <main>
@@ -372,50 +388,46 @@ as a visible record of when the data last refreshed.</p>
   gas — see <a href="known-limitations.html">Known Limitations</a>.</li>
 </ul>
 <h2>Multi-site hosting topology</h2>
-<p>Three properties, one <code>gasbrazil</code> account used purely as a firewall-friendly
-hub — some corporate DNS/proxy filters flag a newly-registered custom domain
-like <code>gasbrazil.com</code> (or its subdomains) as suspicious regardless of content,
-where a plain <code>*.github.io</code> URL has no such reputation problem:</p>
+<p>One monorepo (<code>gasbrazil/gasbrazil.github.io</code>) serves the hub and all three
+dashboards from path URLs. <code>gasbrazil.github.io</code> is the firewall-friendly
+mirror of the same tree — some corporate DNS filters flag a new custom
+domain even when the content is fine.</p>
 <table>
 <thead>
 <tr>
-<th>Repo</th>
+<th>Path</th>
 <th>Primary URL</th>
-<th>Mirror(s)</th>
+<th>Mirror</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>caissonpoint/ons-dashboard</code> (this repo)</td>
-<td><code>ons.gasbrazil.com</code></td>
-<td><code>ons-dashboard.github.io</code>, <code>gasbrazil.github.io/ons</code></td>
-</tr>
-<tr>
-<td><code>caissonpoint/poc-dashboard</code></td>
-<td><code>poc.gasbrazil.com</code></td>
-<td><code>caissonpoint.github.io/poc-dashboard</code>, <code>gasbrazil.github.io/poc</code></td>
-</tr>
-<tr>
-<td><code>caissonpoint/gasbrazil-com</code></td>
+<td><code>/</code></td>
 <td><code>gasbrazil.com</code></td>
 <td><code>gasbrazil.github.io</code></td>
 </tr>
+<tr>
+<td><code>/ons/</code></td>
+<td><code>gasbrazil.com/ons/</code></td>
+<td><code>gasbrazil.github.io/ons/</code></td>
+</tr>
+<tr>
+<td><code>/poc/</code></td>
+<td><code>gasbrazil.com/poc/</code></td>
+<td><code>gasbrazil.github.io/poc/</code></td>
+</tr>
+<tr>
+<td><code>/contratos/</code></td>
+<td><code>gasbrazil.com/contratos/</code></td>
+<td><code>gasbrazil.github.io/contratos/</code></td>
+</tr>
 </tbody>
 </table>
-<p>Each mirror is a separate GitHub Pages repo, classic branch-based (not
-Actions-build) since it only ever receives one already-built <code>index.html</code>.
-<code>refresh.yml</code>'s mirror steps clone the mirror repo, copy <code>site/index.html</code>
-in, commit, and push — using an SSH deploy key scoped to that one repo only
-(GitHub doesn't allow reusing one SSH key across multiple repos, so each
-mirror has its own keypair). Every mirror step is <code>continue-on-error: true</code>
-and gated on its secret being set, so a mirror failure can never break the
-real build or deploy. The dashboard's own header links (see
-<a href="using-the-dashboard.html">Using the Dashboard</a>) resolve to the right sibling URL
-based on <code>location.hostname</code> at load time — <code>SITE_LINKS</code>/<code>siteFlavor()</code> in
-<code>dashboard.py</code>.</p>
-<p>The landing page (<code>gasbrazil-com</code> → <code>gasbrazil.github.io</code>) is a one-time
-snapshot, not on its own sync schedule — it changes rarely, so there's no CI
-step for it currently.</p>
+<p>GitHub Pages deploys from the <code>main</code> branch root. Each dashboard workflow
+commits into its own subfolder. Header links resolve from <code>location.hostname</code>
+at load time (<code>SITE_LINKS</code> / <code>siteFlavor()</code> in <code>shared/dashboard_kit.py</code>):
+<code>gasbrazil.com/...</code> on the custom domain, <code>gasbrazil.github.io/...</code> on the
+hub host.</p>
 <h2>"Refresh data" button infrastructure</h2>
 <p>The dashboard is a public static file with no backend, so triggering
 <code>refresh.yml</code>'s <code>workflow_dispatch</code> on demand needs an authenticated call to
@@ -446,7 +458,7 @@ constant points at the deployed Worker.</p>
 </div>
 <footer class="site">
   <div style="display:block">
-    Source: <a href="https://github.com/caissonpoint/ons-dashboard" target="_blank" rel="noopener">caissonpoint/ons-dashboard</a> on GitHub.
+    Source: <a href="https://github.com/gasbrazil/gasbrazil.github.io" target="_blank" rel="noopener">gasbrazil/gasbrazil.github.io</a> on GitHub.
     Data via <a href="https://dados.ons.org.br" target="_blank" rel="noopener">ONS Dados Abertos</a> (CC-BY).
     Questions or feedback: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>.
   </div>

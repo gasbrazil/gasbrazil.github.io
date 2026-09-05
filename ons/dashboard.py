@@ -355,6 +355,8 @@ def write_dashboard(df: pd.DataFrame, dest: Path,
         SHARED_THEME_CSS=kit.render_theme_css(),
         SHARED_JS_XLSX=kit.JS_XLSX_ENGINE,
         SHARED_JS_THEME_TOGGLE=kit.JS_THEME_TOGGLE,
+        SHARED_JS_BOOT=kit.JS_BOOT,
+        SHARED_JS_I18N=kit.JS_I18N,
         SHARED_SITE_LINKS_JS=kit.site_links_js("ons"),
         FAVICON_DATA_URI=kit.embed_favicon(),
     )
@@ -371,7 +373,10 @@ TEMPLATE = r"""<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ONS Balances</title>
+<meta name="description" content="Daily Brazilian grid balances, thermal generation by plant, and estimated gas-fired dispatch from ONS open data.">
+<link rel="canonical" href="https://gasbrazil.com/ons/">
 <link rel="icon" href="{{FAVICON_DATA_URI}}">
+<script>__SHARED_JS_BOOT__</script>
 <style>
 __SHARED_THEME_CSS__
 /* Everything below is ons-dashboard's own layout/components. The palette
@@ -548,18 +553,21 @@ table.data thead th.sortable:hover{background:var(--accent-soft)}
 </style>
 </head>
 <body>
+<a class="skip-link" href="#app" data-i18n="skip">Skip to content</a>
 <div class="wrap">
 <header>
   <div>
-    <h1>ONS Balances</h1>
+    <h1 data-i18n="navOns">ONS Balances</h1>
     <div class="sub" id="subtitle">Loading&hellip;</div>
   </div>
   <div class="row">
-    <a class="navlink" id="link-home" href="https://gasbrazil.com">&larr; GasBrazil.com</a>
-    <a class="navlink" id="link-poc" href="https://poc.gasbrazil.com">POC Results Dashboard &rarr;</a>
-    <a class="navlink" id="link-contratos" href="https://poc2.gasbrazil.com">POC Contracts &rarr;</a>
-    <a class="navlink" href="wiki-html/">Wiki</a>
+    <a class="navlink" id="link-home" href="https://gasbrazil.com/">&larr; GasBrazil.com</a>
+    <a class="navlink" id="link-poc" href="https://gasbrazil.com/poc/">POC Results Dashboard &rarr;</a>
+    <a class="navlink" id="link-contratos" href="https://gasbrazil.com/contratos/">POC Contracts &rarr;</a>
+    <a class="navlink" href="wiki-html/" data-i18n="navWiki">Wiki</a>
+    <a class="navlink" href="../about/" data-i18n="navAbout">About</a>
     <button id="refreshBtn" hidden>&#8635; Refresh data</button>
+    <button type="button" id="lang-toggle" class="langBtn" aria-label="Português">PT</button>
     <button id="themeBtn" class="iconBtn" title="Toggle light/dark" aria-label="Toggle light/dark"></button>
   </div>
 </header>
@@ -655,9 +663,31 @@ const VIEWS = [
   // Data Tables block further down.
   {id:"tables",     label:"Data Tables", kind:null},
 ];
+const VIEW_ALIASES = {thermal:"plants", plant:"plants", table:"tables"};
+function viewFromQuery(){
+  const q = new URLSearchParams(location.search).get("tab");
+  if(!q) return null;
+  const id = VIEW_ALIASES[q] || q;
+  return VIEWS.some(v=>v.id===id) ? id : null;
+}
+function writeViewQuery(){
+  const u = new URL(location.href);
+  u.searchParams.set("tab", state.view);
+  history.replaceState(null, "", u.pathname + u.search + u.hash);
+  try { localStorage.setItem("ons-view", state.view); } catch(e){}
+}
+function initialView(){
+  const fromUrl = viewFromQuery();
+  if(fromUrl) return fromUrl;
+  try {
+    const saved = localStorage.getItem("ons-view");
+    if(saved && VIEWS.some(v=>v.id===saved)) return saved;
+  } catch(e){}
+  return "plants";
+}
 
 const state = {
-  view: "plants",
+  view: initialView(),
   from: null, to: null, smooth: 1,
   subs: new Set(["SIN"]),
   table: false,
@@ -733,6 +763,7 @@ const colorOf = (k, v) => {
    isDarkTheme() -- the two do the same check; no need for both names live
    at once. initThemeToggle is wired to the #themeBtn button down in boot(). */
 __SHARED_JS_THEME_TOGGLE__
+__SHARED_JS_I18N__
 
 /* ---------- series keys: "<metric>|<subsystem>|<entity>" -------------------- */
 const skey = (m,s,e="") => m+"|"+s+"|"+e;
@@ -984,7 +1015,7 @@ function buildTabs(){
   VIEWS.forEach(v=>{
     const b=el("button",null,v.label);
     b.setAttribute("aria-pressed",String(state.view===v.id));
-    b.onclick=()=>{ state.view=v.id; buildTabs(); buildSubs(); updateSubsVisibility();
+    b.onclick=()=>{ state.view=v.id; writeViewQuery(); buildTabs(); buildSubs(); updateSubsVisibility();
       buildPickCard(); render(); };
     host.appendChild(b);
   });
@@ -2993,6 +3024,7 @@ async function boot(){
     refreshBtn.onclick=triggerRefresh;
   }
   initThemeToggle("themeBtn", () => { buildPickCard(); render(); });
+  initLangToggle("lang-toggle");
   initCrossLinks();
   let rz; window.addEventListener("resize",()=>{
     clearTimeout(rz); rz=setTimeout(renderCharts,140);

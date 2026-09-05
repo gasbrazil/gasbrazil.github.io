@@ -5,7 +5,7 @@ balances, plant-level thermal dispatch, installed capacity, and reservoir
 storage, aggregated into a single self-contained HTML page. No server, no
 database, no API — the data is embedded in the file itself.
 
-This wiki covers what the [README](https://github.com/caissonpoint/ons-dashboard/blob/main/README.md)
+This wiki covers what the [README](https://github.com/gasbrazil/gasbrazil.github.io/blob/main/ons/README.md)
 doesn't: how to read the live dashboard, how the pieces are deployed and wired
 together, and what to take with a grain of salt.
 
@@ -25,19 +25,16 @@ together, and what to take with a grain of salt.
 
 ## Live sites
 
-| Site | URL | What it is |
+One repo, path-based URLs. The same pages are on the custom domain and the
+GitHub Pages host:
+
+| Site | gasbrazil.com | Mirror |
 |---|---|---|
-| ONS Balances (this repo) | [ons.gasbrazil.com](https://ons.gasbrazil.com) | The dashboard this wiki documents |
-| POC dashboard | [poc.gasbrazil.com](https://poc.gasbrazil.com) | A separate, related dashboard (`poc-dashboard` repo) |
-| Landing page | [gasbrazil.com](https://gasbrazil.com) | Hub linking to both |
-
-Each site also has a firewall-friendly mirror with no custom domain, kept in
-sync automatically — see [Architecture and Deployment](Architecture-and-Deployment)
-for why and how:
-
-- `ons.gasbrazil.com` → also at [ons-dashboard.github.io](https://ons-dashboard.github.io) and [gasbrazil.github.io/ons](https://gasbrazil.github.io/ons)
-- `poc.gasbrazil.com` → also at [caissonpoint.github.io/poc-dashboard](https://caissonpoint.github.io/poc-dashboard) and [gasbrazil.github.io/poc](https://gasbrazil.github.io/poc)
-- `gasbrazil.com` → also at [gasbrazil.github.io](https://gasbrazil.github.io)
+| Landing page | [gasbrazil.com](https://gasbrazil.com/) | [gasbrazil.github.io](https://gasbrazil.github.io/) |
+| ONS Balances | [gasbrazil.com/ons](https://gasbrazil.com/ons/) | [gasbrazil.github.io/ons](https://gasbrazil.github.io/ons/) |
+| POC Results | [gasbrazil.com/poc](https://gasbrazil.com/poc/) | [gasbrazil.github.io/poc](https://gasbrazil.github.io/poc/) |
+| POC Contracts | [gasbrazil.com/contratos](https://gasbrazil.com/contratos/) | [gasbrazil.github.io/contratos](https://gasbrazil.github.io/contratos/) |
+| About | [gasbrazil.com/about](https://gasbrazil.com/about/) | [gasbrazil.github.io/about](https://gasbrazil.github.io/about/) |
 
 ## Repo at a glance
 
@@ -46,12 +43,12 @@ ons_pipeline.py     downloader + aggregator + CLI
 dashboard.py        HTML/JS dashboard generator (imported by the CLI)
 make_mock.py        generates ONS-shaped fake data for offline testing
 check_bulletin.py   reconciles the store against an ONS DIARIO_*.xlsx bulletin
-.github/workflows/refresh.yml   daily rebuild + GitHub Pages deploy (+ mirrors)
-fonts/Degular.ttf   self-hosted font, embedded into the page at build time
+../.github/workflows/ons.yml   twice-daily rebuild + commit of ons/index.html
+../shared/fonts/Degular.ttf    self-hosted font, embedded at build time
 requirements.txt
 ```
 
 Full setup, CLI flags, and local usage are in the
-[README](https://github.com/caissonpoint/ons-dashboard/blob/main/README.md) —
+[README](https://github.com/gasbrazil/gasbrazil.github.io/blob/main/ons/README.md) —
 this wiki assumes you've already got it running and focuses on the dashboard
 itself and how it's deployed.
