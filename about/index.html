@@ -210,33 +210,43 @@ body {
   display: flex; align-items: center; justify-content: center;
 }
 #theme-toggle svg { width: 17px; height: 17px; }
-main.hub { flex: 1; width: var(--content-w); max-width: 820px; margin: 0 auto;
-  padding: 72px 0 40px; }
-@media (max-width: 900px) { main.hub { width: auto; padding: 72px 16px 40px; } }
-.wordmark { font-size: 30px; font-weight: 700; letter-spacing: -.01em; }
+main.hub { flex: 1; width: var(--content-w); max-width: 720px; margin: 0 auto;
+  padding: 56px 0 40px; }
+@media (max-width: 900px) { main.hub { width: auto; padding: 40px 16px 40px; } }
+/* Home's own header row -- wordmark left, PT/theme controls right, same
+   idea as the pill-row-below-title header every dashboard uses, just
+   without a redundant nav-pill row here since the four cards below already
+   link to every other page (see ADR-001 / nav_links_html). */
+.hub-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.hub-controls { display: flex; gap: 6px; flex: none; }
+.hub-controls #theme-toggle { position: static; }
+.wordmark { font-size: 26px; font-weight: 700; letter-spacing: -.01em; }
 .wordmark .dot { color: var(--accent); }
 .wordmark a { color: inherit; text-decoration: none; }
-.tagline { color: var(--muted); font-size: 15px; margin-top: 8px; max-width: 40em; line-height: 1.5; }
-.flagbar { width: 120px; margin: 22px 0 0; }
-.lead { margin-top: 22px; font-size: 14.5px; line-height: 1.55; max-width: 42em; }
-.lead strong { font-weight: 650; }
-.lead .muted { color: var(--muted2); display: block; margin-top: 8px; }
-.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-  gap: 12px; margin-top: 26px; }
+.tagline { color: var(--muted); font-size: 14.5px; margin-top: 8px; max-width: 40em; line-height: 1.5; }
+.flagbar { width: 120px; margin: 18px 0 0; }
+.lead {
+  margin-top: 18px; font-size: 13.5px; line-height: 1.55; max-width: 100%;
+  background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+  padding: 12px 14px;
+}
+.lead .muted { color: var(--muted2); display: block; }
+.cards { display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: 10px; margin-top: 20px; }
+@media (max-width: 560px) { .cards { grid-template-columns: 1fr; } }
 .card {
-  background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 16px;
+  background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 13px 14px;
   text-align: left; text-decoration: none; color: var(--text);
   transition: box-shadow .15s ease, transform .15s ease, border-color .15s ease;
   display: flex; flex-direction: column;
 }
-.card:hover { box-shadow: 0 8px 24px var(--ring); transform: translateY(-2px); border-color: var(--accent); }
-.card .name { font-size: 16px; font-weight: 700; display: flex; align-items: center;
-  justify-content: space-between; gap: 8px; }
-.card .name .arrow { color: var(--accent); font-weight: 400; transition: transform .15s ease; }
-.card:hover .name .arrow { transform: translateX(3px); }
-.card .desc { color: var(--muted); font-size: 13px; margin-top: 8px; line-height: 1.5; flex: 1; }
-.card .kpi { margin-top: 12px; font-size: 13px; font-weight: 650; color: var(--text); }
-.card .when { color: var(--muted); font-size: 11.5px; margin-top: 4px; }
+.card:hover { box-shadow: 0 6px 18px var(--ring); transform: translateY(-2px); border-color: var(--accent); }
+.card .name { font-size: 14px; font-weight: 700; display: flex; align-items: center;
+  gap: 7px; }
+.card .name .dot { width: 7px; height: 7px; border-radius: 50%; flex: none; background: var(--accent); }
+.card .desc { color: var(--muted); font-size: 12px; margin-top: 6px; line-height: 1.45; flex: 1; }
+.card .kpi { margin-top: 10px; font-size: 12px; font-weight: 650; color: var(--text); min-height: 1em; }
+.card .when { color: var(--muted); font-size: 11px; margin-top: 3px; min-height: 1em; }
 .sources-block { margin-top: 28px; }
 .sources-block .label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em;
   color: var(--muted); font-weight: 600; margin-bottom: 8px; }
