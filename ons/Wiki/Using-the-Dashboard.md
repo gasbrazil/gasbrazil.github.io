@@ -137,8 +137,6 @@ progress.
 
 ## Getting to the other sites
 
-Top-right of the header: **← GasBrazil.com** and **POC Results Dashboard →**
-link to the landing page and the companion POC dashboard. These resolve to
-the right URL automatically depending on which mirror you're viewing the
-page from (custom domain, `caissonpoint.github.io`, or the `gasbrazil.github.io`
-hub) — see [Home](Home) for the full list of mirrors.
+Top-right of the header: **← GasBrazil.com**, **POC Results**, **POC Contracts**,
+and **About**. These resolve to path URLs on the host you are on
+(`gasbrazil.com/...` or `gasbrazil.github.io/...`) — see [Home](Home).

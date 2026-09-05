@@ -104,6 +104,34 @@ def render(template: str, **replacements: str) -> str:
     return out
 
 
+def seo_head(*, title: str, description: str, path: str = "/") -> str:
+    """Title, description, canonical, Open Graph, and hreflang tags.
+    path is the site-relative path including a leading slash."""
+    if not path.startswith("/"):
+        path = "/" + path
+    canonical = "https://gasbrazil.com" + path
+    alt = "https://gasbrazil.github.io" + ("" if path == "/" else path.rstrip("/"))
+    if path != "/" and not alt.endswith("/"):
+        alt = alt + "/"
+    desc = description.replace('"', "&quot;")
+    return (
+        f"<title>{title}</title>\n"
+        f'<meta name="description" content="{desc}">\n'
+        f'<link rel="canonical" href="{canonical}">\n'
+        f'<meta property="og:type" content="website">\n'
+        f'<meta property="og:site_name" content="GasBrazil.com">\n'
+        f'<meta property="og:title" content="{title}">\n'
+        f'<meta property="og:description" content="{desc}">\n'
+        f'<meta property="og:url" content="{canonical}">\n'
+        f'<meta property="og:locale" content="en_US">\n'
+        f'<meta property="og:locale:alternate" content="pt_BR">\n'
+        f'<link rel="alternate" hreflang="en" href="{canonical}">\n'
+        f'<link rel="alternate" hreflang="pt-BR" href="{canonical}">\n'
+        f'<link rel="alternate" hreflang="x-default" href="{canonical}">\n'
+        f'<link rel="alternate" href="{alt}">'
+    )
+
+
 # ---------------------------------------------------------------------------
 # Reusable JS. Plain strings, not a bundler: each dashboard's TEMPLATE splices
 # these into its own <script> block at a place of its choosing (typically
@@ -142,9 +170,24 @@ function escapeHtml(s) {
 # mode a click switches TO. initThemeToggle wires a button to toggle
 # document.documentElement's data-theme attribute and calls onChange (if
 # given) after each toggle so callers can repaint charts/colors.
+JS_BOOT = r"""
+(function(){
+  try {
+    if (localStorage.getItem("gasbrazil-theme") === "dark")
+      document.documentElement.setAttribute("data-theme", "dark");
+    var lang = localStorage.getItem("gasbrazil-lang");
+    if (!lang)
+      lang = ((navigator.language || "en").toLowerCase().indexOf("pt") === 0) ? "pt" : "en";
+    document.documentElement.setAttribute("data-lang", lang);
+    document.documentElement.setAttribute("lang", lang === "pt" ? "pt-BR" : "en");
+  } catch (e) {}
+})();
+"""
+
 JS_THEME_TOGGLE = r"""
 const SUN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>';
 const MOON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+const THEME_KEY = "gasbrazil-theme";
 function isDarkTheme() { return document.documentElement.getAttribute("data-theme") === "dark"; }
 function initThemeToggle(buttonId, onChange) {
   const btn = document.getElementById(buttonId);
@@ -152,15 +195,152 @@ function initThemeToggle(buttonId, onChange) {
   function paint() {
     const dark = isDarkTheme();
     btn.innerHTML = dark ? SUN_SVG : MOON_SVG;
-    const label = dark ? "Switch to light mode" : "Switch to dark mode";
+    const label = dark ? (typeof t === "function" ? t("themeLight") : "Switch to light mode")
+                       : (typeof t === "function" ? t("themeDark") : "Switch to dark mode");
     btn.title = label; btn.setAttribute("aria-label", label);
   }
   paint();
   btn.addEventListener("click", () => {
-    if (isDarkTheme()) document.documentElement.removeAttribute("data-theme");
-    else document.documentElement.setAttribute("data-theme", "dark");
+    const nextDark = !isDarkTheme();
+    if (nextDark) document.documentElement.setAttribute("data-theme", "dark");
+    else document.documentElement.removeAttribute("data-theme");
+    try { localStorage.setItem(THEME_KEY, nextDark ? "dark" : "light"); } catch (e) {}
     paint();
-    if (onChange) onChange(isDarkTheme());
+    if (onChange) onChange(nextDark);
+  });
+}
+"""
+
+JS_I18N = r"""
+const LANG_KEY = "gasbrazil-lang";
+const GB_I18N = {
+  en: {
+    themeDark: "Switch to dark mode",
+    themeLight: "Switch to light mode",
+    langSwitch: "Português",
+    skip: "Skip to content",
+    navHome: "GasBrazil.com",
+    navOns: "ONS Balances",
+    navPoc: "POC Results",
+    navContratos: "POC Contracts",
+    navAbout: "About",
+    navWiki: "Wiki",
+    contact: "Contact",
+    tagline: "Data tools for Brazil's natural gas market — grid balances, pipeline capacity, and contracted transport activity, refreshed daily.",
+    aboutLead: "Independent, public-data dashboards. Nothing here is an official ONS, ANP, CCEE, or transportadora product.",
+    aboutBody: "GasBrazil.com consolidates open Brazilian gas and power data into three self-contained tools you can filter, chart, and export. Numbers come from public APIs and open-data portals; caveats live on each dashboard and on the About page.",
+    cardOns: "ONS Balances",
+    cardOnsDesc: "Daily grid balances, thermal generation by plant, and gas-fired dispatch across Brazil's interconnected power system.",
+    cardPoc: "POC Results",
+    cardPocDesc: "Pipeline capacity offer results — balancing, GUS acquisition, and linepack trades across TBG, TAG, and NTS.",
+    cardContratos: "POC Contracts",
+    cardContratosDesc: "Active transport and master transport contracts across TBG, TAG, and NTS. Legacy and access-connection contracts are not yet included.",
+    kpiRefresh: "Last refreshed",
+    sources: "Official sources",
+    sourceOns: "ONS open data",
+    sourcePoc: "Portal de Oferta de Capacidade",
+    sourceAnp: "ANP gas transport movement",
+    footerAbout: "About & methodology",
+    aboutH1: "About GasBrazil",
+    aboutWho: "What this is",
+    aboutWhoBody: "A small independent site that republishes public Brazilian natural-gas and power-system data as filterable dashboards. It is not affiliated with ONS, ANP, CCEE, TBG, TAG, or NTS.",
+    aboutHow: "How the data is built",
+    aboutHowBody: "Each dashboard is a single static HTML file. GitHub Actions fetch the source, transform it, and embed a compressed payload in the page. There is no live API behind the published site.",
+    aboutGloss: "Glossary",
+    glossGus: "GUS — gas acquired by a transportadora for system use.",
+    glossLinepack: "Linepack — inventory held inside the pipeline, traded to balance the network.",
+    glossBal: "Residual / operational balancing — short-term PEG processes that clear imbalances.",
+    glossCmo: "CMO — ONS marginal operating cost (R$/MWh). Not the same as CCEE's PLD settlement price.",
+    glossMaster: "Master transport contract — framework that enables later transport nominations; not itself a firm capacity booking.",
+    aboutCover: "Coverage limits",
+    aboutCoverBody: "POC Contracts currently include Transport Contract and Master Contract rows. Legacy transport contracts and access connections are on the official portal but are not in this feed yet.",
+    notFound: "This page is not here.",
+    notFoundBody: "The hub and three dashboards are linked below.",
+    backHome: "Back to GasBrazil.com"
+  },
+  pt: {
+    themeDark: "Mudar para o modo escuro",
+    themeLight: "Mudar para o modo claro",
+    langSwitch: "English",
+    skip: "Ir para o conteúdo",
+    navHome: "GasBrazil.com",
+    navOns: "Balanços ONS",
+    navPoc: "Resultados POC",
+    navContratos: "Contratos POC",
+    navAbout: "Sobre",
+    navWiki: "Wiki",
+    contact: "Contato",
+    tagline: "Ferramentas de dados para o mercado de gás natural do Brasil — balanços do SIN, capacidade de gasodutos e contratos de transporte, atualizados diariamente.",
+    aboutLead: "Painéis independentes com dados públicos. Isto não é um produto oficial da ONS, da ANP, da CCEE ou das transportadoras.",
+    aboutBody: "O GasBrazil.com reúne dados abertos de gás e energia do Brasil em três ferramentas que você pode filtrar, graficar e exportar. Os números vêm de APIs e portais públicos; as ressalvas estão em cada painel e na página Sobre.",
+    cardOns: "Balanços ONS",
+    cardOnsDesc: "Balanços diários do SIN, geração térmica por usina e despacho a gás no sistema interligado.",
+    cardPoc: "Resultados POC",
+    cardPocDesc: "Resultados da oferta de capacidade — balanceamento, aquisição de GUS e linepack em TBG, TAG e NTS.",
+    cardContratos: "Contratos POC",
+    cardContratosDesc: "Contratos de transporte e contratos master ativos em TBG, TAG e NTS. Contratos legados e conexões de acesso ainda não entram.",
+    kpiRefresh: "Última atualização",
+    sources: "Fontes oficiais",
+    sourceOns: "Dados abertos da ONS",
+    sourcePoc: "Portal de Oferta de Capacidade",
+    sourceAnp: "Movimentação de gás da ANP",
+    footerAbout: "Sobre e metodologia",
+    aboutH1: "Sobre o GasBrazil",
+    aboutWho: "O que é isto",
+    aboutWhoBody: "Um site independente que republica dados públicos de gás natural e do sistema elétrico brasileiro em painéis filtráveis. Não tem vínculo com ONS, ANP, CCEE, TBG, TAG ou NTS.",
+    aboutHow: "Como os dados são montados",
+    aboutHowBody: "Cada painel é um único arquivo HTML estático. O GitHub Actions busca a fonte, transforma e embute o payload compactado na página. O site publicado não tem API ao vivo.",
+    aboutGloss: "Glossário",
+    glossGus: "GUS — gás adquirido pela transportadora para uso do sistema.",
+    glossLinepack: "Linepack — estoque dentro do gasoduto, negociado para balancear a rede.",
+    glossBal: "Balanceamento residual / operacional — processos de curto prazo da PEG que zeram desequilíbrios.",
+    glossCmo: "CMO — custo marginal de operação da ONS (R$/MWh). Não é o PLD da CCEE.",
+    glossMaster: "Contrato master de transporte — quadro que habilita nomeações posteriores; não é, por si, uma reserva firme de capacidade.",
+    aboutCover: "Limites de cobertura",
+    aboutCoverBody: "Contratos POC incluem hoje Contrato de Transporte e Contrato Master. Contratos de transporte legado e conexões de acesso estão no portal oficial, mas ainda não neste feed.",
+    notFound: "Esta página não existe.",
+    notFoundBody: "O hub e os três painéis estão nos links abaixo.",
+    backHome: "Voltar ao GasBrazil.com"
+  }
+};
+function currentLang() {
+  return document.documentElement.getAttribute("data-lang") === "pt" ? "pt" : "en";
+}
+function t(key) {
+  const pack = GB_I18N[currentLang()] || GB_I18N.en;
+  return pack[key] || GB_I18N.en[key] || key;
+}
+function applyI18n() {
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const key = el.getAttribute("data-i18n");
+    if (key) el.textContent = t(key);
+  });
+  document.querySelectorAll("[data-i18n-aria]").forEach(el => {
+    const key = el.getAttribute("data-i18n-aria");
+    if (key) el.setAttribute("aria-label", t(key));
+  });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+    const key = el.getAttribute("data-i18n-placeholder");
+    if (key) el.setAttribute("placeholder", t(key));
+  });
+  const langBtn = document.getElementById("lang-toggle");
+  if (langBtn) {
+    langBtn.textContent = currentLang() === "pt" ? "EN" : "PT";
+    langBtn.title = t("langSwitch");
+    langBtn.setAttribute("aria-label", t("langSwitch"));
+  }
+}
+function initLangToggle(buttonId, onChange) {
+  const btn = document.getElementById(buttonId || "lang-toggle");
+  applyI18n();
+  if (!btn) return;
+  btn.addEventListener("click", () => {
+    const next = currentLang() === "pt" ? "en" : "pt";
+    document.documentElement.setAttribute("data-lang", next);
+    document.documentElement.setAttribute("lang", next === "pt" ? "pt-BR" : "en");
+    try { localStorage.setItem(LANG_KEY, next); } catch (e) {}
+    applyI18n();
+    if (onChange) onChange(next);
   });
 }
 """
@@ -338,19 +518,19 @@ _SITES = {
     },
     "ons": {
         "label": "ONS Balances Dashboard",
-        "custom": "https://ons.gasbrazil.com",
+        "custom": "https://gasbrazil.com/ons/",
         "caissonpoint": "https://caissonpoint.github.io/ons-dashboard/",
         "hub": "https://gasbrazil.github.io/ons/",
     },
     "poc": {
         "label": "POC Results Dashboard",
-        "custom": "https://poc.gasbrazil.com",
+        "custom": "https://gasbrazil.com/poc/",
         "caissonpoint": "https://caissonpoint.github.io/poc-dashboard/",
         "hub": "https://gasbrazil.github.io/poc/",
     },
     "contratos": {
         "label": "POC Contracts Dashboard",
-        "custom": "https://poc2.gasbrazil.com",
+        "custom": "https://gasbrazil.com/contratos/",
         "caissonpoint": "https://caissonpoint.github.io/poc-contratos/",
         "hub": "https://gasbrazil.github.io/contratos/",
     },

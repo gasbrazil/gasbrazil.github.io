@@ -149,6 +149,22 @@
   opacity: 1; visibility: visible;
 }
 
+.skip-link {
+  position: absolute; left: 12px; top: -40px; z-index: 80;
+  background: var(--accent); color: #fff; padding: 6px 10px;
+  border-radius: 6px; font: 600 12.5px var(--font); text-decoration: none;
+}
+.skip-link:focus { top: 12px; }
+.langBtn, #lang-toggle {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 34px; height: 34px; padding: 0 8px;
+  background: var(--panel); border: 1px solid var(--border-strong);
+  border-radius: 6px; color: var(--text); cursor: pointer;
+  font: 700 11.5px/1 var(--font); letter-spacing: .04em;
+}
+.langBtn:hover, #lang-toggle:hover { background: var(--accent-soft); }
+.chrome-tools { display: flex; align-items: center; gap: 6px; }
+
 :root{ color-scheme: light; }
 :root[data-theme="dark"]{ color-scheme: dark; }
 *{box-sizing:border-box}
@@ -233,7 +249,7 @@ footer.site a{color:var(--muted)}
 <a href="using-the-dashboard.html">Using the Dashboard</a>
 <a href="architecture-and-deployment.html">Architecture & Deployment</a>
 <a href="known-limitations.html">Known Limitations</a>
-      <a class="back" href="https://github.com/caissonpoint/ons-dashboard/blob/main/README.md" target="_blank" rel="noopener">README (GitHub) &#8599;</a>
+      <a class="back" href="https://github.com/gasbrazil/gasbrazil.github.io/blob/main/ons/README.md" target="_blank" rel="noopener">README (GitHub) &#8599;</a>
     </nav>
   </aside>
   <main>
@@ -243,7 +259,7 @@ footer.site a{color:var(--muted)}
 balances, plant-level thermal dispatch, installed capacity, and reservoir
 storage, aggregated into a single self-contained HTML page. No server, no
 database, no API — the data is embedded in the file itself.</p>
-<p>This wiki covers what the <a href="https://github.com/caissonpoint/ons-dashboard/blob/main/README.md">README</a>
+<p>This wiki covers what the <a href="https://github.com/gasbrazil/gasbrazil.github.io/blob/main/ons/README.md">README</a>
 doesn't: how to read the live dashboard, how the pieces are deployed and wired
 together, and what to take with a grain of salt.</p>
 <h2>Pages</h2>
@@ -261,51 +277,55 @@ together, and what to take with a grain of salt.</p>
   before quoting a number from this tool to someone else.</li>
 </ul>
 <h2>Live sites</h2>
+<p>One repo, path-based URLs. The same pages are on the custom domain and the
+GitHub Pages host:</p>
 <table>
 <thead>
 <tr>
 <th>Site</th>
-<th>URL</th>
-<th>What it is</th>
+<th>gasbrazil.com</th>
+<th>Mirror</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>ONS Balances (this repo)</td>
-<td><a href="https://ons.gasbrazil.com">ons.gasbrazil.com</a></td>
-<td>The dashboard this wiki documents</td>
-</tr>
-<tr>
-<td>POC dashboard</td>
-<td><a href="https://poc.gasbrazil.com">poc.gasbrazil.com</a></td>
-<td>A separate, related dashboard (<code>poc-dashboard</code> repo)</td>
-</tr>
-<tr>
 <td>Landing page</td>
-<td><a href="https://gasbrazil.com">gasbrazil.com</a></td>
-<td>Hub linking to both</td>
+<td><a href="https://gasbrazil.com/">gasbrazil.com</a></td>
+<td><a href="https://gasbrazil.github.io/">gasbrazil.github.io</a></td>
+</tr>
+<tr>
+<td>ONS Balances</td>
+<td><a href="https://gasbrazil.com/ons/">gasbrazil.com/ons</a></td>
+<td><a href="https://gasbrazil.github.io/ons/">gasbrazil.github.io/ons</a></td>
+</tr>
+<tr>
+<td>POC Results</td>
+<td><a href="https://gasbrazil.com/poc/">gasbrazil.com/poc</a></td>
+<td><a href="https://gasbrazil.github.io/poc/">gasbrazil.github.io/poc</a></td>
+</tr>
+<tr>
+<td>POC Contracts</td>
+<td><a href="https://gasbrazil.com/contratos/">gasbrazil.com/contratos</a></td>
+<td><a href="https://gasbrazil.github.io/contratos/">gasbrazil.github.io/contratos</a></td>
+</tr>
+<tr>
+<td>About</td>
+<td><a href="https://gasbrazil.com/about/">gasbrazil.com/about</a></td>
+<td><a href="https://gasbrazil.github.io/about/">gasbrazil.github.io/about</a></td>
 </tr>
 </tbody>
 </table>
-<p>Each site also has a firewall-friendly mirror with no custom domain, kept in
-sync automatically — see <a href="architecture-and-deployment.html">Architecture and Deployment</a>
-for why and how:</p>
-<ul>
-<li><code>ons.gasbrazil.com</code> → also at <a href="https://ons-dashboard.github.io">ons-dashboard.github.io</a> and <a href="https://gasbrazil.github.io/ons">gasbrazil.github.io/ons</a></li>
-<li><code>poc.gasbrazil.com</code> → also at <a href="https://caissonpoint.github.io/poc-dashboard">caissonpoint.github.io/poc-dashboard</a> and <a href="https://gasbrazil.github.io/poc">gasbrazil.github.io/poc</a></li>
-<li><code>gasbrazil.com</code> → also at <a href="https://gasbrazil.github.io">gasbrazil.github.io</a></li>
-</ul>
 <h2>Repo at a glance</h2>
 <pre><code>ons_pipeline.py     downloader + aggregator + CLI
 dashboard.py        HTML/JS dashboard generator (imported by the CLI)
 make_mock.py        generates ONS-shaped fake data for offline testing
 check_bulletin.py   reconciles the store against an ONS DIARIO_*.xlsx bulletin
-.github/workflows/refresh.yml   daily rebuild + GitHub Pages deploy (+ mirrors)
-fonts/Degular.ttf   self-hosted font, embedded into the page at build time
+../.github/workflows/ons.yml   twice-daily rebuild + commit of ons/index.html
+../shared/fonts/Degular.ttf    self-hosted font, embedded at build time
 requirements.txt
 </code></pre>
 <p>Full setup, CLI flags, and local usage are in the
-<a href="https://github.com/caissonpoint/ons-dashboard/blob/main/README.md">README</a> —
+<a href="https://github.com/gasbrazil/gasbrazil.github.io/blob/main/ons/README.md">README</a> —
 this wiki assumes you've already got it running and focuses on the dashboard
 itself and how it's deployed.</p>
     </div>
@@ -313,7 +333,7 @@ itself and how it's deployed.</p>
 </div>
 <footer class="site">
   <div style="display:block">
-    Source: <a href="https://github.com/caissonpoint/ons-dashboard" target="_blank" rel="noopener">caissonpoint/ons-dashboard</a> on GitHub.
+    Source: <a href="https://github.com/gasbrazil/gasbrazil.github.io" target="_blank" rel="noopener">gasbrazil/gasbrazil.github.io</a> on GitHub.
     Data via <a href="https://dados.ons.org.br" target="_blank" rel="noopener">ONS Dados Abertos</a> (CC-BY).
     Questions or feedback: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>.
   </div>

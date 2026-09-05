@@ -71,7 +71,10 @@ TEMPLATE = """<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>POC Results Dashboard</title>
+<meta name="description" content="Pipeline capacity offer results from Brazil's Portal de Oferta de Capacidade — balancing, GUS, and linepack trades.">
+<link rel="canonical" href="https://gasbrazil.com/poc/">
 <link rel="icon" href="{{FAVICON_DATA_URI}}">
+<script>__SHARED_JS_BOOT__</script>
 <style>
 __SHARED_THEME_CSS__
 /* Everything below is this dashboard's own layout/components -- the palette
@@ -176,18 +179,21 @@ footer a { color: var(--accent); }
 </style>
 </head>
 <body>
+<a class="skip-link" href="#data-table" data-i18n="skip">Skip to content</a>
 <div class="wrap">
 <header>
   <div>
-    <h1>POC Results Dashboard</h1>
+    <h1 data-i18n="navPoc">POC Results Dashboard</h1>
     <div class="subtitle" id="subtitle">Last refreshed &mdash;</div>
   </div>
   <div class="header-right">
     <div class="header-links">
-      <a class="navlink" id="link-home" href="https://gasbrazil.com">&larr; GasBrazil.com</a>
-      <a class="navlink" id="link-ons" href="https://ons.gasbrazil.com">ONS Balances Dashboard &rarr;</a>
-      <a class="navlink" id="link-contratos" href="https://poc2.gasbrazil.com">POC Contracts &rarr;</a>
+      <a class="navlink" id="link-home" href="https://gasbrazil.com/">&larr; GasBrazil.com</a>
+      <a class="navlink" id="link-ons" href="https://gasbrazil.com/ons/">ONS Balances Dashboard &rarr;</a>
+      <a class="navlink" id="link-contratos" href="https://gasbrazil.com/contratos/">POC Contracts &rarr;</a>
+      <a class="navlink" href="../about/" data-i18n="navAbout">About</a>
     </div>
+    <button type="button" id="lang-toggle" class="langBtn" aria-label="Português">PT</button>
     <button id="theme-toggle" title="Toggle theme" aria-label="Toggle theme"></button>
   </div>
 </header>
@@ -1144,6 +1150,7 @@ async function downloadAllXLSX() {
 // JS_THEME_TOGGLE. initThemeToggle is called from init() below with this
 // page's own post-toggle repaint (renderChart/updateChartPickerButtons).
 __SHARED_JS_THEME_TOGGLE__
+__SHARED_JS_I18N__
 
 async function init() {
   document.getElementById("year").textContent = new Date().getFullYear();
@@ -1208,6 +1215,7 @@ async function init() {
     chartResizeTimer = setTimeout(renderChart, 140);
   });
   initThemeToggle("theme-toggle", () => { renderChart(); updateChartPickerButtons(); });
+  initLangToggle("lang-toggle");
   initCrossLinks();
 }
 init();
@@ -1227,6 +1235,8 @@ def write_dashboard(out_path=DEFAULT_OUT):
         SHARED_JS_DECODE=kit.JS_DECODE,
         SHARED_JS_ESCAPE_HTML=kit.JS_ESCAPE_HTML,
         SHARED_JS_THEME_TOGGLE=kit.JS_THEME_TOGGLE,
+        SHARED_JS_BOOT=kit.JS_BOOT,
+        SHARED_JS_I18N=kit.JS_I18N,
         SHARED_JS_CSV=kit.JS_CSV_HELPERS,
         SHARED_JS_XLSX=kit.JS_XLSX_ENGINE,
         SHARED_SITE_LINKS_JS=kit.site_links_js("poc"),

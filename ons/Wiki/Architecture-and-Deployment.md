@@ -113,32 +113,23 @@ as a visible record of when the data last refreshed.
 
 ## Multi-site hosting topology
 
-Three properties, one `gasbrazil` account used purely as a firewall-friendly
-hub — some corporate DNS/proxy filters flag a newly-registered custom domain
-like `gasbrazil.com` (or its subdomains) as suspicious regardless of content,
-where a plain `*.github.io` URL has no such reputation problem:
+One monorepo (`gasbrazil/gasbrazil.github.io`) serves the hub and all three
+dashboards from path URLs. `gasbrazil.github.io` is the firewall-friendly
+mirror of the same tree — some corporate DNS filters flag a new custom
+domain even when the content is fine.
 
-| Repo | Primary URL | Mirror(s) |
+| Path | Primary URL | Mirror |
 |---|---|---|
-| `caissonpoint/ons-dashboard` (this repo) | `ons.gasbrazil.com` | `ons-dashboard.github.io`, `gasbrazil.github.io/ons` |
-| `caissonpoint/poc-dashboard` | `poc.gasbrazil.com` | `caissonpoint.github.io/poc-dashboard`, `gasbrazil.github.io/poc` |
-| `caissonpoint/gasbrazil-com` | `gasbrazil.com` | `gasbrazil.github.io` |
+| `/` | `gasbrazil.com` | `gasbrazil.github.io` |
+| `/ons/` | `gasbrazil.com/ons/` | `gasbrazil.github.io/ons/` |
+| `/poc/` | `gasbrazil.com/poc/` | `gasbrazil.github.io/poc/` |
+| `/contratos/` | `gasbrazil.com/contratos/` | `gasbrazil.github.io/contratos/` |
 
-Each mirror is a separate GitHub Pages repo, classic branch-based (not
-Actions-build) since it only ever receives one already-built `index.html`.
-`refresh.yml`'s mirror steps clone the mirror repo, copy `site/index.html`
-in, commit, and push — using an SSH deploy key scoped to that one repo only
-(GitHub doesn't allow reusing one SSH key across multiple repos, so each
-mirror has its own keypair). Every mirror step is `continue-on-error: true`
-and gated on its secret being set, so a mirror failure can never break the
-real build or deploy. The dashboard's own header links (see
-[Using the Dashboard](Using-the-Dashboard)) resolve to the right sibling URL
-based on `location.hostname` at load time — `SITE_LINKS`/`siteFlavor()` in
-`dashboard.py`.
-
-The landing page (`gasbrazil-com` → `gasbrazil.github.io`) is a one-time
-snapshot, not on its own sync schedule — it changes rarely, so there's no CI
-step for it currently.
+GitHub Pages deploys from the `main` branch root. Each dashboard workflow
+commits into its own subfolder. Header links resolve from `location.hostname`
+at load time (`SITE_LINKS` / `siteFlavor()` in `shared/dashboard_kit.py`):
+`gasbrazil.com/...` on the custom domain, `gasbrazil.github.io/...` on the
+hub host.
 
 ## "Refresh data" button infrastructure
 

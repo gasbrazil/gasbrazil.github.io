@@ -171,7 +171,7 @@ def page_template(title, body_html, current_html):
     <nav>
       <div class="label">Pages</div>
       {nav}
-      <a class="back" href="https://github.com/caissonpoint/ons-dashboard/blob/main/README.md" target="_blank" rel="noopener">README (GitHub) &#8599;</a>
+      <a class="back" href="https://github.com/gasbrazil/gasbrazil.github.io/blob/main/ons/README.md" target="_blank" rel="noopener">README (GitHub) &#8599;</a>
     </nav>
   </aside>
   <main>
@@ -182,7 +182,7 @@ def page_template(title, body_html, current_html):
 </div>
 <footer class="site">
   <div style="display:block">
-    Source: <a href="https://github.com/caissonpoint/ons-dashboard" target="_blank" rel="noopener">caissonpoint/ons-dashboard</a> on GitHub.
+    Source: <a href="https://github.com/gasbrazil/gasbrazil.github.io" target="_blank" rel="noopener">gasbrazil/gasbrazil.github.io</a> on GitHub.
     Data via <a href="https://dados.ons.org.br" target="_blank" rel="noopener">ONS Dados Abertos</a> (CC-BY).
     Questions or feedback: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>.
   </div>

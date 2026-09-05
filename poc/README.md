@@ -32,7 +32,7 @@ file — no server, no database).
   theme toggle, CSV/XLSX export helpers, and cross-dashboard nav links.
 - `make_mock.py` — synthetic raw data for local testing without hitting the
   live API.
-- `../.github/workflows/poc.yml` — cron (every 6h) + push + manual dispatch:
+- `../.github/workflows/poc.yml` — every 6 hours + push + manual dispatch:
   fetch → build → commit `data/poc_results.parquet` + `index.html`.
 
 ## Local dev
