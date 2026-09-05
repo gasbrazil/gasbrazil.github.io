@@ -15,10 +15,11 @@ verified three times, and the copies drifted (different accent colors,
 different function names, one dashboard had Excel export and the other two
 didn't). This repo fixes that two ways:
 
-1. **One repo, one Pages site, path-based URLs.** `ons/`, `poc/`, and
-   `contratos/` each build to their own `index.html`, committed straight
-   into this repo, served at `/ons/`, `/poc/`, `/contratos/` under one
-   domain — no more one-subdomain-per-repo.
+1. **One repo, one Pages site, path-based URLs.** `ons/`, `poc/`,
+   `contratos/`, and `flows/` each build to their own `index.html`,
+   committed straight into this repo, served at `/ons/`, `/poc/`,
+   `/contratos/`, `/flows/` under one domain — no more
+   one-subdomain-per-repo.
 2. **A shared front-end kit.** `shared/theme.css` and
    `shared/dashboard_kit.py` hold the cosmetic and mechanical pieces every
    dashboard needs (palette, font embedding, the theme toggle, CSV/XLSX
@@ -27,11 +28,12 @@ didn't). This repo fixes that two ways:
    `shared/theme.css` and every dashboard picks it up on its next rebuild —
    one edit instead of three.**
 
-The three Python data pipelines (`ons_pipeline.py`, `poc_pipeline.py`,
-`contratos_pipeline.py`) are untouched by any of this — this was a
-front-end/shell consolidation, not a data-architecture change. Each
-dashboard still owns its own data model, layout, and business logic;
-`shared/` only centralizes what was genuinely identical across all three.
+The Python data pipelines (`ons_pipeline.py`, `poc_pipeline.py`,
+`contratos_pipeline.py`, `flows_pipeline.py`) are untouched by any of
+this — this was a front-end/shell consolidation, not a
+data-architecture change. Each dashboard still owns its own data model,
+layout, and business logic; `shared/` only centralizes what was
+genuinely identical across all of them.
 
 ## Structure
 
@@ -44,6 +46,7 @@ shared/                 theme.css + dashboard_kit.py -- the shared kit (see belo
 ons/                    ONS grid-balances dashboard -- see ons/README.md
 poc/                    POC capacity-offer-results dashboard -- see poc/README.md
 contratos/              POC transport-contracts dashboard -- see contratos/README.md
+flows/                  ANP pipeline-flows dashboard -- see flows/README.md
 build_home.py           builds the landing page (this file) from shared/theme.css
 index.html              built landing page (committed -- served at /)
 .github/workflows/
@@ -51,6 +54,7 @@ index.html              built landing page (committed -- served at /)
   ons.yml                 ons/'s own fetch -> build -> health-gate -> deploy
   poc.yml                 poc/'s own fetch -> build -> deploy
   contratos.yml           contratos/'s own fetch -> build -> deploy
+  flows.yml               flows/'s own fetch -> build -> health-gate -> deploy
 ```
 
 ## Making a visual change
@@ -59,7 +63,7 @@ Edit `shared/theme.css` (a color, the font, the `.flagbar` gradient) or
 `shared/dashboard_kit.py` (shared JS behavior — the theme toggle, CSV/XLSX
 export, nav-link resolution) and push to `main`. Because each workflow
 triggers on `paths: [<project>/**, shared/**]`, that one push rebuilds
-**all three dashboards and the landing page**, no per-project edits needed.
+**every dashboard and the landing page**, no per-project edits needed.
 To change just one dashboard's own layout or data logic, edit that
 project's own `dashboard.py` — nothing else needs to change.
 
@@ -68,16 +72,17 @@ project's own `dashboard.py` — nothing else needs to change.
 GitHub Pages is configured **Deploy from a branch → `main` / `(root)`**, not
 the Actions-artifact deployment (`actions/deploy-pages`). That's a
 deliberate choice: artifact-based deployment publishes one artifact as the
-*entire* site per repo, which would make ons/poc/contratos/home's four
-independent workflows race to overwrite each other's deploy. Branch
-deployment just serves whatever is currently committed, so four workflows
-each committing straight into their own subfolder (or root, for the landing
-page) coexist without stepping on each other.
+*entire* site per repo, which would make ons/poc/contratos/flows/home's
+five independent workflows race to overwrite each other's deploy. Branch
+deployment just serves whatever is currently committed, so each workflow
+committing straight into its own subfolder (or root, for the landing
+page) coexists without stepping on the others.
 
 Each workflow ends with a commit-and-push step that retries with
 `git pull --rebase` if the push is rejected (i.e. another workflow pushed
-first) — expected occasionally with four independently-scheduled workflows
-sharing one branch, and harmless since they never touch the same files.
+first) — expected occasionally with several independently-scheduled
+workflows sharing one branch, and harmless since they never touch the
+same files.
 
 ## URL scheme
 
@@ -89,6 +94,7 @@ Path-based under one domain, per ADR-001 Decision 1 Option C:
 | `/ons/` | ONS grid balances |
 | `/poc/` | POC capacity offer results |
 | `/contratos/` | POC transport contracts |
+| `/flows/` | ANP pipeline flows |
 
 Before the `gasbrazil.com` domain is cut over to this repo, the same
 structure is reachable at `gasbrazil.github.io/...` for verification.

@@ -1,0 +1,93 @@
+name: Refresh Pipeline Flows dashboard
+
+# ANP publishes one file per month, typically with a lag of several weeks,
+# and revises recently-published months in place -- daily is more than
+# enough to catch both a new month landing and a revision to an old one.
+# fetch_pipeline.py's own REFRESH_LAST_N_MONTHS handles not re-downloading
+# everything every run.
+on:
+  schedule:
+    - cron: "15 12 * * *"
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths:
+      - "flows/**"
+      - "shared/**"
+      - ".github/workflows/flows.yml"
+
+permissions:
+  contents: write
+
+# Scoped to this workflow only -- ons, poc, contratos, and flows each own a
+# different subfolder and can build concurrently.
+concurrency:
+  group: flows-refresh
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: flows
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: flows/requirements.txt
+
+      - run: pip install -r requirements.txt
+
+      # Raw ANP files are one CSV per month -- cache the whole raw/ tree
+      # keyed by year-month so a normal run only re-downloads the last few
+      # months (fetch always refreshes those; see REFRESH_LAST_N_MONTHS)
+      # instead of re-pulling the full multi-year history every time.
+      - name: Cache key for this month
+        id: ym
+        run: echo "ym=$(date -u +%Y-%m)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore raw ANP source files
+        uses: actions/cache@v4
+        with:
+          path: flows/raw
+          key: flows-raw-${{ steps.ym.outputs.ym }}
+          restore-keys: |
+            flows-raw-
+
+      - name: Fetch new and revised monthly files
+        run: python flows_pipeline.py fetch
+
+      # Health gate (zero rows, staleness, missing point codes) runs inside
+      # `build` and exits non-zero on failure -- a bad build stops here
+      # rather than committing a broken dashboard over a working one.
+      - name: Build the tidy data stores
+        run: python flows_pipeline.py build
+
+      - name: Build the dashboard page
+        run: python dashboard.py index.html
+
+      # Legacy branch-based Pages deployment (Settings -> Pages -> Deploy
+      # from a branch -> main / root), matching ons/poc/contratos so this
+      # workflow's commit never races with theirs. raw/ and data/ are
+      # gitignored (large, rebuildable) -- only the built page is committed.
+      - name: Commit refreshed dashboard
+        working-directory: .
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add flows/index.html
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git commit -m "flows: automated refresh $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          for i in 1 2 3 4 5; do
+            if git push; then break; fi
+            echo "Push rejected (another workflow likely pushed first) -- rebasing and retrying ($i)..."
+            git pull --rebase origin main
+          done

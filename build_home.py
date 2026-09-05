@@ -38,6 +38,9 @@ def collect_status() -> dict:
         "contratos_kpi": None,
         "contratos_kpi_pt": None,
         "contratos_when": None,
+        "flows_kpi": None,
+        "flows_kpi_pt": None,
+        "flows_when": None,
     }
 
     ons_html = ROOT / "ons" / "index.html"
@@ -51,6 +54,21 @@ def collect_status() -> dict:
         if g:
             status["ons_kpi"] = f"{g.group(1)} MWmed gas"
             status["ons_kpi_pt"] = f"{g.group(1)} MWmed a gás"
+
+    flows_html = ROOT / "flows" / "index.html"
+    if flows_html.exists():
+        text = flows_html.read_text(encoding="utf-8", errors="ignore")
+        m = re.search(r"generated:\s*(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}\s+UTC)", text)
+        if m:
+            status["flows_when"] = m.group(1)
+        kpi = re.search(r"kpi_total_7d:\s*([0-9.]+)", text)
+        npts = re.search(r"n_points:\s*(\d+)", text)
+        if kpi and kpi.group(1):
+            total = float(kpi.group(1))
+            vol_label = f"{total / 1000:.1f}M" if total >= 1000 else f"{total:.0f}"
+            n_label = f" · {npts.group(1)} points" if npts and npts.group(1) else ""
+            status["flows_kpi"] = f"{vol_label} m³ realized (7d){n_label}"
+            status["flows_kpi_pt"] = f"{vol_label} m³ realizados (7d){n_label}"
 
     try:
         import pandas as pd
@@ -201,11 +219,11 @@ HOME_TEMPLATE = """__HEAD__
 __TOPBAR__
 <main class="hub" id="main">
   <div class="wordmark">GasBrazil<span class="dot">.</span>com</div>
-  <p class="tagline" data-i18n="tagline">Data tools for Brazil's natural gas market &mdash; grid balances, pipeline capacity, and contracted transport activity, refreshed daily.</p>
+  <p class="tagline" data-i18n="tagline">Data tools for Brazil's natural gas market &mdash; grid balances, pipeline flows and capacity, and contracted transport activity, refreshed daily.</p>
   <div class="flagbar" aria-hidden="true"></div>
   <div class="lead">
     <strong data-i18n="aboutLead">Independent, public-data dashboards. Nothing here is an official ONS, ANP, CCEE, or transportadora product.</strong>
-    <span class="muted" data-i18n="aboutBody">GasBrazil.com consolidates open Brazilian gas and power data into three self-contained tools you can filter, chart, and export. Numbers come from public APIs and open-data portals; caveats live on each dashboard and on the About page.</span>
+    <span class="muted" data-i18n="aboutBody">GasBrazil.com consolidates open Brazilian gas and power data into self-contained tools you can filter, chart, and export. Numbers come from public APIs and open-data portals; caveats live on each dashboard and on the About page.</span>
   </div>
   <div class="cards">
     <a class="card" href="ons/">
@@ -226,6 +244,12 @@ __TOPBAR__
       <div class="kpi" data-en="__CON_KPI__" data-pt="__CON_KPI_PT__">__CON_KPI__</div>
       <div class="when" data-refresh="__CON_WHEN__"></div>
     </a>
+    <a class="card" href="flows/">
+      <div class="name"><span data-i18n="cardFlows">Pipeline Flows</span><span class="arrow">&rarr;</span></div>
+      <div class="desc" data-i18n="cardFlowsDesc">Daily physical gas flow at every receipt and delivery point on Brazil's transport pipelines, plus system-use gas, losses, imbalance, and linepack.</div>
+      <div class="kpi" data-en="__FLOWS_KPI__" data-pt="__FLOWS_KPI_PT__">__FLOWS_KPI__</div>
+      <div class="when" data-refresh="__FLOWS_WHEN__"></div>
+    </a>
   </div>
   <div class="sources-block">
     <div class="label" data-i18n="sources">Official sources</div>
@@ -233,6 +257,7 @@ __TOPBAR__
       <a href="https://dados.ons.org.br" target="_blank" rel="noopener" data-i18n="sourceOns">ONS open data</a>
       <a href="https://www.ofertadecapacidade.com.br/PEG/resultado" target="_blank" rel="noopener" data-i18n="sourcePoc">Portal de Oferta de Capacidade</a>
       <a href="https://www.gov.br/anp/pt-br/centrais-de-conteudo/paineis-dinamicos-da-anp/painel-dinamico-de-movimentacao-de-gas-natural-em-gasodutos-de-transporte" target="_blank" rel="noopener" data-i18n="sourceAnp">ANP gas transport movement</a>
+      <a href="https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/dados-consolidados-movimentacao-de-gas-natural-em-gasodutos-de-transporte" target="_blank" rel="noopener" data-i18n="sourceFlows">ANP open data — pipeline movement</a>
     </div>
   </div>
 </main>
@@ -281,8 +306,9 @@ __TOPBAR__
     </ul>
     <h2 data-i18n="aboutCover">Coverage limits</h2>
     <p data-i18n="aboutCoverBody">POC Contracts currently include Transport Contract and Master Contract rows. Legacy transport contracts and access connections are on the official portal but are not in this feed yet.</p>
+    <p data-i18n="aboutCoverFlows">Pipeline Flows has no published ANP data for 2022, and each month is typically released with a lag of several weeks. Average pressure and shipper-level detail are collected but not shown on the dashboard; both are available in the underlying data files in the repository.</p>
     <p>
-      <a href="../ons/">ONS</a> · <a href="../poc/">POC</a> · <a href="../contratos/">Contratos</a> ·
+      <a href="../ons/">ONS</a> · <a href="../poc/">POC</a> · <a href="../contratos/">Contratos</a> · <a href="../flows/">Flows</a> ·
       <a href="../ons/wiki-html/">ONS wiki</a>
     </p>
   </div>
@@ -297,13 +323,14 @@ __TOPBAR__
 <main class="hub" id="main">
   <div class="wordmark"><a href="./">GasBrazil<span class="dot">.</span>com</a></div>
   <h1 style="font-size:22px;margin:18px 0 0" data-i18n="notFound">This page is not here.</h1>
-  <p class="tagline" data-i18n="notFoundBody">The hub and three dashboards are linked below.</p>
+  <p class="tagline" data-i18n="notFoundBody">The hub and dashboards are linked below.</p>
   <div class="flagbar" aria-hidden="true"></div>
   <div class="cards" style="margin-top:22px">
     <a class="card" href="./"><div class="name"><span data-i18n="backHome">Back to GasBrazil.com</span><span class="arrow">&rarr;</span></div></a>
     <a class="card" href="ons/"><div class="name"><span data-i18n="cardOns">ONS Balances</span><span class="arrow">&rarr;</span></div></a>
     <a class="card" href="poc/"><div class="name"><span data-i18n="cardPoc">POC Results</span><span class="arrow">&rarr;</span></div></a>
     <a class="card" href="contratos/"><div class="name"><span data-i18n="cardContratos">POC Contracts</span><span class="arrow">&rarr;</span></div></a>
+    <a class="card" href="flows/"><div class="name"><span data-i18n="cardFlows">Pipeline Flows</span><span class="arrow">&rarr;</span></div></a>
   </div>
 </main>
 __FOOTER__
@@ -341,6 +368,9 @@ def write_home(out_path: Path | str = DEFAULT_OUT) -> Path:
     html = html.replace("__CON_KPI__", st["contratos_kpi"] or "")
     html = html.replace("__CON_KPI_PT__", st["contratos_kpi_pt"] or st["contratos_kpi"] or "")
     html = html.replace("__CON_WHEN__", st["contratos_when"] or "")
+    html = html.replace("__FLOWS_KPI__", st["flows_kpi"] or "")
+    html = html.replace("__FLOWS_KPI_PT__", st["flows_kpi_pt"] or st["flows_kpi"] or "")
+    html = html.replace("__FLOWS_WHEN__", st["flows_when"] or "")
     html = _kit_render(html)
     out_path = Path(out_path)
     out_path.write_text(html, encoding="utf-8")
@@ -389,7 +419,7 @@ def write_robots_and_sitemap() -> None:
         encoding="utf-8",
     )
     today = dt.date.today().isoformat()
-    urls = ["/", "/ons/", "/poc/", "/contratos/", "/about/"]
+    urls = ["/", "/ons/", "/poc/", "/contratos/", "/flows/", "/about/"]
     body = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     for u in urls:
         body += f"  <url><loc>https://gasbrazil.com{u}</loc><lastmod>{today}</lastmod></url>\n"

@@ -22,3 +22,10 @@ ons/data/
 # is excluded.
 poc/data/raw_processos.json
 contratos/data/raw_contratos.json
+
+# flows/: downloaded ANP source files and the derived daily stores, both
+# rebuildable and both too large for git. CI keeps raw/ in the Actions cache
+# instead (see .github/workflows/flows.yml). flows/index.html IS committed --
+# it's the deployed output, same as ons/, poc/, and contratos/'s index.html.
+flows/raw/
+flows/data/

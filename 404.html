@@ -266,13 +266,14 @@ footer.site a { color: var(--muted); }
 <main class="hub" id="main">
   <div class="wordmark"><a href="./">GasBrazil<span class="dot">.</span>com</a></div>
   <h1 style="font-size:22px;margin:18px 0 0" data-i18n="notFound">This page is not here.</h1>
-  <p class="tagline" data-i18n="notFoundBody">The hub and three dashboards are linked below.</p>
+  <p class="tagline" data-i18n="notFoundBody">The hub and dashboards are linked below.</p>
   <div class="flagbar" aria-hidden="true"></div>
   <div class="cards" style="margin-top:22px">
     <a class="card" href="./"><div class="name"><span data-i18n="backHome">Back to GasBrazil.com</span><span class="arrow">&rarr;</span></div></a>
     <a class="card" href="ons/"><div class="name"><span data-i18n="cardOns">ONS Balances</span><span class="arrow">&rarr;</span></div></a>
     <a class="card" href="poc/"><div class="name"><span data-i18n="cardPoc">POC Results</span><span class="arrow">&rarr;</span></div></a>
     <a class="card" href="contratos/"><div class="name"><span data-i18n="cardContratos">POC Contracts</span><span class="arrow">&rarr;</span></div></a>
+    <a class="card" href="flows/"><div class="name"><span data-i18n="cardFlows">Pipeline Flows</span><span class="arrow">&rarr;</span></div></a>
   </div>
 </main>
 <footer class="site">
@@ -319,23 +320,27 @@ const GB_I18N = {
     navOns: "ONS Balances",
     navPoc: "POC Results",
     navContratos: "POC Contracts",
+    navFlows: "Pipeline Flows Dashboard",
     navAbout: "About",
     navWiki: "Wiki",
     contact: "Contact",
-    tagline: "Data tools for Brazil's natural gas market — grid balances, pipeline capacity, and contracted transport activity, refreshed daily.",
+    tagline: "Data tools for Brazil's natural gas market — grid balances, pipeline capacity, contracted transport activity, and physical pipeline flows, refreshed daily.",
     aboutLead: "Independent, public-data dashboards. Nothing here is an official ONS, ANP, CCEE, or transportadora product.",
-    aboutBody: "GasBrazil.com consolidates open Brazilian gas and power data into three self-contained tools you can filter, chart, and export. Numbers come from public APIs and open-data portals; caveats live on each dashboard and on the About page.",
+    aboutBody: "GasBrazil.com consolidates open Brazilian gas and power data into self-contained tools you can filter, chart, and export. Numbers come from public APIs and open-data portals; caveats live on each dashboard and on the About page.",
     cardOns: "ONS Balances",
     cardOnsDesc: "Daily grid balances, thermal generation by plant, and gas-fired dispatch across Brazil's interconnected power system.",
     cardPoc: "POC Results",
     cardPocDesc: "Pipeline capacity offer results — balancing, GUS acquisition, and linepack trades across TBG, TAG, and NTS.",
     cardContratos: "POC Contracts",
     cardContratosDesc: "Active transport and master transport contracts across TBG, TAG, and NTS. Legacy and access-connection contracts are not yet included.",
+    cardFlows: "Pipeline Flows",
+    cardFlowsDesc: "Daily physical gas flow at every receipt and delivery point on Brazil's transport pipelines, plus system-use gas, losses, imbalance, and linepack.",
     kpiRefresh: "Last refreshed",
     sources: "Official sources",
     sourceOns: "ONS open data",
     sourcePoc: "Portal de Oferta de Capacidade",
     sourceAnp: "ANP gas transport movement",
+    sourceFlows: "ANP open data — pipeline movement",
     footerAbout: "About & methodology",
     aboutH1: "About GasBrazil",
     aboutWho: "What this is",
@@ -350,8 +355,9 @@ const GB_I18N = {
     glossMaster: "Master transport contract — framework that enables later transport nominations; not itself a firm capacity booking.",
     aboutCover: "Coverage limits",
     aboutCoverBody: "POC Contracts currently include Transport Contract and Master Contract rows. Legacy transport contracts and access connections are on the official portal but are not in this feed yet.",
+    aboutCoverFlows: "Pipeline Flows has no published ANP data for 2022, and each month is typically released with a lag of several weeks. Average pressure and shipper-level detail are collected but not shown on the dashboard; both are available in the underlying data files in the repository.",
     notFound: "This page is not here.",
-    notFoundBody: "The hub and three dashboards are linked below.",
+    notFoundBody: "The hub and dashboards are linked below.",
     backHome: "Back to GasBrazil.com"
   },
   pt: {
@@ -363,23 +369,27 @@ const GB_I18N = {
     navOns: "Balanços ONS",
     navPoc: "Resultados POC",
     navContratos: "Contratos POC",
+    navFlows: "Painel de Fluxos de Gasodutos",
     navAbout: "Sobre",
     navWiki: "Wiki",
     contact: "Contato",
-    tagline: "Ferramentas de dados para o mercado de gás natural do Brasil — balanços do SIN, capacidade de gasodutos e contratos de transporte, atualizados diariamente.",
+    tagline: "Ferramentas de dados para o mercado de gás natural do Brasil — balanços do SIN, capacidade de gasodutos, contratos de transporte e fluxos físicos, atualizados diariamente.",
     aboutLead: "Painéis independentes com dados públicos. Isto não é um produto oficial da ONS, da ANP, da CCEE ou das transportadoras.",
-    aboutBody: "O GasBrazil.com reúne dados abertos de gás e energia do Brasil em três ferramentas que você pode filtrar, graficar e exportar. Os números vêm de APIs e portais públicos; as ressalvas estão em cada painel e na página Sobre.",
+    aboutBody: "O GasBrazil.com reúne dados abertos de gás e energia do Brasil em ferramentas que você pode filtrar, graficar e exportar. Os números vêm de APIs e portais públicos; as ressalvas estão em cada painel e na página Sobre.",
     cardOns: "Balanços ONS",
     cardOnsDesc: "Balanços diários do SIN, geração térmica por usina e despacho a gás no sistema interligado.",
     cardPoc: "Resultados POC",
     cardPocDesc: "Resultados da oferta de capacidade — balanceamento, aquisição de GUS e linepack em TBG, TAG e NTS.",
     cardContratos: "Contratos POC",
     cardContratosDesc: "Contratos de transporte e contratos master ativos em TBG, TAG e NTS. Contratos legados e conexões de acesso ainda não entram.",
+    cardFlows: "Fluxos de Gasodutos",
+    cardFlowsDesc: "Fluxo físico diário em cada ponto de recebimento e entrega dos gasodutos de transporte do Brasil, além de gás de uso do sistema, perdas, desequilíbrio e linepack.",
     kpiRefresh: "Última atualização",
     sources: "Fontes oficiais",
     sourceOns: "Dados abertos da ONS",
     sourcePoc: "Portal de Oferta de Capacidade",
     sourceAnp: "Movimentação de gás da ANP",
+    sourceFlows: "Dados abertos da ANP — movimentação em gasodutos",
     footerAbout: "Sobre e metodologia",
     aboutH1: "Sobre o GasBrazil",
     aboutWho: "O que é isto",
@@ -394,8 +404,9 @@ const GB_I18N = {
     glossMaster: "Contrato master de transporte — quadro que habilita nomeações posteriores; não é, por si, uma reserva firme de capacidade.",
     aboutCover: "Limites de cobertura",
     aboutCoverBody: "Contratos POC incluem hoje Contrato de Transporte e Contrato Master. Contratos de transporte legado e conexões de acesso estão no portal oficial, mas ainda não neste feed.",
+    aboutCoverFlows: "Fluxos de Gasodutos não tem dados publicados pela ANP para 2022, e cada mês costuma ser divulgado com semanas de atraso. Pressão média e o detalhe por carregador são coletados, mas não exibidos no painel; ambos estão disponíveis nos arquivos de dados no repositório.",
     notFound: "Esta página não existe.",
-    notFoundBody: "O hub e os três painéis estão nos links abaixo.",
+    notFoundBody: "O hub e os painéis estão nos links abaixo.",
     backHome: "Voltar ao GasBrazil.com"
   }
 };
