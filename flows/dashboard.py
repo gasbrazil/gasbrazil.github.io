@@ -187,7 +187,7 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .header-links { display: flex; gap: 8px; flex-wrap: wrap; }
 .sources { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0 0 var(--gap); }
-.sources-label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 400; margin-right: 2px; }
+.sources-label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 200; margin-right: 2px; }
 .pill { font-size: 11.5px; color: var(--muted2); text-decoration: none; border: 1px solid var(--border); border-radius: 999px; padding: 3px 10px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; }
 .pill:hover { background: var(--accent-soft); color: var(--text); border-color: var(--border-strong); }
 .ext-icon { width: 10px; height: 10px; display: inline-block; flex: none; opacity: .75; }
@@ -204,7 +204,7 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .kpi-card:hover { background: var(--accent-soft); }
 .kpi-card.active { border-color: var(--accent); border-width: 2px; padding: 9px 11px; box-shadow: var(--shadow); }
 .kpi-card .tso-name { font-size: 13px; font-weight: 400; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; }
-.kpi-card .tso-name .all-badge { font-size: 10px; font-weight: 400; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.kpi-card .tso-name .all-badge { font-size: 10px; font-weight: 200; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
 .kpi-stat-row { display: flex; justify-content: space-between; gap: 8px; font-size: 11.5px; padding: 2px 0; }
 .kpi-stat-row .lbl { color: var(--muted); }
 .kpi-stat-row .val { font-variant-numeric: tabular-nums; font-weight: 400; }
@@ -250,7 +250,7 @@ select:hover, input:hover { background: var(--accent-soft); }
 .flowtype-toggle { background: var(--bg); border: 1px solid var(--border-strong); border-radius: 999px; padding: 4px 12px; font-size: 12px; cursor: pointer; color: var(--text); font-family: var(--font); font-weight: 400; }
 .flowtype-toggle:hover { background: var(--accent-soft); }
 .flowtype-toggle.active { background: var(--text); color: var(--panel); border-color: var(--text); }
-.filter-label { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 400; margin-right: 2px; }
+.filter-label { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 200; margin-right: 2px; }
 .reset-btn { margin-left: auto; background: transparent; border: 1px solid var(--border-strong); border-radius: 6px; padding: 5px 10px; font-size: 12px; cursor: pointer; color: var(--muted2); font-family: var(--font); }
 .reset-btn:hover { background: var(--accent-soft); color: var(--text); }
 .chart-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: var(--card-pad); margin-bottom: var(--gap); }
@@ -273,7 +273,7 @@ select:hover, input:hover { background: var(--accent-soft); }
    back to the table's default order) plus a small inline filter box. */
 .th-label { cursor: pointer; user-select: none; display: block; }
 .th-label:hover { color: var(--text); }
-.th-filter { display: block; width: 100%; margin-top: 4px; padding: 2px 6px; font-size: 11px; font-weight: 400; background: var(--bg); border: 1px solid var(--border-strong); border-radius: 5px; color: var(--text); box-sizing: border-box; }
+.th-filter { display: block; width: 100%; margin-top: 4px; padding: 2px 6px; font-size: 11px; font-weight: 300; background: var(--bg); border: 1px solid var(--border-strong); border-radius: 5px; color: var(--text); box-sizing: border-box; }
 th.num .th-filter { text-align: right; }
 .meter-table-wrap td { padding: 5px 10px; border-bottom: 1px solid var(--border); }
 .meter-table-wrap tr.meter-row { cursor: pointer; }

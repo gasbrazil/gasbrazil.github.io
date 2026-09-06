@@ -505,7 +505,7 @@ function tableRows() {
 
 function renderTable() {
   const cols = [{ key: "month", label: "Month" }].concat(
-    DATA.metrics.map(m => ({ key: m.key, label: metricLabel(m) }))
+    DATA.metrics.map(m => ({ key: m.key, label: metricLabel(m) + " (" + metricUnit(m) + ")" }))
   );
   const host = document.getElementById("thead-row");
   const tbody = document.getElementById("tbody");
@@ -530,7 +530,7 @@ function renderTable() {
 
 function downloadCsv() {
   const cols = ["month"].concat(DATA.metrics.map(m => m.key));
-  const header = ["month"].concat(DATA.metrics.map(m => metricLabel(m)));
+  const header = ["month"].concat(DATA.metrics.map(m => metricLabel(m) + " (" + metricUnit(m) + ")"));
   const lines = [header.map(csvEscape).join(",")];
   tableRows().forEach(r => {
     lines.push(cols.map(c => csvEscape(r[c] == null ? "" : r[c])).join(","));
@@ -539,7 +539,7 @@ function downloadCsv() {
 }
 
 async function downloadXlsx() {
-  const header = ["month"].concat(DATA.metrics.map(m => metricLabel(m)));
+  const header = ["month"].concat(DATA.metrics.map(m => metricLabel(m) + " (" + metricUnit(m) + ")"));
   const keys = ["month"].concat(DATA.metrics.map(m => m.key));
   const rows = [header];
   tableRows().forEach(r => rows.push(keys.map(k => r[k] == null ? "" : r[k])));

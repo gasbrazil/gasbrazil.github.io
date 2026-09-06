@@ -127,7 +127,7 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; font-weight: 400; }
 .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .header-links { display: flex; gap: 8px; flex-wrap: wrap; }
 .sources { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0 0 var(--gap); }
-.sources-label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 300; margin-right: 2px; }
+.sources-label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 200; margin-right: 2px; }
 .pill { font-size: 11.5px; color: var(--muted2); text-decoration: none; border: 1px solid var(--border); border-radius: 5px; padding: 3px 10px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; font-weight: 300; }
 .pill:hover { background: var(--accent-soft); color: var(--text); border-color: var(--border-strong); }
 .ext-icon { width: 10px; height: 10px; display: inline-block; flex: none; opacity: .75; }
@@ -141,12 +141,12 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; font-weight: 400; }
 .kpi-tile { background: var(--panel); border: 1px solid var(--border); border-radius: 5px; padding: 10px 12px; }
 .kpi-tile .k-label { font-size: 11px; font-weight: 400; color: var(--muted2); }
 .kpi-tile .k-val { font-size: 20px; font-weight: 400; font-variant-numeric: tabular-nums; margin-top: 2px; letter-spacing: -.01em; }
-.kpi-tile .k-unit { font-size: 11px; color: var(--muted); font-weight: 300; }
+.kpi-tile .k-unit { font-size: 11px; color: var(--muted); font-weight: 200; }
 .chart-card { background: var(--panel); border: 1px solid var(--border); border-radius: 5px; padding: var(--card-pad); margin-bottom: var(--gap); }
 .panel-title { font-size: 13px; font-weight: 400; margin: 0 0 2px; }
-.panel-note { font-size: 11.5px; color: var(--muted); margin: 0 0 12px; font-weight: 300; }
+.panel-note { font-size: 11.5px; color: var(--muted); margin: 0 0 12px; font-weight: 200; }
 .chart-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
-.chart-controls label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 300; }
+.chart-controls label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 200; }
 .chart-controls select { background: var(--panel); border: 1px solid var(--border-strong); border-radius: 5px; padding: 5px 10px; color: var(--text); font-size: 12.5px; font-family: var(--font); font-weight: 300; }
 .sm-toggles { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
 .sm-btn { display: inline-flex; align-items: center; gap: 6px; background: var(--panel); border: 1px solid var(--border); border-radius: 5px; padding: 4px 10px 4px 8px; font-size: 12px; cursor: pointer; color: var(--text); font-family: var(--font); font-weight: 300; }
@@ -166,14 +166,14 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; font-weight: 400; }
 .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: var(--gap); }
 .toolbar button { background: var(--panel); color: var(--text); border: 1px solid var(--border-strong); border-radius: 5px; padding: 5px 10px; font-size: 12.5px; cursor: pointer; font-family: var(--font); font-weight: 400; }
 .toolbar button:hover { background: var(--accent-soft); }
-.count { color: var(--muted); font-size: 12px; margin-left: auto; font-weight: 300; }
+.count { color: var(--muted); font-size: 12px; margin-left: auto; font-weight: 200; }
 .table-wrap { background: var(--panel); border: 1px solid var(--border); border-radius: 5px; overflow: auto; max-height: 55vh; margin-bottom: var(--gap); }
 table.data { border-collapse: collapse; width: 100%; font-size: 12.5px; font-weight: 300; }
 table.data th, table.data td { padding: 4px 8px; text-align: left; border-bottom: 1px solid var(--border); }
 table.data th { position: sticky; top: 0; background: var(--panel); color: var(--muted2); font-weight: 400; z-index: 2; }
 table.data .num { text-align: right; font-variant-numeric: tabular-nums; }
 table.data tbody tr:hover { background: var(--accent-soft); }
-footer { margin-top: 22px; color: var(--muted); font-size: 11.5px; line-height: 1.7; font-weight: 300; }
+footer { margin-top: 22px; color: var(--muted); font-size: 11.5px; line-height: 1.7; font-weight: 200; }
 footer a { color: var(--accent); }
 </style>
 </head>
