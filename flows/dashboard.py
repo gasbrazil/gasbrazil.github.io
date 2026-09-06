@@ -253,10 +253,25 @@ select:hover, input:hover { background: var(--accent-soft); }
 .chart-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: var(--card-pad); margin-bottom: var(--gap); }
 .panel-title { font-size: 13px; font-weight: 600; margin: 0 0 2px; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
 .panel-note { font-size: 11.5px; color: var(--muted); margin: 6px 0 10px; }
+/* Collapse toggle for the meter picker (chip grid / table) -- picking is a
+   one-time task before charting, and the picker (especially the meter
+   table) takes up more room than the chart itself once you're done with it. */
+.picker-head { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; }
+.collapse-btn { background: var(--bg); border: 1px solid var(--border-strong); border-radius: 6px; width: 24px; height: 22px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text); font-size: 11px; padding: 0; flex: none; transition: transform .12s ease; }
+.collapse-btn:hover { background: var(--accent-soft); }
+.collapse-btn.collapsed { transform: rotate(-90deg); }
+.picker-summary { font-size: 12px; color: var(--muted); }
 .chip-scroll { display: flex; flex-wrap: wrap; gap: 6px; max-height: 168px; overflow: auto; padding: 2px; margin-bottom: 4px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); }
 .meter-table-wrap { max-height: 320px; overflow: auto; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 4px; }
 .meter-table-wrap table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-.meter-table-wrap th { position: sticky; top: 0; background: var(--panel); color: var(--muted2); font-weight: 600; text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--border); z-index: 1; }
+.meter-table-wrap th, #data-table th { position: sticky; top: 0; background: var(--panel); color: var(--muted2); font-weight: 600; text-align: left; padding: 6px 10px 7px; border-bottom: 1px solid var(--border); z-index: 1; cursor: auto; }
+/* Sortable/filterable column header, shared by the meter table and the
+   data table below the chart: a clickable label (3 clicks = asc, desc,
+   back to the table's default order) plus a small inline filter box. */
+.th-label { cursor: pointer; user-select: none; display: block; }
+.th-label:hover { color: var(--text); }
+.th-filter { display: block; width: 100%; margin-top: 4px; padding: 2px 6px; font-size: 11px; font-weight: 400; background: var(--bg); border: 1px solid var(--border-strong); border-radius: 5px; color: var(--text); box-sizing: border-box; }
+th.num .th-filter { text-align: right; }
 .meter-table-wrap td { padding: 5px 10px; border-bottom: 1px solid var(--border); }
 .meter-table-wrap tr.meter-row { cursor: pointer; }
 .meter-table-wrap tr.meter-row:hover { background: var(--accent-soft); }
@@ -364,9 +379,15 @@ footer a { color: var(--accent); }
     </span>
   </p>
   <p class="panel-note" id="chart-note">Totals summed across every matching receipt/delivery point.</p>
-  <div class="chip-scroll" id="chip-scroll" hidden></div>
-  <div class="chip-truncate-note" id="chip-truncate-note" hidden></div>
-  <div class="meter-table-wrap" id="meter-table-wrap" hidden></div>
+  <div class="picker-head" id="picker-head" hidden>
+    <button type="button" class="collapse-btn" id="picker-collapse-btn" aria-expanded="true" aria-label="Collapse picker">&#9662;</button>
+    <span class="picker-summary" id="picker-summary"></span>
+  </div>
+  <div id="picker-body">
+    <div class="chip-scroll" id="chip-scroll" hidden></div>
+    <div class="chip-truncate-note" id="chip-truncate-note" hidden></div>
+    <div class="meter-table-wrap" id="meter-table-wrap" hidden></div>
+  </div>
   <div id="chart-host"></div>
 </div>
 
@@ -415,9 +436,28 @@ let datePreset = "12m";
 let smoothing = "raw";
 let picked = new Set();      // detail-mode picks only
 let chartSlots = new Map();
-let meterSortCol = "volume"; // meter list sort column: pipeline|name|type|uf|volume
-let meterSortDir = -1;       // 1 asc, -1 desc
-let sortDir = -1; // table date sort: 1 asc, -1 desc
+let pickerCollapsed = false;
+
+// Shared 3-click sort cycle for every sortable table on this page: click 1
+// sorts by the table's natural direction for that column (descending for
+// whichever column is the table's own default, ascending otherwise), click
+// 2 reverses it, click 3 clears back to the table's default order/column.
+function naturalDir(col, defaultCol) { return col === defaultCol ? -1 : 1; }
+function cycleSort(current, col, def) {
+  const nd = naturalDir(col, def.col);
+  if (current.col !== col) return { col, dir: nd };
+  if (current.dir === nd) return { col, dir: -nd };
+  return { col: def.col, dir: def.dir };
+}
+
+const METER_DEFAULT_SORT = { col: "volume", dir: -1 };
+let meterSort = { col: "volume", dir: -1 };
+let meterFilters = {};       // colKey -> lowercase substring filter
+
+const DATA_DEFAULT_SORT = { col: "date", dir: -1 };
+let dataSort = { col: "date", dir: -1 };
+let dataFilters = {};        // "date" | entity id -> lowercase substring filter
+
 let tableRows = []; // last rendered table rows, kept for CSV/XLSX export
 let tableCols = [];
 let chartResizeTimer = null;
@@ -571,6 +611,7 @@ function buildViewToggle() {
 function onViewModeChanged() {
   const isDetail = viewMode === "detail";
   const isPointsDetail = isDetail && level === "points";
+  document.getElementById("picker-head").hidden = !isDetail;
   document.getElementById("chip-scroll").hidden = !isDetail || isPointsDetail;
   document.getElementById("meter-table-wrap").hidden = !isPointsDetail;
   document.getElementById("btn-clear-picks").hidden = !isDetail;
@@ -579,7 +620,16 @@ function onViewModeChanged() {
     : (level === "points"
         ? "Totals summed across every matching receipt/delivery point (use the filters above to narrow by pipeline or state)."
         : "Totals summed across every matching pipeline (use the filters above to narrow by pipeline)");
+  applyPickerCollapse();
   render();
+}
+
+function applyPickerCollapse() {
+  document.getElementById("picker-body").hidden = pickerCollapsed;
+  const btn = document.getElementById("picker-collapse-btn");
+  btn.classList.toggle("collapsed", pickerCollapsed);
+  btn.setAttribute("aria-expanded", String(!pickerCollapsed));
+  btn.setAttribute("aria-label", pickerCollapsed ? "Expand picker" : "Collapse picker");
 }
 
 // Single-select, not multi: picking TAG then clicking TBG should swap to
@@ -690,6 +740,7 @@ function buildChips() {
     empty.textContent = "No pipelines/points match the current filters for this variable.";
     chipHost.appendChild(empty);
   }
+  setPickerSummary(matches.length, matches.length);
 }
 
 function togglePick(id) {
@@ -724,68 +775,130 @@ function meterSortValue(e, col) {
   if (col === "uf") return e.uf || "";
   return e.pipeline;
 }
+function meterFilterValue(e, col) {
+  if (col === "volume") return fmtAxisNum(rankScore(e.id), 1);
+  if (col === "type") return e.type === RECEIPT ? "Receipt" : "Delivery";
+  return String(meterSortValue(e, col));
+}
 
-// The only points-level picker: every matching meter, sorted by volume by
-// default (click any column header to change), and never capped -- the
-// old "chips" grid used to hide anything past the 60 largest until you
-// switched to this same table anyway.
+// Rebuilding a table on every filter keystroke would normally steal focus
+// out of the input the user is typing in. Both tables on this page share
+// this fix: remember which .th-filter (by data-col) had focus and where
+// the caret was, rebuild, then restore both.
+function withFocusPreserved(host, rebuild) {
+  const active = document.activeElement;
+  const col = (active && active.classList && active.classList.contains("th-filter") && host.contains(active))
+    ? active.dataset.col : null;
+  const caret = col ? active.selectionStart : null;
+  rebuild();
+  if (col) {
+    const input = host.querySelector('.th-filter[data-col="' + col + '"]');
+    if (input) { input.focus(); if (caret != null) input.setSelectionRange(caret, caret); }
+  }
+}
+
+// Shared header-cell builder for both sortable/filterable tables: a
+// clickable label (see cycleSort) plus a small inline filter box.
+function buildSortFilterTh(col, sortState, defaultSort, filters, onChange, extraClass) {
+  const th = document.createElement("th");
+  if (extraClass) th.className = extraClass;
+  const labelSpan = document.createElement("span");
+  labelSpan.className = "th-label";
+  labelSpan.textContent = col.label;
+  if (sortState.col === col.key) {
+    const arrow = document.createElement("span");
+    arrow.className = "arrow";
+    arrow.textContent = sortState.dir === 1 ? "↑" : "↓";
+    labelSpan.appendChild(arrow);
+  }
+  labelSpan.addEventListener("click", () => onChange(cycleSort(sortState, col.key, defaultSort), filters));
+  th.appendChild(labelSpan);
+  const filterInput = document.createElement("input");
+  filterInput.type = "search";
+  filterInput.className = "th-filter";
+  filterInput.dataset.col = col.key;
+  filterInput.placeholder = "Filter…";
+  filterInput.value = filters[col.key] || "";
+  filterInput.addEventListener("input", () => {
+    filters[col.key] = filterInput.value.toLowerCase();
+    onChange(sortState, filters);
+  });
+  th.appendChild(filterInput);
+  return th;
+}
+
+// The only points-level picker: every matching meter, sortable by any
+// column (3-click cycle: asc, desc, back to volume-descending) and
+// filterable in place per column -- never capped, unlike the old "chips"
+// grid, which hid anything past the 60 largest until you switched to this
+// same table anyway.
 function renderMeterTable(matches) {
   const host = document.getElementById("meter-table-wrap");
-  host.innerHTML = "";
-  if (!matches.length) {
-    host.innerHTML = '<div style="color:var(--muted);font-size:12.5px;padding:10px">No pipelines/points match the current filters for this variable.</div>';
-    return;
-  }
-  const sorted = matches.slice().sort((a, b) => {
-    const av = meterSortValue(a, meterSortCol), bv = meterSortValue(b, meterSortCol);
-    let cmp = (typeof av === "number") ? av - bv : String(av).localeCompare(String(bv));
-    if (cmp === 0) cmp = a.pipeline.localeCompare(b.pipeline) || a.name.localeCompare(b.name);
-    return cmp * meterSortDir;
-  });
+  withFocusPreserved(host, () => {
+    host.innerHTML = "";
 
-  const table = document.createElement("table");
-  const thead = document.createElement("thead");
-  const trh = document.createElement("tr");
-  trh.appendChild(document.createElement("th")); // swatch column, unsortable
-  for (const c of METER_TABLE_COLS) {
-    const th = document.createElement("th");
-    th.appendChild(document.createTextNode(c.label));
-    if (c.key === meterSortCol) {
-      const arrow = document.createElement("span");
-      arrow.className = "arrow";
-      arrow.textContent = meterSortDir === 1 ? "↑" : "↓";
-      th.appendChild(arrow);
+    let rows = matches;
+    for (const key in meterFilters) {
+      const f = meterFilters[key];
+      if (f) rows = rows.filter(e => meterFilterValue(e, key).toLowerCase().includes(f));
     }
-    th.addEventListener("click", () => {
-      if (meterSortCol === c.key) meterSortDir = -meterSortDir;
-      else { meterSortCol = c.key; meterSortDir = c.key === "volume" ? -1 : 1; }
-      buildChips();
-    });
-    trh.appendChild(th);
-  }
-  thead.appendChild(trh);
-  table.appendChild(thead);
 
-  const tbody = document.createElement("tbody");
-  const unit = currentUnits()[variable] || "";
-  for (const e of sorted) {
-    const tr = document.createElement("tr");
-    tr.className = "meter-row" + (picked.has(e.id) ? " picked" : "");
-    tr.title = e.name;
-    const swColor = picked.has(e.id) ? chartColorOf(e.id) : "transparent";
-    const isRecv = e.type === RECEIPT;
-    tr.innerHTML =
-      '<td class="sw-cell"><span class="sw" style="display:inline-block;width:9px;height:9px;border-radius:2px;background:' + swColor + '"></span></td>' +
-      "<td>" + escapeHtml(e.pipeline) + "</td>" +
-      "<td>" + escapeHtml(shortPointName(e.name)) + "</td>" +
-      '<td><span class="type-badge ' + (isRecv ? "recv" : "del") + '">' + (isRecv ? "Receipt" : "Delivery") + "</span></td>" +
-      "<td>" + escapeHtml(e.uf || "") + "</td>" +
-      '<td class="num">' + fmtAxisNum(rankScore(e.id), 1) + (unit ? " " + escapeHtml(unit) : "") + "</td>";
-    tr.addEventListener("click", () => togglePick(e.id));
-    tbody.appendChild(tr);
-  }
-  table.appendChild(tbody);
-  host.appendChild(table);
+    const table = document.createElement("table");
+    const thead = document.createElement("thead");
+    const trh = document.createElement("tr");
+    trh.appendChild(document.createElement("th")); // swatch column, unsortable/unfiltered
+    for (const c of METER_TABLE_COLS) {
+      trh.appendChild(buildSortFilterTh(c, meterSort, METER_DEFAULT_SORT, meterFilters, (next) => {
+        meterSort = next;
+        buildChips();
+      }, c.key === "volume" ? "num" : ""));
+    }
+    thead.appendChild(trh);
+    table.appendChild(thead);
+
+    const sorted = rows.slice().sort((a, b) => {
+      const av = meterSortValue(a, meterSort.col), bv = meterSortValue(b, meterSort.col);
+      let cmp = (typeof av === "number") ? av - bv : String(av).localeCompare(String(bv));
+      if (cmp === 0) cmp = a.pipeline.localeCompare(b.pipeline) || a.name.localeCompare(b.name);
+      return cmp * meterSort.dir;
+    });
+
+    const tbody = document.createElement("tbody");
+    const unit = currentUnits()[variable] || "";
+    for (const e of sorted) {
+      const tr = document.createElement("tr");
+      tr.className = "meter-row" + (picked.has(e.id) ? " picked" : "");
+      tr.title = e.name;
+      const swColor = picked.has(e.id) ? chartColorOf(e.id) : "transparent";
+      const isRecv = e.type === RECEIPT;
+      tr.innerHTML =
+        '<td class="sw-cell"><span class="sw" style="display:inline-block;width:9px;height:9px;border-radius:2px;background:' + swColor + '"></span></td>' +
+        "<td>" + escapeHtml(e.pipeline) + "</td>" +
+        "<td>" + escapeHtml(shortPointName(e.name)) + "</td>" +
+        '<td><span class="type-badge ' + (isRecv ? "recv" : "del") + '">' + (isRecv ? "Receipt" : "Delivery") + "</span></td>" +
+        "<td>" + escapeHtml(e.uf || "") + "</td>" +
+        '<td class="num">' + fmtAxisNum(rankScore(e.id), 1) + (unit ? " " + escapeHtml(unit) : "") + "</td>";
+      tr.addEventListener("click", () => togglePick(e.id));
+      tbody.appendChild(tr);
+    }
+    if (!sorted.length) {
+      const tr = document.createElement("tr");
+      tr.innerHTML = '<td colspan="6" style="color:var(--muted);padding:10px">No meters match the current filters.</td>';
+      tbody.appendChild(tr);
+    }
+    table.appendChild(tbody);
+    host.appendChild(table);
+
+    setPickerSummary(matches.length, sorted.length);
+  });
+}
+
+function setPickerSummary(total, shown) {
+  const el = document.getElementById("picker-summary");
+  if (!el) return;
+  const noun = level === "points" ? "meters" : "pipelines";
+  el.textContent = (shown < total ? shown + " of " + total : total) + " " + noun
+    + (picked.size ? " · " + picked.size + " selected" : "");
 }
 
 function defaultPicks() {
@@ -1172,59 +1285,89 @@ function renderChart() {
 }
 
 function renderTable(seriesList, dates) {
-  const theadRow = document.getElementById("thead-row");
-  const tbody = document.getElementById("tbody");
-  theadRow.innerHTML = ""; tbody.innerHTML = "";
-  const thDate = document.createElement("th");
-  thDate.textContent = "Date";
-  thDate.addEventListener("click", () => { sortDir = -sortDir; renderTableBody(); });
-  theadRow.appendChild(thDate);
-  const dateArrow = document.createElement("span");
-  dateArrow.className = "arrow";
-  thDate.appendChild(dateArrow);
-
   tableCols = seriesList.map(s => s.entity);
-  seriesList.forEach(s => {
-    const th = document.createElement("th");
-    th.className = "num";
-    th.textContent = entityLabel(s.entity);
-    theadRow.appendChild(th);
-  });
 
   // Build a lookup so partial-history series (nulls at either end) still line up by date.
   const byId = {};
   seriesList.forEach(s => { const m = new Map(); s.pts.forEach(p => m.set(p.date, p.v)); byId[s.entity.id] = m; });
-  tableRows = dates.map(d => {
+  const baseRows = dates.map(d => {
     const row = { date: d };
     seriesList.forEach(s => { row[s.entity.id] = byId[s.entity.id].has(d) ? byId[s.entity.id].get(d) : null; });
     return row;
   }).filter(row => seriesList.length === 0 || seriesList.some(s => row[s.entity.id] !== null));
 
-  renderTableBody();
+  const dataCols = [{ key: "date", label: "Date" }, ...seriesList.map(s => ({ key: s.entity.id, label: entityLabel(s.entity) }))];
 
-  function renderTableBody() {
-    const sorted = tableRows.slice().sort((a, b) => sortDir * (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
-    dateArrow.textContent = sortDir === 1 ? "↑" : "↓";
-    const frag = document.createDocumentFragment();
-    for (const row of sorted) {
-      const tr = document.createElement("tr");
-      const td0 = document.createElement("td");
-      td0.textContent = row.date;
-      tr.appendChild(td0);
-      seriesList.forEach(s => {
-        const td = document.createElement("td");
-        td.className = "num";
-        const v = row[s.entity.id];
-        td.textContent = v === null || v === undefined ? "" : v.toLocaleString("en-US", { maximumFractionDigits: 2 });
-        tr.appendChild(td);
-      });
-      frag.appendChild(tr);
-    }
-    tbody.innerHTML = "";
-    tbody.appendChild(frag);
-    document.getElementById("row-count").textContent = sorted.length.toLocaleString("en-US") + " rows";
-    tableRows = sorted;
+  function dataFilterValue(row, key) {
+    if (key === "date") return row.date;
+    const v = row[key];
+    return v === null || v === undefined ? "" : String(v);
   }
+
+  function rerender() {
+    const host = document.getElementById("data-table");
+    withFocusPreserved(host, () => {
+      const theadRow = document.getElementById("thead-row");
+      const tbody = document.getElementById("tbody");
+      theadRow.innerHTML = "";
+      for (const c of dataCols) {
+        theadRow.appendChild(buildSortFilterTh(c, dataSort, DATA_DEFAULT_SORT, dataFilters, (next) => {
+          dataSort = next;
+          rerender();
+        }, c.key === "date" ? "" : "num"));
+      }
+
+      let rows = baseRows;
+      for (const key in dataFilters) {
+        const f = dataFilters[key];
+        if (f) rows = rows.filter(row => dataFilterValue(row, key).toLowerCase().includes(f));
+      }
+      const sorted = rows.slice().sort((a, b) => {
+        const key = dataSort.col;
+        const av = key === "date" ? a.date : a[key], bv = key === "date" ? b.date : b[key];
+        // Numeric columns: rows with no value at this date always sort last,
+        // regardless of direction, rather than clumping at whichever end
+        // null happens to compare to.
+        if (key !== "date") {
+          if (av === null && bv === null) return 0;
+          if (av === null) return 1;
+          if (bv === null) return -1;
+        }
+        const cmp = av < bv ? -1 : av > bv ? 1 : 0;
+        return cmp * dataSort.dir;
+      });
+
+      const frag = document.createDocumentFragment();
+      for (const row of sorted) {
+        const tr = document.createElement("tr");
+        const td0 = document.createElement("td");
+        td0.textContent = row.date;
+        tr.appendChild(td0);
+        seriesList.forEach(s => {
+          const td = document.createElement("td");
+          td.className = "num";
+          const v = row[s.entity.id];
+          td.textContent = v === null || v === undefined ? "" : v.toLocaleString("en-US", { maximumFractionDigits: 2 });
+          tr.appendChild(td);
+        });
+        frag.appendChild(tr);
+      }
+      if (!sorted.length) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = '<td colspan="' + (1 + seriesList.length) + '" style="color:var(--muted);padding:10px">No rows match the current filters.</td>';
+        frag.appendChild(tr);
+      }
+      tbody.innerHTML = "";
+      tbody.appendChild(frag);
+      document.getElementById("row-count").textContent =
+        (sorted.length < baseRows.length
+          ? sorted.length.toLocaleString("en-US") + " of " + baseRows.length.toLocaleString("en-US")
+          : sorted.length.toLocaleString("en-US")) + " rows";
+      tableRows = sorted;
+    });
+  }
+
+  rerender();
 }
 
 function downloadCsv() {
@@ -1329,6 +1472,8 @@ function resetAllFilters() {
   datePreset = "12m"; document.getElementById("f-preset").value = "12m";
   smoothing = "raw"; document.getElementById("f-smooth").value = "raw";
   picked = new Set(); chartSlots = new Map();
+  meterSort = { ...METER_DEFAULT_SORT }; meterFilters = {};
+  dataSort = { ...DATA_DEFAULT_SORT }; dataFilters = {};
   onLevelOrVariableChanged();
 }
 
@@ -1370,6 +1515,10 @@ async function init() {
   document.getElementById("f-smooth").addEventListener("change", e => { smoothing = e.target.value; renderChart(); writeQueryState(); });
   document.getElementById("btn-clear-picks").addEventListener("click", () => { picked = new Set(); chartSlots = new Map(); render(); });
   document.getElementById("btn-reset-filters").addEventListener("click", resetAllFilters);
+  document.getElementById("picker-collapse-btn").addEventListener("click", () => {
+    pickerCollapsed = !pickerCollapsed;
+    applyPickerCollapse();
+  });
   document.getElementById("btn-csv").addEventListener("click", downloadCsv);
   document.getElementById("btn-xlsx").addEventListener("click", downloadXlsx);
   window.addEventListener("resize", () => { clearTimeout(chartResizeTimer); chartResizeTimer = setTimeout(renderChart, 140); });
