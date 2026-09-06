@@ -191,7 +191,6 @@ footer a { color: var(--accent); }
 <header class="dash-head">
   <div>
     <h1 data-i18n="navPoc">POC Results Dashboard</h1>
-    <p class="subtitle" data-i18n="cardPocDesc">Pipeline capacity offer results — balancing, GUS acquisition, and linepack trades across TBG, TAG, and NTS.</p>
   </div>
   <div class="header-right">
     <div class="header-links">

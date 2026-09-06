@@ -180,7 +180,6 @@ footer a { color: var(--accent); }
 <header class="dash-head">
   <div>
     <h1 data-i18n="navSupply">Gas Supply</h1>
-    <p class="subtitle" data-i18n="supplySubtitle">ANP national monthly natural gas supply balance — production, available gas, flare, own use, and imports.</p>
   </div>
   <div class="header-right">
     <div class="header-links">

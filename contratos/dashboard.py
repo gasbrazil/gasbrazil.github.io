@@ -207,7 +207,6 @@ footer a { color: var(--accent); }
 <header class="dash-head">
   <div>
     <h1 data-i18n="navContratos">POC Contracts Dashboard</h1>
-    <p class="subtitle" data-i18n="cardContratosDesc">Active transport and master transport contracts across TBG, TAG, and NTS. Legacy and access-connection contracts are not yet included.</p>
   </div>
   <div class="header-right">
     <div class="header-links">

@@ -571,7 +571,6 @@ table.data thead th.sortable:hover{background:var(--accent-soft)}
 <header class="dash-head">
   <div>
     <h1 data-i18n="navOns">ONS Balances</h1>
-    <p class="subtitle" data-i18n="cardOnsDesc">Daily grid balances, thermal generation by plant, and gas-fired dispatch across Brazil's interconnected power system.</p>
   </div>
   <div class="header-right">
     <div class="header-links">

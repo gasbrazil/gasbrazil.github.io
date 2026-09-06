@@ -182,7 +182,6 @@ footer a { color: var(--accent); }
 <header class="dash-head">
   <div>
     <h1 data-i18n="navPld">PLD Prices</h1>
-    <p class="subtitle" data-i18n="pldSubtitle">CCEE daily-average settlement price (PLD) by electricity submarket, in R$/MWh.</p>
   </div>
   <div class="header-right">
     <div class="header-links">

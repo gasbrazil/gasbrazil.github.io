@@ -137,12 +137,6 @@ html, body {
     var(--brz-green) 0 46%, var(--brz-yellow) 46% 73%, var(--accent) 73% 100%);
 }
 
-/* Page subtitle: one line under the h1, inside the same header <div>. Every
-   dashboard uses this -- (2026-09-06) sweep found four pages missing it
-   entirely, which is most of why header block heights looked inconsistent
-   across the site. */
-.subtitle { color: var(--muted2); font-size: 13px; font-weight: 300; margin: 4px 0 0; max-width: 48em; line-height: 1.45; }
-
 /* Shared content column. 80% of the viewport, capped so it doesn't sprawl on
    an ultrawide monitor, and released to full width below 900px where 80%
    would waste more than it gains. */

@@ -319,7 +319,6 @@ footer a { color: var(--accent); }
 <header class="dash-head">
   <div>
     <h1 data-i18n="navFlows">Pipeline Flows</h1>
-    <p class="subtitle" data-i18n="cardFlowsDesc">Daily physical gas flow at every receipt and delivery point on Brazil's transport pipelines, plus system-use gas, losses, imbalance, and linepack.</p>
   </div>
   <div class="header-right">
     <div class="header-links">
