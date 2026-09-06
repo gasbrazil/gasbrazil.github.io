@@ -171,6 +171,12 @@ html, body {
     var(--brz-green) 0 46%, var(--brz-yellow) 46% 73%, var(--accent) 73% 100%);
 }
 
+/* Page subtitle: one line under the h1, inside the same header <div>. Every
+   dashboard uses this -- (2026-09-06) sweep found four pages missing it
+   entirely, which is most of why header block heights looked inconsistent
+   across the site. */
+.subtitle { color: var(--muted2); font-size: 13px; font-weight: 300; margin: 4px 0 0; max-width: 48em; line-height: 1.45; }
+
 /* Shared content column. 80% of the viewport, capped so it doesn't sprawl on
    an ultrawide monitor, and released to full width below 900px where 80%
    would waste more than it gains. */
@@ -496,6 +502,7 @@ const GB_I18N = {
     cardPld: "PLD Prices",
     cardPldDesc: "CCEE daily-average PLD (settlement price) by electricity submarket — Southeast, South, Northeast, and North. Not the same as ONS CMO.",
     kpiRefresh: "Last refreshed",
+    dataThrough: "Data through",
     sources: "Official sources",
     sourceOns: "ONS open data",
     sourcePoc: "Portal de Oferta de Capacidade",
@@ -504,7 +511,6 @@ const GB_I18N = {
     sourceSupply: "ANP PPGN-EL — production by state",
     sourcePld: "CCEE open data — PLD média diária",
     pldSubtitle: "CCEE daily-average settlement price (PLD) by electricity submarket, in R$/MWh.",
-    pldThrough: "Data through",
     pldNote: "PLD is CCEE's settlement price. It is related to, but not the same as, ONS CMO (marginal operating cost) — see",
     pldNoteLink: "ONS Balances",
     pldChartTitle: "Daily PLD by submarket",
@@ -565,6 +571,7 @@ const GB_I18N = {
     cardPld: "Preços PLD",
     cardPldDesc: "PLD médio diário da CCEE por submercado — Sudeste, Sul, Nordeste e Norte. Não é o CMO da ONS.",
     kpiRefresh: "Última atualização",
+    dataThrough: "Dados até",
     sources: "Fontes oficiais",
     sourceOns: "Dados abertos da ONS",
     sourcePoc: "Portal de Oferta de Capacidade",
@@ -573,7 +580,6 @@ const GB_I18N = {
     sourceSupply: "ANP PPGN-EL — produção por estado",
     sourcePld: "Dados abertos da CCEE — PLD média diária",
     pldSubtitle: "Preço médio diário de liquidação (PLD) da CCEE por submercado, em R$/MWh.",
-    pldThrough: "Dados até",
     pldNote: "O PLD é o preço de liquidação da CCEE. Relaciona-se ao CMO da ONS (custo marginal de operação), mas não é a mesma série — veja",
     pldNoteLink: "Balanços ONS",
     pldChartTitle: "PLD diário por submercado",

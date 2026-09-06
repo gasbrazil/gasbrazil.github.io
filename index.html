@@ -171,6 +171,12 @@ html, body {
     var(--brz-green) 0 46%, var(--brz-yellow) 46% 73%, var(--accent) 73% 100%);
 }
 
+/* Page subtitle: one line under the h1, inside the same header <div>. Every
+   dashboard uses this -- (2026-09-06) sweep found four pages missing it
+   entirely, which is most of why header block heights looked inconsistent
+   across the site. */
+.subtitle { color: var(--muted2); font-size: 13px; font-weight: 300; margin: 4px 0 0; max-width: 48em; line-height: 1.45; }
+
 /* Shared content column. 80% of the viewport, capped so it doesn't sprawl on
    an ultrawide monitor, and released to full width below 900px where 80%
    would waste more than it gains. */
@@ -427,8 +433,8 @@ footer.site a { color: var(--muted); }
   <div class="kpi-strip">
     <a class="kpi-cell" href="ons/">
       <div class="kpi-label" data-i18n="cardOns">ONS Balances</div>
-      <div class="kpi-val" data-en="4,553 MWmed gas" data-pt="4,553 MWmed a gás">4,553 MWmed gas</div>
-      <div class="kpi-when" data-refresh="2026-09-06 03:39 UTC"></div>
+      <div class="kpi-val" data-en="3,007 MWmed gas" data-pt="3,007 MWmed a gás">3,007 MWmed gas</div>
+      <div class="kpi-when" data-refresh="2026-09-06 18:29 UTC"></div>
     </a>
     <a class="kpi-cell" href="poc/">
       <div class="kpi-label" data-i18n="cardPoc">POC Results</div>
@@ -438,25 +444,25 @@ footer.site a { color: var(--muted); }
     </a>
     <a class="kpi-cell" href="contratos/">
       <div class="kpi-label" data-i18n="cardContratos">POC Contracts</div>
-      <div class="kpi-val" data-en="880 contracts · 182,928 thousand m³/d" data-pt="880 contratos · 182,928 mil m³/d">880 contracts · 182,928 thousand m³/d</div>
+      <div class="kpi-val" data-en="881 contracts · 182,929 thousand m³/d" data-pt="881 contratos · 182,929 mil m³/d">881 contracts · 182,929 thousand m³/d</div>
       <div class="kpi-when" data-refresh="2026-09-06"></div>
     </a>
     <a class="kpi-cell" href="flows/">
       <div class="kpi-label" data-i18n="cardFlows">Pipeline Flows</div>
-      <div class="kpi-val" data-en="2.2M m³ realized (7d) · 3 points" data-pt="2.2M m³ realizados (7d) · 3 points">2.2M m³ realized (7d) · 3 points</div>
-      <div class="kpi-when" data-refresh="2026-09-06 17:50 UTC"></div>
+      <div class="kpi-val" data-en="1358.6M m³ realized (7d) · 270 points" data-pt="1358.6M m³ realizados (7d) · 270 points">1358.6M m³ realized (7d) · 270 points</div>
+      <div class="kpi-when" data-refresh="2026-09-06 19:02 UTC"></div>
     </a>
     <a class="kpi-cell" href="supply/">
       <div class="kpi-label" data-i18n="cardSupply">Gas Supply</div>
       <div class="kpi-val" data-en="6.7M thousand m³ produced · 2026-07" data-pt="6.7M mil m³ produzidos · 2026-07">6.7M thousand m³ produced · 2026-07</div>
-      <div class="kpi-when" data-refresh="2026-09-06 17:50 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-06 19:01 UTC"></div>
       
     </a>
     <a class="kpi-cell" href="pld/">
       <div class="kpi-label" data-i18n="cardPld">PLD Prices</div>
-      <div class="kpi-val" data-en="SE 122.33 R$/MWh · 2026-09-06" data-pt="SE 122.33 R$/MWh · 2026-09-06">SE 122.33 R$/MWh · 2026-09-06</div>
-      <div class="kpi-when" data-refresh="2026-09-06 17:50 UTC"></div>
-      <svg class="kpi-spark" viewBox="0 0 120 28" width="120" height="28" aria-hidden="true"><polyline points="2.0,26.0 4.6,22.0 7.3,18.0 9.9,14.0 12.5,10.0 15.2,6.0 17.8,2.0 20.5,26.0 23.1,22.0 25.7,18.0 28.4,14.0 31.0,10.0 33.6,6.0 36.3,2.0 38.9,26.0 41.5,22.0 44.2,18.0 46.8,14.0 49.5,10.0 52.1,6.0 54.7,2.0 57.4,26.0 60.0,22.0 62.6,18.0 65.3,14.0 67.9,10.0 70.5,6.0 73.2,2.0 75.8,26.0 78.5,22.0 81.1,18.0 83.7,14.0 86.4,10.0 89.0,6.0 91.6,2.0 94.3,26.0 96.9,22.0 99.5,18.0 102.2,14.0 104.8,10.0 107.5,6.0 110.1,2.0 112.7,26.0 115.4,22.0 118.0,18.0"/></svg>
+      <div class="kpi-val" data-en="SE 118.05 R$/MWh · 2026-09-06" data-pt="SE 118.05 R$/MWh · 2026-09-06">SE 118.05 R$/MWh · 2026-09-06</div>
+      <div class="kpi-when" data-refresh="2026-09-06 19:01 UTC"></div>
+      <svg class="kpi-spark" viewBox="0 0 120 28" width="120" height="28" aria-hidden="true"><polyline points="2.0,10.8 4.6,18.1 7.3,23.6 9.9,19.4 12.5,14.6 15.2,9.7 17.8,10.3 20.5,16.8 23.1,25.7 25.7,26.0 28.4,21.7 31.0,19.3 33.6,18.4 36.3,14.9 38.9,16.2 41.5,22.3 44.2,20.1 46.8,17.9 49.5,21.1 52.1,19.8 54.7,11.0 57.4,19.1 60.0,21.7 62.6,23.3 65.3,19.8 67.9,19.6 70.5,17.9 73.2,18.7 75.8,19.0 78.5,20.5 81.1,21.6 83.7,19.3 86.4,17.9 89.0,16.2 91.6,17.2 94.3,17.5 96.9,17.7 99.5,19.4 102.2,2.0 104.8,2.3 107.5,6.3 110.1,14.9 112.7,12.8 115.4,16.1 118.0,20.3"/></svg>
     </a>
   </div>
   <div class="cards">
@@ -563,6 +569,7 @@ const GB_I18N = {
     cardPld: "PLD Prices",
     cardPldDesc: "CCEE daily-average PLD (settlement price) by electricity submarket — Southeast, South, Northeast, and North. Not the same as ONS CMO.",
     kpiRefresh: "Last refreshed",
+    dataThrough: "Data through",
     sources: "Official sources",
     sourceOns: "ONS open data",
     sourcePoc: "Portal de Oferta de Capacidade",
@@ -571,7 +578,6 @@ const GB_I18N = {
     sourceSupply: "ANP PPGN-EL — production by state",
     sourcePld: "CCEE open data — PLD média diária",
     pldSubtitle: "CCEE daily-average settlement price (PLD) by electricity submarket, in R$/MWh.",
-    pldThrough: "Data through",
     pldNote: "PLD is CCEE's settlement price. It is related to, but not the same as, ONS CMO (marginal operating cost) — see",
     pldNoteLink: "ONS Balances",
     pldChartTitle: "Daily PLD by submarket",
@@ -632,6 +638,7 @@ const GB_I18N = {
     cardPld: "Preços PLD",
     cardPldDesc: "PLD médio diário da CCEE por submercado — Sudeste, Sul, Nordeste e Norte. Não é o CMO da ONS.",
     kpiRefresh: "Última atualização",
+    dataThrough: "Dados até",
     sources: "Fontes oficiais",
     sourceOns: "Dados abertos da ONS",
     sourcePoc: "Portal de Oferta de Capacidade",
@@ -640,7 +647,6 @@ const GB_I18N = {
     sourceSupply: "ANP PPGN-EL — produção por estado",
     sourcePld: "Dados abertos da CCEE — PLD média diária",
     pldSubtitle: "Preço médio diário de liquidação (PLD) da CCEE por submercado, em R$/MWh.",
-    pldThrough: "Dados até",
     pldNote: "O PLD é o preço de liquidação da CCEE. Relaciona-se ao CMO da ONS (custo marginal de operação), mas não é a mesma série — veja",
     pldNoteLink: "Balanços ONS",
     pldChartTitle: "PLD diário por submercado",
