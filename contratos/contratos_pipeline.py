@@ -18,8 +18,10 @@ GraphQL resolver. This was confirmed by exhaustively querying
 (there are only three: ATIVO, CONCLUIDO, HABILITADO -- both non-HABILITADO
 values are covered by the "transporte" branch below) and by introspecting
 the full GraphQL schema (33 types total, nothing named legado/conexão/
-acesso). That data comes from a different, not-yet-identified endpoint and
-is not included here yet -- see the project README.
+acesso). Re-verified 2026-09-06 against the live schema (25 types visible
+in introspection; query fields still lack legado/conexão). That data comes
+from a different, not-yet-identified endpoint and is not included here yet
+-- see the project README.
 
 API:  https://ofertadecapacidade.com.br/v2/api/graphql
 Site: https://ofertadecapacidade.com.br/home/contratos

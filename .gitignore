@@ -29,3 +29,12 @@ contratos/data/raw_contratos.json
 # it's the deployed output, same as ons/, poc/, and contratos/'s index.html.
 flows/raw/
 flows/data/
+
+# supply/: ANP PPGN-EL + import CSVs and derived monthly parquet — rebuildable;
+# CI caches raw/. supply/index.html is committed.
+supply/raw/
+supply/data/
+
+# pld/: CCEE yearly CSVs cached in CI; parquet may be committed when small.
+# Keep raw/ out of git either way.
+pld/raw/

@@ -30,20 +30,14 @@ DEFAULT_OUT = HERE / "index.html"
 # Display order + unit shown on the chart axis / table header. Keys must
 # match flows_pipeline.py's *_VARIABLES_EN values exactly.
 #
-# Average Pressure is deliberately left out of the embedded dashboard: it's
-# an engineering/hydraulics reading, not a flow number, and -- being a
-# continuous physical measurement with two decimals of real precision on
-# every active day -- it was the single most expensive series to embed
-# (roughly 30% of the points payload for one of five variables, measured
-# during development). It's still fully present in
-# data/flows_points.parquet for anyone who wants it; only the shipped HTML
-# leaves it out to keep the page a reasonable size across ~3.5 years of
-# daily history.
+# Average Pressure is included for depth: the UI aggregates it with mean
+# (like Allocation), matching the pipeline's median-across-shipper store.
 POINT_VAR_ORDER = [
     ("Actual Volume (thousand m3)", "thousand m3/d"),
     ("Scheduled Volume (thousand m3)", "thousand m3/d"),
     ("Requested Volume (thousand m3)", "thousand m3/d"),
     ("Allocation (%)", "%"),
+    ("Average Pressure (kgf/cm2)", "kgf/cm2"),
 ]
 LEDGER_VAR_ORDER = [
     ("System Use Gas (thousand m3)", "thousand m3/d"),
@@ -55,7 +49,10 @@ LEDGER_VAR_ORDER = [
     ("Line Pack (thousand m3)", "thousand m3"),
 ]
 
-TSO_ORDER = ["NTS", "TAG", "TBG"]  # TSB, GOM excluded -- see load_payload()
+# Primary transporters shown by default in the UI. TSB/GOM stay in the
+# payload; the page exposes them behind an "Include TSB & GOM" toggle.
+TSO_ORDER = ["NTS", "TAG", "TBG"]
+MINOR_TSOS = ["TSB", "GOM"]
 
 
 def _short_label(full_label: str) -> str:
@@ -67,8 +64,10 @@ def _pivot_series(df: pd.DataFrame, id_col: str, dates: list[str]) -> dict:
     """variable -> {id: [values aligned to `dates`, None where missing]}."""
     out = {}
     date_index = pd.DatetimeIndex(dates)
+    mean_vars = {"Allocation (%)", "Average Pressure (kgf/cm2)"}
     for variable, group in df.groupby("variable", observed=True):
-        wide = group.pivot_table(index=id_col, columns="date", values="value", aggfunc="sum")
+        agg = "mean" if variable in mean_vars else "sum"
+        wide = group.pivot_table(index=id_col, columns="date", values="value", aggfunc=agg)
         wide = wide.reindex(columns=date_index)
         series = {}
         for row_id, row in wide.iterrows():
@@ -87,15 +86,8 @@ def load_payload() -> dict:
     points_df = pd.read_parquet(POINTS_PARQUET) if POINTS_PARQUET.exists() else pd.DataFrame()
     ledger_df = pd.read_parquet(LEDGER_PARQUET) if LEDGER_PARQUET.exists() else pd.DataFrame()
 
-    # TSB and GOM are real ANP-registered TSOs with a "tso" code of their own
-    # in the source data, but they're not ones Eric tracks -- drop them here,
-    # before anything else derives from these frames, so they never enter the
-    # embedded payload (not just hidden behind a UI filter). Re-including
-    # either is a one-line revert if that changes.
-    EXCLUDED_TSOS = {"TSB", "GOM"}
-    for _df in (points_df, ledger_df):
-        if len(_df) and "tso" in _df.columns:
-            _df.drop(_df.index[_df["tso"].isin(EXCLUDED_TSOS)], inplace=True)
+    # TSB and GOM stay in the payload; the UI defaults to NTS/TAG/TBG and
+    # exposes an "Include TSB & GOM" toggle (see MINOR_TSOS / PRIMARY in JS).
 
     all_dates = pd.concat([
         points_df["date"] if len(points_df) else pd.Series(dtype="datetime64[ns]"),
@@ -171,7 +163,7 @@ TEMPLATE = """<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Pipeline Flows Dashboard</title>
+<title>Pipeline Flows</title>
 <meta name="description" content="Daily physical natural gas flow at every receipt and delivery point on Brazil's transport pipelines, plus system-use gas, losses, imbalance, and linepack -- from ANP's public data.">
 <link rel="canonical" href="https://gasbrazil.com/flows/">
 <link rel="icon" href="__FAVICON_DATA_URI__">
@@ -195,29 +187,27 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .header-links { display: flex; gap: 8px; flex-wrap: wrap; }
 .sources { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0 0 var(--gap); }
-.sources-label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; margin-right: 2px; }
+.sources-label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 400; margin-right: 2px; }
 .pill { font-size: 11.5px; color: var(--muted2); text-decoration: none; border: 1px solid var(--border); border-radius: 999px; padding: 3px 10px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; }
 .pill:hover { background: var(--accent-soft); color: var(--text); border-color: var(--border-strong); }
 .ext-icon { width: 10px; height: 10px; display: inline-block; flex: none; opacity: .75; }
-.navlink { font-size: 11.5px; color: var(--accent); text-decoration: none; font-weight: 600; border: 1px solid var(--accent); border-radius: 999px; padding: 3px 10px; white-space: nowrap; }
-.navlink:hover { background: var(--accent); color: #fff; }
 #theme-toggle { display: inline-flex; align-items: center; justify-content: center; background: var(--panel); border: 1px solid var(--border-strong); border-radius: 6px; padding: 5px 9px; line-height: 0; cursor: pointer; color: var(--text); }
 #theme-toggle:hover { background: var(--accent-soft); }
 #theme-toggle svg { width: 16px; height: 16px; display: block; }
 
 .kpi-card-wrap { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: var(--card-pad); margin-bottom: var(--gap); }
 .kpi-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
-.kpi-title { font-size: 13px; font-weight: 600; }
+.kpi-title { font-size: 13px; font-weight: 400; }
 .kpi-title .muted { color: var(--muted); font-weight: 400; }
 .kpi-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(168px, 1fr)); gap: 8px; }
 .kpi-card { text-align: left; background: var(--bg); border: 1px solid var(--border-strong); border-radius: 10px; padding: 10px 12px; cursor: pointer; font-family: var(--font); color: var(--text); }
 .kpi-card:hover { background: var(--accent-soft); }
 .kpi-card.active { border-color: var(--accent); border-width: 2px; padding: 9px 11px; box-shadow: var(--shadow); }
-.kpi-card .tso-name { font-size: 13px; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; }
-.kpi-card .tso-name .all-badge { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.kpi-card .tso-name { font-size: 13px; font-weight: 400; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; }
+.kpi-card .tso-name .all-badge { font-size: 10px; font-weight: 400; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
 .kpi-stat-row { display: flex; justify-content: space-between; gap: 8px; font-size: 11.5px; padding: 2px 0; }
 .kpi-stat-row .lbl { color: var(--muted); }
-.kpi-stat-row .val { font-variant-numeric: tabular-nums; font-weight: 600; }
+.kpi-stat-row .val { font-variant-numeric: tabular-nums; font-weight: 400; }
 .kpi-stat-row.recv .val { color: var(--flow-recv, #1baf7a); }
 .kpi-stat-row.del .val { color: var(--flow-del, #eb6834); }
 .kpi-card.empty { color: var(--muted); font-style: italic; }
@@ -226,12 +216,25 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .kpi-balance-bar .del-seg { background: var(--flow-del, #eb6834); }
 
 .level-toggle, .view-toggle { display: flex; gap: 6px; margin-bottom: var(--gap); flex-wrap: wrap; }
-.level-btn { background: var(--panel); border: 1px solid var(--border-strong); border-radius: 8px; padding: 7px 16px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--text); font-family: var(--font); }
+.level-btn { background: var(--panel); border: 1px solid var(--border-strong); border-radius: 8px; padding: 7px 16px; font-size: 13px; font-weight: 400; cursor: pointer; color: var(--text); font-family: var(--font); }
 .level-btn:hover { background: var(--accent-soft); }
 .level-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 .view-toggle .level-btn { padding: 6px 14px; font-size: 12.5px; }
+:root { --flow-recv: #1baf7a; --flow-del: #eb6834; }
+[data-theme="dark"] { --flow-recv: #199e70; --flow-del: #d95926; }
 .filters-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: var(--card-pad); margin-bottom: var(--gap); }
 .filters-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.filters-bar { justify-content: flex-start; }
+.filters-bar .reset-btn { margin-left: auto; }
+.filters-drawer-toggle {
+  display: none; align-items: center;
+  background: var(--bg); border: 1px solid var(--border-strong); border-radius: 8px;
+  padding: 5px 12px; font-size: 12.5px; font-weight: 400; cursor: pointer;
+  color: var(--text); font-family: var(--font);
+}
+.filters-drawer-toggle:hover { background: var(--accent-soft); }
+.minor-tso-label { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--text); cursor: pointer; }
+.minor-tso-label input { cursor: pointer; }
 .filters-row + .filters-row { margin-top: 8px; }
 /* Page-wide, not just .filters-row -- the KPI month select and the
    variable/date-range/granularity selects above the chart live outside
@@ -241,17 +244,17 @@ select, input { background: var(--bg); border: 1px solid var(--border-strong); b
 input[type="search"] { cursor: text; }
 select:hover, input:hover { background: var(--accent-soft); }
 .tso-toggle-row { display: flex; gap: 6px; flex-wrap: wrap; }
-.tso-toggle { background: var(--bg); border: 1px solid var(--border-strong); border-radius: 999px; padding: 4px 12px; font-size: 12px; cursor: pointer; color: var(--text); font-family: var(--font); font-weight: 600; }
+.tso-toggle { background: var(--bg); border: 1px solid var(--border-strong); border-radius: 999px; padding: 4px 12px; font-size: 12px; cursor: pointer; color: var(--text); font-family: var(--font); font-weight: 400; }
 .tso-toggle:hover { background: var(--accent-soft); }
 .tso-toggle.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-.flowtype-toggle { background: var(--bg); border: 1px solid var(--border-strong); border-radius: 999px; padding: 4px 12px; font-size: 12px; cursor: pointer; color: var(--text); font-family: var(--font); font-weight: 600; }
+.flowtype-toggle { background: var(--bg); border: 1px solid var(--border-strong); border-radius: 999px; padding: 4px 12px; font-size: 12px; cursor: pointer; color: var(--text); font-family: var(--font); font-weight: 400; }
 .flowtype-toggle:hover { background: var(--accent-soft); }
 .flowtype-toggle.active { background: var(--text); color: var(--panel); border-color: var(--text); }
-.filter-label { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; margin-right: 2px; }
+.filter-label { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 400; margin-right: 2px; }
 .reset-btn { margin-left: auto; background: transparent; border: 1px solid var(--border-strong); border-radius: 6px; padding: 5px 10px; font-size: 12px; cursor: pointer; color: var(--muted2); font-family: var(--font); }
 .reset-btn:hover { background: var(--accent-soft); color: var(--text); }
 .chart-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: var(--card-pad); margin-bottom: var(--gap); }
-.panel-title { font-size: 13px; font-weight: 600; margin: 0 0 2px; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.panel-title { font-size: 13px; font-weight: 400; margin: 0 0 2px; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
 .panel-note { font-size: 11.5px; color: var(--muted); margin: 6px 0 10px; }
 /* Collapse toggle for the meter picker (chip grid / table) -- picking is a
    one-time task before charting, and the picker (especially the meter
@@ -264,7 +267,7 @@ select:hover, input:hover { background: var(--accent-soft); }
 .chip-scroll { display: flex; flex-wrap: wrap; gap: 6px; max-height: 168px; overflow: auto; padding: 2px; margin-bottom: 4px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); }
 .meter-table-wrap { max-height: 320px; overflow: auto; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 4px; }
 .meter-table-wrap table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-.meter-table-wrap th, #data-table th { position: sticky; top: 0; background: var(--panel); color: var(--muted2); font-weight: 600; text-align: left; padding: 6px 10px 7px; border-bottom: 1px solid var(--border); z-index: 1; cursor: auto; }
+.meter-table-wrap th, #data-table th { position: sticky; top: 0; background: var(--panel); color: var(--muted2); font-weight: 400; text-align: left; padding: 6px 10px 7px; border-bottom: 1px solid var(--border); z-index: 1; cursor: auto; }
 /* Sortable/filterable column header, shared by the meter table and the
    data table below the chart: a clickable label (3 clicks = asc, desc,
    back to the table's default order) plus a small inline filter box. */
@@ -275,14 +278,14 @@ th.num .th-filter { text-align: right; }
 .meter-table-wrap td { padding: 5px 10px; border-bottom: 1px solid var(--border); }
 .meter-table-wrap tr.meter-row { cursor: pointer; }
 .meter-table-wrap tr.meter-row:hover { background: var(--accent-soft); }
-.meter-table-wrap tr.meter-row.picked { background: var(--accent-soft); font-weight: 600; }
+.meter-table-wrap tr.meter-row.picked { background: var(--accent-soft); font-weight: 400; }
 .meter-table-wrap .sw-cell { width: 18px; }
-.meter-table-wrap .type-badge { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
+.meter-table-wrap .type-badge { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 400; text-transform: uppercase; letter-spacing: .03em; }
 .meter-table-wrap .type-badge.recv { background: rgba(27,175,122,0.16); color: #1baf7a; }
 .meter-table-wrap .type-badge.del { background: rgba(235,104,52,0.16); color: #eb6834; }
 .series-btn { display: inline-flex; align-items: center; gap: 6px; background: var(--panel); border: 1px solid var(--border); border-radius: 999px; padding: 4px 12px 4px 8px; font-size: 12px; cursor: pointer; color: var(--text); font-family: var(--font); }
 .series-btn:hover { background: var(--accent-soft); }
-.series-btn.active { border-color: var(--border-strong); font-weight: 600; }
+.series-btn.active { border-color: var(--border-strong); font-weight: 400; }
 .series-btn .sw { width: 9px; height: 9px; border-radius: 2px; flex: none; background: var(--border-strong); }
 .chip-truncate-note { font-size: 11px; color: var(--muted); margin: 4px 2px 8px; }
 #chart-host svg { display: block; overflow: hidden; }
@@ -291,7 +294,7 @@ th.num .th-filter { text-align: right; }
 .legend span { display: flex; align-items: center; gap: 6px; }
 .legend .sw { width: 9px; height: 9px; border-radius: 2px; flex: none; }
 .tt { position: fixed; pointer-events: none; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 12px; box-shadow: 0 6px 20px rgba(0,0,0,.16); z-index: 50; display: none; min-width: 200px; }
-.tt .d { font-weight: 600; margin-bottom: 5px; }
+.tt .d { font-weight: 400; margin-bottom: 5px; }
 .tt table { border-collapse: collapse; width: 100%; }
 .tt td { padding: 1px 0; }
 .tt td.v { text-align: right; padding-left: 14px; font-variant-numeric: tabular-nums; white-space: nowrap; }
@@ -302,7 +305,7 @@ th.num .th-filter { text-align: right; }
 .table-wrap { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; overflow: auto; box-shadow: var(--shadow); max-height: 50vh; }
 table { border-collapse: collapse; width: auto; min-width: 100%; font-size: 12.5px; white-space: nowrap; table-layout: auto; }
 th, td { padding: 4px 8px; text-align: left; border-bottom: 1px solid var(--border); }
-th { position: sticky; top: 0; background: var(--panel); color: var(--muted2); font-weight: 600; z-index: 2; cursor: pointer; user-select: none; }
+th { position: sticky; top: 0; background: var(--panel); color: var(--muted2); font-weight: 400; z-index: 2; cursor: pointer; user-select: none; }
 th:hover { background: var(--accent-soft); }
 th .arrow { opacity: .4; margin-left: 3px; }
 tbody tr:hover { background: var(--accent-soft); }
@@ -314,10 +317,9 @@ footer a { color: var(--accent); }
 <body>
 <a class="skip-link" href="#chart-host" data-i18n="skip">Skip to content</a>
 <div class="wrap">
-<header>
+<header class="dash-head">
   <div>
-    <h1 data-i18n="navFlows">Pipeline Flows Dashboard</h1>
-    <div class="subtitle" id="subtitle">Last refreshed &mdash;</div>
+    <h1 data-i18n="navFlows">Pipeline Flows</h1>
   </div>
   <div class="header-right">
     <div class="header-links">
@@ -327,6 +329,10 @@ footer a { color: var(--accent); }
     <button id="theme-toggle" title="Toggle theme" aria-label="Toggle theme"></button>
   </div>
 </header>
+<div class="asof-strip" id="asof-strip">
+  <span><span class="asof-label">Data through</span> <span class="asof-val" data-through id="asof-through">&mdash;</span></span>
+  <span><span class="asof-label">Refreshed</span> <span class="asof-val" id="asof-refreshed">&mdash;</span></span>
+</div>
 <div class="flagbar" aria-hidden="true"></div>
 <div class="sources">
   <span class="sources-label">Data source</span>
@@ -341,24 +347,21 @@ footer a { color: var(--accent); }
       <select id="f-kpi-month"></select>
     </span>
   </div>
+  <div class="tso-schematic" aria-hidden="true">
+    <svg viewBox="0 0 280 56" xmlns="http://www.w3.org/2000/svg">
+      <line x1="24" y1="14" x2="256" y2="14" stroke="var(--accent)" stroke-width="2"/>
+      <text x="24" y="11" fill="var(--muted2)" font-size="9" font-family="var(--font)">NTS</text>
+      <line x1="24" y1="28" x2="256" y2="28" stroke="var(--chart-3)" stroke-width="2"/>
+      <text x="24" y="25" fill="var(--muted2)" font-size="9" font-family="var(--font)">TAG</text>
+      <line x1="24" y1="42" x2="200" y2="42" stroke="var(--chart-5)" stroke-width="2"/>
+      <text x="24" y="39" fill="var(--muted2)" font-size="9" font-family="var(--font)">TBG</text>
+    </svg>
+  </div>
   <div class="kpi-cards" id="kpi-cards"></div>
 </div>
 
 <div class="level-toggle" id="level-toggle"></div>
 <div class="view-toggle" id="view-toggle"></div>
-
-<div class="filters-card">
-  <div class="filters-row" id="tso-toggle-row"></div>
-  <div class="filters-row" id="flowtype-toggle-row"></div>
-  <div class="filters-row">
-    <span class="filter-label">Pipeline</span>
-    <select id="f-pipeline"><option value="">All pipelines</option></select>
-    <span class="filter-label" id="f-uf-label">State</span>
-    <select id="f-uf"><option value="">All states</option></select>
-    <input id="f-search" type="search" placeholder="Search pipeline / point&hellip;" style="min-width:200px">
-    <button type="button" id="btn-reset-filters" class="reset-btn">Reset all filters</button>
-  </div>
-</div>
 
 <div class="chart-card">
   <p class="panel-title">
@@ -391,6 +394,26 @@ footer a { color: var(--accent); }
   <div id="chart-host"></div>
 </div>
 
+<div class="filters-card">
+  <div class="filters-row filters-bar">
+    <button type="button" class="filters-drawer-toggle" id="filters-drawer-toggle"
+            aria-expanded="false" aria-controls="filters-drawer">Filters</button>
+    <div id="tso-toggle-row" class="tso-toggle-row"></div>
+    <button type="button" id="btn-reset-filters" class="reset-btn">Reset all filters</button>
+  </div>
+  <div id="filters-drawer" class="filters-collapsible is-collapsed">
+    <div class="filters-row" id="flowtype-toggle-row"></div>
+    <div class="filters-row">
+      <span class="filter-label">Pipeline</span>
+      <select id="f-pipeline"><option value="">All pipelines</option></select>
+      <span class="filter-label" id="f-uf-label">State</span>
+      <select id="f-uf"><option value="">All states</option></select>
+      <input id="f-search" type="search" placeholder="Search pipeline / point&hellip;" style="min-width:200px">
+      <label class="minor-tso-label"><input type="checkbox" id="f-include-minor-tsos"> Include TSB &amp; GOM</label>
+    </div>
+  </div>
+</div>
+
 <div class="toolbar">
   <button id="btn-clear-picks" hidden>Clear selection</button>
   <button id="btn-csv">Download CSV</button>
@@ -404,7 +427,7 @@ footer a { color: var(--accent); }
   </table>
 </div>
 <footer>
-  &copy; <span id="year"></span> GasBrazil.com &middot; Data: ANP dados abertos (public CSV) &middot; Average Pressure and shipper/contract-level detail are in the underlying data store but not in this page &mdash; see <a href="https://github.com/gasbrazil/gasbrazil.github.io/tree/main/flows" target="_blank" rel="noopener">the repo</a> &middot; Contact: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
+  &copy; <span id="year"></span> GasBrazil.com &middot; Data: ANP dados abertos (public CSV) &middot; Shipper capacity is on <a href="../contratos/">POC Contracts</a>; this page shows physical flow totals only &middot; Contact: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
 </footer>
 </div>
 <div class="tt" id="chart-tt"></div>
@@ -417,8 +440,7 @@ __SHARED_JS_XLSX__
 __SHARED_SITE_LINKS_JS__
 __SHARED_JS_ESCAPE_HTML__
 
-const CHART_PALETTE_LIGHT = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#4a3aa7", "#e34948", "#0891a8", "#a8514a"];
-const CHART_PALETTE_DARK = ["#3987e5", "#d95926", "#199e70", "#c98500", "#d55181", "#008300", "#9085e9", "#e66767", "#2ba9c2", "#c46b63"];
+__SHARED_JS_CHART_PALETTE__
 const MAX_CHIPS_SHOWN = 60;
 const DEFAULT_PICK_COUNT = 5;
 const RECEIPT = "Receipt Point", DELIVERY = "Delivery Point";
@@ -427,7 +449,10 @@ let DATA = null;
 let level = "points";        // "points" | "ledger"
 let viewMode = "aggregate";  // "aggregate" (TSO totals) | "detail" (individual meters/pipelines)
 let variable = null;         // current variable string
-let tsoFilter = new Set();   // empty == all TSOs
+const PRIMARY_TSOS = ["NTS", "TAG", "TBG"];
+const MINOR_TSOS = ["TSB", "GOM"];
+let includeMinorTsos = false;
+let tsoFilter = new Set();   // empty == all visible TSOs
 let flowTypeFilter = "";     // "" | "Receipt Point" | "Delivery Point" -- points level only
 let pipelineFilter = "";
 let ufFilter = "";
@@ -465,13 +490,15 @@ let kpiMonth = null; // "YYYY-MM"
 
 function chartClaimSlot(key) {
   if (chartSlots.has(key)) return chartSlots.get(key);
-  const slot = chartSlots.size % CHART_PALETTE_LIGHT.length;
+  const pal = chartPalette();
+  const slot = chartSlots.size % Math.max(1, pal.length);
   chartSlots.set(key, slot);
   return slot;
 }
 function chartColorOf(key) {
-  const dark = document.documentElement.getAttribute("data-theme") === "dark";
-  return (dark ? CHART_PALETTE_DARK : CHART_PALETTE_LIGHT)[chartClaimSlot(key)];
+  const pal = chartPalette();
+  if (!pal.length) return "var(--accent)";
+  return pal[chartClaimSlot(key) % pal.length];
 }
 
 function currentEntities() { return level === "points" ? DATA.points : DATA.pipelines; }
@@ -488,7 +515,7 @@ function entityById(id) { return currentEntities().find(e => e.id === id); }
 // from every on-page label; the full raw name is still available via the
 // row's title attribute for anyone who needs the ANP-exact wording.
 function shortPointName(name) {
-  return name.replace(/\s*\([^()]*>>[^()]*\)\s*$/, "");
+  return name.replace(/\\s*\\([^()]*>>[^()]*\\)\\s*$/, "");
 }
 
 function entityLabel(e) {
@@ -497,8 +524,27 @@ function entityLabel(e) {
   return e.name;
 }
 
+function isTsoVisible(tso) {
+  if (!tso) return false;
+  // Only TSB/GOM are gated; NTS/TAG/TBG and any other code stay visible.
+  if (MINOR_TSOS.includes(tso)) return includeMinorTsos;
+  return true;
+}
+function tsoUniverse(ents) {
+  const all = [...new Set((ents || currentEntities()).map(e => e.tso).filter(Boolean))];
+  const filtered = all.filter(isTsoVisible);
+  return filtered.sort((a, b) => {
+    const ia = PRIMARY_TSOS.indexOf(a), ib = PRIMARY_TSOS.indexOf(b);
+    const ra = ia >= 0 ? ia : 100, rb = ib >= 0 ? ib : 100;
+    return ra - rb || a.localeCompare(b);
+  });
+}
 function matchesFilters(e) {
-  if (tsoFilter.size && !tsoFilter.has(e.tso)) return false;
+  if (tsoFilter.size) {
+    if (!tsoFilter.has(e.tso)) return false;
+  } else if (!isTsoVisible(e.tso)) {
+    return false;
+  }
   if (pipelineFilter && (level === "points" ? e.pipeline : e.name) !== pipelineFilter) return false;
   if (level === "points") {
     if (flowTypeFilter && e.type !== flowTypeFilter) return false;
@@ -517,6 +563,7 @@ function matchesFilters(e) {
 // own fixed TSO/flow-type regardless of how many TSOs are toggled on.
 function matchesGroup(e, tso, pointType) {
   if (tso && e.tso !== tso) return false;
+  if (!tso && !isTsoVisible(e.tso)) return false;
   if (level === "points" && pointType && e.type !== pointType) return false;
   if (pipelineFilter && (level === "points" ? e.pipeline : e.name) !== pipelineFilter) return false;
   if (level === "points" && ufFilter && e.uf !== ufFilter) return false;
@@ -640,7 +687,11 @@ function applyPickerCollapse() {
 function buildTsoToggles() {
   const host = document.getElementById("tso-toggle-row");
   host.innerHTML = '<span class="filter-label">Transporter</span>';
-  const allTsos = [...new Set(currentEntities().map(e => e.tso).filter(Boolean))].sort();
+  const allTsos = tsoUniverse();
+  // Drop a stuck selection if the minor-TSO toggle hid it.
+  if (tsoFilter.size) {
+    tsoFilter = new Set([...tsoFilter].filter(isTsoVisible));
+  }
 
   const allBtn = document.createElement("button");
   allBtn.className = "tso-toggle" + (tsoFilter.size === 0 ? " active" : "");
@@ -695,7 +746,10 @@ function buildVariableSelect() {
 function shortLabel(v) { return v.split(" (")[0]; }
 
 function buildDependentSelects() {
-  const ents = currentEntities().filter(e => tsoFilter.size === 0 || tsoFilter.has(e.tso));
+  const ents = currentEntities().filter(e => {
+    if (tsoFilter.size) return tsoFilter.has(e.tso);
+    return isTsoVisible(e.tso);
+  });
   if (level === "points") {
     populateSelectPreserve(document.getElementById("f-pipeline"), ents.map(e => e.pipeline), "All pipelines");
     populateSelectPreserve(document.getElementById("f-uf"), ents.map(e => e.uf), "All states");
@@ -970,14 +1024,14 @@ function aggregateGroups() {
   // Ledger: no receipt/delivery split -- one aggregate line per TSO. With
   // nothing toggled on, show every TSO so "the system as a whole" is the
   // default comparison; narrowing to specific TSOs shows just those.
-  const tsos = tsoFilter.size ? [...tsoFilter] : [...new Set(DATA.pipelines.map(p => p.tso).filter(Boolean))].sort();
+  const tsos = tsoFilter.size ? [...tsoFilter] : tsoUniverse(DATA.pipelines);
   return tsos.map(tso => ({ key: tso, tso, pointType: null, label: tso }));
 }
 
 function aggregateValuesForGroup(tso, pointType, fromIdx, toIdx) {
   const seriesMap = currentSeriesMap();
   const ids = currentEntities().filter(e => matchesGroup(e, tso, pointType)).map(e => e.id);
-  const isMean = variable === "Allocation (%)";
+  const isMean = variable === "Allocation (%)" || variable.startsWith("Average Pressure");
   const out = [];
   for (let i = fromIdx; i <= toIdx; i++) {
     let sum = 0, n = 0, any = false;
@@ -1032,6 +1086,7 @@ function monthlyTotal(tso, pointType, startIdx, endIdx) {
   for (const pt of DATA.points) {
     if (pt.type !== pointType) continue;
     if (tso && pt.tso !== tso) continue;
+    if (!tso && !isTsoVisible(pt.tso)) continue;
     const arr = seriesMap[pt.id];
     if (!arr) continue;
     for (let i = startIdx; i <= endIdx; i++) {
@@ -1073,7 +1128,7 @@ function renderKpiCards() {
   const isPartial = endIdx < lastOverallIdx ? false : (DATA.dates[endIdx].slice(8, 10) !== new Date(Date.UTC(+kpiMonth.slice(0, 4), +kpiMonth.slice(5, 7), 0)).getUTCDate().toString().padStart(2, "0"));
   labelHost.textContent = isPartial ? ("— partial, through " + DATA.dates[endIdx]) : "";
 
-  const tsos = [...new Set(DATA.points.map(p => p.tso).filter(Boolean))].sort();
+  const tsos = tsoUniverse(DATA.points);
 
   const makeCard = (tso, label, isAll) => {
     const recv = monthlyTotal(tso, RECEIPT, startIdx, endIdx);
@@ -1189,7 +1244,7 @@ function renderChart() {
   });
   if (lo < 0 && hi > 0) svg.appendChild(chartSvgEl("line", { x1: ML, x2: W - MR, y1: y(0), y2: y(0), stroke: "var(--border-strong)", "stroke-width": 1.5 }));
 
-  const lTitle = chartSvgEl("text", { x: ML, y: 14, fill: "var(--muted2)", "font-size": 11, "font-weight": 600 });
+  const lTitle = chartSvgEl("text", { x: ML, y: 14, fill: "var(--muted2)", "font-size": 11, "font-weight": 400 });
   lTitle.textContent = unit; svg.appendChild(lTitle);
 
   const nT = Math.min(8, allDates.length);
@@ -1462,6 +1517,9 @@ function render() {
 
 function resetAllFilters() {
   tsoFilter = new Set();
+  includeMinorTsos = false;
+  const minorCb = document.getElementById("f-include-minor-tsos");
+  if (minorCb) minorCb.checked = false;
   flowTypeFilter = ""; pipelineFilter = ""; ufFilter = ""; searchText = "";
   document.getElementById("f-pipeline").value = "";
   document.getElementById("f-uf").value = "";
@@ -1486,22 +1544,34 @@ async function init() {
   DATA = JSON.parse(text);
   variable = DATA.pointVars[0];
 
-  let subtitleText = "Last refreshed " + DATA.generated;
+  const through = DATA.dates.length ? DATA.dates[DATA.dates.length - 1] : "—";
+  document.getElementById("asof-through").textContent = through;
+  let refreshedText = DATA.generated || "—";
   try {
     const d = new Date(DATA.generatedIso);
     if (!isNaN(d)) {
       const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
       const localDate = d.toLocaleDateString(undefined, { year: "numeric", month: "2-digit", day: "2-digit" });
       const localTime = d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
-      subtitleText += " (" + localDate + " " + localTime + " " + tz + ")";
+      refreshedText = localDate + " " + localTime + " " + tz;
     }
   } catch (e) {}
-  document.getElementById("subtitle").textContent = subtitleText;
+  document.getElementById("asof-refreshed").textContent = refreshedText;
 
   buildKpiMonthSelect();
   applyQueryState();
   onLevelOrVariableChanged();
 
+  const drawer = document.getElementById("filters-drawer");
+  const drawerToggle = document.getElementById("filters-drawer-toggle");
+  drawerToggle.addEventListener("click", () => {
+    const open = drawer.classList.toggle("is-collapsed") === false;
+    drawerToggle.setAttribute("aria-expanded", String(open));
+  });
+  document.getElementById("f-include-minor-tsos").addEventListener("change", e => {
+    includeMinorTsos = e.target.checked;
+    render();
+  });
   document.getElementById("f-kpi-month").addEventListener("change", e => { kpiMonth = e.target.value; renderKpiCards(); });
   document.getElementById("f-pipeline").addEventListener("change", e => { pipelineFilter = e.target.value; render(); });
   document.getElementById("f-uf").addEventListener("change", e => { ufFilter = e.target.value; render(); });
@@ -1550,6 +1620,7 @@ def write_dashboard(out_path=DEFAULT_OUT):
         SHARED_JS_I18N=kit.JS_I18N,
         SHARED_JS_CSV=kit.JS_CSV_HELPERS,
         SHARED_JS_XLSX=kit.JS_XLSX_ENGINE,
+        SHARED_JS_CHART_PALETTE=kit.chart_palette_js(),
         SHARED_SITE_LINKS_JS=kit.site_links_js("flows"),
         SHARED_NAV_LINKS=kit.nav_links_html("flows"),
         FAVICON_DATA_URI=kit.embed_favicon(),

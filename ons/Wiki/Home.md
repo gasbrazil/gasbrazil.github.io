@@ -34,6 +34,7 @@ GitHub Pages host:
 | ONS Balances | [gasbrazil.com/ons](https://gasbrazil.com/ons/) | [gasbrazil.github.io/ons](https://gasbrazil.github.io/ons/) |
 | POC Results | [gasbrazil.com/poc](https://gasbrazil.com/poc/) | [gasbrazil.github.io/poc](https://gasbrazil.github.io/poc/) |
 | POC Contracts | [gasbrazil.com/contratos](https://gasbrazil.com/contratos/) | [gasbrazil.github.io/contratos](https://gasbrazil.github.io/contratos/) |
+| Pipeline Flows | [gasbrazil.com/flows](https://gasbrazil.com/flows/) | [gasbrazil.github.io/flows](https://gasbrazil.github.io/flows/) |
 | About | [gasbrazil.com/about](https://gasbrazil.com/about/) | [gasbrazil.github.io/about](https://gasbrazil.github.io/about/) |
 
 ## Repo at a glance
@@ -44,7 +45,7 @@ dashboard.py        HTML/JS dashboard generator (imported by the CLI)
 make_mock.py        generates ONS-shaped fake data for offline testing
 check_bulletin.py   reconciles the store against an ONS DIARIO_*.xlsx bulletin
 ../.github/workflows/ons.yml   twice-daily rebuild + commit of ons/index.html
-../shared/fonts/Degular.ttf    self-hosted font, embedded at build time
+../shared/fonts/Pacaembu-*.ttf    self-hosted Pacaembu weights, embedded at build time
 requirements.txt
 ```
 

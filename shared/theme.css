@@ -8,9 +8,10 @@
  * applies to every dashboard on its next scheduled rebuild (see ADR-001,
  * Decision 2 Option C).
  *
- * __FONT_FACE__ is filled in by shared/dashboard_kit.py's embed_font_face()
- * at build time with a base64-embedded @font-face rule (or left blank if
- * shared/fonts/Pacaembu-Light.ttf is missing from the checkout).
+ * The FONT_FACE placeholder below is filled in by
+ * shared/dashboard_kit.py's embed_font_face() at build time with
+ * base64-embedded weight rules for ExtraLight / Light / Regular /
+ * SemiBold (or left blank if shared/fonts/ is empty).
  */
 __FONT_FACE__
 :root {
@@ -19,16 +20,19 @@ __FONT_FACE__
      rendering light (dark text on a dark --bg, unreadable) just because we
      never told the browser the page itself went dark. */
   color-scheme: light;
-  --bg: #f4f4f1;
-  --panel: #fcfcfb;
-  --border: #e1e0d9;
-  --border-strong: #c3c2b7;
+  /* Cooler paper than warm cream -- closer to a desk terminal. */
+  --bg: #eef0f2;
+  --panel: #f7f8f9;
+  --border: #d5d8dc;
+  --border-strong: #b8bcc2;
   --text: #0b0b0b;
-  --muted: #898781;
-  --muted2: #52514e;
+  --muted: #7a7e85;
+  --muted2: #4a4e55;
   --ring: rgba(11,11,11,.10);
   --shadow: none;
   --font: "Pacaembu", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --radius: 5px;
+  --radius-sm: 4px;
 
   /* Shared layout + density tokens (2026-09-05). Every page's .wrap uses
      these, so the site-wide content width and breathing room are a one-line
@@ -55,7 +59,19 @@ __FONT_FACE__
   --accent-soft: rgba(0,39,118,.08);
   --pos: #002776;
   --neg: #b3441e;
+
+  /* Shared chart series palette: accent first, then muted neutrals.
+     Semantic recv/del stay page-local (--flow-recv / --flow-del). */
+  --chart-1: #002776;
+  --chart-2: #4a5568;
+  --chart-3: #2f6fed;
+  --chart-4: #6b7280;
+  --chart-5: #0e7490;
+  --chart-6: #64748b;
+  --chart-7: #1d4ed8;
+  --chart-8: #475569;
 }
+
 [data-theme="dark"] {
   color-scheme: dark;
   --bg: #0d0d0d;
@@ -81,6 +97,31 @@ __FONT_FACE__
   --accent-soft: rgba(63,116,217,.16);
   --pos: #3f74d9;
   --neg: #e08a5f;
+
+  --chart-1: #3f74d9;
+  --chart-2: #94a3b8;
+  --chart-3: #60a5fa;
+  --chart-4: #64748b;
+  --chart-5: #22d3ee;
+  --chart-6: #788396;
+  --chart-7: #93c5fd;
+  --chart-8: #475569;
+}
+
+/* Pacaembu is heavy at Regular -- default the whole UI to Light (300).
+   Mid emphasis uses Regular (400); wordmark alone uses SemiBold (600).
+   Never Bold / 700 (that synthesizes badly and the face is already dense). */
+html, body {
+  margin: 0;
+  font-family: var(--font);
+  font-weight: 300;
+  color: var(--text);
+  background: var(--bg);
+}
+.muted, .when, .sources-label, .asof, .meta-muted { font-weight: 200; color: var(--muted); }
+.wordmark { font-weight: 600; }
+.emph, .navlink, .kpi-title, .card .name, .panel-title, th, b, strong {
+  font-weight: 400;
 }
 
 /* Green/yellow/blue band, proportioned like the flag itself (green field,
@@ -110,6 +151,51 @@ __FONT_FACE__
   .wrap { width: auto; padding: 14px 12px 32px; }
 }
 
+/* Sticky compact desk header: title · nav · as-of · tools. */
+.site-header, header.top, header.dash-head {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(8px);
+  padding-top: 10px;
+  margin: 0 0 0;
+}
+.asof-strip {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 14px;
+  font-size: 11.5px; font-weight: 200; color: var(--muted);
+  margin: 0 0 10px; padding: 4px 0;
+  border-bottom: 1px solid var(--border);
+}
+.asof-strip .asof-label {
+  text-transform: uppercase; letter-spacing: .06em; font-weight: 400;
+  color: var(--muted2); font-size: 10.5px;
+}
+.asof-strip .asof-val { font-weight: 300; color: var(--muted2); font-variant-numeric: tabular-nums; }
+
+/* Text nav (not pill clusters): underline active page. */
+.navlinks, .header-links {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px;
+}
+.navlink {
+  font-size: 12px;
+  color: var(--muted2);
+  text-decoration: none;
+  font-weight: 400;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  padding: 4px 0;
+  white-space: nowrap;
+  background: transparent;
+}
+.navlink:hover { color: var(--accent); border-bottom-color: var(--accent-soft); }
+.navlink.is-active, .navlink[aria-current="page"] {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  font-weight: 400;
+}
+
 /* Inline "i" affordance. Replaces the paragraphs of explanatory copy that
    used to sit under panel titles: the explanation is still one hover or tap
    away, but the page reads as a tool rather than a tutorial.
@@ -121,7 +207,7 @@ __FONT_FACE__
   margin-left: 6px; padding: 0;
   border: 1px solid var(--muted); border-radius: 50%;
   background: transparent; color: var(--muted2);
-  font: 700 9.5px/1 var(--font); font-style: italic;
+  font: 400 9.5px/1 var(--font); font-style: italic;
   cursor: help; vertical-align: middle; position: relative;
 }
 .infodot:hover, .infodot:focus-visible {
@@ -136,9 +222,9 @@ __FONT_FACE__
   position: absolute; left: -5px; top: calc(100% + 7px);
   width: max-content; max-width: 300px;
   background: var(--panel); color: var(--text);
-  border: 1px solid var(--border-strong); border-radius: 8px;
+  border: 1px solid var(--border-strong); border-radius: var(--radius);
   padding: 7px 9px;
-  font: 400 11.5px/1.5 var(--font); font-style: normal;
+  font: 300 11.5px/1.5 var(--font); font-style: normal;
   text-align: left; white-space: normal;
   box-shadow: 0 6px 20px rgba(0,0,0,.16);
   opacity: 0; visibility: hidden; pointer-events: none;
@@ -158,21 +244,40 @@ __FONT_FACE__
    whole cell, looks clickable). */
 .th-label { cursor: pointer; user-select: none; display: block; }
 .th-label:hover { color: var(--text); }
-.th-filter { display: block; width: 100%; margin-top: 4px; padding: 2px 6px; font-size: 11px; font-weight: 400; background: var(--bg); border: 1px solid var(--border-strong); border-radius: 5px; color: var(--text); box-sizing: border-box; cursor: text; }
+.th-filter { display: block; width: 100%; margin-top: 4px; padding: 2px 6px; font-size: 11px; font-weight: 300; background: var(--bg); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); color: var(--text); box-sizing: border-box; cursor: text; }
 th.num .th-filter { text-align: right; }
 
 .skip-link {
   position: absolute; left: 12px; top: -40px; z-index: 80;
   background: var(--accent); color: #fff; padding: 6px 10px;
-  border-radius: 6px; font: 600 12.5px var(--font); text-decoration: none;
+  border-radius: var(--radius-sm); font: 400 12.5px var(--font); text-decoration: none;
 }
 .skip-link:focus { top: 12px; }
 .langBtn, #lang-toggle {
   display: inline-flex; align-items: center; justify-content: center;
   min-width: 34px; height: 34px; padding: 0 8px;
   background: var(--panel); border: 1px solid var(--border-strong);
-  border-radius: 6px; color: var(--text); cursor: pointer;
-  font: 700 11.5px/1 var(--font); letter-spacing: .04em;
+  border-radius: var(--radius-sm); color: var(--text); cursor: pointer;
+  font: 400 11.5px/1 var(--font); letter-spacing: .04em;
 }
 .langBtn:hover, #lang-toggle:hover { background: var(--accent-soft); }
 .chrome-tools { display: flex; align-items: center; gap: 6px; }
+
+/* TSO schematic (Flows): simple Brazil trunk lines, not a GIS map. */
+.tso-schematic {
+  display: flex; align-items: center; justify-content: center;
+  gap: 0; min-height: 56px; padding: 6px 8px;
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.tso-schematic svg { width: 100%; max-width: 280px; height: 56px; }
+
+@media (max-width: 720px) {
+  .navlinks, .header-links { gap: 2px 10px; }
+  .navlink { font-size: 11.5px; }
+  .site-header .header-row, header.top .header-row {
+    flex-wrap: wrap;
+  }
+  .filters-drawer-toggle { display: inline-flex !important; }
+  .filters-collapsible.is-collapsed { display: none; }
+}

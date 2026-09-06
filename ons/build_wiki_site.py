@@ -60,25 +60,26 @@ header.top{display:flex;flex-wrap:wrap;gap:12px;align-items:center;
   justify-content:space-between;margin:0 auto 4px;padding:12px 0;
   border-bottom:1px solid var(--ring);width:var(--content-w);max-width:var(--content-max)}
 header.top .brand{display:flex;align-items:baseline;gap:10px}
-header.top h1{font-size:18px;margin:0;font-weight:700}
+header.top h1{font-size:18px;margin:0;font-weight:400}
 header.top .tag{color:var(--muted2);font-size:12.5px}
 header.top .row{display:flex;gap:8px;align-items:center}
 .flagbar{width:var(--content-w);max-width:var(--content-max);margin:0 auto 10px}
 a{color:var(--accent)}
-.navlink,button.iconBtn{border:1px solid var(--ring);background:var(--panel);
-  color:var(--accent);border-radius:8px;padding:5px 10px;font-size:12.5px;
-  font-weight:600;text-decoration:none;cursor:pointer;font-family:var(--font)}
-.navlink:hover,button.iconBtn:hover{background:var(--accent-soft)}
-button.iconBtn{padding:5px 8px;color:var(--text)}
-button.iconBtn svg{width:14px;height:14px;display:block}
+/* Header back-link uses .navlink from shared/theme.css (text underline). */
+button.iconBtn,#theme-toggle{border:1px solid var(--ring);background:var(--panel);
+  color:var(--text);border-radius:5px;padding:5px 8px;font-size:12.5px;
+  font-weight:400;text-decoration:none;cursor:pointer;font-family:var(--font);
+  display:inline-flex;align-items:center;justify-content:center;line-height:0}
+button.iconBtn:hover,#theme-toggle:hover{background:var(--accent-soft)}
+button.iconBtn svg,#theme-toggle svg{width:14px;height:14px;display:block}
 aside nav{background:var(--panel);border:1px solid var(--border);border-radius:10px;
   padding:10px 12px}
 aside nav .label{font-size:11px;text-transform:uppercase;letter-spacing:.04em;
   color:var(--muted);margin-bottom:6px}
 aside nav a{display:block;padding:5px 4px;font-size:13px;color:var(--text);
-  text-decoration:none;border-radius:6px}
+  text-decoration:none;border-radius:5px}
 aside nav a:hover{background:var(--accent-soft);color:var(--accent)}
-aside nav a.active{color:var(--accent);font-weight:700}
+aside nav a.active{color:var(--accent);font-weight:400}
 aside .back{display:block;margin-top:10px;font-size:12.5px}
 main .card{background:var(--panel);border:1px solid var(--border);border-radius:10px;
   padding:18px 22px}
@@ -97,7 +98,7 @@ main pre code{background:none;padding:0}
 main table{border-collapse:collapse;width:100%;margin:8px 0 14px;font-size:13px}
 main th,main td{border:1px solid var(--border);padding:4px 8px;text-align:left;
   vertical-align:top}
-main th{background:var(--accent-soft);font-weight:700}
+main th{background:var(--accent-soft);font-weight:400}
 main hr{border:0;border-top:1px solid var(--ring);margin:18px 0}
 footer.site{width:var(--content-w);max-width:var(--content-max);margin:20px auto 0;
   color:var(--muted);font-size:12px;line-height:1.6}
@@ -113,7 +114,7 @@ footer.site a{color:var(--muted)}
 
 THEME_JS = """
 (function(){
-  var b=document.getElementById('themeBtn');
+  var b=document.getElementById('theme-toggle');
   var sun='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
   var moon='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
   function paint(){
@@ -162,7 +163,7 @@ def page_template(title, body_html, current_html):
   </div>
   <div class="row">
     <a class="navlink" href="../index.html">&larr; Back to dashboard</a>
-    <button id="themeBtn" class="iconBtn" title="Toggle light/dark" aria-label="Toggle light/dark"></button>
+    <button id="theme-toggle" class="iconBtn" title="Toggle light/dark" aria-label="Toggle light/dark"></button>
   </div>
 </header>
 <div class="flagbar" aria-hidden="true"></div>

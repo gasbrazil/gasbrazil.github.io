@@ -31,8 +31,22 @@ from pathlib import Path
 
 HERE = Path(__file__).parent
 THEME_CSS_PATH = HERE / "theme.css"
-DEFAULT_FONT_PATH = HERE / "fonts" / "Pacaembu-Light.ttf"
+FONTS_DIR = HERE / "fonts"
+DEFAULT_FONT_PATH = FONTS_DIR / "Pacaembu-Light.ttf"
 DEFAULT_FAVICON_PATH = HERE / "favicon.png"
+
+# Pacaembu is a heavy geometric face -- site default is Light (300); mid
+# emphasis is Regular (400); wordmark only uses SemiBold (600). Never Bold.
+# ExtraLight (200) is for muted metadata. File names on disk:
+#   Pacaembu-ExtraLight.ttf, Pacaembu-Light.ttf, Pacaembu-Regular.ttf
+#   (from Adobe "Pacaembu.ttf", true usWeightClass=400), Pacaembu-SemiBold.ttf
+# Do NOT use Adobe's "Pacaembu Regular.ttf" -- that file is Bold 700.
+PACAEMBU_FACES = (
+    (200, "Pacaembu-ExtraLight.ttf"),
+    (300, "Pacaembu-Light.ttf"),
+    (400, "Pacaembu-Regular.ttf"),
+    (600, "Pacaembu-SemiBold.ttf"),
+)
 
 # Raw theme.css text, __FONT_FACE__ placeholder still unresolved -- callers
 # combine this with embed_font_face() (see render_theme_css below) and their
@@ -41,18 +55,32 @@ THEME_CSS = THEME_CSS_PATH.read_text(encoding="utf-8")
 
 
 def embed_font_face(font_path: Path | str = DEFAULT_FONT_PATH) -> str:
-    """Return a base64-embedded @font-face rule for Pacaembu, or "" if the
-    font file isn't present in this checkout (degrade to the system font
-    stack rather than ship a broken @font-face rule)."""
+    """Return base64-embedded @font-face rules for the Pacaembu weight stack,
+    or "" if no weight files are present (degrade to the system font stack).
+
+    font_path is accepted for call-site compatibility; when it points at the
+    shared fonts dir (or the Light file), all available weights are embedded.
+    A one-off alternate path still embeds that single file at weight 300."""
     font_path = Path(font_path)
-    if not font_path.exists():
+    faces: list[tuple[int, Path]] = []
+    if font_path == DEFAULT_FONT_PATH or font_path == FONTS_DIR:
+        for weight, name in PACAEMBU_FACES:
+            p = FONTS_DIR / name
+            if p.exists():
+                faces.append((weight, p))
+    elif font_path.exists():
+        faces.append((300, font_path))
+    if not faces:
         return ""
-    font_b64 = base64.b64encode(font_path.read_bytes()).decode("ascii")
-    return (
-        "@font-face{font-family:'Pacaembu';font-weight:300;font-style:normal;"
-        "font-display:swap;src:url(data:font/ttf;base64," + font_b64 +
-        ") format('truetype');}"
-    )
+    rules = []
+    for weight, path in faces:
+        font_b64 = base64.b64encode(path.read_bytes()).decode("ascii")
+        rules.append(
+            "@font-face{font-family:'Pacaembu';font-weight:" + str(weight) +
+            ";font-style:normal;font-display:swap;src:url(data:font/ttf;base64," +
+            font_b64 + ") format('truetype');}"
+        )
+    return "".join(rules)
 
 
 def embed_favicon(favicon_path: Path | str = DEFAULT_FAVICON_PATH,
@@ -223,11 +251,13 @@ const GB_I18N = {
     navOns: "ONS Balances",
     navPoc: "POC Results",
     navContratos: "POC Contracts",
-    navFlows: "Pipeline Flows Dashboard",
+    navFlows: "Pipeline Flows",
+    navSupply: "Gas Supply",
+    navPld: "PLD Prices",
     navAbout: "About",
     navWiki: "Wiki",
     contact: "Contact",
-    tagline: "Data tools for Brazil's natural gas market — grid balances, pipeline capacity, contracted transport activity, and physical pipeline flows, refreshed daily.",
+    tagline: "Data tools for Brazil's natural gas market — grid balances, pipeline capacity, contracted transport, physical flows, supply balance, and power prices, refreshed regularly.",
     aboutLead: "Independent, public-data dashboards. Nothing here is an official ONS, ANP, CCEE, or transportadora product.",
     aboutBody: "GasBrazil.com consolidates open Brazilian gas and power data into self-contained tools you can filter, chart, and export. Numbers come from public APIs and open-data portals; caveats live on each dashboard and on the About page.",
     cardOns: "ONS Balances",
@@ -238,12 +268,28 @@ const GB_I18N = {
     cardContratosDesc: "Active transport and master transport contracts across TBG, TAG, and NTS. Legacy and access-connection contracts are not yet included.",
     cardFlows: "Pipeline Flows",
     cardFlowsDesc: "Daily physical gas flow at every receipt and delivery point on Brazil's transport pipelines, plus system-use gas, losses, imbalance, and linepack.",
+    cardSupply: "Gas Supply",
+    cardSupplyDesc: "National monthly natural gas supply balance from ANP — production, available gas, flare and loss, own use, reinjection, LGN, and imports.",
+    cardPld: "PLD Prices",
+    cardPldDesc: "CCEE daily-average PLD (settlement price) by electricity submarket — Southeast, South, Northeast, and North. Not the same as ONS CMO.",
     kpiRefresh: "Last refreshed",
     sources: "Official sources",
     sourceOns: "ONS open data",
     sourcePoc: "Portal de Oferta de Capacidade",
     sourceAnp: "ANP gas transport movement",
     sourceFlows: "ANP open data — pipeline movement",
+    sourceSupply: "ANP PPGN-EL — production by state",
+    sourcePld: "CCEE open data — PLD média diária",
+    pldSubtitle: "CCEE daily-average settlement price (PLD) by electricity submarket, in R$/MWh.",
+    pldThrough: "Data through",
+    pldNote: "PLD is CCEE's settlement price. It is related to, but not the same as, ONS CMO (marginal operating cost) — see",
+    pldNoteLink: "ONS Balances",
+    pldChartTitle: "Daily PLD by submarket",
+    pldChartNote: "Last 24 months embedded. Toggle submarkets and date window below.",
+    pldWindow: "Window",
+    pldCsv: "Download CSV",
+    pldXlsx: "Export all data (Excel)",
+    pldFooter: "Data: CCEE (PLD média diária). Not an official CCEE product.",
     footerAbout: "About & methodology",
     aboutH1: "About GasBrazil",
     aboutWho: "What this is",
@@ -257,8 +303,10 @@ const GB_I18N = {
     glossCmo: "CMO — ONS marginal operating cost (R$/MWh). Not the same as CCEE's PLD settlement price.",
     glossMaster: "Master transport contract — framework that enables later transport nominations; not itself a firm capacity booking.",
     aboutCover: "Coverage limits",
-    aboutCoverBody: "POC Contracts currently include Transport Contract and Master Contract rows. Legacy transport contracts and access connections are on the official portal but are not in this feed yet.",
-    aboutCoverFlows: "Pipeline Flows has no published ANP data for 2022, and each month is typically released with a lag of several weeks. Average pressure and shipper-level detail are collected but not shown on the dashboard; both are available in the underlying data files in the repository.",
+    aboutCoverBody: "POC Contracts currently include Transport Contract and Master Contract rows. Legacy transport contracts and access connections appear on the official portal UI but are not served by the public GraphQL API (re-verified September 2026: no legado/conexão fields in the schema). They will be added when that endpoint is identified.",
+    aboutCoverFlows: "Pipeline Flows has no published ANP data for 2022, and each month is typically released with a lag of several weeks. Average pressure is available in the dashboard variable list. Shipper-level flow detail is not embedded (capacity by shipper lives on POC Contracts). TSB and GOM can be included via a toggle.",
+    aboutCoverSupply: "Gas Supply uses ANP PPGN-EL national monthly series plus national natural-gas imports. The open import CSV does not split Bolivia pipeline vs LNG cargoes.",
+    aboutCoverPld: "PLD Prices shows CCEE daily-average PLD by submarket. It is not ONS CMO — see ONS Balances for marginal operating cost.",
     notFound: "This page is not here.",
     notFoundBody: "The hub and dashboards are linked below.",
     backHome: "Back to GasBrazil.com"
@@ -272,11 +320,13 @@ const GB_I18N = {
     navOns: "Balanços ONS",
     navPoc: "Resultados POC",
     navContratos: "Contratos POC",
-    navFlows: "Painel de Fluxos de Gasodutos",
+    navFlows: "Fluxos de Gasodutos",
+    navSupply: "Oferta de Gás",
+    navPld: "Preços PLD",
     navAbout: "Sobre",
     navWiki: "Wiki",
     contact: "Contato",
-    tagline: "Ferramentas de dados para o mercado de gás natural do Brasil — balanços do SIN, capacidade de gasodutos, contratos de transporte e fluxos físicos, atualizados diariamente.",
+    tagline: "Ferramentas de dados para o mercado de gás natural do Brasil — balanços do SIN, capacidade de gasodutos, contratos de transporte, fluxos físicos e preços de energia, atualizados diariamente.",
     aboutLead: "Painéis independentes com dados públicos. Isto não é um produto oficial da ONS, da ANP, da CCEE ou das transportadoras.",
     aboutBody: "O GasBrazil.com reúne dados abertos de gás e energia do Brasil em ferramentas que você pode filtrar, graficar e exportar. Os números vêm de APIs e portais públicos; as ressalvas estão em cada painel e na página Sobre.",
     cardOns: "Balanços ONS",
@@ -287,12 +337,28 @@ const GB_I18N = {
     cardContratosDesc: "Contratos de transporte e contratos master ativos em TBG, TAG e NTS. Contratos legados e conexões de acesso ainda não entram.",
     cardFlows: "Fluxos de Gasodutos",
     cardFlowsDesc: "Fluxo físico diário em cada ponto de recebimento e entrega dos gasodutos de transporte do Brasil, além de gás de uso do sistema, perdas, desequilíbrio e linepack.",
+    cardSupply: "Oferta de Gás",
+    cardSupplyDesc: "Balanço mensal nacional de gás natural da ANP — produção, disponível, queima e perda, consumo próprio, reinjeção, LGN e importações.",
+    cardPld: "Preços PLD",
+    cardPldDesc: "PLD médio diário da CCEE por submercado — Sudeste, Sul, Nordeste e Norte. Não é o CMO da ONS.",
     kpiRefresh: "Última atualização",
     sources: "Fontes oficiais",
     sourceOns: "Dados abertos da ONS",
     sourcePoc: "Portal de Oferta de Capacidade",
     sourceAnp: "Movimentação de gás da ANP",
     sourceFlows: "Dados abertos da ANP — movimentação em gasodutos",
+    sourceSupply: "ANP PPGN-EL — produção por estado",
+    sourcePld: "Dados abertos da CCEE — PLD média diária",
+    pldSubtitle: "Preço médio diário de liquidação (PLD) da CCEE por submercado, em R$/MWh.",
+    pldThrough: "Dados até",
+    pldNote: "O PLD é o preço de liquidação da CCEE. Relaciona-se ao CMO da ONS (custo marginal de operação), mas não é a mesma série — veja",
+    pldNoteLink: "Balanços ONS",
+    pldChartTitle: "PLD diário por submercado",
+    pldChartNote: "Últimos 24 meses embutidos. Alterne submercados e a janela abaixo.",
+    pldWindow: "Janela",
+    pldCsv: "Baixar CSV",
+    pldXlsx: "Exportar tudo (Excel)",
+    pldFooter: "Dados: CCEE (PLD média diária). Não é um produto oficial da CCEE.",
     footerAbout: "Sobre e metodologia",
     aboutH1: "Sobre o GasBrazil",
     aboutWho: "O que é isto",
@@ -306,8 +372,10 @@ const GB_I18N = {
     glossCmo: "CMO — custo marginal de operação da ONS (R$/MWh). Não é o PLD da CCEE.",
     glossMaster: "Contrato master de transporte — quadro que habilita nomeações posteriores; não é, por si, uma reserva firme de capacidade.",
     aboutCover: "Limites de cobertura",
-    aboutCoverBody: "Contratos POC incluem hoje Contrato de Transporte e Contrato Master. Contratos de transporte legado e conexões de acesso estão no portal oficial, mas ainda não neste feed.",
-    aboutCoverFlows: "Fluxos de Gasodutos não tem dados publicados pela ANP para 2022, e cada mês costuma ser divulgado com semanas de atraso. Pressão média e o detalhe por carregador são coletados, mas não exibidos no painel; ambos estão disponíveis nos arquivos de dados no repositório.",
+    aboutCoverBody: "Contratos POC incluem hoje Contrato de Transporte e Contrato Master. Contratos de transporte legado e conexões de acesso aparecem na UI do portal oficial, mas não são servidos pela API GraphQL pública (reconfirmado em setembro de 2026: sem campos legado/conexão no schema). Serão adicionados quando esse endpoint for identificado.",
+    aboutCoverFlows: "Fluxos de Gasodutos não tem dados publicados pela ANP para 2022, e cada mês costuma ser divulgado com semanas de atraso. A pressão média está na lista de variáveis do painel. O detalhe por carregador não é embutido (capacidade por carregador fica em Contratos POC). TSB e GOM podem ser incluídos por um seletor.",
+    aboutCoverSupply: "Oferta de Gás usa as séries mensais nacionais PPGN-EL da ANP mais importações nacionais de gás natural. O CSV aberto de importação não separa Gasbol (Bolívia) de GNL.",
+    aboutCoverPld: "Preços PLD mostra o PLD médio diário da CCEE por submercado. Não é o CMO da ONS — veja Balanços ONS para o custo marginal de operação.",
     notFound: "Esta página não existe.",
     notFoundBody: "O hub e os painéis estão nos links abaixo.",
     backHome: "Voltar ao GasBrazil.com"
@@ -618,6 +686,18 @@ _SITES = {
         "caissonpoint": "https://gasbrazil.com/flows/",
         "hub": "https://gasbrazil.github.io/flows/",
     },
+    "supply": {
+        "label": "Gas Supply",
+        "custom": "https://gasbrazil.com/supply/",
+        "caissonpoint": "https://gasbrazil.com/supply/",
+        "hub": "https://gasbrazil.github.io/supply/",
+    },
+    "pld": {
+        "label": "PLD Prices",
+        "custom": "https://gasbrazil.com/pld/",
+        "caissonpoint": "https://gasbrazil.com/pld/",
+        "hub": "https://gasbrazil.github.io/pld/",
+    },
 }
 
 
@@ -655,24 +735,49 @@ def site_links_js(self_id: str) -> str:
 
 
 def nav_links_html(self_id: str, about_href: str = "../about/", extra_links_html: str = "") -> str:
-    """Standard header nav pills: every site in _SITES except self_id, in
-    _SITES' fixed order (home, ons, poc, contratos, flows), then any
-    page-specific extra links (e.g. ONS's Wiki), then About last. No
-    direction arrows -- these are sibling pages, not a sequence, so
-    there's no "forward"/"back" to indicate. href defaults to each site's
-    custom-domain URL (correct on the primary domain even before JS
-    runs); initCrossLinks() rewrites it at view time to match whichever
-    hostname/flavor the page is actually being viewed on.
+    """Standard header text nav: every site in _SITES in fixed order
+    (home, ons, poc, contratos, flows, supply, pld), with the current page
+    marked aria-current=page / is-active (not a link). Then any page-specific
+    extras (e.g. ONS Wiki), then About. href defaults to each site's
+    custom-domain URL; initCrossLinks() rewrites sibling hrefs at view
+    time for hostname/flavor.
 
-    Single source of truth for this markup so every dashboard's nav stays
-    in the same order with the same labels, and so a newly-added site
-    (like flows was) gets added to every existing page's nav in one place
-    instead of by hand, one dashboard at a time."""
-    parts = [
-        f'<a class="navlink" id="link-{k}" href="{v["custom"]}">{v["label"]}</a>'
-        for k, v in _SITES.items() if k != self_id
-    ]
+    Single source of truth so every dashboard's nav stays in the same
+    order with the same labels, and a newly-added site lands everywhere
+    from one edit."""
+    i18n_keys = {
+        "home": "navHome",
+        "ons": "navOns",
+        "poc": "navPoc",
+        "contratos": "navContratos",
+        "flows": "navFlows",
+        "supply": "navSupply",
+        "pld": "navPld",
+    }
+    parts: list[str] = []
+    for k, v in _SITES.items():
+        i18n = i18n_keys.get(k)
+        i18n_attr = f' data-i18n="{i18n}"' if i18n else ""
+        if k == self_id:
+            parts.append(
+                f'<span class="navlink is-active" aria-current="page"{i18n_attr}>{v["label"]}</span>'
+            )
+        else:
+            parts.append(
+                f'<a class="navlink" id="link-{k}" href="{v["custom"]}"{i18n_attr}>{v["label"]}</a>'
+            )
     if extra_links_html:
         parts.append(extra_links_html)
     parts.append(f'<a class="navlink" href="{about_href}" data-i18n="navAbout">About</a>')
     return "\n      ".join(parts)
+
+
+def chart_palette_js() -> str:
+    """JS helper: CHART_PALETTE from CSS custom properties (--chart-1..8)."""
+    return (
+        "function chartPalette() {\n"
+        "  const s = getComputedStyle(document.documentElement);\n"
+        "  return [1,2,3,4,5,6,7,8].map(i => "
+        "(s.getPropertyValue('--chart-' + i) || '').trim()).filter(Boolean);\n"
+        "}\n"
+    )

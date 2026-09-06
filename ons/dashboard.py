@@ -400,11 +400,10 @@ body{margin:0;background:var(--bg);color:var(--text);
    it -- deterministic, not dependent on flex-wrap kicking in at a given
    viewport width or pill count (see ADR-001: same layout on every
    GasBrazil.com dashboard, not just whichever happens to wrap). */
-header{display:flex;flex-direction:column;gap:10px;margin-bottom:var(--gap)}
+header.dash-head{display:flex;flex-direction:column;gap:10px;margin-bottom:0}
 .header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .header-links{display:flex;gap:8px;flex-wrap:wrap}
-h1{font-size:25px;margin:0;letter-spacing:-.01em}
-.sub{color:var(--muted2);font-size:13px}
+h1{font-size:25px;margin:0;letter-spacing:-.01em;font-weight:400}
 /* Green/yellow/blue band under the header -- the one place the flag appears
    as itself rather than as an accent on something else. Proportions echo the
    flag's own (green field, yellow lozenge, blue disc) rather than being three
@@ -413,32 +412,33 @@ h1{font-size:25px;margin:0;letter-spacing:-.01em}
    invisible against a near-black background. */
 .sources{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 var(--gap)}
 .sources-label{font-size:11px;text-transform:uppercase;letter-spacing:.06em;
-  color:var(--muted);font-weight:600;margin-right:2px}
+  color:var(--muted);font-weight:200;margin-right:2px}
 .sources a{font-size:11.5px;color:var(--muted2);text-decoration:none;
-  border:1px solid var(--ring);border-radius:999px;padding:3px 10px;white-space:nowrap;
+  border:1px solid var(--ring);border-radius:5px;padding:3px 10px;white-space:nowrap;
   display:inline-flex;align-items:center;gap:4px}
 .ext-icon{width:10px;height:10px;display:inline-block;flex:none;opacity:.75}
 .sources a:hover{background:var(--accent-soft);color:var(--text);border-color:var(--border-strong)}
-.navlink{font-size:11.5px;color:var(--accent);text-decoration:none;font-weight:600;
-  border:1px solid var(--accent);border-radius:999px;padding:3px 10px;white-space:nowrap}
-.navlink:hover{background:var(--accent);color:#fff}
+/* .navlink look owned by shared/theme.css (text underline nav, not pills). */
 /* "Refresh data" triggers a real rebuild, so it reads as an action rather
    than another navigation pill -- green sets it apart from the blue-accented
    links beside it. */
-#refreshBtn{color:var(--ok-ink);border-color:var(--brz-green);font-weight:600}
+#refreshBtn{color:var(--ok-ink);border-color:var(--brz-green);font-weight:400}
 #refreshBtn:hover:not(:disabled){background:var(--brz-green);color:#fff;
   border-color:var(--brz-green)}
 #refreshBtn:disabled{opacity:.55}
-.iconBtn{display:inline-flex;align-items:center;justify-content:center;
+.iconBtn,#theme-toggle{display:inline-flex;align-items:center;justify-content:center;
   padding:5px 9px;line-height:0}
-.iconBtn svg{width:16px;height:16px;display:block}
+.iconBtn svg,#theme-toggle svg{width:16px;height:16px;display:block}
+#theme-toggle{background:var(--panel);border:1px solid var(--border-strong);
+  border-radius:5px;cursor:pointer;color:var(--text)}
+#theme-toggle:hover{background:var(--accent-soft)}
 .card{background:var(--panel);border:1px solid var(--ring);border-radius:10px;
   padding:var(--card-pad);margin-bottom:var(--gap)}
 .tabbar{display:flex;align-items:flex-end;justify-content:space-between;
   flex-wrap:wrap;gap:10px;border-bottom:1px solid var(--ring);margin-bottom:var(--gap)}
 .tabs{display:flex;gap:4px}
 .tabs button{border:0;border-bottom:2px solid transparent;background:none;
-  border-radius:0;padding:9px 14px;color:var(--muted2);font-weight:600;font-size:13.5px}
+  border-radius:0;padding:9px 14px;color:var(--muted2);font-weight:400;font-size:13.5px}
 .tabs button[aria-pressed=true]{color:#fff;background:var(--accent);
   border-bottom-color:var(--accent);border-radius:6px 6px 0 0}
 .tabs button:hover{background:var(--accent-soft)}
@@ -446,17 +446,17 @@ h1{font-size:25px;margin:0;letter-spacing:-.01em}
 .controls{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-end}
 .ctl{display:flex;flex-direction:column;gap:6px}
 .ctl > label{font-size:11px;text-transform:uppercase;letter-spacing:.06em;
-  color:var(--muted);font-weight:600}
+  color:var(--muted);font-weight:200}
 .row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 button,select,input{font:inherit;color:var(--text);background:var(--panel);
-  border:1px solid var(--border-strong);border-radius:6px;padding:5px 10px}
+  border:1px solid var(--border-strong);border-radius:5px;padding:5px 10px;font-weight:400}
 button,select{cursor:pointer}
 button:hover,select:hover{background:var(--accent-soft)}
 button:disabled{opacity:.45;cursor:not-allowed;background:var(--panel)}
 button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#fff}
 .pickers{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
 .pick h3{font-size:11px;text-transform:uppercase;letter-spacing:.06em;
-  color:var(--muted);margin:0 0 6px;font-weight:600}
+  color:var(--muted);margin:0 0 6px;font-weight:200}
 .opt{display:flex;align-items:center;gap:8px;padding:2px 0;cursor:pointer;
   font-size:13px;line-height:1.35}
 .opt input{accent-color:var(--accent);margin:0;flex:none}
@@ -471,7 +471,7 @@ button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);co
 .entlist table.data th,.entlist table.data td{padding:3px 7px}
 .entlist th.l,.entlist td.l{text-align:left}
 .entlist tr.total-row{background:var(--accent-soft)}
-.entlist tr.total-row td.l{font-weight:600}
+.entlist tr.total-row td.l{font-weight:400}
 .entlist table.data th.th-metric{white-space:nowrap}
 .th-metric-inner{display:flex;align-items:center;justify-content:flex-end;
   gap:3px}
@@ -481,7 +481,7 @@ button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);co
 /* Amber rather than the accent: an active column filter means what you are
    looking at is a subset, which is worth flagging differently from the blue
    used for ordinary selected/active chrome. */
-.colFilterBtn.active{color:var(--warn-ink);font-weight:700}
+.colFilterBtn.active{color:var(--warn-ink);font-weight:400}
 .colFilterPop{position:fixed;background:var(--panel);border:1px solid var(--ring);
   border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.16);padding:8px;font-size:12px;
   display:flex;flex-direction:column;gap:6px;z-index:60;min-width:180px}
@@ -498,7 +498,7 @@ button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);co
 .tile .nm{display:flex;align-items:flex-start;gap:5px;font-size:11px;color:var(--muted2);
   margin-bottom:3px;line-height:1.3;overflow-wrap:anywhere}
 .tile .nm .sw{flex:none;margin-top:2px}
-.tile .big{font-size:18px;font-weight:600;letter-spacing:-.02em;
+.tile .big{font-size:18px;font-weight:400;letter-spacing:-.02em;
   overflow-wrap:anywhere;line-height:1.2}
 .tile .meta{font-size:10.5px;color:var(--muted);margin-top:2px;line-height:1.35;
   font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
@@ -514,8 +514,8 @@ button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);co
 .cap-bar{height:10px;border-radius:4px;overflow:hidden;background:var(--border);
   min-width:90px}
 .cap-bar>div{height:100%}
-.band-label{font-size:11px;font-weight:600;white-space:nowrap}
-.panel-title{font-size:13px;font-weight:600;margin:0 0 2px}
+.band-label{font-size:11px;font-weight:400;white-space:nowrap}
+.panel-title{font-size:13px;font-weight:400;margin:0 0 2px}
 .panel-note{font-size:11.5px;color:var(--muted);margin:0 0 8px}
 .legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:8px;font-size:12px;
   color:var(--muted2)}
@@ -524,7 +524,7 @@ svg{display:block;width:100%;overflow:hidden}
 .tt{position:fixed;pointer-events:none;background:var(--panel);
   border:1px solid var(--ring);border-radius:8px;padding:8px 10px;font-size:12px;
   box-shadow:0 6px 20px rgba(0,0,0,.16);z-index:50;display:none;min-width:180px}
-.tt .d{font-weight:600;margin-bottom:5px}
+.tt .d{font-weight:400;margin-bottom:5px}
 .tt table{border-collapse:collapse;width:100%}
 .tt td{padding:1px 0}
 .tt td.v{text-align:right;padding-left:14px;font-variant-numeric:tabular-nums}
@@ -535,7 +535,7 @@ table.data th,table.data td{padding:4px 8px;border-bottom:1px solid var(--border
 table.data th:first-child,table.data td:first-child{text-align:left}
 table.data th.l,table.data td.l{text-align:left}
 table.data thead th{position:sticky;top:0;background:var(--panel);
-  color:var(--muted2);font-weight:600}
+  color:var(--muted2);font-weight:400}
 table.data thead th.sortable{cursor:pointer;user-select:none}
 table.data thead th.sortable:hover{background:var(--accent-soft)}
 .scroll{overflow-x:auto;max-height:460px;overflow-y:auto}
@@ -544,7 +544,7 @@ table.data thead th.sortable:hover{background:var(--accent-soft)}
 /* Methodology lives behind a disclosure rather than as 450 words of footer
    prose: nothing is lost, but the page reads as a tool. */
 .foot details{margin-top:4px}
-.foot summary{cursor:pointer;color:var(--accent);font-weight:600;
+.foot summary{cursor:pointer;color:var(--accent);font-weight:400;
   list-style:none;display:inline-block}
 .foot summary::-webkit-details-marker{display:none}
 .foot summary::after{content:"\00a0\25B8";display:inline-block;transition:transform .12s ease}
@@ -558,15 +558,19 @@ table.data thead th.sortable:hover{background:var(--accent-soft)}
    KPI strip stayed on screen in the Data Tables view. Make the attribute
    authoritative so `el.hidden = true` means hidden everywhere. */
 [hidden]{display:none!important}
+@media (max-width:720px){
+  .controls,.tabbar,.sources,.row{flex-direction:column;align-items:stretch}
+  .tabs{width:100%;overflow-x:auto}
+  button,select,input{width:100%}
+}
 </style>
 </head>
 <body>
 <a class="skip-link" href="#app" data-i18n="skip">Skip to content</a>
 <div class="wrap">
-<header>
+<header class="dash-head">
   <div>
     <h1 data-i18n="navOns">ONS Balances</h1>
-    <div class="sub" id="subtitle">Loading&hellip;</div>
   </div>
   <div class="header-right">
     <div class="header-links">
@@ -574,9 +578,16 @@ table.data thead th.sortable:hover{background:var(--accent-soft)}
     </div>
     <button id="refreshBtn" hidden>&#8635; Refresh data</button>
     <button type="button" id="lang-toggle" class="langBtn" aria-label="Português">PT</button>
-    <button id="themeBtn" class="iconBtn" title="Toggle light/dark" aria-label="Toggle light/dark"></button>
+    <button id="theme-toggle" class="iconBtn" title="Toggle light/dark" aria-label="Toggle light/dark"></button>
   </div>
 </header>
+
+<div class="asof-strip" id="asof-strip">
+  <span class="asof-label">Last refreshed</span>
+  <span class="asof-val" id="asof-refreshed">Loading&hellip;</span>
+  <span class="asof-label">Data through</span>
+  <span class="asof-val" id="asof-through">&mdash;</span>
+</div>
 
 <div class="flagbar" aria-hidden="true"></div>
 
@@ -767,7 +778,7 @@ const colorOf = (k, v) => {
    (see the "colour slots" section above) that every other call site here
    uses, so it's left as-is rather than routed through the shared kit's
    isDarkTheme() -- the two do the same check; no need for both names live
-   at once. initThemeToggle is wired to the #themeBtn button down in boot(). */
+   at once. initThemeToggle is wired to the #theme-toggle button down in boot(). */
 __SHARED_JS_THEME_TOGGLE__
 __SHARED_JS_I18N__
 /* ONS-local chrome strings (tabs, control labels, view blurbs). Shared kit
@@ -2038,7 +2049,7 @@ function renderViewInfo(){
   wrap.style.cssText="display:flex;align-items:center;gap:0;margin:0 0 6px";
   const lab=el("span");
   lab.style.cssText="font-size:11px;text-transform:uppercase;letter-spacing:.06em;"+
-    "color:var(--muted);font-weight:600";
+    "color:var(--muted);font-weight:200";
   lab.textContent=ot("aboutView");
   wrap.appendChild(lab);
   wrap.appendChild(infodot(text,ot("aboutView")));
@@ -3051,17 +3062,18 @@ async function boot(){
   state.tbl.to=last;
   state.tbl.from=DATA.dates[Math.max(0,DATA.dates.length-30)];
 
-  let subtitleText = "Last refreshed " + DATA.generated;
+  let refreshedText = DATA.generated || "—";
   try {
     const d = new Date(DATA.generatedIso);
     if (!isNaN(d)) {
       const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
       const localDate = d.toLocaleDateString(undefined, {year:"numeric", month:"2-digit", day:"2-digit"});
       const localTime = d.toLocaleTimeString(undefined, {hour:"2-digit", minute:"2-digit"});
-      subtitleText += " (" + localDate + " " + localTime + " " + tz + ")";
+      refreshedText += " (" + localDate + " " + localTime + " " + tz + ")";
     }
   } catch (e) { /* fall back to UTC-only text above */ }
-  document.getElementById("subtitle").textContent = subtitleText;
+  document.getElementById("asof-refreshed").textContent = refreshedText;
+  document.getElementById("asof-through").textContent = last || "—";
   // Visible footer is one line: attribution, the single averaging rule that
   // changes how every number reads, and a disclosure. Everything that used to
   // sit here as prose is intact inside the disclosure -- see the sweep
@@ -3126,7 +3138,7 @@ async function boot(){
     refreshBtn.hidden=false;
     refreshBtn.onclick=triggerRefresh;
   }
-  initThemeToggle("themeBtn", () => { buildPickCard(); render(); });
+  initThemeToggle("theme-toggle", () => { buildPickCard(); render(); });
   initLangToggle("lang-toggle", () => {
     applyOnsI18n();
     buildTabs();

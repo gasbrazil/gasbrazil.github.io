@@ -2,7 +2,7 @@
 Builds the single-file POC Contratos (gas transport contracts) dashboard from
 data/contratos.parquet.
 
-Usage: python dashboard.py [output_path]  (default: docs/index.html)
+Usage: python dashboard.py [output_path]  (default: index.html)
 """
 import datetime as dt
 import sys
@@ -15,7 +15,7 @@ import dashboard_kit as kit  # noqa: E402  (must follow sys.path.insert)
 
 HERE = Path(__file__).parent
 PARQUET_PATH = HERE / "data" / "contratos.parquet"
-DEFAULT_OUT = HERE / "docs" / "index.html"
+DEFAULT_OUT = HERE / "index.html"
 
 COLUMNS = [
     "Transporter (TSO)", "Contract Number", "Contract Category", "Status", "Shipper",
@@ -92,29 +92,27 @@ body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--
    it -- deterministic, not dependent on flex-wrap kicking in at a given
    viewport width or pill count (see ADR-001: same layout on every
    GasBrazil.com dashboard, not just whichever happens to wrap). */
-header { display: flex; flex-direction: column; gap: 10px; margin-bottom: var(--gap); }
-h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
-.subtitle { color: var(--muted2); font-size: 13px; }
+header.dash-head { display: flex; flex-direction: column; gap: 10px; margin-bottom: 0; }
+h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; font-weight: 400; }
 .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .header-links { display: flex; gap: 8px; flex-wrap: wrap; }
 .sources { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0 0 var(--gap); }
-.sources-label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; margin-right: 2px; }
-.pill { font-size: 11.5px; color: var(--muted2); text-decoration: none; border: 1px solid var(--border); border-radius: 999px; padding: 3px 10px; white-space: nowrap; }
+.sources-label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 200; margin-right: 2px; }
+.pill { font-size: 11.5px; color: var(--muted2); text-decoration: none; border: 1px solid var(--border); border-radius: 5px; padding: 3px 10px; white-space: nowrap; }
 .pill:hover { background: var(--accent-soft); color: var(--text); border-color: var(--border-strong); }
-.navlink { font-size: 11.5px; color: var(--accent); text-decoration: none; font-weight: 600; border: 1px solid var(--accent); border-radius: 999px; padding: 3px 10px; white-space: nowrap; }
-.navlink:hover { background: var(--accent); color: #fff; }
-#theme-toggle { display: inline-flex; align-items: center; justify-content: center; background: var(--panel); border: 1px solid var(--border-strong); border-radius: 6px; padding: 5px 9px; line-height: 0; cursor: pointer; color: var(--text); }
+/* .navlink look owned by shared/theme.css (text underline nav, not pills). */
+#theme-toggle { display: inline-flex; align-items: center; justify-content: center; background: var(--panel); border: 1px solid var(--border-strong); border-radius: 5px; padding: 5px 9px; line-height: 0; cursor: pointer; color: var(--text); }
 #theme-toggle:hover { background: var(--accent-soft); }
 #theme-toggle svg { width: 16px; height: 16px; display: block; }
 .tso-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: var(--gap); }
-.tso-chip { background: var(--panel); border: 1px solid var(--border); border-radius: 999px; padding: 4px 12px; font-size: 12px; box-shadow: var(--shadow); white-space: nowrap; cursor: pointer; color: var(--text); font-family: var(--font); }
+.tso-chip { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 4px 12px; font-size: 12px; box-shadow: var(--shadow); white-space: nowrap; cursor: pointer; color: var(--text); font-family: var(--font); }
 .tso-chip:hover { background: var(--accent-soft); }
 .tso-chip.selected { background: var(--accent); color: #fff; border-color: var(--accent); }
 .tso-chip.selected .muted { color: rgba(255,255,255,.72); }
 .tso-chip.empty { cursor: default; }
 .tso-chip.empty:hover { background: var(--panel); }
 .tso-chip.empty { color: var(--muted); }
-.tso-chip b { font-weight: 700; }
+.tso-chip b { font-weight: 400; }
 .tso-chip .muted { color: var(--muted); }
 .quick-filters { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: var(--gap); }
 .qf-sep { width: 1px; align-self: stretch; background: var(--border-strong); margin: 0 4px; }
@@ -122,7 +120,7 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .drill-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: var(--card-pad); margin-bottom: var(--gap); }
 .drill-card table { border-collapse: collapse; width: 100%; font-size: 12.5px; white-space: nowrap; }
 .drill-card th, .drill-card td { padding: 4px 8px; border-bottom: 1px solid var(--border); text-align: left; }
-.drill-card th { color: var(--muted2); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; cursor: default; position: static; }
+.drill-card th { color: var(--muted2); font-weight: 400; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; cursor: default; position: static; }
 .drill-card thead tr:first-child th { border-bottom: none; padding-bottom: 0; }
 .drill-card th.grp { text-align: center; color: var(--text); letter-spacing: .04em; }
 .drill-card th.grp.on { color: var(--accent); }
@@ -131,23 +129,23 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .drill-card td.num, .drill-card th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .drill-card tbody tr { cursor: pointer; }
 .drill-card tbody tr:hover { background: var(--accent-soft); }
-.drill-card tbody tr.picked { background: var(--accent-soft); font-weight: 600; }
+.drill-card tbody tr.picked { background: var(--accent-soft); font-weight: 400; }
 .drill-card .rank { color: var(--muted); width: 22px; }
 .drill-more { background: none; border: none; color: var(--accent); font-size: 12px; cursor: pointer; padding: 8px 0 0; font-family: var(--font); }
-.qf-btn { background: var(--panel); border: 1px solid var(--border); border-radius: 999px; padding: 4px 12px; font-size: 12px; cursor: pointer; color: var(--text); font-family: var(--font); }
+.qf-btn { background: var(--panel); border: 1px solid var(--border); border-radius: 5px; padding: 4px 12px; font-size: 12px; cursor: pointer; color: var(--text); font-family: var(--font); }
 .qf-btn:hover { background: var(--accent-soft); }
 .qf-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: var(--gap); }
-.toolbar select, .toolbar input { background: var(--panel); border: 1px solid var(--border-strong); border-radius: 6px; padding: 5px 10px; color: var(--text); font-size: 12.5px; font-family: var(--font); }
+.toolbar select, .toolbar input { background: var(--panel); border: 1px solid var(--border-strong); border-radius: 5px; padding: 5px 10px; color: var(--text); font-size: 12.5px; font-family: var(--font); }
 .toolbar select:hover { background: var(--accent-soft); }
-.toolbar button { background: var(--panel); color: var(--text); border: 1px solid var(--border-strong); border-radius: 6px; padding: 5px 10px; font-size: 12.5px; cursor: pointer; font-family: var(--font); }
+.toolbar button { background: var(--panel); color: var(--text); border: 1px solid var(--border-strong); border-radius: 5px; padding: 5px 10px; font-size: 12.5px; cursor: pointer; font-family: var(--font); font-weight: 400; }
 .toolbar button:hover { background: var(--accent-soft); }
 .toolbar button.secondary { background: var(--panel); color: var(--text); border: 1px solid var(--border-strong); }
 .count { color: var(--muted); font-size: 12px; margin-left: auto; }
 .table-wrap { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; overflow: auto; box-shadow: var(--shadow); max-height: 65vh; }
 table { border-collapse: collapse; width: auto; min-width: 100%; font-size: 12.5px; white-space: nowrap; table-layout: auto; }
 th, td { padding: 4px 8px; text-align: left; border-bottom: 1px solid var(--border); }
-th { position: sticky; top: 0; background: var(--panel); cursor: pointer; user-select: none; color: var(--muted2); font-weight: 600; z-index: 2; position: relative; }
+th { position: sticky; top: 0; background: var(--panel); cursor: pointer; user-select: none; color: var(--muted2); font-weight: 400; z-index: 2; position: relative; }
 th:hover { background: var(--accent-soft); }
 th.dragging { opacity: .4; }
 th.drag-over { box-shadow: inset 2px 0 0 var(--accent); }
@@ -168,22 +166,22 @@ footer a { color: var(--accent); }
 .filter-menu .fm-item input { margin: 0; }
 .filter-menu .fm-row { display: flex; justify-content: space-between; gap: 6px; }
 .filter-menu .fm-row.actions { margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border); }
-.filter-menu button { font-size: 11.5px; padding: 4px 10px; border-radius: 6px; cursor: pointer; }
+.filter-menu button { font-size: 11.5px; padding: 4px 10px; border-radius: 5px; cursor: pointer; font-weight: 400; }
 .filter-menu button.link { background: none; border: none; color: var(--accent); padding: 2px 0; }
 .filter-menu button.primary { background: var(--accent); color: #fff; border: none; }
 .filter-menu button.secondary { background: var(--panel); color: var(--text); border: 1px solid var(--border); }
 .filter-menu label.fm-date { display: block; font-size: 11px; color: var(--muted); margin: 6px 0 3px; }
 .filter-menu input[type="date"] { width: 100%; }
-.filter-menu input[type="text"].fm-search { width: 100%; box-sizing: border-box; padding: 4px 6px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 12px; margin-bottom: 6px; }
+.filter-menu input[type="text"].fm-search { width: 100%; box-sizing: border-box; padding: 4px 6px; border: 1px solid var(--border); border-radius: 5px; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 12px; margin-bottom: 6px; }
 .chart-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: var(--card-pad); margin: 12px 0 var(--gap); }
-.panel-title { font-size: 13px; font-weight: 600; margin: 0 0 2px; }
+.panel-title { font-size: 13px; font-weight: 400; margin: 0 0 2px; }
 .panel-note { font-size: 11.5px; color: var(--muted); margin: 0 0 12px; }
 .chart-picker { display: flex; flex-wrap: wrap; gap: 14px 18px; margin-bottom: 12px; }
 .pick-group { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-.pick-group-label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; margin-right: 2px; }
-.series-btn { display: inline-flex; align-items: center; gap: 6px; background: var(--panel); border: 1px solid var(--border); border-radius: 999px; padding: 4px 12px 4px 8px; font-size: 12px; cursor: pointer; color: var(--text); font-family: var(--font); }
+.pick-group-label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 200; margin-right: 2px; }
+.series-btn { display: inline-flex; align-items: center; gap: 6px; background: var(--panel); border: 1px solid var(--border); border-radius: 5px; padding: 4px 12px 4px 8px; font-size: 12px; cursor: pointer; color: var(--text); font-family: var(--font); font-weight: 400; }
 .series-btn:hover { background: var(--accent-soft); }
-.series-btn.active { border-color: var(--border-strong); font-weight: 600; }
+.series-btn.active { border-color: var(--border-strong); font-weight: 400; }
 .series-btn .sw { width: 9px; height: 9px; border-radius: 2px; flex: none; background: var(--border-strong); }
 #chart-host svg { display: block; overflow: hidden; }
 .chart-empty { color: var(--muted); font-size: 13px; padding: 44px 0; text-align: center; }
@@ -191,19 +189,23 @@ footer a { color: var(--accent); }
 .legend span { display: flex; align-items: center; gap: 6px; }
 .legend .sw { width: 9px; height: 9px; border-radius: 2px; flex: none; }
 .tt { position: fixed; pointer-events: none; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 12px; box-shadow: 0 6px 20px rgba(0,0,0,.16); z-index: 50; display: none; min-width: 200px; }
-.tt .d { font-weight: 600; margin-bottom: 5px; }
+.tt .d { font-weight: 400; margin-bottom: 5px; }
 .tt table { border-collapse: collapse; width: 100%; }
 .tt td { padding: 1px 0; }
 .tt td.v { text-align: right; padding-left: 14px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+@media (max-width: 720px) {
+  .toolbar, .quick-filters, .sources, .tso-row, .chart-picker, .pick-group { flex-direction: column; align-items: stretch; }
+  .toolbar select, .toolbar input, .toolbar button { width: 100%; }
+  .count { margin-left: 0; }
+}
 </style>
 </head>
 <body>
 <a class="skip-link" href="#data-table" data-i18n="skip">Skip to content</a>
 <div class="wrap">
-<header>
+<header class="dash-head">
   <div>
     <h1 data-i18n="navContratos">POC Contracts Dashboard</h1>
-    <div class="subtitle" id="subtitle">Last refreshed &mdash;</div>
   </div>
   <div class="header-right">
     <div class="header-links">
@@ -213,6 +215,12 @@ footer a { color: var(--accent); }
     <button id="theme-toggle" title="Toggle theme" aria-label="Toggle theme"></button>
   </div>
 </header>
+<div class="asof-strip" id="asof-strip">
+  <span class="asof-label">Last refreshed</span>
+  <span class="asof-val" id="asof-refreshed">&mdash;</span>
+  <span class="asof-label">Data through</span>
+  <span class="asof-val" id="asof-through">&mdash;</span>
+</div>
 <div class="flagbar" aria-hidden="true"></div>
 <div class="sources">
   <span class="sources-label">Data source</span>
@@ -255,6 +263,11 @@ const PAYLOAD_B64 = "__PAYLOAD__";
 __SHARED_JS_DECODE__
 __SHARED_JS_CSV__
 __SHARED_JS_XLSX__
+/* Shared cycleSort / buildSortFilterTh (flows/ONS pattern). Full header
+   migration to buildSortFilterTh is deferred here: this table still needs
+   Excel-style popup filters, column drag/reorder, resize, and hide prefs.
+   cycleSort is adopted below for the 3-click header sort cycle. */
+__SHARED_JS_TABLE_SORT__
 
 const NUMERIC_COLS = new Set(["Contracted Capacity (000 m3/d)", "Allocated Tariff (R$/MMBtu)", "Tariff Multiplier", "Transporter Ownership %"]);
 const DEFAULT_COL_WIDTH = { "Shipper": 260, "Contract Number": 190 };
@@ -690,8 +703,10 @@ __SHARED_SITE_LINKS_JS__
 __SHARED_JS_ESCAPE_HTML__
 
 let DATA = null;
-let sortCol = "Start Date";
-let sortDir = -1; // 1 = ascending, -1 = descending, 0 = unsorted (third click on a header)
+const DEFAULT_SORT = { col: "Start Date", dir: -1 };
+let sortState = { col: DEFAULT_SORT.col, dir: DEFAULT_SORT.dir };
+let sortCol = sortState.col;
+let sortDir = sortState.dir; // 1 = ascending, -1 = descending (kit cycleSort; no "unsorted")
 let filtered = [];
 // Same row set as `filtered` but with any Shipper filter left off -- see rowPasses().
 let filteredForDrill = [];
@@ -955,15 +970,10 @@ function buildHeader() {
 
     th.addEventListener("click", e => {
       if (e.target.closest(".resizer") || e.target.closest(".filter-icon")) return;
-      // Three-state cycle per column: ascending -> descending -> unsorted.
-      // Clicking a different column always starts it at ascending.
-      if (sortCol === col) {
-        if (sortDir === 1) sortDir = -1;
-        else if (sortDir === -1) { sortDir = 0; sortCol = null; }
-        else { sortCol = col; sortDir = 1; }
-      } else {
-        sortCol = col; sortDir = 1;
-      }
+      // Shared 3-click cycle (kit.JS_TABLE_SORT): natural dir -> reverse -> default.
+      sortState = cycleSort(sortState, col, DEFAULT_SORT);
+      sortCol = sortState.col;
+      sortDir = sortState.dir;
       render();
     });
 
@@ -1041,7 +1051,6 @@ function applyFilters() {
 }
 
 function sortRows() {
-  if (!sortCol || sortDir === 0) return; // third click on a header clears sorting
   filtered.sort((a, b) => {
     let av = a[sortCol], bv = b[sortCol];
     if (av === null || av === undefined) av = "";
@@ -1469,7 +1478,13 @@ async function init() {
     if (Array.isArray(savedPrefs.hidden)) hiddenCols = new Set(savedPrefs.hidden.filter(c => validCols.has(c)));
     if (savedPrefs.widths && typeof savedPrefs.widths === "object") columnWidths = Object.assign({}, DEFAULT_COL_WIDTH, savedPrefs.widths);
   }
-  document.getElementById("subtitle").textContent = "Last refreshed " + DATA.generated;
+  document.getElementById("asof-refreshed").textContent = DATA.generated || "—";
+  let through = "";
+  for (const r of DATA.rows) {
+    const d = r["End Date"] || r["Start Date"];
+    if (d && (!through || d > through)) through = d;
+  }
+  document.getElementById("asof-through").textContent = through || "—";
   if (DATA.excludedConcluded) {
     document.getElementById("coverage-note").textContent =
       `Active Transport & Master contracts \u00b7 ${DATA.excludedConcluded.toLocaleString("en-US")} concluded excluded`;
@@ -1540,6 +1555,7 @@ def write_dashboard(out_path=DEFAULT_OUT):
         SHARED_JS_I18N=kit.JS_I18N,
         SHARED_JS_CSV=kit.JS_CSV_HELPERS,
         SHARED_JS_XLSX=kit.JS_XLSX_ENGINE,
+        SHARED_JS_TABLE_SORT=kit.JS_TABLE_SORT,
         SHARED_SITE_LINKS_JS=kit.site_links_js("contratos"),
         SHARED_NAV_LINKS=kit.nav_links_html("contratos"),
         FAVICON_DATA_URI=kit.embed_favicon(),

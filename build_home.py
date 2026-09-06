@@ -9,7 +9,10 @@ parquet stores (and a light parse of ons/index.html) at build time.
 """
 from __future__ import annotations
 
+import base64
 import datetime as dt
+import gzip
+import json
 import re
 import sys
 from pathlib import Path
@@ -24,6 +27,71 @@ DEFAULT_OUT = ROOT / "index.html"
 def _fmt_num(n: float, digits: int = 0) -> str:
     s = f"{n:,.{digits}f}"
     return s
+
+
+def _last_non_null(arr: list) -> tuple[int | None, float | None]:
+    for i in range(len(arr) - 1, -1, -1):
+        v = arr[i]
+        if v is not None:
+            try:
+                return i, float(v)
+            except (TypeError, ValueError):
+                continue
+    return None, None
+
+
+def _ons_teaser_from_html(text: str) -> tuple[str | None, str | None, str | None]:
+    """Pull ONS hub teaser from the embedded gzip payload (same source the
+    dashboard inflates at runtime). Falls back to a light HTML scrape if the
+    page still embeds a literal gas-generation figure."""
+    kpi = kpi_pt = when = None
+    m = re.search(r'id="payload">([A-Za-z0-9+/=]+)</script>', text)
+    if m:
+        try:
+            data = json.loads(gzip.decompress(base64.b64decode(m.group(1))))
+            if data.get("generated"):
+                when = str(data["generated"])
+            series = data.get("series") or {}
+            # skey("gen_gas","SIN") → "gen_gas|SIN|"
+            arr = series.get("gen_gas|SIN|") or series.get("gen_gas|SIN") or []
+            _idx, val = _last_non_null(arr if isinstance(arr, list) else [])
+            if val is not None:
+                n = f"{int(round(val)):,}"
+                kpi = f"{n} MWmed gas"
+                kpi_pt = f"{n} MWmed a gás"
+        except Exception:
+            pass
+    if when is None:
+        m = re.search(r"Last refreshed\s+(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}\s+UTC)", text)
+        if m:
+            when = m.group(1)
+    if kpi is None:
+        g = re.search(r"Gas verified generation.*?([0-9][0-9,]*)\s*MWmed", text, re.S)
+        if g:
+            kpi = f"{g.group(1)} MWmed gas"
+            kpi_pt = f"{g.group(1)} MWmed a gás"
+    return kpi, kpi_pt, when
+
+
+def _sparkline_svg(values: list[float], *, width: int = 120, height: int = 28) -> str:
+    """Compact polyline sparkline for hub KPI cells. Empty input → \"\"."""
+    nums = [float(v) for v in values if v is not None]
+    if len(nums) < 2:
+        return ""
+    lo, hi = min(nums), max(nums)
+    span = (hi - lo) or 1.0
+    pad = 2
+    pts = []
+    n = len(nums)
+    for i, v in enumerate(nums):
+        x = pad + (width - 2 * pad) * (i / (n - 1))
+        y = height - pad - (height - 2 * pad) * ((v - lo) / span)
+        pts.append(f"{x:.1f},{y:.1f}")
+    return (
+        f'<svg class="kpi-spark" viewBox="0 0 {width} {height}" '
+        f'width="{width}" height="{height}" aria-hidden="true">'
+        f'<polyline points="{" ".join(pts)}"/></svg>'
+    )
 
 
 def collect_status() -> dict:
@@ -41,19 +109,24 @@ def collect_status() -> dict:
         "flows_kpi": None,
         "flows_kpi_pt": None,
         "flows_when": None,
+        "supply_kpi": None,
+        "supply_kpi_pt": None,
+        "supply_when": None,
+        "pld_kpi": None,
+        "pld_kpi_pt": None,
+        "pld_when": None,
+        "supply_spark": "",
+        "pld_spark": "",
+        "poc_spark": "",
     }
 
     ons_html = ROOT / "ons" / "index.html"
     if ons_html.exists():
         text = ons_html.read_text(encoding="utf-8", errors="ignore")
-        m = re.search(r"Last refreshed\s+(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}\s+UTC)", text)
-        if m:
-            status["ons_when"] = m.group(1)
-        # Prefer a gas-generation figure if the current HTML still has one.
-        g = re.search(r"Gas verified generation.*?([0-9][0-9,]*)\s*MWmed", text, re.S)
-        if g:
-            status["ons_kpi"] = f"{g.group(1)} MWmed gas"
-            status["ons_kpi_pt"] = f"{g.group(1)} MWmed a gás"
+        kpi, kpi_pt, when = _ons_teaser_from_html(text)
+        status["ons_kpi"] = kpi
+        status["ons_kpi_pt"] = kpi_pt
+        status["ons_when"] = when
 
     flows_html = ROOT / "flows" / "index.html"
     if flows_html.exists():
@@ -69,6 +142,56 @@ def collect_status() -> dict:
             n_label = f" · {npts.group(1)} points" if npts and npts.group(1) else ""
             status["flows_kpi"] = f"{vol_label} m³ realized (7d){n_label}"
             status["flows_kpi_pt"] = f"{vol_label} m³ realizados (7d){n_label}"
+
+
+    supply_html = ROOT / "supply" / "index.html"
+    if supply_html.exists():
+        text = supply_html.read_text(encoding="utf-8", errors="ignore")
+        m = re.search(r"generated:\s*(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}\s+UTC)", text)
+        if m:
+            status["supply_when"] = m.group(1)
+        kpi = re.search(r"kpi_production:\s*([0-9.]+)", text)
+        through = re.search(r"data_through:\s*(\d{4}-\d{2})", text)
+        if kpi and kpi.group(1):
+            prod = float(kpi.group(1))
+            if prod >= 1_000_000:
+                vol = f"{prod / 1_000_000:.1f}M"
+            elif prod >= 1000:
+                vol = f"{prod / 1000:.0f}k"
+            else:
+                vol = f"{prod:.0f}"
+            month = through.group(1) if through else ""
+            month_bit = f" · {month}" if month else ""
+            status["supply_kpi"] = f"{vol} thousand m³ produced{month_bit}"
+            status["supply_kpi_pt"] = f"{vol} mil m³ produzidos{month_bit}"
+
+    pld_html = ROOT / "pld" / "index.html"
+    if pld_html.exists():
+        text = pld_html.read_text(encoding="utf-8", errors="ignore")
+        m = re.search(r"generated:\s*(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}\s+UTC)", text)
+        if m:
+            status["pld_when"] = m.group(1)
+        kpi = re.search(r"kpi_se:\s*([0-9.]+)", text)
+        latest = re.search(r"latest_date:\s*(\d{4}-\d{2}-\d{2})", text)
+        if kpi and kpi.group(1):
+            se = float(kpi.group(1))
+            day = latest.group(1) if latest else ""
+            day_bit = f" · {day}" if day else ""
+            status["pld_kpi"] = f"SE {se:.2f} R$/MWh{day_bit}"
+            status["pld_kpi_pt"] = f"SE {se:.2f} R$/MWh{day_bit}"
+    elif (ROOT / "pld" / "data" / "pld_daily.parquet").exists():
+        try:
+            import pandas as pd
+            df = pd.read_parquet(ROOT / "pld" / "data" / "pld_daily.parquet")
+            df["date"] = pd.to_datetime(df["date"], errors="coerce")
+            se = df[df["submarket"].astype(str).str.upper() == "SE"].dropna(subset=["date", "pld"])
+            if len(se):
+                last = se.loc[se["date"].idxmax()]
+                status["pld_when"] = last["date"].strftime("%Y-%m-%d")
+                status["pld_kpi"] = f"SE {float(last['pld']):.2f} R$/MWh · {status['pld_when']}"
+                status["pld_kpi_pt"] = status["pld_kpi"]
+        except Exception:
+            pass
 
     try:
         import pandas as pd
@@ -103,6 +226,32 @@ def collect_status() -> dict:
             status["contratos_kpi"] = f"{n:,} contracts · {_fmt_num(cap, 0)} thousand m³/d"
             status["contratos_kpi_pt"] = f"{n:,} contratos · {_fmt_num(cap, 0)} mil m³/d"
             status["contratos_when"] = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d")
+
+        # Hub sparklines (last ~24 points) from committed / rebuilt parquet.
+        if poc.exists() and "Trade Date" in pd.read_parquet(poc, columns=["Trade Date"]).columns:
+            pdf = pd.read_parquet(poc)
+            if "Price" in pdf.columns and "Trade Date" in pdf.columns:
+                pdf = pdf.dropna(subset=["Trade Date", "Price"]).copy()
+                pdf["Trade Date"] = pd.to_datetime(pdf["Trade Date"], errors="coerce")
+                pdf = pdf.dropna(subset=["Trade Date"]).sort_values("Trade Date")
+                daily = pdf.groupby(pdf["Trade Date"].dt.floor("D"))["Price"].mean().tail(24)
+                status["poc_spark"] = _sparkline_svg(daily.tolist())
+
+        supply_pq = ROOT / "supply" / "data" / "supply_monthly.parquet"
+        if supply_pq.exists():
+            sdf = pd.read_parquet(supply_pq)
+            col = "production" if "production" in sdf.columns else None
+            if col and "month" in sdf.columns:
+                sdf = sdf.dropna(subset=["month", col]).sort_values("month")
+                status["supply_spark"] = _sparkline_svg(sdf[col].tail(24).tolist())
+
+        pld_pq = ROOT / "pld" / "data" / "pld_daily.parquet"
+        if pld_pq.exists():
+            ldf = pd.read_parquet(pld_pq)
+            ldf["date"] = pd.to_datetime(ldf["date"], errors="coerce")
+            se = ldf[ldf["submarket"].astype(str).str.upper().isin(["SE", "SUDESTE"])]
+            se = se.dropna(subset=["date", "pld"]).sort_values("date")
+            status["pld_spark"] = _sparkline_svg(se["pld"].tail(45).tolist())
     except Exception:
         pass
     return status
@@ -113,7 +262,7 @@ SHARED_PAGE_CSS = """
 html, body { height: 100%; }
 body {
   margin: 0; background: var(--bg); color: var(--text); font-family: var(--font);
-  display: flex; flex-direction: column; min-height: 100vh;
+  font-weight: 300; display: flex; flex-direction: column; min-height: 100vh;
 }
 .topbar {
   position: fixed; top: 16px; right: 16px; z-index: 20;
@@ -121,61 +270,80 @@ body {
 }
 #theme-toggle {
   background: var(--panel); border: 1px solid var(--border);
-  border-radius: 6px; width: 34px; height: 34px; cursor: pointer; color: var(--muted2);
+  border-radius: 5px; width: 34px; height: 34px; cursor: pointer; color: var(--muted2);
   display: flex; align-items: center; justify-content: center;
 }
 #theme-toggle svg { width: 17px; height: 17px; }
-main.hub { flex: 1; width: var(--content-w); max-width: 720px; margin: 0 auto;
-  padding: 56px 0 40px; }
-@media (max-width: 900px) { main.hub { width: auto; padding: 40px 16px 40px; } }
+/* Match dashboard .wrap: shared --content-w / --content-max (~1280px). */
+main.hub { flex: 1; width: var(--content-w); max-width: var(--content-max); margin: 0 auto;
+  padding: 48px 0 40px; }
+@media (max-width: 900px) { main.hub { width: auto; padding: 36px 16px 40px; } }
 /* Home's own header row -- wordmark left, PT/theme controls right, same
-   idea as the pill-row-below-title header every dashboard uses, just
-   without a redundant nav-pill row here since the four cards below already
-   link to every other page (see ADR-001 / nav_links_html). */
+   idea as the header every dashboard uses, just without a redundant nav
+   row here since the product cards below already link to every page. */
 .hub-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .hub-controls { display: flex; gap: 6px; flex: none; }
 .hub-controls #theme-toggle { position: static; }
-.wordmark { font-size: 26px; font-weight: 700; letter-spacing: -.01em; }
+.wordmark { font-size: 26px; font-weight: 600; letter-spacing: -.01em; }
 .wordmark .dot { color: var(--accent); }
 .wordmark a { color: inherit; text-decoration: none; }
-.tagline { color: var(--muted); font-size: 14.5px; margin-top: 8px; max-width: 40em; line-height: 1.5; }
-.flagbar { width: 120px; margin: 18px 0 0; }
-.lead {
-  margin-top: 18px; font-size: 13.5px; line-height: 1.55; max-width: 100%;
-  background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
-  padding: 12px 14px;
+.tagline { color: var(--muted); font-weight: 200; font-size: 14.5px; margin-top: 8px;
+  max-width: 46em; line-height: 1.5; }
+/* Full-width flagband — do not override shared .flagbar width. */
+.flagbar { margin: 16px 0 0; }
+.hub .asof-strip { margin-top: 12px; }
+.kpi-strip {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 8px; margin-top: 14px;
 }
-.lead .muted { color: var(--muted2); display: block; }
-.cards { display: grid; grid-template-columns: repeat(2, 1fr);
-  gap: 10px; margin-top: 20px; }
-@media (max-width: 560px) { .cards { grid-template-columns: 1fr; } }
+@media (max-width: 900px) { .kpi-strip { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .kpi-strip { grid-template-columns: 1fr; } }
+.kpi-cell {
+  background: var(--panel); border: 1px solid var(--border); border-radius: 5px;
+  padding: 10px 12px; text-decoration: none; color: var(--text);
+  display: flex; flex-direction: column; gap: 3px; min-width: 0;
+  transition: border-color .15s ease;
+}
+.kpi-cell:hover { border-color: var(--accent); }
+.kpi-cell .kpi-label { font-size: 11px; font-weight: 400; color: var(--muted2); }
+.kpi-cell .kpi-val { font-size: 13px; font-weight: 400; color: var(--text);
+  line-height: 1.35; min-height: 1.2em; }
+.kpi-cell .kpi-when { font-size: 10.5px; font-weight: 200; color: var(--muted); min-height: 1em; }
+.kpi-spark { display: block; width: 100%; height: 28px; margin-top: 2px; color: var(--accent); }
+.kpi-spark polyline { fill: none; stroke: currentColor; stroke-width: 1.5;
+  stroke-linejoin: round; stroke-linecap: round; }
+/* 2×3 for six live dashboards (ONS, POC, Contratos, Flows, Supply, PLD). */
+.cards { display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 8px; margin-top: 16px; }
+@media (max-width: 720px) { .cards { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .cards { grid-template-columns: 1fr; } }
 .card {
-  background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 13px 14px;
+  background: var(--panel); border: 1px solid var(--border); border-radius: 5px;
+  padding: var(--card-pad, 10px 12px);
   text-align: left; text-decoration: none; color: var(--text);
-  transition: box-shadow .15s ease, transform .15s ease, border-color .15s ease;
+  transition: border-color .15s ease;
   display: flex; flex-direction: column;
 }
-.card:hover { box-shadow: 0 6px 18px var(--ring); transform: translateY(-2px); border-color: var(--accent); }
-.card .name { font-size: 14px; font-weight: 700; display: flex; align-items: center;
+.card:hover { border-color: var(--accent); }
+.card .name { font-size: 13.5px; font-weight: 400; display: flex; align-items: center;
   gap: 7px; }
-.card .name .dot { width: 7px; height: 7px; border-radius: 50%; flex: none; background: var(--accent); }
-.card .desc { color: var(--muted); font-size: 12px; margin-top: 6px; line-height: 1.45; flex: 1; }
-.card .kpi { margin-top: 10px; font-size: 12px; font-weight: 650; color: var(--text); min-height: 1em; }
-.card .when { color: var(--muted); font-size: 11px; margin-top: 3px; min-height: 1em; }
-.sources-block { margin-top: 28px; }
+.card .name .dot { width: 6px; height: 6px; border-radius: 50%; flex: none; background: var(--accent); }
+.card .desc { color: var(--muted); font-weight: 200; font-size: 12px; margin-top: 5px;
+  line-height: 1.4; flex: 1; }
+.sources-block { margin-top: 24px; }
 .sources-block .label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em;
-  color: var(--muted); font-weight: 600; margin-bottom: 8px; }
+  color: var(--muted); font-weight: 200; margin-bottom: 8px; }
 .sources-block .row { display: flex; flex-wrap: wrap; gap: 6px; }
 .sources-block a {
-  font-size: 12px; color: var(--muted2); text-decoration: none;
-  border: 1px solid var(--border); border-radius: 999px; padding: 4px 10px;
+  font-size: 12px; font-weight: 300; color: var(--muted2); text-decoration: none;
+  border: 1px solid var(--border); border-radius: 5px; padding: 4px 9px;
 }
 .sources-block a:hover { background: var(--accent-soft); color: var(--text); border-color: var(--border-strong); }
 .prose { margin-top: 8px; max-width: 42em; }
-.prose h2 { font-size: 16px; margin: 22px 0 6px; }
-.prose p, .prose li { font-size: 14px; line-height: 1.6; color: var(--muted2); }
+.prose h2 { font-size: 16px; font-weight: 400; margin: 22px 0 6px; }
+.prose p, .prose li { font-size: 14px; font-weight: 300; line-height: 1.6; color: var(--muted2); }
 .prose ul { padding-left: 1.2em; }
-footer.site { padding: 14px 24px; color: var(--muted); font-size: 11.5px; text-align: center; }
+footer.site { padding: 14px 24px; color: var(--muted); font-weight: 200; font-size: 11.5px; text-align: center; }
 footer.site a { color: var(--muted); }
 """
 
@@ -237,33 +405,69 @@ HOME_TEMPLATE = """__HEAD__
   </div>
   <p class="tagline" data-i18n="tagline">Data tools for Brazil's natural gas market &mdash; grid balances, pipeline flows and capacity, and contracted transport activity, refreshed daily.</p>
   <div class="flagbar" aria-hidden="true"></div>
-  <div class="lead">
-    <span class="muted" data-i18n="aboutBody">GasBrazil.com consolidates open Brazilian gas and power data into self-contained tools you can filter, chart, and export. Numbers come from public APIs and open-data portals; caveats live on each dashboard and on the About page.</span>
+  <div class="asof-strip" id="asof-strip" hidden>
+    <span class="asof-label" data-i18n="kpiRefresh">Last refreshed</span>
+    <span class="asof-val"></span>
+  </div>
+  <div class="kpi-strip">
+    <a class="kpi-cell" href="ons/">
+      <div class="kpi-label" data-i18n="cardOns">ONS Balances</div>
+      <div class="kpi-val" data-en="__ONS_KPI__" data-pt="__ONS_KPI_PT__">__ONS_KPI__</div>
+      <div class="kpi-when" data-refresh="__ONS_WHEN__"></div>
+    </a>
+    <a class="kpi-cell" href="poc/">
+      <div class="kpi-label" data-i18n="cardPoc">POC Results</div>
+      <div class="kpi-val" data-en="__POC_KPI__" data-pt="__POC_KPI_PT__">__POC_KPI__</div>
+      <div class="kpi-when" data-refresh="__POC_WHEN__"></div>
+      __POC_SPARK__
+    </a>
+    <a class="kpi-cell" href="contratos/">
+      <div class="kpi-label" data-i18n="cardContratos">POC Contracts</div>
+      <div class="kpi-val" data-en="__CON_KPI__" data-pt="__CON_KPI_PT__">__CON_KPI__</div>
+      <div class="kpi-when" data-refresh="__CON_WHEN__"></div>
+    </a>
+    <a class="kpi-cell" href="flows/">
+      <div class="kpi-label" data-i18n="cardFlows">Pipeline Flows</div>
+      <div class="kpi-val" data-en="__FLOWS_KPI__" data-pt="__FLOWS_KPI_PT__">__FLOWS_KPI__</div>
+      <div class="kpi-when" data-refresh="__FLOWS_WHEN__"></div>
+    </a>
+    <a class="kpi-cell" href="supply/">
+      <div class="kpi-label" data-i18n="cardSupply">Gas Supply</div>
+      <div class="kpi-val" data-en="__SUPPLY_KPI__" data-pt="__SUPPLY_KPI_PT__">__SUPPLY_KPI__</div>
+      <div class="kpi-when" data-refresh="__SUPPLY_WHEN__"></div>
+      __SUPPLY_SPARK__
+    </a>
+    <a class="kpi-cell" href="pld/">
+      <div class="kpi-label" data-i18n="cardPld">PLD Prices</div>
+      <div class="kpi-val" data-en="__PLD_KPI__" data-pt="__PLD_KPI_PT__">__PLD_KPI__</div>
+      <div class="kpi-when" data-refresh="__PLD_WHEN__"></div>
+      __PLD_SPARK__
+    </a>
   </div>
   <div class="cards">
     <a class="card" href="ons/">
       <div class="name"><span class="dot" aria-hidden="true"></span><span data-i18n="cardOns">ONS Balances</span></div>
       <div class="desc" data-i18n="cardOnsDesc">Daily grid balances, thermal generation by plant, and gas-fired dispatch across Brazil's interconnected power system.</div>
-      <div class="kpi" data-en="__ONS_KPI__" data-pt="__ONS_KPI_PT__">__ONS_KPI__</div>
-      <div class="when" data-refresh="__ONS_WHEN__"></div>
     </a>
     <a class="card" href="poc/">
       <div class="name"><span class="dot" aria-hidden="true"></span><span data-i18n="cardPoc">POC Results</span></div>
       <div class="desc" data-i18n="cardPocDesc">Pipeline capacity offer results — balancing, GUS acquisition, and linepack trades across TBG, TAG, and NTS.</div>
-      <div class="kpi" data-en="__POC_KPI__" data-pt="__POC_KPI_PT__">__POC_KPI__</div>
-      <div class="when" data-refresh="__POC_WHEN__"></div>
     </a>
     <a class="card" href="contratos/">
       <div class="name"><span class="dot" aria-hidden="true"></span><span data-i18n="cardContratos">POC Contracts</span></div>
       <div class="desc" data-i18n="cardContratosDesc">Active transport and master transport contracts across TBG, TAG, and NTS. Legacy and access-connection contracts are not yet included.</div>
-      <div class="kpi" data-en="__CON_KPI__" data-pt="__CON_KPI_PT__">__CON_KPI__</div>
-      <div class="when" data-refresh="__CON_WHEN__"></div>
     </a>
     <a class="card" href="flows/">
       <div class="name"><span class="dot" aria-hidden="true"></span><span data-i18n="cardFlows">Pipeline Flows</span></div>
       <div class="desc" data-i18n="cardFlowsDesc">Daily physical gas flow at every receipt and delivery point on Brazil's transport pipelines, plus system-use gas, losses, imbalance, and linepack.</div>
-      <div class="kpi" data-en="__FLOWS_KPI__" data-pt="__FLOWS_KPI_PT__">__FLOWS_KPI__</div>
-      <div class="when" data-refresh="__FLOWS_WHEN__"></div>
+    </a>
+    <a class="card" href="supply/">
+      <div class="name"><span class="dot" aria-hidden="true"></span><span data-i18n="cardSupply">Gas Supply</span></div>
+      <div class="desc" data-i18n="cardSupplyDesc">National monthly gas production, available gas, flare and loss, own use, reinjection, and imports from ANP PPGN-EL open data.</div>
+    </a>
+    <a class="card" href="pld/">
+      <div class="name"><span class="dot" aria-hidden="true"></span><span data-i18n="cardPld">PLD Prices</span></div>
+      <div class="desc" data-i18n="cardPldDesc">CCEE daily-average PLD (settlement price) by electricity submarket — Southeast, South, Northeast, and North. Not the same as ONS CMO.</div>
     </a>
   </div>
   <div class="sources-block">
@@ -273,24 +477,39 @@ HOME_TEMPLATE = """__HEAD__
       <a href="https://www.ofertadecapacidade.com.br/PEG/resultado" target="_blank" rel="noopener" data-i18n="sourcePoc">Portal de Oferta de Capacidade</a>
       <a href="https://www.gov.br/anp/pt-br/centrais-de-conteudo/paineis-dinamicos-da-anp/painel-dinamico-de-movimentacao-de-gas-natural-em-gasodutos-de-transporte" target="_blank" rel="noopener" data-i18n="sourceAnp">ANP gas transport movement</a>
       <a href="https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/dados-consolidados-movimentacao-de-gas-natural-em-gasodutos-de-transporte" target="_blank" rel="noopener" data-i18n="sourceFlows">ANP open data — pipeline movement</a>
+      <a href="https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/producao-de-petroleo-e-gas-natural-por-estado-e-localizacao" target="_blank" rel="noopener" data-i18n="sourceSupply">ANP PPGN-EL — production by state</a>
+      <a href="https://dadosabertos.ccee.org.br/dataset/pld_media_diaria" target="_blank" rel="noopener" data-i18n="sourcePld">CCEE open data — PLD média diária</a>
     </div>
   </div>
 </main>
 __FOOTER__
 <script>
 function paintRefreshLabels() {
-  const prefix = t("kpiRefresh");
-  document.querySelectorAll(".when[data-refresh]").forEach(el => {
+  document.querySelectorAll(".kpi-when[data-refresh]").forEach(el => {
     const when = el.getAttribute("data-refresh");
-    el.textContent = when ? prefix + " " + when : "";
+    el.textContent = when ? when : "";
   });
-  document.querySelectorAll(".kpi[data-en]").forEach(el => {
+  document.querySelectorAll(".kpi-val[data-en]").forEach(el => {
     const en = el.getAttribute("data-en");
     const pt = el.getAttribute("data-pt");
     const val = currentLang() === "pt" ? (pt || en) : en;
     el.textContent = val || "";
     el.hidden = !val;
   });
+  const strip = document.getElementById("asof-strip");
+  if (strip) {
+    const parts = [];
+    document.querySelectorAll(".kpi-cell").forEach(cell => {
+      const whenEl = cell.querySelector(".kpi-when[data-refresh]");
+      const when = whenEl && whenEl.getAttribute("data-refresh");
+      const labelEl = cell.querySelector(".kpi-label");
+      const label = labelEl ? labelEl.textContent.trim() : "";
+      if (when) parts.push(label ? (label + " " + when) : when);
+    });
+    const dates = strip.querySelector(".asof-val");
+    if (dates) dates.textContent = parts.join(" · ");
+    strip.hidden = parts.length === 0;
+  }
 }
 const _apply = applyI18n;
 applyI18n = function() { _apply(); paintRefreshLabels(); };
@@ -304,7 +523,7 @@ ABOUT_TEMPLATE = """__HEAD__
 __TOPBAR__
 <main class="hub" id="main">
   <div class="wordmark"><a href="../">GasBrazil<span class="dot">.</span>com</a></div>
-  <h1 style="font-size:22px;margin:18px 0 0" data-i18n="aboutH1">About GasBrazil</h1>
+  <h1 style="font-size:22px;font-weight:400;margin:18px 0 0" data-i18n="aboutH1">About GasBrazil</h1>
   <div class="flagbar" aria-hidden="true"></div>
   <div class="prose">
     <h2 data-i18n="aboutWho">What this is</h2>
@@ -322,8 +541,10 @@ __TOPBAR__
     <h2 data-i18n="aboutCover">Coverage limits</h2>
     <p data-i18n="aboutCoverBody">POC Contracts currently include Transport Contract and Master Contract rows. Legacy transport contracts and access connections are on the official portal but are not in this feed yet.</p>
     <p data-i18n="aboutCoverFlows">Pipeline Flows has no published ANP data for 2022, and each month is typically released with a lag of several weeks. Average pressure and shipper-level detail are collected but not shown on the dashboard; both are available in the underlying data files in the repository.</p>
+    <p data-i18n="aboutCoverSupply">Gas Supply uses ANP PPGN-EL national monthly series plus national natural-gas imports. The open import CSV does not split Bolivia pipeline vs LNG cargoes.</p>
+    <p data-i18n="aboutCoverPld">PLD Prices shows CCEE daily-average PLD by submarket. It is not ONS CMO — see ONS Balances for marginal operating cost.</p>
     <p>
-      <a href="../ons/">ONS</a> · <a href="../poc/">POC</a> · <a href="../contratos/">Contratos</a> · <a href="../flows/">Flows</a> ·
+      <a href="../ons/">ONS</a> · <a href="../poc/">POC</a> · <a href="../contratos/">Contratos</a> · <a href="../flows/">Flows</a> · <a href="../supply/">Supply</a> · <a href="../pld/">PLD</a> ·
       <a href="../ons/wiki-html/">ONS wiki</a>
     </p>
   </div>
@@ -337,7 +558,7 @@ NOTFOUND_TEMPLATE = """__HEAD__
 __TOPBAR__
 <main class="hub" id="main">
   <div class="wordmark"><a href="./">GasBrazil<span class="dot">.</span>com</a></div>
-  <h1 style="font-size:22px;margin:18px 0 0" data-i18n="notFound">This page is not here.</h1>
+  <h1 style="font-size:22px;font-weight:400;margin:18px 0 0" data-i18n="notFound">This page is not here.</h1>
   <p class="tagline" data-i18n="notFoundBody">The hub and dashboards are linked below.</p>
   <div class="flagbar" aria-hidden="true"></div>
   <div class="cards" style="margin-top:22px">
@@ -346,6 +567,8 @@ __TOPBAR__
     <a class="card" href="poc/"><div class="name"><span class="dot" aria-hidden="true"></span><span data-i18n="cardPoc">POC Results</span></div></a>
     <a class="card" href="contratos/"><div class="name"><span class="dot" aria-hidden="true"></span><span data-i18n="cardContratos">POC Contracts</span></div></a>
     <a class="card" href="flows/"><div class="name"><span class="dot" aria-hidden="true"></span><span data-i18n="cardFlows">Pipeline Flows</span></div></a>
+    <a class="card" href="supply/"><div class="name"><span class="dot" aria-hidden="true"></span><span data-i18n="cardSupply">Gas Supply</span></div></a>
+    <a class="card" href="pld/"><div class="name"><span class="dot" aria-hidden="true"></span><span data-i18n="cardPld">PLD Prices</span></div></a>
   </div>
 </main>
 __FOOTER__
@@ -369,7 +592,7 @@ def write_home(out_path: Path | str = DEFAULT_OUT) -> Path:
     html = HOME_TEMPLATE
     html = html.replace("__HEAD__", _head(
         "GasBrazil.com",
-        "Independent data tools for Brazil's natural gas market: ONS grid balances, POC capacity results, and transport contracts.",
+        "Independent data tools for Brazil's natural gas market: ONS grid balances, POC capacity results, transport contracts, pipeline flows, and CCEE PLD prices.",
         "/",
     ))
     html = html.replace("__FOOTER__", _footer("./"))
@@ -385,6 +608,15 @@ def write_home(out_path: Path | str = DEFAULT_OUT) -> Path:
     html = html.replace("__FLOWS_KPI__", st["flows_kpi"] or "")
     html = html.replace("__FLOWS_KPI_PT__", st["flows_kpi_pt"] or st["flows_kpi"] or "")
     html = html.replace("__FLOWS_WHEN__", st["flows_when"] or "")
+    html = html.replace("__SUPPLY_KPI__", st["supply_kpi"] or "")
+    html = html.replace("__SUPPLY_KPI_PT__", st["supply_kpi_pt"] or st["supply_kpi"] or "")
+    html = html.replace("__SUPPLY_WHEN__", st["supply_when"] or "")
+    html = html.replace("__PLD_KPI__", st["pld_kpi"] or "")
+    html = html.replace("__PLD_KPI_PT__", st["pld_kpi_pt"] or st["pld_kpi"] or "")
+    html = html.replace("__PLD_WHEN__", st["pld_when"] or "")
+    html = html.replace("__POC_SPARK__", st.get("poc_spark") or "")
+    html = html.replace("__SUPPLY_SPARK__", st.get("supply_spark") or "")
+    html = html.replace("__PLD_SPARK__", st.get("pld_spark") or "")
     html = _kit_render(html)
     out_path = Path(out_path)
     out_path.write_text(html, encoding="utf-8")
@@ -433,7 +665,7 @@ def write_robots_and_sitemap() -> None:
         encoding="utf-8",
     )
     today = dt.date.today().isoformat()
-    urls = ["/", "/ons/", "/poc/", "/contratos/", "/flows/", "/about/"]
+    urls = ["/", "/ons/", "/poc/", "/contratos/", "/flows/", "/supply/", "/pld/", "/about/"]
     body = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     for u in urls:
         body += f"  <url><loc>https://gasbrazil.com{u}</loc><lastmod>{today}</lastmod></url>\n"
