@@ -14,6 +14,11 @@
  */
 __FONT_FACE__
 :root {
+  /* Tells the browser which palette its OWN native UI should use -- select
+     dropdown popups, date pickers, scrollbars -- so those aren't stuck
+     rendering light (dark text on a dark --bg, unreadable) just because we
+     never told the browser the page itself went dark. */
+  color-scheme: light;
   --bg: #f4f4f1;
   --panel: #fcfcfb;
   --border: #e1e0d9;
@@ -52,6 +57,7 @@ __FONT_FACE__
   --neg: #b3441e;
 }
 [data-theme="dark"] {
+  color-scheme: dark;
   --bg: #0d0d0d;
   --panel: #1a1a19;
   --border: #2c2c2a;

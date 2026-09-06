@@ -253,11 +253,6 @@ select:hover, input:hover { background: var(--accent-soft); }
 .chart-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: var(--card-pad); margin-bottom: var(--gap); }
 .panel-title { font-size: 13px; font-weight: 600; margin: 0 0 2px; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
 .panel-note { font-size: 11.5px; color: var(--muted); margin: 6px 0 10px; }
-.meter-view-row { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; }
-.meter-view-toggle { display: flex; gap: 6px; }
-.meter-view-btn { background: var(--bg); border: 1px solid var(--border-strong); border-radius: 999px; padding: 3px 12px; font-size: 11.5px; cursor: pointer; color: var(--text); font-family: var(--font); font-weight: 600; }
-.meter-view-btn:hover { background: var(--accent-soft); }
-.meter-view-btn.active { background: var(--text); color: var(--panel); border-color: var(--text); }
 .chip-scroll { display: flex; flex-wrap: wrap; gap: 6px; max-height: 168px; overflow: auto; padding: 2px; margin-bottom: 4px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); }
 .meter-table-wrap { max-height: 320px; overflow: auto; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 4px; }
 .meter-table-wrap table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
@@ -369,10 +364,6 @@ footer a { color: var(--accent); }
     </span>
   </p>
   <p class="panel-note" id="chart-note">Totals summed across every matching receipt/delivery point.</p>
-  <div class="meter-view-row" id="meter-view-row" hidden>
-    <span class="filter-label">Meters</span>
-    <div class="meter-view-toggle" id="meter-view-toggle"></div>
-  </div>
   <div class="chip-scroll" id="chip-scroll" hidden></div>
   <div class="chip-truncate-note" id="chip-truncate-note" hidden></div>
   <div class="meter-table-wrap" id="meter-table-wrap" hidden></div>
@@ -424,7 +415,8 @@ let datePreset = "12m";
 let smoothing = "raw";
 let picked = new Set();      // detail-mode picks only
 let chartSlots = new Map();
-let meterViewMode = "chips"; // "chips" | "table" -- points-level detail mode only
+let meterSortCol = "volume"; // meter list sort column: pipeline|name|type|uf|volume
+let meterSortDir = -1;       // 1 asc, -1 desc
 let sortDir = -1; // table date sort: 1 asc, -1 desc
 let tableRows = []; // last rendered table rows, kept for CSV/XLSX export
 let tableCols = [];
@@ -450,9 +442,18 @@ function currentSeriesMap() {
   return bag[variable] || {};
 }
 function entityById(id) { return currentEntities().find(e => e.id === id); }
+// ANP point names sometimes carry a trailing "(ORIGIN >> DEST)" segment
+// spelling out the connecting sub-pipeline codes -- meaningful to ANP's own
+// registry, but clutter on a page meant to be skimmed at a glance. Stripped
+// from every on-page label; the full raw name is still available via the
+// row's title attribute for anyone who needs the ANP-exact wording.
+function shortPointName(name) {
+  return name.replace(/\s*\([^()]*>>[^()]*\)\s*$/, "");
+}
+
 function entityLabel(e) {
   if (e.isAggregate) return e.name;
-  if (level === "points") return e.pipeline + " · " + e.name + " (" + (e.type === "Receipt Point" ? "Recv" : "Del") + ")";
+  if (level === "points") return e.pipeline + " · " + shortPointName(e.name) + " (" + (e.type === "Receipt Point" ? "Recv" : "Del") + ")";
   return e.name;
 }
 
@@ -570,50 +571,46 @@ function buildViewToggle() {
 function onViewModeChanged() {
   const isDetail = viewMode === "detail";
   const isPointsDetail = isDetail && level === "points";
-  document.getElementById("meter-view-row").hidden = !isPointsDetail;
-  document.getElementById("chip-scroll").hidden = !isDetail || (isPointsDetail && meterViewMode === "table");
-  document.getElementById("meter-table-wrap").hidden = !isPointsDetail || meterViewMode !== "table";
+  document.getElementById("chip-scroll").hidden = !isDetail || isPointsDetail;
+  document.getElementById("meter-table-wrap").hidden = !isPointsDetail;
   document.getElementById("btn-clear-picks").hidden = !isDetail;
   document.getElementById("chart-note").textContent = isDetail
     ? "Pick one or more pipelines/points below to chart. Values summed across every shipper and contract active at that point/pipeline."
     : (level === "points"
         ? "Totals summed across every matching receipt/delivery point (use the filters above to narrow by pipeline or state)."
         : "Totals summed across every matching pipeline (use the filters above to narrow by pipeline)");
-  if (isPointsDetail) buildMeterViewToggle();
   render();
 }
 
-function buildMeterViewToggle() {
-  const host = document.getElementById("meter-view-toggle");
-  host.innerHTML = "";
-  const defs = [{ v: "chips", label: "Chips" }, { v: "table", label: "Table (all meters)" }];
-  for (const d of defs) {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "meter-view-btn" + (meterViewMode === d.v ? " active" : "");
-    btn.textContent = d.label;
-    btn.addEventListener("click", () => {
-      if (meterViewMode === d.v) return;
-      meterViewMode = d.v;
-      document.getElementById("chip-scroll").hidden = meterViewMode === "table";
-      document.getElementById("meter-table-wrap").hidden = meterViewMode !== "table";
-      buildMeterViewToggle();
-      buildChips();
-    });
-    host.appendChild(btn);
-  }
-}
-
+// Single-select, not multi: picking TAG then clicking TBG should swap to
+// TBG, not add to it -- there's no case where two specific transporters but
+// not the third is a meaningful filter. An explicit "All" pill makes the
+// no-filter state a real, clickable option instead of an implicit side
+// effect of deselecting everything by hand.
 function buildTsoToggles() {
   const host = document.getElementById("tso-toggle-row");
   host.innerHTML = '<span class="filter-label">Transporter</span>';
   const allTsos = [...new Set(currentEntities().map(e => e.tso).filter(Boolean))].sort();
+
+  const allBtn = document.createElement("button");
+  allBtn.className = "tso-toggle" + (tsoFilter.size === 0 ? " active" : "");
+  allBtn.textContent = "All";
+  allBtn.addEventListener("click", () => {
+    if (tsoFilter.size === 0) return;
+    tsoFilter = new Set();
+    render();
+  });
+  host.appendChild(allBtn);
+
   for (const tso of allTsos) {
     const btn = document.createElement("button");
-    btn.className = "tso-toggle" + (tsoFilter.has(tso) ? " active" : "");
+    const isActive = tsoFilter.has(tso);
+    btn.className = "tso-toggle" + (isActive ? " active" : "");
     btn.textContent = tso;
     btn.addEventListener("click", () => {
-      if (tsoFilter.has(tso)) tsoFilter.delete(tso); else tsoFilter.add(tso);
+      // Clicking the only active transporter again clears back to "All"
+      // rather than leaving no way to toggle it off besides the All pill.
+      tsoFilter = (isActive && tsoFilter.size === 1) ? new Set() : new Set([tso]);
       render();
     });
     host.appendChild(btn);
@@ -657,16 +654,12 @@ function buildDependentSelects() {
   }
 }
 
-// Sort points by pipeline, then receipts before deliveries, then name --
-// used for both the chip list and the meter table so a pipeline's meters
-// stay adjacent and grouped by flow type without needing a visible
-// section header for it.
-function pointsSortOrder(a, b) {
-  if (a.pipeline !== b.pipeline) return a.pipeline.localeCompare(b.pipeline);
-  if (a.type !== b.type) return a.type === RECEIPT ? -1 : 1;
-  return a.name.localeCompare(b.name);
-}
-
+// Points level always uses the sortable/filterable meter table below --
+// receipts/deliveries/both is already the Flow type filter above, and a
+// real "Avg volume" column replaces a separate chip picker plus a hidden
+// 60-item cap. The pipeline-system level still uses a small chip grid
+// (there are only ever a handful of pipelines, TAG/NTS/TBG, so a table
+// would be overkill there).
 function buildChips() {
   const chipHost = document.getElementById("chip-scroll");
   chipHost.innerHTML = "";
@@ -675,27 +668,21 @@ function buildChips() {
 
   let matches = availableEntities();
 
-  if (level === "points" && meterViewMode === "table") {
+  if (level === "points") {
     note.hidden = true;
-    renderMeterTable(matches.slice().sort(pointsSortOrder));
+    renderMeterTable(matches);
     return;
   }
 
   matches.sort((a, b) => rankScore(b.id) - rankScore(a.id));
   if (matches.length > MAX_CHIPS_SHOWN) {
     note.hidden = false;
-    note.textContent = level === "points"
-      ? `Showing the ${MAX_CHIPS_SHOWN} largest of ${matches.length} matches by average volume -- narrow the filters, or switch to the table view above to browse all of them.`
-      : `Showing the ${MAX_CHIPS_SHOWN} largest of ${matches.length} matches by average volume -- narrow the filters or search to see the rest.`;
+    note.textContent = `Showing the ${MAX_CHIPS_SHOWN} largest of ${matches.length} matches by average volume -- narrow the filters or search to see the rest.`;
     matches = matches.slice(0, MAX_CHIPS_SHOWN);
   } else {
     note.hidden = true;
   }
-  if (level === "points") {
-    matches.sort(pointsSortOrder);
-  } else {
-    matches.sort((a, b) => a.name.localeCompare(b.name));
-  }
+  matches.sort((a, b) => a.name.localeCompare(b.name));
   for (const e of matches) chipHost.appendChild(makeChip(e));
   if (!matches.length) {
     const empty = document.createElement("div");
@@ -722,32 +709,78 @@ function makeChip(e) {
   return btn;
 }
 
-// Full, uncapped listing of every matching meter -- an alternative to the
-// chip picker for browsing/selecting from all of them at once, sorted by
-// pipeline with receipts before deliveries within each.
-function renderMeterTable(sortedMatches) {
+const METER_TABLE_COLS = [
+  { key: "pipeline", label: "Pipeline" },
+  { key: "name", label: "Meter" },
+  { key: "type", label: "Type" },
+  { key: "uf", label: "State" },
+  { key: "volume", label: "Avg volume" },
+];
+
+function meterSortValue(e, col) {
+  if (col === "volume") return rankScore(e.id);
+  if (col === "name") return shortPointName(e.name);
+  if (col === "type") return e.type;
+  if (col === "uf") return e.uf || "";
+  return e.pipeline;
+}
+
+// The only points-level picker: every matching meter, sorted by volume by
+// default (click any column header to change), and never capped -- the
+// old "chips" grid used to hide anything past the 60 largest until you
+// switched to this same table anyway.
+function renderMeterTable(matches) {
   const host = document.getElementById("meter-table-wrap");
   host.innerHTML = "";
-  if (!sortedMatches.length) {
+  if (!matches.length) {
     host.innerHTML = '<div style="color:var(--muted);font-size:12.5px;padding:10px">No pipelines/points match the current filters for this variable.</div>';
     return;
   }
+  const sorted = matches.slice().sort((a, b) => {
+    const av = meterSortValue(a, meterSortCol), bv = meterSortValue(b, meterSortCol);
+    let cmp = (typeof av === "number") ? av - bv : String(av).localeCompare(String(bv));
+    if (cmp === 0) cmp = a.pipeline.localeCompare(b.pipeline) || a.name.localeCompare(b.name);
+    return cmp * meterSortDir;
+  });
+
   const table = document.createElement("table");
   const thead = document.createElement("thead");
-  thead.innerHTML = "<tr><th></th><th>Pipeline</th><th>Meter</th><th>Type</th><th>State</th></tr>";
+  const trh = document.createElement("tr");
+  trh.appendChild(document.createElement("th")); // swatch column, unsortable
+  for (const c of METER_TABLE_COLS) {
+    const th = document.createElement("th");
+    th.appendChild(document.createTextNode(c.label));
+    if (c.key === meterSortCol) {
+      const arrow = document.createElement("span");
+      arrow.className = "arrow";
+      arrow.textContent = meterSortDir === 1 ? "↑" : "↓";
+      th.appendChild(arrow);
+    }
+    th.addEventListener("click", () => {
+      if (meterSortCol === c.key) meterSortDir = -meterSortDir;
+      else { meterSortCol = c.key; meterSortDir = c.key === "volume" ? -1 : 1; }
+      buildChips();
+    });
+    trh.appendChild(th);
+  }
+  thead.appendChild(trh);
   table.appendChild(thead);
+
   const tbody = document.createElement("tbody");
-  for (const e of sortedMatches) {
+  const unit = currentUnits()[variable] || "";
+  for (const e of sorted) {
     const tr = document.createElement("tr");
     tr.className = "meter-row" + (picked.has(e.id) ? " picked" : "");
+    tr.title = e.name;
     const swColor = picked.has(e.id) ? chartColorOf(e.id) : "transparent";
     const isRecv = e.type === RECEIPT;
     tr.innerHTML =
       '<td class="sw-cell"><span class="sw" style="display:inline-block;width:9px;height:9px;border-radius:2px;background:' + swColor + '"></span></td>' +
       "<td>" + escapeHtml(e.pipeline) + "</td>" +
-      "<td>" + escapeHtml(e.name) + "</td>" +
+      "<td>" + escapeHtml(shortPointName(e.name)) + "</td>" +
       '<td><span class="type-badge ' + (isRecv ? "recv" : "del") + '">' + (isRecv ? "Receipt" : "Delivery") + "</span></td>" +
-      "<td>" + escapeHtml(e.uf || "") + "</td>";
+      "<td>" + escapeHtml(e.uf || "") + "</td>" +
+      '<td class="num">' + fmtAxisNum(rankScore(e.id), 1) + (unit ? " " + escapeHtml(unit) : "") + "</td>";
     tr.addEventListener("click", () => togglePick(e.id));
     tbody.appendChild(tr);
   }
