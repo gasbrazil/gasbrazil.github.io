@@ -117,7 +117,7 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; font-weight: 400; }
 .quick-filters { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: var(--gap); }
 .qf-sep { width: 1px; align-self: stretch; background: var(--border-strong); margin: 0 4px; }
 .qf-btn.qf-validity { border-style: dashed; }
-.drill-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: var(--card-pad); margin-bottom: var(--gap); }
+.drill-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: var(--card-pad); margin-bottom: var(--gap); overflow-x: auto; }
 .drill-card table { border-collapse: collapse; width: 100%; font-size: 12.5px; white-space: nowrap; }
 .drill-card th, .drill-card td { padding: 4px 8px; border-bottom: 1px solid var(--border); text-align: left; }
 .drill-card th { color: var(--muted2); font-weight: 400; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; cursor: default; position: static; }
