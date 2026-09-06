@@ -38,8 +38,8 @@ one file:
     shipper/contract per (pipeline, variable, date).
 Shipper- and contract-level detail exists in the source but is discarded at
 build time to keep the store and the dashboard's embedded payload a
-reasonable size -- POC Contracts already covers shipper/contract-level
-detail for capacity; this dashboard is about physical flow.
+reasonable size -- shipper capacity belongs on POC Contracts
+(/contratos/); this dashboard is about physical flow totals only.
 
 Usage:
     python flows_pipeline.py fetch    # download raw/gn_<month>_<year>.csv files

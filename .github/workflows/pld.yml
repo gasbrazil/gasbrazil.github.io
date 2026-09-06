@@ -1,0 +1,93 @@
+name: Refresh PLD dashboard
+
+# CCEE publishes daily-average PLD with a short lag and appends to the
+# current-year CSV in place. Schedule every other day (and allow manual
+# dispatch); code pushes rebuild from cached raw/ without re-hitting CCEE
+# unless the cache is empty.
+on:
+  schedule:
+    - cron: "30 13 */2 * *"
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths:
+      - "pld/**"
+      - "shared/**"
+      - ".github/workflows/pld.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pld-refresh
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: pld
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pld/requirements.txt
+
+      - run: pip install -r requirements.txt
+
+      - name: Cache key for this month
+        id: ym
+        run: echo "ym=$(date -u +%Y-%m)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore raw CCEE source files
+        uses: actions/cache@v4
+        with:
+          path: pld/raw
+          key: pld-raw-${{ steps.ym.outputs.ym }}
+          restore-keys: |
+            pld-raw-
+
+      - name: Check for cached raw data
+        id: rawcheck
+        run: |
+          if [ -n "$(ls -A raw 2>/dev/null)" ]; then
+            echo "has_data=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_data=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Fetch CCEE yearly CSVs
+        if: github.event_name != 'push' || steps.rawcheck.outputs.has_data != 'true'
+        run: python pld_pipeline.py fetch
+
+      - name: Skip fetch (code-only push, using cached CCEE data)
+        if: github.event_name == 'push' && steps.rawcheck.outputs.has_data == 'true'
+        run: echo "Code-only push -- rebuilding from cached raw CCEE CSVs."
+
+      - name: Build tidy parquet
+        run: python pld_pipeline.py build
+
+      - name: Build the dashboard page
+        run: python dashboard.py index.html
+
+      - name: Commit refreshed dashboard + parquet
+        working-directory: .
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pld/index.html pld/data/pld_daily.parquet
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git commit -m "pld: automated refresh $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          for i in 1 2 3 4 5; do
+            if git push; then break; fi
+            echo "Push rejected (another workflow likely pushed first) -- rebasing and retrying ($i)..."
+            git pull --rebase origin main
+          done

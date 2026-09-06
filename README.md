@@ -16,10 +16,9 @@ different function names, one dashboard had Excel export and the other two
 didn't). This repo fixes that two ways:
 
 1. **One repo, one Pages site, path-based URLs.** `ons/`, `poc/`,
-   `contratos/`, and `flows/` each build to their own `index.html`,
-   committed straight into this repo, served at `/ons/`, `/poc/`,
-   `/contratos/`, `/flows/` under one domain — no more
-   one-subdomain-per-repo.
+   `contratos/`, `flows/`, `supply/`, and `pld/` each build to their own
+   `index.html`, committed straight into this repo, served at path URLs
+   under one domain — no more one-subdomain-per-repo.
 2. **A shared front-end kit.** `shared/theme.css` and
    `shared/dashboard_kit.py` hold the cosmetic and mechanical pieces every
    dashboard needs (palette, font embedding, the theme toggle, CSV/XLSX
@@ -29,11 +28,10 @@ didn't). This repo fixes that two ways:
    one edit instead of three.**
 
 The Python data pipelines (`ons_pipeline.py`, `poc_pipeline.py`,
-`contratos_pipeline.py`, `flows_pipeline.py`) are untouched by any of
-this — this was a front-end/shell consolidation, not a
-data-architecture change. Each dashboard still owns its own data model,
-layout, and business logic; `shared/` only centralizes what was
-genuinely identical across all of them.
+`contratos_pipeline.py`, `flows_pipeline.py`, `supply_pipeline.py`,
+`pld_pipeline.py`) are untouched by the shared-kit consolidation — each
+dashboard still owns its own data model, layout, and business logic;
+`shared/` only centralizes what was genuinely identical across all of them.
 
 ## Structure
 
@@ -41,12 +39,17 @@ genuinely identical across all of them.
 shared/                 theme.css + dashboard_kit.py -- the shared kit (see below)
   theme.css               CSS custom properties: palette, font, the .flagbar strip
   dashboard_kit.py        font/favicon embedding, payload encoding, reusable JS
-  fonts/Degular.ttf
+  fonts/Pacaembu-ExtraLight.ttf
+  fonts/Pacaembu-Light.ttf
+  fonts/Pacaembu-Regular.ttf
+  fonts/Pacaembu-SemiBold.ttf
   favicon.png
 ons/                    ONS grid-balances dashboard -- see ons/README.md
 poc/                    POC capacity-offer-results dashboard -- see poc/README.md
 contratos/              POC transport-contracts dashboard -- see contratos/README.md
 flows/                  ANP pipeline-flows dashboard -- see flows/README.md
+supply/                 ANP national gas supply balance -- see supply/README.md
+pld/                    CCEE daily-average PLD prices -- see pld/README.md
 build_home.py           builds the landing page (this file) from shared/theme.css
 index.html              built landing page (committed -- served at /)
 .github/workflows/
@@ -55,6 +58,8 @@ index.html              built landing page (committed -- served at /)
   poc.yml                 poc/'s own fetch -> build -> deploy
   contratos.yml           contratos/'s own fetch -> build -> deploy
   flows.yml               flows/'s own fetch -> build -> health-gate -> deploy
+  supply.yml              supply/'s own fetch -> build -> deploy
+  pld.yml                 pld/'s own fetch -> build -> deploy
 ```
 
 ## Making a visual change
@@ -95,6 +100,8 @@ Path-based under one domain, per ADR-001 Decision 1 Option C:
 | `/poc/` | POC capacity offer results |
 | `/contratos/` | POC transport contracts |
 | `/flows/` | ANP pipeline flows |
+| `/supply/` | ANP national gas supply balance |
+| `/pld/` | CCEE daily-average PLD prices |
 
 Before the `gasbrazil.com` domain is cut over to this repo, the same
 structure is reachable at `gasbrazil.github.io/...` for verification.

@@ -26,9 +26,10 @@ file — no server, no database).
   Acesso". These are not served by `contratosCarregador` — confirmed by
   exhaustively querying every value the `StatusContrato` enum accepts (only
   three: `ATIVO`, `CONCLUIDO`, `HABILITADO`, all consumed by the branches
-  above) and by introspecting the full GraphQL schema (33 types, nothing
-  named legado/conexão/acesso). That data comes from a different, unidentified
-  endpoint.
+  above) and by introspecting the GraphQL schema (nothing named
+  legado/conexão/acesso). Re-verified 2026-09-06 against the live API.
+  That data comes from a different, unidentified endpoint and will be
+  added when it is found.
 - TSO id mapping: `1 = TBG`, `2 = TAG`, `3 = NTS` — confirmed.
 - The dashboard excludes concluded ("Concluído") transport contracts by
   default to keep the client-side payload smaller — `dashboard.py` filters
