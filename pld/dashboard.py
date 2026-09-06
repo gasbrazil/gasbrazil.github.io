@@ -123,7 +123,6 @@ __SHARED_THEME_CSS__
 body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; font-weight: 300; }
 header.dash-head { display: flex; flex-direction: column; gap: 10px; margin-bottom: 0; }
 h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; font-weight: 400; }
-.subtitle { color: var(--muted2); font-size: 13px; font-weight: 300; margin: 4px 0 0; max-width: 48em; line-height: 1.45; }
 .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .header-links { display: flex; gap: 8px; flex-wrap: wrap; }
 .sources { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0 0 var(--gap); }
@@ -196,7 +195,7 @@ footer a { color: var(--accent); }
 <div class="asof-strip" id="asof-strip">
   <span class="asof-label" data-i18n="kpiRefresh">Last refreshed</span>
   <span class="asof-val" id="asof-refreshed">&mdash;</span>
-  <span class="asof-label" data-i18n="pldThrough">Data through</span>
+  <span class="asof-label" data-i18n="dataThrough">Data through</span>
   <span class="asof-val" id="asof-through">&mdash;</span>
 </div>
 <div class="flagbar" aria-hidden="true"></div>

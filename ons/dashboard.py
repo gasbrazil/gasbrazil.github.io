@@ -571,6 +571,7 @@ table.data thead th.sortable:hover{background:var(--accent-soft)}
 <header class="dash-head">
   <div>
     <h1 data-i18n="navOns">ONS Balances</h1>
+    <p class="subtitle" data-i18n="cardOnsDesc">Daily grid balances, thermal generation by plant, and gas-fired dispatch across Brazil's interconnected power system.</p>
   </div>
   <div class="header-right">
     <div class="header-links">
@@ -583,13 +584,18 @@ table.data thead th.sortable:hover{background:var(--accent-soft)}
 </header>
 
 <div class="asof-strip" id="asof-strip">
-  <span class="asof-label">Last refreshed</span>
+  <span class="asof-label" data-i18n="kpiRefresh">Last refreshed</span>
   <span class="asof-val" id="asof-refreshed">Loading&hellip;</span>
-  <span class="asof-label">Data through</span>
+  <span class="asof-label" data-i18n="dataThrough">Data through</span>
   <span class="asof-val" id="asof-through">&mdash;</span>
 </div>
 
 <div class="flagbar" aria-hidden="true"></div>
+
+<div class="sources">
+  <span class="sources-label" data-i18n="sources">Official sources</span>
+  <a href="https://dados.ons.org.br" target="_blank" rel="noopener">ONS open data<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+</div>
 
 <div id="boot">Unpacking data&hellip;</div>
 <div id="app" hidden>

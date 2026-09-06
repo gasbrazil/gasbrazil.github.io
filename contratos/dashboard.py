@@ -98,7 +98,8 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; font-weight: 400; }
 .header-links { display: flex; gap: 8px; flex-wrap: wrap; }
 .sources { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0 0 var(--gap); }
 .sources-label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 200; margin-right: 2px; }
-.pill { font-size: 11.5px; color: var(--muted2); text-decoration: none; border: 1px solid var(--border); border-radius: 5px; padding: 3px 10px; white-space: nowrap; }
+.pill { font-size: 11.5px; color: var(--muted2); text-decoration: none; border: 1px solid var(--border); border-radius: 5px; padding: 3px 10px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; }
+.ext-icon { width: 10px; height: 10px; display: inline-block; flex: none; opacity: .75; }
 .pill:hover { background: var(--accent-soft); color: var(--text); border-color: var(--border-strong); }
 /* .navlink look owned by shared/theme.css (text underline nav, not pills). */
 #theme-toggle { display: inline-flex; align-items: center; justify-content: center; background: var(--panel); border: 1px solid var(--border-strong); border-radius: 5px; padding: 5px 9px; line-height: 0; cursor: pointer; color: var(--text); }
@@ -206,6 +207,7 @@ footer a { color: var(--accent); }
 <header class="dash-head">
   <div>
     <h1 data-i18n="navContratos">POC Contracts Dashboard</h1>
+    <p class="subtitle" data-i18n="cardContratosDesc">Active transport and master transport contracts across TBG, TAG, and NTS. Legacy and access-connection contracts are not yet included.</p>
   </div>
   <div class="header-right">
     <div class="header-links">
@@ -216,15 +218,15 @@ footer a { color: var(--accent); }
   </div>
 </header>
 <div class="asof-strip" id="asof-strip">
-  <span class="asof-label">Last refreshed</span>
+  <span class="asof-label" data-i18n="kpiRefresh">Last refreshed</span>
   <span class="asof-val" id="asof-refreshed">&mdash;</span>
-  <span class="asof-label">Data through</span>
+  <span class="asof-label" data-i18n="dataThrough">Data through</span>
   <span class="asof-val" id="asof-through">&mdash;</span>
 </div>
 <div class="flagbar" aria-hidden="true"></div>
 <div class="sources">
-  <span class="sources-label">Data source</span>
-  <a class="pill" href="https://ofertadecapacidade.com.br/home/contratos" target="_blank" rel="noopener">Portal de Oferta de Capacidade &mdash; Contracts</a>
+  <span class="sources-label" data-i18n="sources">Official sources</span>
+  <a class="pill" href="https://ofertadecapacidade.com.br/home/contratos" target="_blank" rel="noopener">Portal de Oferta de Capacidade &mdash; Contracts<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
 </div>
 <div class="tso-row" id="tso-row"></div>
 <div class="drill-card" id="drill-card"></div>

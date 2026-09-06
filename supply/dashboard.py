@@ -117,7 +117,6 @@ __SHARED_THEME_CSS__
 body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; font-weight: 300; }
 header.dash-head { display: flex; flex-direction: column; gap: 10px; margin-bottom: 0; }
 h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; font-weight: 400; }
-.subtitle { color: var(--muted2); font-size: 13px; font-weight: 300; margin-top: 4px; }
 .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .header-links { display: flex; gap: 8px; flex-wrap: wrap; }
 .sources { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0 0 var(--gap); }
@@ -194,7 +193,7 @@ footer a { color: var(--accent); }
 <div class="asof-strip" id="asof-strip">
   <span class="asof-label" data-i18n="kpiRefresh">Last refreshed</span>
   <span class="asof-val" id="asof-refreshed">&mdash;</span>
-  <span class="asof-label" data-i18n="supplyThrough">Data through</span>
+  <span class="asof-label" data-i18n="dataThrough">Data through</span>
   <span class="asof-val" id="asof-through">&mdash;</span>
 </div>
 <div class="flagbar" aria-hidden="true"></div>
@@ -248,7 +247,6 @@ __SHARED_JS_I18N__
 // Page-local i18n keys merged into the shared pack.
 GB_I18N.en.navSupply = "Gas Supply";
 GB_I18N.en.supplySubtitle = "ANP national monthly natural gas supply balance — production, available gas, flare, own use, and imports.";
-GB_I18N.en.supplyThrough = "Data through";
 GB_I18N.en.supplyChartTitle = "Monthly supply balance";
 GB_I18N.en.supplyChartNote = "National totals (sum of UF × location). LGN is cubic metres; other series are thousand m³.";
 GB_I18N.en.supplyTableTitle = "Monthly series";
@@ -263,7 +261,6 @@ GB_I18N.en.supplyKpiOwn = "Own use";
 GB_I18N.en.supplyKpiImp = "Imports";
 GB_I18N.pt.navSupply = "Oferta de Gás";
 GB_I18N.pt.supplySubtitle = "Balanço mensal nacional de gás natural da ANP (PPGN-EL) — produção, disponível, queima, consumo próprio e importações.";
-GB_I18N.pt.supplyThrough = "Dados até";
 GB_I18N.pt.supplyChartTitle = "Balanço mensal de oferta";
 GB_I18N.pt.supplyChartNote = "Totais nacionais (soma UF × localização). LGN em m³; demais séries em mil m³.";
 GB_I18N.pt.supplyTableTitle = "Série mensal";
