@@ -373,6 +373,74 @@ function downloadTextFile(text, mime, filename) {
 }
 """
 
+# Sortable/filterable <table> headers, shared by every table on every
+# dashboard (first built for flows-dashboard's meter picker and chart data
+# table -- see ADR-001 -- then lifted here so ONS/POC/Contratos can use the
+# exact same behavior instead of a page-specific re-implementation):
+#   - naturalDir/cycleSort: a 3-click cycle per column -- click 1 sorts in
+#     that column's natural direction (descending for the table's own
+#     default column, ascending otherwise), click 2 reverses it, click 3
+#     clears back to the table's default column+direction, instead of
+#     getting stuck sorted on whatever was last clicked.
+#   - withFocusPreserved: rebuilding a table wholesale on every filter
+#     keystroke would normally steal focus out of the input being typed
+#     in; this remembers which .th-filter (by data-col) had focus and
+#     where the caret was, runs the rebuild, then restores both.
+#   - buildSortFilterTh: the actual <th> builder -- a clickable label (for
+#     sorting) plus a small inline filter box -- so a table only has to
+#     supply its column defs, current {col,dir} state, default state, and
+#     a filters object.
+# Pairs with theme.css's .th-label/.th-filter rules for the look, and
+# nothing else -- each table still owns its own sort-value/filter-value
+# functions and row rendering, since those are inherently page-specific.
+JS_TABLE_SORT = r"""
+function naturalDir(col, defaultCol) { return col === defaultCol ? -1 : 1; }
+function cycleSort(current, col, def) {
+  const nd = naturalDir(col, def.col);
+  if (current.col !== col) return { col, dir: nd };
+  if (current.dir === nd) return { col, dir: -nd };
+  return { col: def.col, dir: def.dir };
+}
+function withFocusPreserved(host, rebuild) {
+  const active = document.activeElement;
+  const col = (active && active.classList && active.classList.contains("th-filter") && host.contains(active))
+    ? active.dataset.col : null;
+  const caret = col ? active.selectionStart : null;
+  rebuild();
+  if (col) {
+    const input = host.querySelector('.th-filter[data-col="' + col + '"]');
+    if (input) { input.focus(); if (caret != null) input.setSelectionRange(caret, caret); }
+  }
+}
+function buildSortFilterTh(col, sortState, defaultSort, filters, onChange, extraClass) {
+  const th = document.createElement("th");
+  if (extraClass) th.className = extraClass;
+  const labelSpan = document.createElement("span");
+  labelSpan.className = "th-label";
+  labelSpan.textContent = col.label;
+  if (sortState.col === col.key) {
+    const arrow = document.createElement("span");
+    arrow.className = "arrow";
+    arrow.textContent = sortState.dir === 1 ? "↑" : "↓";
+    labelSpan.appendChild(arrow);
+  }
+  labelSpan.addEventListener("click", () => onChange(cycleSort(sortState, col.key, defaultSort), filters));
+  th.appendChild(labelSpan);
+  const filterInput = document.createElement("input");
+  filterInput.type = "search";
+  filterInput.className = "th-filter";
+  filterInput.dataset.col = col.key;
+  filterInput.placeholder = "Filter…";
+  filterInput.value = filters[col.key] || "";
+  filterInput.addEventListener("input", () => {
+    filters[col.key] = filterInput.value.toLowerCase();
+    onChange(sortState, filters);
+  });
+  th.appendChild(filterInput);
+  return th;
+}
+"""
+
 # Dependency-free XLSX writer (store-only-adjacent ZIP via the browser's
 # native CompressionStream("deflate-raw"), plus the minimal OOXML parts Excel
 # needs). Originally built for ons-dashboard's "Export all data" button;

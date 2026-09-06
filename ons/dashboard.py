@@ -1070,6 +1070,56 @@ function makeSortable(table,id){
   paintSortIndicators(table, id);
 }
 
+// Per-column text filtering for the plain sortable tables (dataTable,
+// reeTable, resRegionTable, basinTable) -- the entity-picker table already
+// has its own dropdown-style filter (makeColFilterBtn), so this isn't
+// called for it. Reuses the same .th-label wrapper makeSortable/
+// paintSortIndicators already understand, so the sort arrow keeps
+// repainting correctly once a header has a filter box in it too. Filtering
+// hides rows in place (row.style.display) rather than rebuilding the
+// table, and rowFilterState persists per table id across the full
+// teardown-and-rebuild every render() does, same as sortState.
+const rowFilterState={}; // tableId -> {colIndex: lowercase substring}
+function makeFilterable(table,id){
+  if(!table || !table.tHead) return;
+  const headRow=table.tHead.rows[table.tHead.rows.length-1];
+  if(!headRow) return;
+  const st = rowFilterState[id] || (rowFilterState[id]={});
+  [...headRow.cells].forEach((th,i)=>{
+    if(th.querySelector(".th-filter")) return;   // already wired
+    const label = th.dataset.label!==undefined ? th.dataset.label : th.textContent;
+    if(!label) return;                            // blank header: not filterable
+    th.dataset.label=label;
+    th.textContent="";
+    const labelSpan=el("span","th-label",label);
+    th.appendChild(labelSpan);
+    const input=document.createElement("input");
+    input.type="search"; input.className="th-filter"; input.placeholder="Filter…";
+    input.value=st[i]||"";
+    input.addEventListener("click",e=>e.stopPropagation());
+    input.addEventListener("input",()=>{
+      st[i]=input.value.toLowerCase();
+      applyColumnTextFilters(table,id);
+    });
+    th.appendChild(input);
+  });
+  paintSortIndicators(table,id);
+  applyColumnTextFilters(table,id);
+}
+function applyColumnTextFilters(table,id){
+  const st=rowFilterState[id];
+  const tbody=table.tBodies[0]; if(!st || !tbody) return;
+  [...tbody.rows].forEach(row=>{
+    let visible=true;
+    for(const col in st){
+      const f=st[col]; if(!f) continue;
+      const text=(row.cells[col]?row.cells[col].textContent:"").toLowerCase();
+      if(!text.includes(f)){ visible=false; break; }
+    }
+    row.style.display = visible ? "" : "none";
+  });
+}
+
 function buildTabs(){
   const host=document.getElementById("tabs"); host.innerHTML="";
   VIEWS.forEach(v=>{
@@ -1779,6 +1829,7 @@ function renderTable(){
   const t=document.getElementById("dataTable");
   t.innerHTML=h+"</tbody>";
   makeSortable(t, "dataTable");
+  makeFilterable(t, "dataTable");
 }
 function downloadCSV(){
   const {dates,cols}=tableData();
@@ -2248,6 +2299,7 @@ function renderReeTable(host){
   card.innerHTML=h;
   host.appendChild(card);
   makeSortable(card.querySelector("table"), "reeTable");
+  makeFilterable(card.querySelector("table"), "reeTable");
 }
 function renderReservoirRegionTable(host){
   const rows=DATA.subsystems.map(s=>earRow(s)).filter(r=>r && r.pct!=null);
@@ -2278,6 +2330,7 @@ function renderReservoirRegionTable(host){
   card.innerHTML=h;
   host.appendChild(card);
   makeSortable(card.querySelector("table"), "resRegionTable");
+  makeFilterable(card.querySelector("table"), "resRegionTable");
 }
 function renderBasinSummary(host){
   const ents=(DATA.entities||[]).filter(e=>e.kind==="reservoir");
@@ -2312,6 +2365,7 @@ function renderBasinSummary(host){
   card.innerHTML=h;
   host.appendChild(card);
   makeSortable(card.querySelector("table"), "basinTable");
+  makeFilterable(card.querySelector("table"), "basinTable");
 }
 
 /* ---------- Thermal Plants tab: gas KPI strip ---------------------------- */
