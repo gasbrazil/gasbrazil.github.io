@@ -183,6 +183,18 @@
   opacity: 1; visibility: visible;
 }
 
+/* Sortable/filterable table header cells (see shared/dashboard_kit.py's
+   JS_TABLE_SORT for the click behavior): a clickable label plus a small
+   inline filter box, sharing one look across every table on every
+   dashboard. th.num right-aligns the filter box to match its numeric
+   column; a table's own th rule should still set position/background/etc,
+   just not cursor (this overrides that to auto so only .th-label, not the
+   whole cell, looks clickable). */
+.th-label { cursor: pointer; user-select: none; display: block; }
+.th-label:hover { color: var(--text); }
+.th-filter { display: block; width: 100%; margin-top: 4px; padding: 2px 6px; font-size: 11px; font-weight: 400; background: var(--bg); border: 1px solid var(--border-strong); border-radius: 5px; color: var(--text); box-sizing: border-box; cursor: text; }
+th.num .th-filter { text-align: right; }
+
 .skip-link {
   position: absolute; left: 12px; top: -40px; z-index: 80;
   background: var(--accent); color: #fff; padding: 6px 10px;
@@ -303,14 +315,14 @@ footer.site a { color: var(--muted); }
     <a class="card" href="contratos/">
       <div class="name"><span class="dot" aria-hidden="true"></span><span data-i18n="cardContratos">POC Contracts</span></div>
       <div class="desc" data-i18n="cardContratosDesc">Active transport and master transport contracts across TBG, TAG, and NTS. Legacy and access-connection contracts are not yet included.</div>
-      <div class="kpi" data-en="877 contracts · 179,778 thousand m³/d" data-pt="877 contratos · 179,778 mil m³/d">877 contracts · 179,778 thousand m³/d</div>
+      <div class="kpi" data-en="880 contracts · 182,928 thousand m³/d" data-pt="880 contratos · 182,928 mil m³/d">880 contracts · 182,928 thousand m³/d</div>
       <div class="when" data-refresh="2026-09-06"></div>
     </a>
     <a class="card" href="flows/">
       <div class="name"><span class="dot" aria-hidden="true"></span><span data-i18n="cardFlows">Pipeline Flows</span></div>
       <div class="desc" data-i18n="cardFlowsDesc">Daily physical gas flow at every receipt and delivery point on Brazil's transport pipelines, plus system-use gas, losses, imbalance, and linepack.</div>
       <div class="kpi" data-en="1354.0M m³ realized (7d) · 263 points" data-pt="1354.0M m³ realizados (7d) · 263 points">1354.0M m³ realized (7d) · 263 points</div>
-      <div class="when" data-refresh="2026-09-06 00:00 UTC"></div>
+      <div class="when" data-refresh="2026-09-06 03:24 UTC"></div>
     </a>
   </div>
   <div class="sources-block">

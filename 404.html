@@ -183,6 +183,18 @@
   opacity: 1; visibility: visible;
 }
 
+/* Sortable/filterable table header cells (see shared/dashboard_kit.py's
+   JS_TABLE_SORT for the click behavior): a clickable label plus a small
+   inline filter box, sharing one look across every table on every
+   dashboard. th.num right-aligns the filter box to match its numeric
+   column; a table's own th rule should still set position/background/etc,
+   just not cursor (this overrides that to auto so only .th-label, not the
+   whole cell, looks clickable). */
+.th-label { cursor: pointer; user-select: none; display: block; }
+.th-label:hover { color: var(--text); }
+.th-filter { display: block; width: 100%; margin-top: 4px; padding: 2px 6px; font-size: 11px; font-weight: 400; background: var(--bg); border: 1px solid var(--border-strong); border-radius: 5px; color: var(--text); box-sizing: border-box; cursor: text; }
+th.num .th-filter { text-align: right; }
+
 .skip-link {
   position: absolute; left: 12px; top: -40px; z-index: 80;
   background: var(--accent); color: #fff; padding: 6px 10px;
