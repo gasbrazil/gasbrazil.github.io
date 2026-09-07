@@ -249,6 +249,15 @@ html, body {
    column; a table's own th rule should still set position/background/etc,
    just not cursor (this overrides that to auto so only .th-label, not the
    whole cell, looks clickable). */
+.table-wrap thead th,
+.scroll thead th,
+.meter-table-wrap thead th,
+.drill-card thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--panel);
+}
 .th-label { cursor: pointer; user-select: none; display: block; }
 .th-label:hover { color: var(--text); }
 .th-filter { display: block; width: 100%; margin-top: 4px; padding: 2px 6px; font-size: 11px; font-weight: 300; background: var(--bg); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); color: var(--text); box-sizing: border-box; cursor: text; }
