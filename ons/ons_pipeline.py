@@ -115,6 +115,21 @@ NATGAS_KCAL_PER_M3 = 9400.0          # Brazil industry-standard PCS, per user
 HEAT_RATE_COMBINED_CYCLE = 1800.0    # kcal/kWh, typical CCGT (~46% efficiency)
 HEAT_RATE_SIMPLE_CYCLE = 2500.0      # kcal/kWh, typical OCGT (~34% efficiency)
 
+# Prefer shared/transforms.py when available (ADR-002 Track A versioned params).
+try:
+    _shared = Path(__file__).resolve().parents[1] / "shared"
+    if _shared.is_dir():
+        import sys as _sys
+        if str(_shared) not in _sys.path:
+            _sys.path.insert(0, str(_shared))
+        import transforms as _xf  # noqa: E402
+        _heat = _xf.ONS_GAS_HEAT
+        NATGAS_KCAL_PER_M3 = float(_heat["natgas_kcal_per_m3"])
+        HEAT_RATE_COMBINED_CYCLE = float(_heat["heat_rate_combined_cycle_kcal_per_kwh"])
+        HEAT_RATE_SIMPLE_CYCLE = float(_heat["heat_rate_simple_cycle_kcal_per_kwh"])
+except Exception:  # noqa: BLE001 — keep local defaults if shared/ missing
+    pass
+
 
 # --------------------------------------------------------------------------
 # Source definitions
@@ -1755,15 +1770,19 @@ def build_store(raw: Path, out: Path, keys: list[str]) -> pd.DataFrame:
     ent = ent_df
     ent.to_parquet(out / "entities.parquet", index=False)
 
-    # ADR-002 Track A: publish ONS daily into the lake when the standard
-    # ./data path is used (CI and local default).
+    # ADR-002 Track A: validate + publish ONS daily into the lake when the
+    # standard ./data path is used (CI and local default).
     try:
         shared = Path(__file__).resolve().parents[1] / "shared"
         if shared.is_dir() and "date" in df.columns:
             import sys
             sys.path.insert(0, str(shared))
             import data_kit as dk  # noqa: E402
+            import schemas  # noqa: E402
+            schemas.validate_ons_daily(df)
+            schemas.validate_ons_entities(ent_df)
             dk.publish("ons_daily", dest)
+            dk.publish("ons_entities", ent)
     except Exception as exc:  # noqa: BLE001 — publish is best-effort; build already succeeded
         print(f"  lake publish skipped: {exc}")
 

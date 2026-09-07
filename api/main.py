@@ -23,6 +23,8 @@ from fastapi.middleware.cors import CORSMiddleware
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "shared"))
 import data_kit as dk  # noqa: E402
+import joins  # noqa: E402
+import transforms as xf  # noqa: E402
 
 app = FastAPI(
     title="GasBrazil API",
@@ -54,6 +56,7 @@ _FALLBACKS = {
     "poc_results": ROOT / "poc" / "data" / "poc_results.parquet",
     "contratos": ROOT / "contratos" / "data" / "contratos.parquet",
     "ons_daily": ROOT / "ons" / "data" / "daily.parquet",
+    "ons_entities": ROOT / "ons" / "data" / "entities.parquet",
 }
 
 
@@ -93,7 +96,11 @@ def health() -> dict[str, Any]:
         name: (dk.lake_path(name).exists() or _FALLBACKS[name].exists())
         for name in _FALLBACKS
     }
-    return {"ok": True, "datasets": present}
+    return {
+        "ok": True,
+        "datasets": present,
+        "transforms": xf.registry_summary(),
+    }
 
 
 @app.get("/v1/flows/points")
@@ -185,3 +192,31 @@ def ons_balances(
     sort_cols = [c for c in ("date", "subsystem", "series") if c in df.columns]
     df = df.sort_values(sort_cols)
     return {"count": int(len(df)), "limit": limit, "rows": _records(df, limit)}
+
+
+@app.get("/v1/power/pld-cmo")
+def power_pld_cmo(
+    submarket: Optional[str] = None,
+    date_from: Optional[str] = Query(None, alias="from"),
+    date_to: Optional[str] = Query(None, alias="to"),
+    limit: int = Query(5000, ge=1, le=50000),
+) -> dict[str, Any]:
+    """Cross-product join: CCEE PLD vs ONS CMO by submarket/day."""
+    try:
+        joined = joins.join_pld_cmo(
+            _load("pld_daily"),
+            _load("ons_daily"),
+            date_from=_parse_day(date_from),
+            date_to=_parse_day(date_to),
+        )
+    except ValueError as exc:
+        raise HTTPException(503, str(exc)) from exc
+    if submarket:
+        sm = submarket.upper()
+        joined = joined[joined["submarket"].astype(str).str.upper() == sm]
+    return {
+        "count": int(len(joined)),
+        "limit": limit,
+        "transform": "pld_ons_submarket_map",
+        "rows": _records(joined, limit),
+    }

@@ -38,14 +38,14 @@ dashboard still owns its own data model, layout, and business logic;
 See [docs/ADR-002-future-architecture.md](docs/ADR-002-future-architecture.md)
 for the progressive tracks beyond static HTML embeds:
 
-1. **Canonical lake + schemas** (`shared/data_kit.py`, `shared/schemas/`, `lake/`)
+1. **Canonical lake + schemas** (`shared/data_kit.py`, `shared/schemas/`, `shared/transforms.py`, `shared/joins.py`, `lake/`)
 2. **Artifact delivery** (`flows/payload.json.gz`, `ons/payload.json.gz` fetched by thin shells)
-3. **Read-only API** (`api/` FastAPI over the lake)
+3. **Read-only API** (`api/` FastAPI over the lake, including `/v1/power/pld-cmo`)
 
 ## Structure
 
 ```
-shared/                 theme.css + dashboard_kit.py + data_kit.py / schemas/ (ADR-002)
+shared/                 theme.css + dashboard_kit.py + data_kit / schemas / transforms / joins
   fonts/…                 Pacaembu ExtraLight / Light / Regular / SemiBold
   favicon.png
 lake/                   canonical parquet mirrors (gitignored except README)
