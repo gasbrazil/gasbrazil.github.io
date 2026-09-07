@@ -362,15 +362,15 @@ def write_dashboard(df: pd.DataFrame, dest: Path,
         ent = pd.DataFrame(columns=["kind", "entity", "subsystem", "group",
                                     "capacity_mw", "heat_rate_kcal_per_kwh"])
     payload = build_payload(df, ent)
-    # ADR-002 Track B: data lives in payload.json.gz beside the HTML shell
-    # (no base64-in-HTML). Hub teasers still read __GENERATED__ markers.
+    # ADR-002 Track B + R2: payload.json.gz locally (and on R2 when configured).
     sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "shared"))
     import data_kit as dk  # noqa: E402
-    payload_path = Path(__file__).resolve().parent / "payload.json.gz"
-    dk.write_json_gzip(payload, payload_path)
+    here = Path(__file__).resolve().parent
+    payload_path, payload_href = dk.write_and_publish_artifact("ons", payload, here)
 
     html = kit.render(
         TEMPLATE,
+        PAYLOAD_URL=payload_href,
         GENERATED=payload["generated"],
         KPI_GAS_MWMED=_hub_kpi_gas_mwmed(payload),
         SHARED_THEME_CSS=kit.render_theme_css(),
@@ -390,7 +390,7 @@ def write_dashboard(df: pd.DataFrame, dest: Path,
     print(
         f"  {len(payload['dates'])} dates x {len(payload['series'])} series -> "
         f"shell {len(html)/1e6:.2f} MB + {payload_path.name} "
-        f"{payload_path.stat().st_size/1e6:.2f} MB"
+        f"{payload_path.stat().st_size/1e6:.2f} MB → {payload_href}"
     )
     return dest
 
@@ -669,7 +669,7 @@ table.data thead th.sortable:hover{background:var(--accent-soft)}
 <div class="tt" id="tt"></div>
 
 <script>
-const PAYLOAD_URL = "payload.json.gz";
+const PAYLOAD_URL = "__PAYLOAD_URL__";
 __SHARED_JS_DECODE__
 let DATA = null;
 const PALETTE_SIZE = 8;   // colour palette length -- selection itself is unlimited

@@ -428,7 +428,7 @@ footer a { color: var(--accent); }
 </div>
 <div class="tt" id="chart-tt"></div>
 <script>
-const PAYLOAD_URL = "payload.json.gz";
+const PAYLOAD_URL = "__PAYLOAD_URL__";
 
 __SHARED_JS_DECODE__
 __SHARED_JS_CSV__
@@ -1601,15 +1601,15 @@ init();
 
 def write_dashboard(out_path=DEFAULT_OUT):
     payload = load_payload()
-    # ADR-002 Track B: data lives in payload.json.gz beside the HTML shell
-    # (no base64-in-HTML). Hub teasers still read __GENERATED__ markers.
+    # ADR-002 Track B + R2: payload.json.gz locally (and on R2 when configured).
+    # Hub teasers still read __GENERATED__ markers from the thin HTML shell.
     sys.path.insert(0, str(HERE.parent / "shared"))
     import data_kit as dk  # noqa: E402
-    payload_path = HERE / "payload.json.gz"
-    dk.write_json_gzip(payload, payload_path)
+    payload_path, payload_href = dk.write_and_publish_artifact("flows", payload, HERE)
 
     html = kit.render(
         TEMPLATE,
+        PAYLOAD_URL=payload_href,
         GENERATED=payload["generated"],
         KPI_TOTAL_7D=str(payload["kpiTotal7d"]) if payload["kpiTotal7d"] is not None else "",
         N_POINTS=str(payload["nPoints"]),
@@ -1632,7 +1632,7 @@ def write_dashboard(out_path=DEFAULT_OUT):
     print(
         f"Wrote dashboard shell ({len(html):,} bytes) + {payload_path.name} "
         f"({payload_path.stat().st_size:,} bytes, {len(payload['points'])} points, "
-        f"{len(payload['pipelines'])} pipelines) to {out_path.parent}"
+        f"{len(payload['pipelines'])} pipelines) → {payload_href}"
     )
 
 if __name__ == "__main__":

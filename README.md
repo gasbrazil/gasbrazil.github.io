@@ -39,8 +39,12 @@ See [docs/ADR-002-future-architecture.md](docs/ADR-002-future-architecture.md)
 for the progressive tracks beyond static HTML embeds:
 
 1. **Canonical lake + schemas** (`shared/data_kit.py`, `shared/schemas/`, `shared/transforms.py`, `shared/joins.py`, `lake/`)
-2. **Artifact delivery** (`flows/payload.json.gz`, `ons/payload.json.gz` fetched by thin shells)
+2. **Artifact delivery** — thin Pages shells fetch `payload.json.gz` from **Cloudflare R2** (all six dashboards)
 3. **Read-only API** (`api/` FastAPI over the lake, including `/v1/power/pld-cmo`)
+
+CI mirrors lake parquet to a private R2 bucket and uploads public artifacts
+when the `R2_*` / `GASBRAZIL_*` repository secrets are set. Local builds
+without those env vars still write sibling `payload.json.gz` for offline use.
 
 ## Structure
 
@@ -51,10 +55,10 @@ shared/                 theme.css + dashboard_kit.py + data_kit / schemas / tran
 lake/                   canonical parquet mirrors (gitignored except README)
 docs/ADR-002-…          future architecture tracks
 api/                    FastAPI read-only /v1 query layer (Track C)
-ons/                    ONS grid-balances (HTML shell + payload.json.gz)
+ons/                    ONS grid-balances (thin HTML shell; data on R2)
 poc/                    POC capacity-offer-results dashboard -- see poc/README.md
 contratos/              POC transport-contracts dashboard -- see contratos/README.md
-flows/                  ANP pipeline-flows (HTML shell + payload.json.gz)
+flows/                  ANP pipeline-flows (thin HTML shell; data on R2)
 supply/                 ANP national gas supply balance -- see supply/README.md
 pld/                    CCEE daily-average PLD prices -- see pld/README.md
 build_home.py           builds the landing page (this file) from shared/theme.css

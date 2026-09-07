@@ -232,7 +232,7 @@ footer a { color: var(--accent); }
 </div>
 <div class="tt" id="chart-tt"></div>
 <script>
-const PAYLOAD_B64 = "__PAYLOAD__";
+const PAYLOAD_URL = "__PAYLOAD_URL__";
 __SHARED_JS_DECODE__
 __SHARED_JS_ESCAPE_HTML__
 __SHARED_JS_CSV__
@@ -564,7 +564,7 @@ function paintAsof() {
 
 async function init() {
   document.getElementById("year").textContent = new Date().getFullYear();
-  const json = await inflateGzipB64(PAYLOAD_B64);
+  const json = await inflateGzipUrl(PAYLOAD_URL);
   DATA = JSON.parse(json);
   document.getElementById("import-gap").hidden = !DATA.importGap;
   DATA.metrics.forEach(m => { if (m.defaultOn) { picked.add(m.key); colorOf(m.key); } });
@@ -595,11 +595,14 @@ init();
 
 def write_dashboard(out_path: Path | str = DEFAULT_OUT) -> Path:
     payload = load_payload()
-    b64 = kit.encode_payload_b64(payload)
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "shared"))
+    import data_kit as dk  # noqa: E402
+    here = Path(__file__).resolve().parent
+    payload_path, payload_href = dk.write_and_publish_artifact("supply", payload, here)
     kpi_prod = payload["kpi"].get("production")
     html = kit.render(
         TEMPLATE,
-        PAYLOAD=b64,
+        PAYLOAD_URL=payload_href,
         GENERATED=payload["generated"],
         KPI_PRODUCTION="" if kpi_prod is None else str(kpi_prod),
         DATA_THROUGH=payload.get("dataThrough") or "",
@@ -620,7 +623,10 @@ def write_dashboard(out_path: Path | str = DEFAULT_OUT) -> Path:
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(html, encoding="utf-8")
-    print(f"Wrote dashboard ({len(html):,} bytes, {payload['nMonths']} months) to {out_path}")
+    print(
+        f"Wrote dashboard shell ({len(html):,} bytes) + {payload_path.name} "
+        f"({payload_path.stat().st_size:,} bytes, {payload['nMonths']} months) → {payload_href}"
+    )
     return out_path
 
 

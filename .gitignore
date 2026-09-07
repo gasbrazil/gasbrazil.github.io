@@ -10,35 +10,34 @@ gh_pat.local
 
 # ons/: downloaded source files and the derived daily store, both
 # rebuildable and both far too large for git. CI keeps them in the Actions
-# cache instead (see .github/workflows/ons.yml). ons/index.html and
-# ons/wiki-html/ ARE committed -- they're the deployed output, same as poc/ and
-# contratos/'s index.html.
+# cache instead (see .github/workflows/ons.yml). Thin index.html + wiki-html
+# ARE committed; series payloads live on Cloudflare R2.
 ons/raw/
 ons/data/
 
-# poc/ and contratos/: the aggregated parquet stores ARE committed (small,
-# and the whole point of the "docs/index.html on main" deploy model is that
-# the repo's working tree IS the deployed site); only the raw fetched JSON
-# is excluded.
-poc/data/raw_processos.json
-contratos/data/raw_contratos.json
+# poc/ and contratos/: raw fetched JSON excluded; parquet + payload live on R2.
+poc/data/
+contratos/data/
 
 # flows/: downloaded ANP source files and the derived daily stores, both
 # rebuildable and both too large for git. CI keeps raw/ in the Actions cache
-# instead (see .github/workflows/flows.yml). flows/index.html IS committed --
-# it's the deployed output, same as ons/, poc/, and contratos/'s index.html.
+# instead (see .github/workflows/flows.yml). Thin index.html is committed;
+# series payloads live on Cloudflare R2.
 flows/raw/
 flows/data/
 
 # supply/: ANP PPGN-EL + import CSVs and derived monthly parquet — rebuildable;
-# CI caches raw/. supply/index.html is committed.
+# CI caches raw/. supply/index.html is committed; payload on R2.
 supply/raw/
 supply/data/
 
-# pld/: CCEE yearly CSVs cached in CI; parquet may be committed when small.
-# Keep raw/ out of git either way.
+# pld/: CCEE yearly CSVs cached in CI; parquet + payload on R2.
 pld/raw/
+pld/data/
 
-# ADR-002 lake mirrors (rebuildable; same rationale as ons/data and flows/data).
+# Track B artifacts (local rebuilds + R2 uploads; not committed).
+**/payload.json.gz
+
+# ADR-002 lake mirrors (rebuildable; mirrored to private R2 lake bucket in CI).
 lake/**
 !lake/README.md

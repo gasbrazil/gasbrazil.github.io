@@ -239,7 +239,7 @@ footer a { color: var(--accent); }
 </div>
 <div class="tt" id="chart-tt"></div>
 <script>
-const PAYLOAD_B64 = "__PAYLOAD__";
+const PAYLOAD_URL = "__PAYLOAD_URL__";
 
 __SHARED_JS_DECODE__
 __SHARED_JS_ESCAPE_HTML__
@@ -568,7 +568,7 @@ __SHARED_JS_I18N__
 
 async function init() {
   document.getElementById("year").textContent = new Date().getFullYear();
-  const text = await inflateGzipB64(PAYLOAD_B64);
+  const text = await inflateGzipUrl(PAYLOAD_URL);
   DATA = JSON.parse(text);
 
   document.getElementById("asof-through").textContent = DATA.latestDate || "—";
@@ -614,11 +614,14 @@ init();
 
 def write_dashboard(out_path: Path | str = DEFAULT_OUT) -> Path:
     payload = load_payload()
-    b64 = kit.encode_payload_b64(payload)
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "shared"))
+    import data_kit as dk  # noqa: E402
+    here = Path(__file__).resolve().parent
+    payload_path, payload_href = dk.write_and_publish_artifact("pld", payload, here)
     kpi_se = payload["kpiSe"]
     html = kit.render(
         TEMPLATE,
-        PAYLOAD=b64,
+        PAYLOAD_URL=payload_href,
         GENERATED=payload["generated"],
         KPI_SE="" if kpi_se is None else f"{kpi_se:.2f}",
         LATEST_DATE=payload["latestDate"] or "",
@@ -641,8 +644,9 @@ def write_dashboard(out_path: Path | str = DEFAULT_OUT) -> Path:
     out_path.write_text(html, encoding="utf-8")
     n_dates = len(payload["dates"])
     print(
-        f"Wrote dashboard ({len(html):,} bytes, {n_dates} days × "
-        f"{len(payload['submarkets'])} submarkets) to {out_path}"
+        f"Wrote dashboard shell ({len(html):,} bytes) + {payload_path.name} "
+        f"({payload_path.stat().st_size:,} bytes, {n_dates} days × "
+        f"{len(payload['submarkets'])} submarkets) → {payload_href}"
     )
     return out_path
 

@@ -259,7 +259,7 @@ footer a { color: var(--accent); }
 </div>
 <div class="tt" id="chart-tt"></div>
 <script>
-const PAYLOAD_B64 = "__PAYLOAD__";
+const PAYLOAD_URL = "__PAYLOAD_URL__";
 
 __SHARED_JS_DECODE__
 __SHARED_JS_CSV__
@@ -1464,7 +1464,7 @@ __SHARED_JS_I18N__
 
 async function init() {
   document.getElementById("year").textContent = new Date().getFullYear();
-  const text = await inflateGzipB64(PAYLOAD_B64);
+  const text = await inflateGzipUrl(PAYLOAD_URL);
   DATA = JSON.parse(text);
   columnOrder = DATA.columns.slice();
   hiddenCols = new Set(DEFAULT_HIDDEN_COLS);
@@ -1544,10 +1544,13 @@ init();
 
 def write_dashboard(out_path=DEFAULT_OUT):
     payload = load_payload()
-    b64 = kit.encode_payload_b64(payload)
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "shared"))
+    import data_kit as dk  # noqa: E402
+    here = Path(__file__).resolve().parent
+    payload_path, payload_href = dk.write_and_publish_artifact("contratos", payload, here)
     html = kit.render(
         TEMPLATE,
-        PAYLOAD=b64,
+        PAYLOAD_URL=payload_href,
         SHARED_THEME_CSS=kit.render_theme_css(),
         SHARED_JS_DECODE=kit.JS_DECODE,
         SHARED_JS_ESCAPE_HTML=kit.JS_ESCAPE_HTML,
@@ -1564,7 +1567,10 @@ def write_dashboard(out_path=DEFAULT_OUT):
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(html, encoding="utf-8")
-    print(f"Wrote dashboard ({len(html):,} bytes, {len(payload['rows'])} rows) to {out_path}")
+    print(
+        f"Wrote dashboard shell ({len(html):,} bytes) + {payload_path.name} "
+        f"({payload_path.stat().st_size:,} bytes, {len(payload['rows'])} rows) → {payload_href}"
+    )
 
 
 if __name__ == "__main__":
