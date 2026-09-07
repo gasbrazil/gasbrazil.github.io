@@ -1,9 +1,10 @@
 # ONS Balances — scraper + dashboard
 
 Pulls Brazilian grid data from the ONS open-data portal, aggregates it to a daily
-store, and generates a single self-contained HTML dashboard (`index.html`) you
-open in a browser. Part of the [gasbrazil.github.io](../README.md) monorepo —
-see the root README for how this fits with `poc/`, `contratos/`, and `shared/`.
+store, and generates an HTML dashboard shell (`index.html`) plus a sibling
+`payload.json.gz` you open over HTTP(S). Part of the [gasbrazil.github.io](../README.md)
+monorepo — see the root README for how this fits with `poc/`, `contratos/`, and
+`shared/`.
 
 ## What it collects
 
@@ -99,11 +100,11 @@ rather than being replaced by a broken one.
 
 ## The dashboard
 
-`index.html` is one file with the data embedded — no server, no CDN, no
-network calls. It works from a `file://` path and survives being emailed. The
-data is embedded gzipped and inflated in the browser via `DecompressionStream`,
-which needs Chrome/Edge 80+, Firefox 113+, or Safari 16.4+; on anything older
-the page says so instead of rendering blank.
+`index.html` is a thin shell; series data lives in sibling `payload.json.gz`
+(ADR-002 Track B, same pattern as Flows). Serve both over HTTP(S) — a bare
+`file://` open cannot fetch the gzip. The browser gunzips via
+`DecompressionStream`, which needs Chrome/Edge 80+, Firefox 113+, or Safari
+16.4+; on anything older the page says so instead of rendering blank.
 
 Three tabs:
 

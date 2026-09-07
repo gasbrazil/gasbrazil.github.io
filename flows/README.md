@@ -92,7 +92,7 @@ the repo for anyone who wants it.
   live source; deliberately exercises the broadcast-vs-per-shipper
   aggregation cases above.
 - `../.github/workflows/flows.yml` — scheduled + push + manual dispatch:
-  fetch → build → dashboard → commit `index.html` only (`raw/` and `data/`
+  fetch → build → dashboard → commit `index.html` + `payload.json.gz` (`raw/` and `data/`
   are gitignored — large and fully rebuildable from the source, same as
   `ons/raw/` and `ons/data/`).
 

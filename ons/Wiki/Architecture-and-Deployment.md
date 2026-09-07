@@ -7,8 +7,9 @@ fetch  →  build  →  dashboard  →  (health gate)  →  deploy
 ```
 
 `ons_pipeline.py` is the CLI for the first three steps plus `health` and
-`verify`; `dashboard.py` (imported by it) generates the HTML. Nothing here
-needs a database or a server — the output is one static file.
+`verify`; `dashboard.py` (imported by it) generates the HTML shell and
+`payload.json.gz`. Nothing here needs a database — the output is static files
+for GitHub Pages.
 
 **fetch** downloads ONS's `.parquet` resources (falling back to `.csv` with
 delimiter/decimal sniffing for years before ONS published parquet) into
@@ -22,12 +23,12 @@ under `data/_cache/`, keyed by a version tag bumped whenever the aggregation
 logic changes (forcing a clean re-aggregate rather than silently reusing
 stale cache entries).
 
-**dashboard** reads the store and writes the single HTML file — the JSON
-payload is gzip-compressed and base64-embedded, inflated client-side via
-`DecompressionStream` (requires Chrome/Edge 80+, Firefox 113+, or Safari
-16.4+; older browsers get a message instead of a blank page). `SERIES_META`
-in `dashboard.py` (Python) is the single source of truth that drives both
-what gets aggregated and what the JS UI can chart.
+**dashboard** reads the store and writes `index.html` plus sibling
+`payload.json.gz` (ADR-002 Track B). The browser fetches and gunzips the
+artifact via `DecompressionStream` (requires Chrome/Edge 80+, Firefox 113+,
+or Safari 16.4+; older browsers get a message instead of a blank page).
+`SERIES_META` in `dashboard.py` (Python) is the single source of truth that
+drives both what gets aggregated and what the JS UI can chart.
 
 ### Data sources
 
@@ -61,13 +62,13 @@ Estimated gas consumption applies a heat-rate assumption ONS does not
 publish per plant — see [Known Limitations](Known-Limitations-and-Assumptions)
 for the exact figures and why they're an assumption, not a sourced number.
 
-## Single-file HTML
+## Static shell + gzip artifact
 
-Everything the page needs — data, fonts, styling — is embedded, so it works
-from a `file://` path, as an email attachment, or from any static host with
-no build step at request time. `fonts/Degular.ttf` is read and base64-embedded
-as a `@font-face` at build time (falls back to the system font stack if the
-file is ever missing from a checkout).
+Fonts, styling, and the page chrome are embedded in `index.html`. Series data
+lives in `payload.json.gz` beside it (same pattern as Flows). Serve both over
+HTTP(S) — a bare `file://` open cannot fetch the sibling artifact. Shared
+Pacaembu weights are base64-embedded as `@font-face` rules at build time
+(falls back to the system font stack if `shared/fonts/` is empty).
 
 ## CI/CD (`.github/workflows/refresh.yml`)
 

@@ -381,8 +381,9 @@ footer.site a{color:var(--muted)}
 <h1>ONS Balances — Wiki</h1>
 <p>A gas-first dashboard for Brazil's grid operator (ONS) open data: daily subsystem
 balances, plant-level thermal dispatch, installed capacity, and reservoir
-storage, aggregated into a single self-contained HTML page. No server, no
-database, no API — the data is embedded in the file itself.</p>
+storage, published as an HTML shell plus sibling <code>payload.json.gz</code> (no live
+API on the static site). Fonts and chrome are embedded; series data is fetched
+at view time.</p>
 <p>This wiki covers what the <a href="https://github.com/gasbrazil/gasbrazil.github.io/blob/main/ons/README.md">README</a>
 doesn't: how to read the live dashboard, how the pieces are deployed and wired
 together, and what to take with a grain of salt.</p>

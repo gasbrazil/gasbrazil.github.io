@@ -3,7 +3,7 @@
 ONS daily-balances pipeline.
 
 Downloads Brazilian grid operator (ONS) open data, aggregates it to a daily
-tidy store, and generates a self-contained HTML dashboard.
+tidy store, and generates an HTML dashboard shell plus sibling payload.json.gz.
 
 Datasets pulled (all from https://dados.ons.org.br, CC-BY):
   balanco   Balanco de Energia nos Subsistemas  (hourly -> daily mean, MWmed)

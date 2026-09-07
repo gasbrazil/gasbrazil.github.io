@@ -39,7 +39,7 @@ See [docs/ADR-002-future-architecture.md](docs/ADR-002-future-architecture.md)
 for the progressive tracks beyond static HTML embeds:
 
 1. **Canonical lake + schemas** (`shared/data_kit.py`, `shared/schemas/`, `lake/`)
-2. **Artifact delivery** (Flows pilot: `flows/payload.json.gz` fetched by a thin shell)
+2. **Artifact delivery** (`flows/payload.json.gz`, `ons/payload.json.gz` fetched by thin shells)
 3. **Read-only API** (`api/` FastAPI over the lake)
 
 ## Structure
@@ -51,7 +51,7 @@ shared/                 theme.css + dashboard_kit.py + data_kit.py / schemas/ (A
 lake/                   canonical parquet mirrors (gitignored except README)
 docs/ADR-002-…          future architecture tracks
 api/                    FastAPI read-only /v1 query layer (Track C)
-ons/                    ONS grid-balances dashboard -- see ons/README.md
+ons/                    ONS grid-balances (HTML shell + payload.json.gz)
 poc/                    POC capacity-offer-results dashboard -- see poc/README.md
 contratos/              POC transport-contracts dashboard -- see contratos/README.md
 flows/                  ANP pipeline-flows (HTML shell + payload.json.gz)

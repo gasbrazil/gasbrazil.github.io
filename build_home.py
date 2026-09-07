@@ -4,8 +4,8 @@ Builds the GasBrazil.com landing page, About page, and branded 404.
 
 Static chrome -- no live fetch -- but it still runs through
 shared/dashboard_kit.py so colors and font come from the same theme as
-ons/, poc/, and contratos/. KPI teasers are read from the committed
-parquet stores (and a light parse of ons/index.html) at build time.
+ons/, poc/, and contratos/. KPI teasers are read from committed HTML
+comment markers (and light parquet scrapes) at build time.
 """
 from __future__ import annotations
 
@@ -41,26 +41,38 @@ def _last_non_null(arr: list) -> tuple[int | None, float | None]:
 
 
 def _ons_teaser_from_html(text: str) -> tuple[str | None, str | None, str | None]:
-    """Pull ONS hub teaser from the embedded gzip payload (same source the
-    dashboard inflates at runtime). Falls back to a light HTML scrape if the
-    page still embeds a literal gas-generation figure."""
+    """Pull ONS hub teaser from HTML comment markers (ADR-002 Track B).
+
+    Falls back to a light HTML scrape for older committed shells that still
+    embed a literal gas-generation figure.
+    """
     kpi = kpi_pt = when = None
-    m = re.search(r'id="payload">([A-Za-z0-9+/=]+)</script>', text)
+    m = re.search(r"generated:\s*(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}\s+UTC)", text)
     if m:
-        try:
-            data = json.loads(gzip.decompress(base64.b64decode(m.group(1))))
-            if data.get("generated"):
-                when = str(data["generated"])
-            series = data.get("series") or {}
-            # skey("gen_gas","SIN") → "gen_gas|SIN|"
-            arr = series.get("gen_gas|SIN|") or series.get("gen_gas|SIN") or []
-            _idx, val = _last_non_null(arr if isinstance(arr, list) else [])
-            if val is not None:
-                n = f"{int(round(val)):,}"
-                kpi = f"{n} MWmed gas"
-                kpi_pt = f"{n} MWmed a gás"
-        except Exception:
-            pass
+        when = m.group(1)
+    g = re.search(r"kpi_gas_mwmed:\s*([0-9]+)", text)
+    if g and g.group(1):
+        n = f"{int(g.group(1)):,}"
+        kpi = f"{n} MWmed gas"
+        kpi_pt = f"{n} MWmed a gás"
+    # Legacy embed path (pre–Track B shells) — keep until CI has republished.
+    if kpi is None or when is None:
+        emb = re.search(r'id="payload">([A-Za-z0-9+/=]+)</script>', text)
+        if emb:
+            try:
+                data = json.loads(gzip.decompress(base64.b64decode(emb.group(1))))
+                if when is None and data.get("generated"):
+                    when = str(data["generated"])
+                if kpi is None:
+                    series = data.get("series") or {}
+                    arr = series.get("gen_gas|SIN|") or series.get("gen_gas|SIN") or []
+                    _idx, val = _last_non_null(arr if isinstance(arr, list) else [])
+                    if val is not None:
+                        n = f"{int(round(val)):,}"
+                        kpi = f"{n} MWmed gas"
+                        kpi_pt = f"{n} MWmed a gás"
+            except Exception:
+                pass
     if when is None:
         m = re.search(r"Last refreshed\s+(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}\s+UTC)", text)
         if m:
@@ -529,7 +541,7 @@ __TOPBAR__
     <h2 data-i18n="aboutWho">What this is</h2>
     <p data-i18n="aboutWhoBody">A small independent site that republishes public Brazilian natural-gas and power-system data as filterable dashboards. It is not affiliated with ONS, ANP, CCEE, TBG, TAG, or NTS.</p>
     <h2 data-i18n="aboutHow">How the data is built</h2>
-    <p data-i18n="aboutHowBody">Each dashboard is a single static HTML file. GitHub Actions fetch the source, transform it, and embed a compressed payload in the page. There is no live API behind the published site.</p>
+    <p data-i18n="aboutHowBody">Each dashboard is a static page on GitHub Pages. GitHub Actions fetch the source, transform it, and publish an HTML shell (plus a gzip data artifact for the larger dashboards). There is no live API behind the published site.</p>
     <h2 data-i18n="aboutGloss">Glossary</h2>
     <ul>
       <li data-i18n="glossGus">GUS — gas acquired by a transportadora for system use.</li>
