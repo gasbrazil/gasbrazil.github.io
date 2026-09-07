@@ -70,7 +70,7 @@ TEMPLATE = """<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>POC Results Dashboard</title>
+<title>POC Results</title>
 <meta name="description" content="Pipeline capacity offer results from Brazil's Portal de Oferta de Capacidade — balancing, GUS, and linepack trades.">
 <link rel="canonical" href="https://gasbrazil.com/poc/">
 <link rel="icon" href="{{FAVICON_DATA_URI}}">
@@ -192,7 +192,7 @@ footer a { color: var(--accent); }
 <div class="wrap">
 <header class="dash-head">
   <div>
-    <h1 data-i18n="navPoc">POC Results Dashboard</h1>
+    <h1 data-i18n="navPoc">POC Results</h1>
   </div>
   <div class="header-right">
     <div class="header-links">

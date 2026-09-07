@@ -73,7 +73,7 @@ TEMPLATE = """<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>POC Contracts Dashboard</title>
+<title>POC Contracts</title>
 <meta name="description" content="Active transport and master transport contracts across TBG, TAG, and NTS from Brazil's Portal de Oferta de Capacidade.">
 <link rel="canonical" href="https://gasbrazil.com/contratos/">
 <link rel="icon" href="{{FAVICON_DATA_URI}}">
@@ -218,7 +218,7 @@ footer a { color: var(--accent); }
 <div class="wrap">
 <header class="dash-head">
   <div>
-    <h1 data-i18n="navContratos">POC Contracts Dashboard</h1>
+    <h1 data-i18n="navContratos">POC Contracts</h1>
   </div>
   <div class="header-right">
     <div class="header-links">
