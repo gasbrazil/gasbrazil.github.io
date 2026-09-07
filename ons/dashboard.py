@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Generate a single self-contained HTML dashboard from the daily ONS store.
+"""Generate the ONS Balances dashboard from the daily store.
 
-The payload is embedded gzipped + base64 and inflated in the browser with the
-native DecompressionStream API, which keeps the file a few MB rather than tens.
+ADR-002 Track B: the large series payload is written to payload.json.gz
+beside index.html; the HTML shell fetches and gunzips it at runtime
+(hub teaser markers remain in the HTML comment).
 """
 
 from __future__ import annotations
@@ -342,17 +343,38 @@ def build_payload(df: pd.DataFrame, ent: pd.DataFrame) -> dict:
     }
 
 
+def _hub_kpi_gas_mwmed(payload: dict) -> str:
+    """Latest non-null national gas generation for hub teaser markers."""
+    arr = payload.get("series", {}).get("gen_gas|SIN|") or []
+    for v in reversed(arr if isinstance(arr, list) else []):
+        if v is None:
+            continue
+        try:
+            return str(int(round(float(v))))
+        except (TypeError, ValueError):
+            continue
+    return ""
+
+
 def write_dashboard(df: pd.DataFrame, dest: Path,
                     ent: pd.DataFrame | None = None) -> Path:
     if ent is None:
         ent = pd.DataFrame(columns=["kind", "entity", "subsystem", "group",
                                     "capacity_mw", "heat_rate_kcal_per_kwh"])
     payload = build_payload(df, ent)
-    packed = kit.encode_payload_b64(payload)
+    # ADR-002 Track B: data lives in payload.json.gz beside the HTML shell
+    # (no base64-in-HTML). Hub teasers still read __GENERATED__ markers.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "shared"))
+    import data_kit as dk  # noqa: E402
+    payload_path = Path(__file__).resolve().parent / "payload.json.gz"
+    dk.write_json_gzip(payload, payload_path)
+
     html = kit.render(
         TEMPLATE,
-        PAYLOAD=packed,
+        GENERATED=payload["generated"],
+        KPI_GAS_MWMED=_hub_kpi_gas_mwmed(payload),
         SHARED_THEME_CSS=kit.render_theme_css(),
+        SHARED_JS_DECODE=kit.JS_DECODE,
         SHARED_JS_XLSX=kit.JS_XLSX_ENGINE,
         SHARED_JS_THEME_TOGGLE=kit.JS_THEME_TOGGLE,
         SHARED_JS_BOOT=kit.JS_BOOT,
@@ -365,8 +387,11 @@ def write_dashboard(df: pd.DataFrame, dest: Path,
     )
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_text(html, encoding="utf-8")
-    print(f"  {len(payload['dates'])} dates x {len(payload['series'])} series -> "
-          f"{len(packed)/1e6:.1f} MB embedded, {len(html)/1e6:.1f} MB total")
+    print(
+        f"  {len(payload['dates'])} dates x {len(payload['series'])} series -> "
+        f"shell {len(html)/1e6:.2f} MB + {payload_path.name} "
+        f"{payload_path.stat().st_size/1e6:.2f} MB"
+    )
     return dest
 
 
@@ -379,6 +404,9 @@ TEMPLATE = r"""<!doctype html>
 <meta name="description" content="Daily Brazilian grid balances, thermal generation by plant, and estimated gas-fired dispatch from ONS open data.">
 <link rel="canonical" href="https://gasbrazil.com/ons/">
 <link rel="icon" href="{{FAVICON_DATA_URI}}">
+<!-- home-page teaser marker, read by ../build_home.py -- not otherwise used by this page:
+     generated: __GENERATED__
+     kpi_gas_mwmed: __KPI_GAS_MWMED__ -->
 <script>__SHARED_JS_BOOT__</script>
 <style>
 __SHARED_THEME_CSS__
@@ -640,8 +668,9 @@ table.data thead th.sortable:hover{background:var(--accent-soft)}
 
 <div class="tt" id="tt"></div>
 
-<script type="application/octet-stream" id="payload">__PAYLOAD__</script>
 <script>
+const PAYLOAD_URL = "payload.json.gz";
+__SHARED_JS_DECODE__
 let DATA = null;
 const PALETTE_SIZE = 8;   // colour palette length -- selection itself is unlimited
 const CHART_MAX = 40;     // beyond this many picks, charts/tiles defer to the table
@@ -2975,23 +3004,12 @@ function render(){
 }
 
 /* ---------- boot ----------------------------------------------------------- */
-async function unpack(){
-  const b64=document.getElementById("payload").textContent.trim();
-  const bin=Uint8Array.from(atob(b64), c=>c.charCodeAt(0));
-  if(typeof DecompressionStream!=="function")
-    throw new Error("This browser lacks DecompressionStream (needs Chrome/Edge 80+, "+
-      "Firefox 113+, or Safari 16.4+).");
-  const ds=new DecompressionStream("gzip");
-  const txt=await new Response(new Blob([bin]).stream().pipeThrough(ds)).text();
-  return JSON.parse(txt);
-}
-
 // Adds the 5 synthetic subsystem/SIN "Total" plant entities to DATA.entities
 // -- pure client-side wiring onto data (gen_thermal / gas_consumption_m3)
 // that's already in the payload for the Subsystems tab; no pipeline/payload
 // change needed. Must run before anything reads DATA.entities (entityOf/
 // ambiguous cache their lookups from it on first use), so it's called right
-// after unpack() succeeds, before any other boot step.
+// after inflateGzipUrl succeeds, before any other boot step.
 function injectVirtualTotals(){
   if(!Array.isArray(DATA.entities)) DATA.entities=[];
   (DATA.subsystems||[]).forEach(sub=>{
@@ -3048,10 +3066,12 @@ async function triggerRefresh(){
 }
 
 async function boot(){
-  try{ DATA=await unpack(); }
-  catch(err){
+  try{
+    const text = await inflateGzipUrl(PAYLOAD_URL);
+    DATA = JSON.parse(text);
+  }catch(err){
     document.getElementById("boot").innerHTML =
-      "Could not unpack the embedded data.<br>"+err.message;
+      "Could not load dashboard data.<br>"+err.message;
     return;
   }
   document.getElementById("boot").hidden=true;

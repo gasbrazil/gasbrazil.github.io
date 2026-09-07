@@ -468,10 +468,11 @@ assumption ONS doesn't publish at all.</p>
   file) don't necessarily finish publishing for a given day at the same
   time. Every tile shows the true date its own headline number belongs to
   rather than implying same-day alignment.</li>
-<li><strong>Browser floor</strong>: the embedded payload is inflated client-side via
+<li><strong>Browser floor</strong>: <code>payload.json.gz</code> is fetched and inflated client-side via
   <code>DecompressionStream</code>, which needs Chrome/Edge 80+, Firefox 113+, or
   Safari 16.4+. Older browsers get an explanatory message instead of a
-  blank page.</li>
+  blank page. The page also needs HTTP(S) (not bare <code>file://</code>) so the
+  sibling gzip can load.</li>
 </ul>
 <h2>Past data-integrity issues (fixed, kept here for institutional memory)</h2>
 <ul>

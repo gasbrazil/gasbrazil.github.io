@@ -383,8 +383,9 @@ footer.site a{color:var(--muted)}
 <pre><code>fetch  →  build  →  dashboard  →  (health gate)  →  deploy
 </code></pre>
 <p><code>ons_pipeline.py</code> is the CLI for the first three steps plus <code>health</code> and
-<code>verify</code>; <code>dashboard.py</code> (imported by it) generates the HTML. Nothing here
-needs a database or a server — the output is one static file.</p>
+<code>verify</code>; <code>dashboard.py</code> (imported by it) generates the HTML shell and
+<code>payload.json.gz</code>. Nothing here needs a database — the output is static files
+for GitHub Pages.</p>
 <p><strong>fetch</strong> downloads ONS's <code>.parquet</code> resources (falling back to <code>.csv</code> with
 delimiter/decimal sniffing for years before ONS published parquet) into
 <code>raw/</code>, comparing <code>Content-Length</code> against the local copy so a normal daily
@@ -395,12 +396,12 @@ data-integrity tripwires described below. Per-file aggregates are cached
 under <code>data/_cache/</code>, keyed by a version tag bumped whenever the aggregation
 logic changes (forcing a clean re-aggregate rather than silently reusing
 stale cache entries).</p>
-<p><strong>dashboard</strong> reads the store and writes the single HTML file — the JSON
-payload is gzip-compressed and base64-embedded, inflated client-side via
-<code>DecompressionStream</code> (requires Chrome/Edge 80+, Firefox 113+, or Safari
-16.4+; older browsers get a message instead of a blank page). <code>SERIES_META</code>
-in <code>dashboard.py</code> (Python) is the single source of truth that drives both
-what gets aggregated and what the JS UI can chart.</p>
+<p><strong>dashboard</strong> reads the store and writes <code>index.html</code> plus sibling
+<code>payload.json.gz</code> (ADR-002 Track B). The browser fetches and gunzips the
+artifact via <code>DecompressionStream</code> (requires Chrome/Edge 80+, Firefox 113+,
+or Safari 16.4+; older browsers get a message instead of a blank page).
+<code>SERIES_META</code> in <code>dashboard.py</code> (Python) is the single source of truth that
+drives both what gets aggregated and what the JS UI can chart.</p>
 <h3>Data sources</h3>
 <table>
 <thead>
@@ -469,12 +470,12 @@ their own, so nothing is double-counted or overstated at the phase level.
 Estimated gas consumption applies a heat-rate assumption ONS does not
 publish per plant — see <a href="known-limitations.html">Known Limitations</a>
 for the exact figures and why they're an assumption, not a sourced number.</p>
-<h2>Single-file HTML</h2>
-<p>Everything the page needs — data, fonts, styling — is embedded, so it works
-from a <code>file://</code> path, as an email attachment, or from any static host with
-no build step at request time. <code>fonts/Degular.ttf</code> is read and base64-embedded
-as a <code>@font-face</code> at build time (falls back to the system font stack if the
-file is ever missing from a checkout).</p>
+<h2>Static shell + gzip artifact</h2>
+<p>Fonts, styling, and the page chrome are embedded in <code>index.html</code>. Series data
+lives in <code>payload.json.gz</code> beside it (same pattern as Flows). Serve both over
+HTTP(S) — a bare <code>file://</code> open cannot fetch the sibling artifact. Shared
+Pacaembu weights are base64-embedded as <code>@font-face</code> rules at build time
+(falls back to the system font stack if <code>shared/fonts/</code> is empty).</p>
 <h2>CI/CD (<code>.github/workflows/refresh.yml</code>)</h2>
 <p>Runs on a daily cron (<code>40 20 * * *</code> UTC — after ONS's second daily publish
 at 19:00 UTC), on push to <code>main</code> when the pipeline files change, and on

@@ -2,8 +2,9 @@
 
 A gas-first dashboard for Brazil's grid operator (ONS) open data: daily subsystem
 balances, plant-level thermal dispatch, installed capacity, and reservoir
-storage, aggregated into a single self-contained HTML page. No server, no
-database, no API — the data is embedded in the file itself.
+storage, published as an HTML shell plus sibling `payload.json.gz` (no live
+API on the static site). Fonts and chrome are embedded; series data is fetched
+at view time.
 
 This wiki covers what the [README](https://github.com/gasbrazil/gasbrazil.github.io/blob/main/ons/README.md)
 doesn't: how to read the live dashboard, how the pieces are deployed and wired
