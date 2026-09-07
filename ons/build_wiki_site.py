@@ -153,6 +153,7 @@ def page_template(title, body_html, current_html):
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{title} — ONS Balances Wiki</title>
+{kit.font_preload_html()}
 <style>{CSS}</style>
 </head>
 <body>

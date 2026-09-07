@@ -106,6 +106,7 @@ TEMPLATE = r"""<!doctype html>
 <meta name="description" content="Brazil natural gas supply balance from ANP PPGN-EL: national monthly production, available gas, flare/loss, own use, reinjection, LGN, and imports.">
 <link rel="canonical" href="https://gasbrazil.com/supply/">
 <link rel="icon" href="__FAVICON_DATA_URI__">
+__FONT_PRELOAD__
 <!-- home-page teaser marker, read by ../build_home.py:
      generated: __GENERATED__
      kpi_production: __KPI_PRODUCTION__
@@ -619,6 +620,7 @@ def write_dashboard(out_path: Path | str = DEFAULT_OUT) -> Path:
         SHARED_SITE_LINKS_JS=kit.site_links_js("supply"),
         SHARED_NAV_LINKS=kit.nav_links_html("supply"),
         FAVICON_DATA_URI=kit.embed_favicon(),
+        FONT_PRELOAD=kit.font_preload_html(),
     )
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)

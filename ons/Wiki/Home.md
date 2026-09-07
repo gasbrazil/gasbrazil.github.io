@@ -46,7 +46,7 @@ dashboard.py        HTML/JS dashboard generator (imported by the CLI)
 make_mock.py        generates ONS-shaped fake data for offline testing
 check_bulletin.py   reconciles the store against an ONS DIARIO_*.xlsx bulletin
 ../.github/workflows/ons.yml   twice-daily rebuild + commit of ons/index.html
-../shared/fonts/Pacaembu-*.ttf    self-hosted Pacaembu weights, embedded at build time
+../shared/fonts/Pacaembu-*.ttf    self-hosted Pacaembu weights, loaded via @font-face
 requirements.txt
 ```
 

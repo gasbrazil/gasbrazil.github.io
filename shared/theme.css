@@ -10,8 +10,8 @@
  *
  * The FONT_FACE placeholder below is filled in by
  * shared/dashboard_kit.py's embed_font_face() at build time with
- * base64-embedded weight rules for ExtraLight / Light / Regular /
- * SemiBold (or left blank if shared/fonts/ is empty).
+ * @font-face rules that load ExtraLight / Light / Regular / SemiBold
+ * from /shared/fonts/*.ttf (or left blank if that directory is empty).
  */
 __FONT_FACE__
 :root {

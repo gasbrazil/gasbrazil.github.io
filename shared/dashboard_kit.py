@@ -6,7 +6,8 @@ See ADR-001, Decision 2 Option C. Each project's own dashboard.py still owns
 its own data model, TEMPLATE and layout -- this module only centralizes the
 mechanical/cosmetic pieces that were previously pasted into all three:
 
-  - font/favicon embedding (embed_font_face, embed_favicon)
+  - font loading via /shared/fonts/ (@font-face + optional preload)
+  - favicon embedding (embed_favicon)
   - the gzip+base64 payload encoding (encode_payload_b64)
   - shared/theme.css loading + template rendering (THEME_CSS, render)
   - reusable JS: gzip inflate, theme-toggle icons, CSV escaping/download,
@@ -35,6 +36,9 @@ FONTS_DIR = HERE / "fonts"
 DEFAULT_FONT_PATH = FONTS_DIR / "Pacaembu-Light.ttf"
 DEFAULT_FAVICON_PATH = HERE / "favicon.png"
 
+# Site-root path for self-hosted fonts (GitHub Pages + custom domain).
+FONTS_URL_PREFIX = "/shared/fonts"
+
 # Pacaembu is a heavy geometric face -- site default is Light (300); mid
 # emphasis is Regular (400); wordmark only uses SemiBold (600). Never Bold.
 # ExtraLight (200) is for muted metadata. File names on disk:
@@ -55,32 +59,44 @@ THEME_CSS = THEME_CSS_PATH.read_text(encoding="utf-8")
 
 
 def embed_font_face(font_path: Path | str = DEFAULT_FONT_PATH) -> str:
-    """Return base64-embedded @font-face rules for the Pacaembu weight stack,
-    or "" if no weight files are present (degrade to the system font stack).
+    """Return @font-face rules pointing at /shared/fonts/*.ttf, or "" if none.
+
+    Fonts are loaded as separate cacheable files (not base64-inlined). Keep
+    font-display:swap so text paints with the system stack first.
 
     font_path is accepted for call-site compatibility; when it points at the
-    shared fonts dir (or the Light file), all available weights are embedded.
-    A one-off alternate path still embeds that single file at weight 300."""
+    shared fonts dir (or the Light file), all available weights are linked.
+    A one-off alternate path still emits a single face at weight 300."""
     font_path = Path(font_path)
-    faces: list[tuple[int, Path]] = []
+    faces: list[tuple[int, str]] = []
     if font_path == DEFAULT_FONT_PATH or font_path == FONTS_DIR:
         for weight, name in PACAEMBU_FACES:
-            p = FONTS_DIR / name
-            if p.exists():
-                faces.append((weight, p))
+            if (FONTS_DIR / name).exists():
+                faces.append((weight, name))
     elif font_path.exists():
-        faces.append((300, font_path))
+        faces.append((300, font_path.name))
     if not faces:
         return ""
     rules = []
-    for weight, path in faces:
-        font_b64 = base64.b64encode(path.read_bytes()).decode("ascii")
+    for weight, name in faces:
+        url = f"{FONTS_URL_PREFIX}/{name}"
         rules.append(
             "@font-face{font-family:'Pacaembu';font-weight:" + str(weight) +
-            ";font-style:normal;font-display:swap;src:url(data:font/ttf;base64," +
-            font_b64 + ") format('truetype');}"
+            ";font-style:normal;font-display:swap;src:url('" + url +
+            "') format('truetype');}"
         )
     return "".join(rules)
+
+
+def font_preload_html(*, weight: int = 300) -> str:
+    """<link rel=preload> for the default Pacaembu weight (Light = 300)."""
+    name = next((n for w, n in PACAEMBU_FACES if w == weight), None)
+    if not name or not (FONTS_DIR / name).exists():
+        return ""
+    href = f"{FONTS_URL_PREFIX}/{name}"
+    return (
+        f'<link rel="preload" href="{href}" as="font" type="font/ttf" crossorigin>'
+    )
 
 
 def embed_favicon(favicon_path: Path | str = DEFAULT_FAVICON_PATH,
@@ -133,7 +149,7 @@ def render(template: str, **replacements: str) -> str:
 
 
 def seo_head(*, title: str, description: str, path: str = "/") -> str:
-    """Title, description, canonical, Open Graph, and hreflang tags.
+    """Title, description, canonical, Open Graph, hreflang, and font preload.
     path is the site-relative path including a leading slash."""
     if not path.startswith("/"):
         path = "/" + path
@@ -142,10 +158,13 @@ def seo_head(*, title: str, description: str, path: str = "/") -> str:
     if path != "/" and not alt.endswith("/"):
         alt = alt + "/"
     desc = description.replace('"', "&quot;")
+    preload = font_preload_html()
+    preload_line = (preload + "\n") if preload else ""
     return (
         f"<title>{title}</title>\n"
         f'<meta name="description" content="{desc}">\n'
         f'<link rel="canonical" href="{canonical}">\n'
+        f'{preload_line}'
         f'<meta property="og:type" content="website">\n'
         f'<meta property="og:site_name" content="GasBrazil.com">\n'
         f'<meta property="og:title" content="{title}">\n'

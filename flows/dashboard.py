@@ -162,6 +162,7 @@ TEMPLATE = """<!doctype html>
 <meta name="description" content="Daily physical natural gas flow at every receipt and delivery point on Brazil's transport pipelines, plus system-use gas, losses, imbalance, and linepack -- from ANP's public data.">
 <link rel="canonical" href="https://gasbrazil.com/flows/">
 <link rel="icon" href="__FAVICON_DATA_URI__">
+__FONT_PRELOAD__
 <!-- home-page teaser marker, read by ../build_home.py -- not otherwise used by this page:
      generated: __GENERATED__
      kpi_total_7d: __KPI_TOTAL_7D__
@@ -1625,6 +1626,7 @@ def write_dashboard(out_path=DEFAULT_OUT):
         SHARED_SITE_LINKS_JS=kit.site_links_js("flows"),
         SHARED_NAV_LINKS=kit.nav_links_html("flows"),
         FAVICON_DATA_URI=kit.embed_favicon(),
+        FONT_PRELOAD=kit.font_preload_html(),
     )
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)

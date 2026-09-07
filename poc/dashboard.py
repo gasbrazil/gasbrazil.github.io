@@ -74,6 +74,7 @@ TEMPLATE = """<!doctype html>
 <meta name="description" content="Pipeline capacity offer results from Brazil's Portal de Oferta de Capacidade — balancing, GUS, and linepack trades.">
 <link rel="canonical" href="https://gasbrazil.com/poc/">
 <link rel="icon" href="{{FAVICON_DATA_URI}}">
+__FONT_PRELOAD__
 <script>__SHARED_JS_BOOT__</script>
 <style>
 __SHARED_THEME_CSS__
@@ -1313,6 +1314,7 @@ def write_dashboard(out_path=DEFAULT_OUT):
         SHARED_SITE_LINKS_JS=kit.site_links_js("poc"),
         SHARED_NAV_LINKS=kit.nav_links_html("poc"),
         FAVICON_DATA_URI=kit.embed_favicon(),
+        FONT_PRELOAD=kit.font_preload_html(),
     )
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)

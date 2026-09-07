@@ -67,7 +67,7 @@ for the exact figures and why they're an assumption, not a sourced number.
 Fonts, styling, and the page chrome are embedded in `index.html`. Series data
 lives in `payload.json.gz` beside it (same pattern as Flows). Serve both over
 HTTP(S) — a bare `file://` open cannot fetch the sibling artifact. Shared
-Pacaembu weights are base64-embedded as `@font-face` rules at build time
+Pacaembu weights are loaded from `/shared/fonts/*.ttf` via `@font-face` (with `font-display: swap`)
 (falls back to the system font stack if `shared/fonts/` is empty).
 
 ## CI/CD (`.github/workflows/refresh.yml`)

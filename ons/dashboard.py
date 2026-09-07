@@ -384,6 +384,7 @@ def write_dashboard(df: pd.DataFrame, dest: Path,
             "ons", extra_links_html='<a class="navlink" href="wiki-html/" data-i18n="navWiki">Wiki</a>'
         ),
         FAVICON_DATA_URI=kit.embed_favicon(),
+        FONT_PRELOAD=kit.font_preload_html(),
     )
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_text(html, encoding="utf-8")
@@ -404,6 +405,7 @@ TEMPLATE = r"""<!doctype html>
 <meta name="description" content="Daily Brazilian grid balances, thermal generation by plant, and estimated gas-fired dispatch from ONS open data.">
 <link rel="canonical" href="https://gasbrazil.com/ons/">
 <link rel="icon" href="{{FAVICON_DATA_URI}}">
+__FONT_PRELOAD__
 <!-- home-page teaser marker, read by ../build_home.py -- not otherwise used by this page:
      generated: __GENERATED__
      kpi_gas_mwmed: __KPI_GAS_MWMED__ -->
