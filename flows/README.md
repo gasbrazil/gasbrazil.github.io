@@ -8,9 +8,9 @@ gas, unaccounted-for gas, losses, daily imbalance, linepack).
 
 Part of the [gasbrazil.github.io](../README.md) monorepo — served at
 `/flows/`, rebuilt on its own schedule, sharing colors/fonts/chrome with
-`ons/`, `poc/`, and `contratos/` via `../shared/`. Same architecture as those
-projects (gzip+base64 JSON payload inflated client-side into a single static
-HTML file — no server, no database).
+sibling dashboards via `../shared/`. **ADR-002 Track B:** the HTML shell is
+thin; the chart series live in committed `payload.json.gz` (fetched and
+gunzipped in the browser). Parquet under `data/` stays gitignored / CI-cached.
 
 ## Source
 

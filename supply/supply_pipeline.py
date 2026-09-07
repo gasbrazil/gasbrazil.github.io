@@ -326,6 +326,12 @@ def cmd_build(_args) -> None:
     df.to_parquet(MONTHLY_PARQUET, index=False)
     print(f"Wrote {len(df):,} months to {MONTHLY_PARQUET}")
 
+    sys.path.insert(0, str(HERE.parent / "shared"))
+    import data_kit as dk  # noqa: E402
+    import schemas  # noqa: E402
+    schemas.validate_supply_monthly(df)
+    dk.publish("supply_monthly", MONTHLY_PARQUET)
+
     problems = []
     if len(df) == 0:
         problems.append("zero rows in supply_monthly.parquet")

@@ -33,21 +33,28 @@ The Python data pipelines (`ons_pipeline.py`, `poc_pipeline.py`,
 dashboard still owns its own data model, layout, and business logic;
 `shared/` only centralizes what was genuinely identical across all of them.
 
+## Architecture
+
+See [docs/ADR-002-future-architecture.md](docs/ADR-002-future-architecture.md)
+for the progressive tracks beyond static HTML embeds:
+
+1. **Canonical lake + schemas** (`shared/data_kit.py`, `shared/schemas/`, `lake/`)
+2. **Artifact delivery** (Flows pilot: `flows/payload.json.gz` fetched by a thin shell)
+3. **Read-only API** (`api/` FastAPI over the lake)
+
 ## Structure
 
 ```
-shared/                 theme.css + dashboard_kit.py -- the shared kit (see below)
-  theme.css               CSS custom properties: palette, font, the .flagbar strip
-  dashboard_kit.py        font/favicon embedding, payload encoding, reusable JS
-  fonts/Pacaembu-ExtraLight.ttf
-  fonts/Pacaembu-Light.ttf
-  fonts/Pacaembu-Regular.ttf
-  fonts/Pacaembu-SemiBold.ttf
+shared/                 theme.css + dashboard_kit.py + data_kit.py / schemas/ (ADR-002)
+  fonts/…                 Pacaembu ExtraLight / Light / Regular / SemiBold
   favicon.png
+lake/                   canonical parquet mirrors (gitignored except README)
+docs/ADR-002-…          future architecture tracks
+api/                    FastAPI read-only /v1 query layer (Track C)
 ons/                    ONS grid-balances dashboard -- see ons/README.md
 poc/                    POC capacity-offer-results dashboard -- see poc/README.md
 contratos/              POC transport-contracts dashboard -- see contratos/README.md
-flows/                  ANP pipeline-flows dashboard -- see flows/README.md
+flows/                  ANP pipeline-flows (HTML shell + payload.json.gz)
 supply/                 ANP national gas supply balance -- see supply/README.md
 pld/                    CCEE daily-average PLD prices -- see pld/README.md
 build_home.py           builds the landing page (this file) from shared/theme.css

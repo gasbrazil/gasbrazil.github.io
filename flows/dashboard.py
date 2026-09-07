@@ -1,17 +1,12 @@
 """
-Builds the single-file Pipeline Flows dashboard from data/flows_points.parquet
-and data/flows_ledger.parquet.
+Builds the Pipeline Flows dashboard from data/flows_points.parquet and
+data/flows_ledger.parquet.
 
 Usage: python dashboard.py [output_path]  (default: index.html)
 
-UX model (redesigned 2026-09):
-  The page leads with a TSO-level answer (receipts vs. deliveries, by
-  transporter, for a chosen month) and a matching aggregate trend chart.
-  Picking individual receipt/delivery meters or pipelines is a secondary,
-  explicit "Individual meters" view -- present, but no longer the default
-  or the only way to see a number. All of the aggregation below is done
-  client-side in JS from the same per-point/per-pipeline series this page
-  already embeds; no change to the data pipeline or payload shape.
+ADR-002 Track B: the large series payload is written to payload.json.gz
+beside index.html; the HTML shell fetches and gunzips it at runtime
+(hub teaser markers remain in the HTML comment).
 """
 import datetime as dt
 import sys
@@ -433,7 +428,7 @@ footer a { color: var(--accent); }
 </div>
 <div class="tt" id="chart-tt"></div>
 <script>
-const PAYLOAD_B64 = "__PAYLOAD__";
+const PAYLOAD_URL = "payload.json.gz";
 
 __SHARED_JS_DECODE__
 __SHARED_JS_CSV__
@@ -1541,7 +1536,7 @@ __SHARED_JS_I18N__
 
 async function init() {
   document.getElementById("year").textContent = new Date().getFullYear();
-  const text = await inflateGzipB64(PAYLOAD_B64);
+  const text = await inflateGzipUrl(PAYLOAD_URL);
   DATA = JSON.parse(text);
   variable = DATA.pointVars[0];
 
@@ -1606,10 +1601,15 @@ init();
 
 def write_dashboard(out_path=DEFAULT_OUT):
     payload = load_payload()
-    b64 = kit.encode_payload_b64(payload)
+    # ADR-002 Track B: data lives in payload.json.gz beside the HTML shell
+    # (no base64-in-HTML). Hub teasers still read __GENERATED__ markers.
+    sys.path.insert(0, str(HERE.parent / "shared"))
+    import data_kit as dk  # noqa: E402
+    payload_path = HERE / "payload.json.gz"
+    dk.write_json_gzip(payload, payload_path)
+
     html = kit.render(
         TEMPLATE,
-        PAYLOAD=b64,
         GENERATED=payload["generated"],
         KPI_TOTAL_7D=str(payload["kpiTotal7d"]) if payload["kpiTotal7d"] is not None else "",
         N_POINTS=str(payload["nPoints"]),
@@ -1629,8 +1629,11 @@ def write_dashboard(out_path=DEFAULT_OUT):
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(html, encoding="utf-8")
-    print(f"Wrote dashboard ({len(html):,} bytes, {len(payload['points'])} points, {len(payload['pipelines'])} pipelines) to {out_path}")
-
+    print(
+        f"Wrote dashboard shell ({len(html):,} bytes) + {payload_path.name} "
+        f"({payload_path.stat().st_size:,} bytes, {len(payload['points'])} points, "
+        f"{len(payload['pipelines'])} pipelines) to {out_path.parent}"
+    )
 
 if __name__ == "__main__":
     out = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_OUT

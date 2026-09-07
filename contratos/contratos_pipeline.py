@@ -304,6 +304,12 @@ def cmd_build(args):
     n_contracts = df["Contract Number"].nunique() if len(df) else 0
     print(f"Wrote {len(df)} rows ({n_contracts} distinct contract numbers) to {PARQUET_PATH}")
 
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "shared"))
+    import data_kit as dk  # noqa: E402
+    import schemas  # noqa: E402
+    schemas.validate_contratos(df)
+    dk.publish("contratos", PARQUET_PATH)
+
     # Basic integrity tripwires -- fail loudly rather than silently publish garbage.
     problems = []
     if len(df) == 0:

@@ -38,3 +38,7 @@ supply/data/
 # pld/: CCEE yearly CSVs cached in CI; parquet may be committed when small.
 # Keep raw/ out of git either way.
 pld/raw/
+
+# ADR-002 lake mirrors (rebuildable; same rationale as ons/data and flows/data).
+lake/**
+!lake/README.md
