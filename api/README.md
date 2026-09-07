@@ -23,6 +23,9 @@ uvicorn api.main:app --reload --port 8000
 | GET | `/v1/pld/daily` | `submarket`, `from`, `to`, `limit` |
 | GET | `/v1/supply/monthly` | `from`, `to`, `limit` |
 | GET | `/v1/ons/balances` | `subsystem`, `series`, `from`, `to`, `limit` |
+| GET | `/v1/power/pld-cmo` | PLD vs ONS CMO join; `submarket`, `from`, `to`, `limit` |
+
+`/health` also lists dataset presence and transform registry versions.
 
 Deploy anywhere that runs ASGI (Fly.io, Railway, a small VM). Point
 `CORS` allow-list in `api/main.py` at your front-end origins. GitHub Pages

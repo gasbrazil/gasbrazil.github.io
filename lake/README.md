@@ -13,10 +13,15 @@ lake/
     contratos.parquet
   power/
     ons_daily.parquet
+    ons_entities.parquet
     pld_daily.parquet
   supply/
     supply_monthly.parquet
 ```
+
+Column contracts: `shared/schemas/`. Versioned assumptions (heat rates,
+submarket maps): `shared/transforms.py`. Cross-product helpers:
+`shared/joins.py` (e.g. PLD vs CMO).
 
 Everything under this tree is **gitignored** except this README — same
 rationale as `ons/data/` and `flows/data/` (large, rebuildable). The FastAPI

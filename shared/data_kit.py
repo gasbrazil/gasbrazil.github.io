@@ -1,9 +1,10 @@
 """
 Shared data-layer helpers for GasBrazil (ADR-002 Track A).
 
-Canonical schemas live in shared/schemas/. Pipelines call validate_* after
-build and optionally publish() into the repo-root lake/ tree so the API and
-future cross-product jobs read one layout.
+Canonical schemas live in shared/schemas/. Versioned assumptions live in
+shared/transforms.py; cross-product helpers in shared/joins.py. Pipelines
+call validate_* after build and optionally publish() into the repo-root
+lake/ tree so the API and cross-product jobs read one layout.
 """
 from __future__ import annotations
 
@@ -24,6 +25,7 @@ LAKE_PATHS = {
     "poc_results": LAKE_ROOT / "transport" / "poc_results.parquet",
     "contratos": LAKE_ROOT / "transport" / "contratos.parquet",
     "ons_daily": LAKE_ROOT / "power" / "ons_daily.parquet",
+    "ons_entities": LAKE_ROOT / "power" / "ons_entities.parquet",
     "pld_daily": LAKE_ROOT / "power" / "pld_daily.parquet",
     "supply_monthly": LAKE_ROOT / "supply" / "supply_monthly.parquet",
 }

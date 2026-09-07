@@ -61,7 +61,24 @@ CONTRATOS_COLUMNS = (
 
 # --- Power --------------------------------------------------------------------
 
-ONS_DAILY_REQUIRED_ANY = ("date",)
+# Long tidy frame written by ons/ons_pipeline.py → data/daily.parquet.
+ONS_DAILY_COLUMNS = (
+    "date",
+    "subsystem",
+    "entity",
+    "series",
+    "value",
+)
+
+ONS_ENTITIES_COLUMNS = (
+    "kind",
+    "entity",
+    "subsystem",
+    "group",
+    "capacity_mw",
+    "heat_rate_kcal_per_kwh",
+    "rolled_up",
+)
 
 PLD_DAILY_COLUMNS = (
     "date",
@@ -99,6 +116,14 @@ def validate_flows_points(df: "pd.DataFrame") -> None:
 
 def validate_flows_ledger(df: "pd.DataFrame") -> None:
     _require(df, FLOWS_LEDGER_COLUMNS, "flows_ledger")
+
+
+def validate_ons_daily(df: "pd.DataFrame") -> None:
+    _require(df, ONS_DAILY_COLUMNS, "ons_daily")
+
+
+def validate_ons_entities(df: "pd.DataFrame") -> None:
+    _require(df, ONS_ENTITIES_COLUMNS, "ons_entities")
 
 
 def validate_pld_daily(df: "pd.DataFrame") -> None:
