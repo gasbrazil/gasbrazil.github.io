@@ -129,21 +129,22 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; font-weight: 400; }
    overflow, sticky header), just taller since here the table is the page's
    primary content rather than a small secondary widget. */
 .table-wrap { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; overflow: auto; box-shadow: var(--shadow); max-height: 65vh; }
-table { border-collapse: collapse; width: auto; min-width: 100%; font-size: 12.5px; white-space: nowrap; table-layout: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 12.5px; table-layout: fixed; }
 th, td { padding: 4px 8px; text-align: left; border-bottom: 1px solid var(--border); }
-th { position: sticky; top: 0; background: var(--panel); cursor: pointer; user-select: none; color: var(--muted2); font-weight: 400; z-index: 2; position: relative; }
+th { position: sticky; top: 0; background: var(--panel); cursor: pointer; user-select: none; color: var(--muted2); font-weight: 400; z-index: 2; }
 th:hover { background: var(--accent-soft); }
 th.dragging { opacity: .4; }
 th.drag-over { box-shadow: inset 2px 0 0 var(--accent); }
-th .head-inner { display: inline-flex; align-items: center; gap: 3px; }
+th .head-inner { display: inline-flex; align-items: center; gap: 3px; max-width: 100%; }
 th .arrow { opacity: .4; }
 th .filter-icon { opacity: .45; font-size: 10px; padding: 0 2px; }
 th .filter-icon:hover, th .filter-icon.active { opacity: 1; color: var(--accent); }
 th .resizer { position: absolute; right: 0; top: 0; width: 6px; height: 100%; cursor: col-resize; z-index: 3; }
 th .resizer:hover, th .resizer.active { background: var(--accent); opacity: .5; }
-.truncate { overflow: hidden; text-overflow: ellipsis; }
+.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+td.wrap, th.wrap { white-space: normal; word-break: break-word; }
 tbody tr:hover { background: var(--accent-soft); }
-.num { text-align: right; font-variant-numeric: tabular-nums; }
+.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 footer { margin-top: 22px; color: var(--muted); font-size: 11.5px; line-height: 1.7; }
 footer a { color: var(--accent); }
 .filter-menu { position: fixed; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,.16); padding: 8px; z-index: 50; min-width: 190px; max-width: 260px; font-weight: 400; color: var(--text); font-size: 12.5px; }
@@ -209,7 +210,7 @@ footer a { color: var(--accent); }
 </div>
 <div class="flagbar" aria-hidden="true"></div>
 <div class="sources">
-  <span class="sources-label" data-i18n="sources">Official sources</span>
+  <span class="sources-label" data-i18n="sources">Sources</span>
   <a class="pill" href="https://www.ofertadecapacidade.com.br/PEG/resultado" target="_blank" rel="noopener">Portal de Oferta de Capacidade<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
 </div>
 <div class="tso-row" id="tso-row"></div>
@@ -253,7 +254,20 @@ __SHARED_JS_XLSX__
 __SHARED_JS_TABLE_SORT__
 
 const NUMERIC_COLS = new Set(["Flow Days", "Price", "R$/m3", "Avg Process Price", "Volume Accepted", "Total Value", "Volume Offered", "Total Volume"]);
-const DEFAULT_COL_WIDTH = { "Service Type": 220 };
+const WRAP_COLS = new Set(["Transaction Type", "Delivery Point", "Service Type"]);
+const DEFAULT_COL_WIDTH = {
+  "Pipeline": 56,
+  "Trade Date": 96,
+  "Flow Date Start": 96,
+  "Flow Date End": 96,
+  "Trade Timing": 88,
+  "Transaction Type": 140,
+  "Delivery Point": 140,
+  "Price": 72,
+  "R$/m3": 72,
+  "Volume Accepted": 100,
+  "Service Type": 160,
+};
 // Columns hidden by default so the table fits most screens without horizontal
 // scrolling. Users can re-enable any of these (or hide more) from the Columns
 // menu; the choice is remembered in localStorage.
@@ -1098,6 +1112,8 @@ function renderTable() {
         td.textContent = v === "" ? "" : fmtNum(v);
       } else {
         td.textContent = v;
+        if (WRAP_COLS.has(col)) td.classList.add("wrap");
+        else td.classList.add("truncate");
       }
       if (columnWidths[col]) applyColWidth(td, columnWidths[col]);
       tr.appendChild(td);

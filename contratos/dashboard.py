@@ -119,11 +119,13 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; font-weight: 400; }
 .quick-filters { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: var(--gap); }
 .qf-sep { width: 1px; align-self: stretch; background: var(--border-strong); margin: 0 4px; }
 .qf-btn.qf-validity { border-style: dashed; }
-.drill-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: var(--card-pad); margin-bottom: var(--gap); overflow-x: auto; }
+.drill-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: var(--card-pad); margin-bottom: var(--gap); max-height: 320px; overflow: auto; }
 .drill-card table { border-collapse: collapse; width: 100%; font-size: 12.5px; white-space: nowrap; }
 .drill-card th, .drill-card td { padding: 4px 8px; border-bottom: 1px solid var(--border); text-align: left; }
-.drill-card th { color: var(--muted2); font-weight: 400; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; cursor: default; position: static; }
-.drill-card thead tr:first-child th { border-bottom: none; padding-bottom: 0; }
+.drill-card th { color: var(--muted2); font-weight: 400; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; cursor: default; position: sticky; top: 0; background: var(--panel); z-index: 2; }
+.drill-card thead tr:first-child th { border-bottom: none; padding-bottom: 0; top: 0; }
+.drill-card thead tr:nth-child(2) th { top: 1.6em; }
+.drill-card .tso-summary { font-size: 12px; color: var(--muted2); margin: 0 0 10px; }
 .drill-card th.grp { text-align: center; color: var(--text); letter-spacing: .04em; }
 .drill-card th.grp.on { color: var(--accent); }
 .drill-card .sep { border-left: 1px solid var(--border); }
@@ -145,21 +147,22 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; font-weight: 400; }
 .toolbar button.secondary { background: var(--panel); color: var(--text); border: 1px solid var(--border-strong); }
 .count { color: var(--muted); font-size: 12px; margin-left: auto; }
 .table-wrap { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; overflow: auto; box-shadow: var(--shadow); max-height: 65vh; }
-table { border-collapse: collapse; width: auto; min-width: 100%; font-size: 12.5px; white-space: nowrap; table-layout: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 12.5px; table-layout: fixed; }
 th, td { padding: 4px 8px; text-align: left; border-bottom: 1px solid var(--border); }
-th { position: sticky; top: 0; background: var(--panel); cursor: pointer; user-select: none; color: var(--muted2); font-weight: 400; z-index: 2; position: relative; }
+th { position: sticky; top: 0; background: var(--panel); cursor: pointer; user-select: none; color: var(--muted2); font-weight: 400; z-index: 2; }
 th:hover { background: var(--accent-soft); }
 th.dragging { opacity: .4; }
 th.drag-over { box-shadow: inset 2px 0 0 var(--accent); }
-th .head-inner { display: inline-flex; align-items: center; gap: 3px; }
+th .head-inner { display: inline-flex; align-items: center; gap: 3px; max-width: 100%; }
 th .arrow { opacity: .4; }
 th .filter-icon { opacity: .45; font-size: 10px; padding: 0 2px; }
 th .filter-icon:hover, th .filter-icon.active { opacity: 1; color: var(--accent); }
 th .resizer { position: absolute; right: 0; top: 0; width: 6px; height: 100%; cursor: col-resize; z-index: 3; }
 th .resizer:hover, th .resizer.active { background: var(--accent); opacity: .5; }
-.truncate { overflow: hidden; text-overflow: ellipsis; }
+.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+td.wrap, th.wrap { white-space: normal; word-break: break-word; }
 tbody tr:hover { background: var(--accent-soft); }
-.num { text-align: right; font-variant-numeric: tabular-nums; }
+.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 footer { margin-top: 22px; color: var(--muted); font-size: 11.5px; line-height: 1.7; }
 footer a { color: var(--accent); }
 .filter-menu { position: fixed; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,.16); padding: 8px; z-index: 50; min-width: 190px; max-width: 260px; font-weight: 400; color: var(--text); font-size: 12.5px; }
@@ -225,8 +228,8 @@ footer a { color: var(--accent); }
 </div>
 <div class="flagbar" aria-hidden="true"></div>
 <div class="sources">
-  <span class="sources-label" data-i18n="sources">Official sources</span>
-  <a class="pill" href="https://ofertadecapacidade.com.br/home/contratos" target="_blank" rel="noopener">Portal de Oferta de Capacidade &mdash; Contracts<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+  <span class="sources-label" data-i18n="sources">Sources</span>
+  <a class="pill" href="https://ofertadecapacidade.com.br/home/contratos" target="_blank" rel="noopener">Portal de Oferta de Capacidade<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
 </div>
 <div class="tso-row" id="tso-row"></div>
 <div class="drill-card" id="drill-card"></div>
@@ -272,7 +275,8 @@ __SHARED_JS_XLSX__
 __SHARED_JS_TABLE_SORT__
 
 const NUMERIC_COLS = new Set(["Contracted Capacity (000 m3/d)", "Allocated Tariff (R$/MMBtu)", "Tariff Multiplier", "Transporter Ownership %"]);
-const DEFAULT_COL_WIDTH = { "Shipper": 260, "Contract Number": 190 };
+const WRAP_COLS = new Set(["Shipper", "Point/Zone", "Contract Category", "Product Type"]);
+const DEFAULT_COL_WIDTH = { "Shipper": 180, "Contract Number": 140, "Point/Zone": 120 };
 // Columns hidden by default so the table fits most screens without horizontal
 // scrolling. Users can re-enable any of these (or hide more) from the Columns
 // menu; the choice is remembered in localStorage.
@@ -1098,15 +1102,19 @@ function renderTsoRow() {
     const chip = document.createElement("button");
     chip.type = "button";
     chip.dataset.tso = tso;
+    chip.dataset.count = String(rows.length);
+    chip.dataset.capacity = String(capacity);
     if (rows.length) {
       chip.className = "tso-chip";
-      chip.title = "Isolate " + tso + " in the top-shippers table and the contract table";
-      chip.innerHTML = `<b>${escapeHtml(tso)}</b> &middot; ${rows.length.toLocaleString("en-US")} active contract${rows.length === 1 ? "" : "s"} &middot; ${fmtNum(capacity, 0)} 000 m&sup3;/d contracted`;
+      chip.title = tso + ": " + rows.length.toLocaleString("en-US") + " active contract" +
+        (rows.length === 1 ? "" : "s") + ", " + fmtNum(capacity, 0) + " 000 m³/d contracted — click to isolate";
+      chip.innerHTML = `<b>${escapeHtml(tso)}</b>`;
       chip.addEventListener("click", () => toggleDrillTso(tso));
     } else {
       chip.className = "tso-chip empty";
       chip.disabled = true;
-      chip.innerHTML = `<b>${escapeHtml(tso)}</b> &middot; no active contracts`;
+      chip.title = tso + ": no active contracts";
+      chip.innerHTML = `<b>${escapeHtml(tso)}</b>`;
     }
     el.appendChild(chip);
   }
@@ -1250,8 +1258,16 @@ function renderDrill() {
   }).join("");
 
   const mix = cols.map(t => `${escapeHtml(t)} ${fmtNum(totalsByTso[t], 0)}`).join(" &middot; ");
+  let tsoSummary = "";
+  if (drillTso) {
+    const activeRows = DATA.rows.filter(r => r["Transporter (TSO)"] === drillTso && isActiveRow(r));
+    const capacity = activeRows.reduce((a, r) => a + (Number(r["Contracted Capacity (000 m3/d)"]) || 0), 0);
+    const n = activeRows.length;
+    tsoSummary = `<p class="tso-summary"><b>${escapeHtml(drillTso)}</b> &middot; ${n.toLocaleString("en-US")} active contract${n === 1 ? "" : "s"} &middot; ${fmtNum(capacity, 0)} 000 m&sup3;/d contracted</p>`;
+  }
   card.innerHTML = `
     <p class="panel-title">Top Shippers by Held Capacity &mdash; ${scope}</p>
+    ${tsoSummary}
     <p class="panel-note">Capacity in 000 m&sup3;/d on active contracts currently within their term &middot;
       ${all.length.toLocaleString("en-US")} shipper${all.length === 1 ? "" : "s"} &middot; ${mix} &middot; total ${fmtNum(grand, 0)}</p>
     <table>
@@ -1333,6 +1349,8 @@ function renderTable() {
         td.textContent = v === "" ? "" : fmtNum(v);
       } else {
         td.textContent = v;
+        if (WRAP_COLS.has(col)) td.classList.add("wrap");
+        else td.classList.add("truncate");
       }
       if (columnWidths[col]) applyColWidth(td, columnWidths[col]);
       tr.appendChild(td);

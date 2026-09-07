@@ -483,7 +483,7 @@ HOME_TEMPLATE = """__HEAD__
     </a>
   </div>
   <div class="sources-block">
-    <div class="label" data-i18n="sources">Official sources</div>
+    <div class="label" data-i18n="sources">Sources</div>
     <div class="row">
       <a href="https://dados.ons.org.br" target="_blank" rel="noopener" data-i18n="sourceOns">ONS open data</a>
       <a href="https://www.ofertadecapacidade.com.br/PEG/resultado" target="_blank" rel="noopener" data-i18n="sourcePoc">Portal de Oferta de Capacidade</a>

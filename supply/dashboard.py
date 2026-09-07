@@ -159,11 +159,13 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; font-weight: 400; }
 .toolbar button:hover { background: var(--accent-soft); }
 .count { color: var(--muted); font-size: 12px; margin-left: auto; font-weight: 200; }
 .table-wrap { overflow: auto; max-height: 55vh; border: 1px solid var(--border); border-radius: 5px; }
-table { border-collapse: collapse; width: 100%; font-size: 12.5px; white-space: nowrap; }
+table { border-collapse: collapse; width: 100%; font-size: 12.5px; table-layout: fixed; }
 th, td { padding: 4px 8px; text-align: left; border-bottom: 1px solid var(--border); font-weight: 300; }
 th { position: sticky; top: 0; background: var(--panel); color: var(--muted2); font-weight: 400; z-index: 2; }
 th .th-label { cursor: pointer; }
-.num { text-align: right; font-variant-numeric: tabular-nums; }
+.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+td.wrap, th.wrap { white-space: normal; word-break: break-word; }
+.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 tbody tr:hover { background: var(--accent-soft); }
 .gap-note { font-size: 12px; color: var(--muted); margin: 0 0 var(--gap); font-weight: 200; }
 footer { margin-top: 22px; color: var(--muted); font-size: 11.5px; line-height: 1.7; font-weight: 200; }
@@ -198,7 +200,7 @@ footer a { color: var(--accent); }
 </div>
 <div class="flagbar" aria-hidden="true"></div>
 <div class="sources">
-  <span class="sources-label" data-i18n="sources">Official sources</span>
+  <span class="sources-label" data-i18n="sources">Sources</span>
   <a class="pill" href="https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/producao-de-petroleo-e-gas-natural-por-estado-e-localizacao" target="_blank" rel="noopener">ANP PPGN-EL<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
   <a class="pill" href="https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/importacoes-e-exportacoes" target="_blank" rel="noopener">ANP imports<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
 </div>

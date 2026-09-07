@@ -277,6 +277,15 @@ html, body {
    column; a table's own th rule should still set position/background/etc,
    just not cursor (this overrides that to auto so only .th-label, not the
    whole cell, looks clickable). */
+.table-wrap thead th,
+.scroll thead th,
+.meter-table-wrap thead th,
+.drill-card thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--panel);
+}
 .th-label { cursor: pointer; user-select: none; display: block; }
 .th-label:hover { color: var(--text); }
 .th-filter { display: block; width: 100%; margin-top: 4px; padding: 2px 6px; font-size: 11px; font-weight: 300; background: var(--bg); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); color: var(--text); box-sizing: border-box; cursor: text; }
@@ -511,7 +520,7 @@ const GB_I18N = {
     cardPldDesc: "CCEE daily-average PLD (settlement price) by electricity submarket — Southeast, South, Northeast, and North. Not the same as ONS CMO.",
     kpiRefresh: "Last refreshed",
     dataThrough: "Data through",
-    sources: "Official sources",
+    sources: "Sources",
     sourceOns: "ONS open data",
     sourcePoc: "Portal de Oferta de Capacidade",
     sourceAnp: "ANP gas transport movement",
@@ -580,7 +589,7 @@ const GB_I18N = {
     cardPldDesc: "PLD médio diário da CCEE por submercado — Sudeste, Sul, Nordeste e Norte. Não é o CMO da ONS.",
     kpiRefresh: "Última atualização",
     dataThrough: "Dados até",
-    sources: "Fontes oficiais",
+    sources: "Fontes",
     sourceOns: "Dados abertos da ONS",
     sourcePoc: "Portal de Oferta de Capacidade",
     sourceAnp: "Movimentação de gás da ANP",

@@ -168,10 +168,10 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; font-weight: 400; }
 .toolbar button:hover { background: var(--accent-soft); }
 .count { color: var(--muted); font-size: 12px; margin-left: auto; font-weight: 200; }
 .table-wrap { background: var(--panel); border: 1px solid var(--border); border-radius: 5px; overflow: auto; max-height: 55vh; margin-bottom: var(--gap); }
-table.data { border-collapse: collapse; width: 100%; font-size: 12.5px; font-weight: 300; }
+table.data { border-collapse: collapse; width: 100%; font-size: 12.5px; font-weight: 300; table-layout: fixed; }
 table.data th, table.data td { padding: 4px 8px; text-align: left; border-bottom: 1px solid var(--border); }
 table.data th { position: sticky; top: 0; background: var(--panel); color: var(--muted2); font-weight: 400; z-index: 2; }
-table.data .num { text-align: right; font-variant-numeric: tabular-nums; }
+table.data .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 table.data tbody tr:hover { background: var(--accent-soft); }
 footer { margin-top: 22px; color: var(--muted); font-size: 11.5px; line-height: 1.7; font-weight: 200; }
 footer a { color: var(--accent); }
@@ -200,7 +200,7 @@ footer a { color: var(--accent); }
 </div>
 <div class="flagbar" aria-hidden="true"></div>
 <div class="sources">
-  <span class="sources-label" data-i18n="sources">Official sources</span>
+  <span class="sources-label" data-i18n="sources">Sources</span>
   <a class="pill" href="https://dadosabertos.ccee.org.br/dataset/pld_media_diaria" target="_blank" rel="noopener" data-i18n="sourcePld">CCEE open data — PLD média diária<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
 </div>
 <p class="note-strip"><span data-i18n="pldNote">PLD is CCEE's settlement price. It is related to, but not the same as, ONS CMO (marginal operating cost) — see</span> <a href="../ons/" id="pld-ons-note">ONS Balances</a>.</p>

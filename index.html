@@ -277,6 +277,15 @@ html, body {
    column; a table's own th rule should still set position/background/etc,
    just not cursor (this overrides that to auto so only .th-label, not the
    whole cell, looks clickable). */
+.table-wrap thead th,
+.scroll thead th,
+.meter-table-wrap thead th,
+.drill-card thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--panel);
+}
 .th-label { cursor: pointer; user-select: none; display: block; }
 .th-label:hover { color: var(--text); }
 .th-filter { display: block; width: 100%; margin-top: 4px; padding: 2px 6px; font-size: 11px; font-weight: 300; background: var(--bg); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); color: var(--text); box-sizing: border-box; cursor: text; }
@@ -429,7 +438,7 @@ footer.site a { color: var(--muted); }
     <a class="kpi-cell" href="ons/">
       <div class="kpi-label" data-i18n="cardOns">ONS Balances</div>
       <div class="kpi-val" data-en="2,873 MWmed gas" data-pt="2,873 MWmed a gás">2,873 MWmed gas</div>
-      <div class="kpi-when" data-refresh="2026-09-07 17:23 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-07 19:58 UTC"></div>
     </a>
     <a class="kpi-cell" href="poc/">
       <div class="kpi-label" data-i18n="cardPoc">POC Results</div>
@@ -445,18 +454,18 @@ footer.site a { color: var(--muted); }
     <a class="kpi-cell" href="flows/">
       <div class="kpi-label" data-i18n="cardFlows">Pipeline Flows</div>
       <div class="kpi-val" data-en="1358.6M m³ realized (7d) · 270 points" data-pt="1358.6M m³ realizados (7d) · 270 points">1358.6M m³ realized (7d) · 270 points</div>
-      <div class="kpi-when" data-refresh="2026-09-07 17:24 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-07 19:59 UTC"></div>
     </a>
     <a class="kpi-cell" href="supply/">
       <div class="kpi-label" data-i18n="cardSupply">Gas Supply</div>
       <div class="kpi-val" data-en="6.7M thousand m³ produced · 2026-07" data-pt="6.7M mil m³ produzidos · 2026-07">6.7M thousand m³ produced · 2026-07</div>
-      <div class="kpi-when" data-refresh="2026-09-07 17:22 UTC"></div>
-      
+      <div class="kpi-when" data-refresh="2026-09-07 19:57 UTC"></div>
+      <svg class="kpi-spark" viewBox="0 0 120 28" width="120" height="28" aria-hidden="true"><polyline points="2.0,20.5 7.0,18.9 12.1,20.8 17.1,22.9 22.2,20.1 27.2,20.2 32.3,26.0 37.3,18.6 42.3,19.6 47.4,16.3 52.4,15.1 57.5,10.1 62.5,10.7 67.6,12.2 72.6,8.8 77.7,14.8 82.7,8.9 87.7,9.3 92.8,14.2 97.8,5.6 102.9,7.0 107.9,5.0 113.0,3.6 118.0,2.0"/></svg>
     </a>
     <a class="kpi-cell" href="pld/">
       <div class="kpi-label" data-i18n="cardPld">PLD Prices</div>
       <div class="kpi-val" data-en="SE 118.05 R$/MWh · 2026-09-06" data-pt="SE 118.05 R$/MWh · 2026-09-06">SE 118.05 R$/MWh · 2026-09-06</div>
-      <div class="kpi-when" data-refresh="2026-09-07 17:22 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-07 19:57 UTC"></div>
       
     </a>
   </div>
@@ -487,7 +496,7 @@ footer.site a { color: var(--muted); }
     </a>
   </div>
   <div class="sources-block">
-    <div class="label" data-i18n="sources">Official sources</div>
+    <div class="label" data-i18n="sources">Sources</div>
     <div class="row">
       <a href="https://dados.ons.org.br" target="_blank" rel="noopener" data-i18n="sourceOns">ONS open data</a>
       <a href="https://www.ofertadecapacidade.com.br/PEG/resultado" target="_blank" rel="noopener" data-i18n="sourcePoc">Portal de Oferta de Capacidade</a>
@@ -565,7 +574,7 @@ const GB_I18N = {
     cardPldDesc: "CCEE daily-average PLD (settlement price) by electricity submarket — Southeast, South, Northeast, and North. Not the same as ONS CMO.",
     kpiRefresh: "Last refreshed",
     dataThrough: "Data through",
-    sources: "Official sources",
+    sources: "Sources",
     sourceOns: "ONS open data",
     sourcePoc: "Portal de Oferta de Capacidade",
     sourceAnp: "ANP gas transport movement",
@@ -634,7 +643,7 @@ const GB_I18N = {
     cardPldDesc: "PLD médio diário da CCEE por submercado — Sudeste, Sul, Nordeste e Norte. Não é o CMO da ONS.",
     kpiRefresh: "Última atualização",
     dataThrough: "Dados até",
-    sources: "Fontes oficiais",
+    sources: "Fontes",
     sourceOns: "Dados abertos da ONS",
     sourcePoc: "Portal de Oferta de Capacidade",
     sourceAnp: "Movimentação de gás da ANP",
