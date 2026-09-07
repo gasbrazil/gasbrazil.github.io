@@ -354,7 +354,7 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; font-weight: 400; }
 .qf-sep { width: 1px; align-self: stretch; background: var(--border-strong); margin: 0 4px; }
 .qf-btn.qf-validity { border-style: dashed; }
 .drill-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: var(--card-pad); margin-bottom: var(--gap); max-height: 320px; overflow: auto; }
-.drill-card table { border-collapse: collapse; width: 100%; font-size: 12.5px; white-space: nowrap; }
+.drill-card table { border-collapse: collapse; width: 100%; font-size: 12.5px; table-layout: fixed; white-space: nowrap; }
 .drill-card th, .drill-card td { padding: 4px 8px; border-bottom: 1px solid var(--border); text-align: left; }
 .drill-card th { color: var(--muted2); font-weight: 400; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; cursor: default; position: sticky; top: 0; background: var(--panel); z-index: 2; }
 .drill-card thead tr:first-child th { border-bottom: none; padding-bottom: 0; top: 0; }
@@ -368,7 +368,14 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; font-weight: 400; }
 .drill-card tbody tr { cursor: pointer; }
 .drill-card tbody tr:hover { background: var(--accent-soft); }
 .drill-card tbody tr.picked { background: var(--accent-soft); font-weight: 400; }
-.drill-card .rank { color: var(--muted); width: 22px; }
+.drill-card col.rank { width: 2.25rem; }
+.drill-card col.shipper { width: auto; }
+.drill-card col.contracts { width: 5.5rem; }
+.drill-card col.metric { width: 4.75rem; }
+.drill-card col.total { width: 5.25rem; }
+.drill-card col.share { width: 4.5rem; }
+.drill-card .rank { color: var(--muted); }
+.drill-card td.shipper { overflow: hidden; text-overflow: ellipsis; }
 .drill-more { background: none; border: none; color: var(--accent); font-size: 12px; cursor: pointer; padding: 8px 0 0; font-family: var(--font); }
 .qf-btn { background: var(--panel); border: 1px solid var(--border); border-radius: 5px; padding: 4px 12px; font-size: 12px; cursor: pointer; color: var(--text); font-family: var(--font); }
 .qf-btn:hover { background: var(--accent-soft); }
@@ -381,7 +388,8 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; font-weight: 400; }
 .toolbar button.secondary { background: var(--panel); color: var(--text); border: 1px solid var(--border-strong); }
 .count { color: var(--muted); font-size: 12px; margin-left: auto; }
 .table-wrap { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; overflow: auto; box-shadow: var(--shadow); max-height: 65vh; }
-table { border-collapse: collapse; width: 100%; font-size: 12.5px; table-layout: fixed; }
+table { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+.table-wrap table { table-layout: fixed; }
 th, td { padding: 4px 8px; text-align: left; border-bottom: 1px solid var(--border); }
 th { position: sticky; top: 0; background: var(--panel); cursor: pointer; user-select: none; color: var(--muted2); font-weight: 400; z-index: 2; }
 th:hover { background: var(--accent-soft); }
@@ -1758,7 +1766,7 @@ function renderDrill() {
     }).join("");
     return `<tr data-shipper="${escapeHtml(e.name)}" class="${pickedShipper === e.name ? "picked" : ""}">
       <td class="rank">${i + 1}</td>
-      <td>${escapeHtml(e.name)}</td>
+      <td class="shipper" title="${escapeHtml(e.name)}">${escapeHtml(e.name)}</td>
       <td class="num">${e.nContracts.toLocaleString("en-US")}</td>
       ${cells}
       <td class="num sep">${fmtNum(e.total, 0)}</td>
@@ -1774,12 +1782,18 @@ function renderDrill() {
     const n = activeRows.length;
     tsoSummary = `<p class="tso-summary"><b>${escapeHtml(drillTso)}</b> &middot; ${n.toLocaleString("en-US")} active contract${n === 1 ? "" : "s"} &middot; ${fmtNum(capacity, 0)} 000 m&sup3;/d contracted</p>`;
   }
+  const colgroup = `<colgroup>
+      <col class="rank"><col class="shipper"><col class="contracts">
+      ${cols.map(() => '<col class="metric"><col class="metric">').join("")}
+      <col class="total"><col class="share">
+    </colgroup>`;
   card.innerHTML = `
     <p class="panel-title">Top Shippers by Held Capacity &mdash; ${scope}</p>
     ${tsoSummary}
     <p class="panel-note">Capacity in 000 m&sup3;/d on active contracts currently within their term &middot;
       ${all.length.toLocaleString("en-US")} shipper${all.length === 1 ? "" : "s"} &middot; ${mix} &middot; total ${fmtNum(grand, 0)}</p>
     <table>
+      ${colgroup}
       <thead>
         <tr><th></th><th></th><th></th>${head1}<th class="sep"></th><th></th></tr>
         <tr><th></th><th>Shipper</th><th class="num">Contracts</th>${head2}<th class="num sep">Total</th><th class="num">Share</th></tr>
