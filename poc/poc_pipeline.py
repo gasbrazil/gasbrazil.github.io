@@ -234,6 +234,12 @@ def cmd_build(args):
     df.to_parquet(PARQUET_PATH, index=False)
     print(f"Wrote {len(df)} rows ({df['codigoProcesso'].nunique()} processes) to {PARQUET_PATH}")
 
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "shared"))
+    import data_kit as dk  # noqa: E402
+    import schemas  # noqa: E402
+    schemas.validate_poc_results(df)
+    dk.publish("poc_results", PARQUET_PATH)
+
     # Basic integrity tripwires -- fail loudly rather than silently publish garbage.
     problems = []
     if len(df) == 0:

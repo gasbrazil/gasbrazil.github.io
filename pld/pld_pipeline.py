@@ -247,6 +247,11 @@ def build() -> pd.DataFrame:
         f"Wrote {PARQUET_PATH} ({len(df):,} rows, "
         f"{pd.Timestamp(df['date'].min()).date()} -> {pd.Timestamp(df['date'].max()).date()})"
     )
+    sys.path.insert(0, str(HERE.parent / "shared"))
+    import data_kit as dk  # noqa: E402
+    import schemas  # noqa: E402
+    schemas.validate_pld_daily(df)
+    dk.publish("pld_daily", PARQUET_PATH)
     return df
 
 

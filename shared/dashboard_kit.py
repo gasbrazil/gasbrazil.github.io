@@ -186,6 +186,16 @@ async function inflateGzipB64(b64) {
   const stream = new Blob([b64ToBytes(b64)]).stream().pipeThrough(ds);
   return new TextDecoder().decode(await new Response(stream).arrayBuffer());
 }
+async function inflateGzipUrl(url) {
+  if (typeof DecompressionStream !== "function") {
+    throw new Error("This browser lacks DecompressionStream (needs Chrome/Edge 80+, Firefox 113+, or Safari 16.4+).");
+  }
+  const res = await fetch(url, { cache: "no-cache" });
+  if (!res.ok) throw new Error("Failed to load " + url + " (" + res.status + ")");
+  const ds = new DecompressionStream("gzip");
+  const stream = res.body.pipeThrough(ds);
+  return new TextDecoder().decode(await new Response(stream).arrayBuffer());
+}
 """
 
 JS_ESCAPE_HTML = r"""

@@ -513,6 +513,16 @@ def cmd_build(args) -> None:
         print("HEALTH GATE FAILED: " + "; ".join(problems), file=sys.stderr)
         sys.exit(2)
 
+    # ADR-002 Track A: validate canonical columns and mirror into lake/
+    # only after the health gate passes.
+    sys.path.insert(0, str(HERE.parent / "shared"))
+    import data_kit as dk  # noqa: E402
+    import schemas  # noqa: E402
+    schemas.validate_flows_points(points_df)
+    schemas.validate_flows_ledger(ledger_df)
+    dk.publish("flows_points", POINTS_PARQUET)
+    dk.publish("flows_ledger", LEDGER_PARQUET)
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
