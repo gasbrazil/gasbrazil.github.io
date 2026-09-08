@@ -122,8 +122,15 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 #theme-toggle:hover { background: var(--accent-soft); }
 #theme-toggle svg { width: 16px; height: 16px; display: block; }
 .tso-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: var(--gap); }
-.tso-chip { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 4px 12px; font-size: 12px; box-shadow: var(--shadow); white-space: nowrap; }
+.tso-chip { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 4px 12px; font-size: 12px; box-shadow: var(--shadow); white-space: nowrap; cursor: pointer; color: var(--text); font-family: var(--font); }
+.tso-chip:hover { background: var(--accent-soft); }
+.tso-chip.selected { background: var(--accent); color: #fff; border-color: var(--accent); }
+.tso-chip.selected .muted { color: rgba(255,255,255,.72); }
 .tso-chip.empty { color: var(--muted); }
+.tso-chip.empty:hover { background: var(--accent-soft); }
+.tso-chip.empty.selected { background: var(--accent); color: #fff; border-color: var(--accent); }
+.tso-chip.empty.selected:hover { background: var(--accent); }
+.tso-chip.empty.selected .muted { color: rgba(255,255,255,.72); }
 .tso-chip b { font-weight: 400; }
 .tso-chip .muted { color: var(--muted); }
 .quick-filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: var(--gap); }
@@ -175,13 +182,12 @@ footer a { color: var(--accent); }
 .chart-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: var(--card-pad); margin-bottom: var(--gap); }
 .panel-title { font-size: 13px; font-weight: 400; margin: 0 0 2px; }
 .panel-note { font-size: 11.5px; color: var(--muted); margin: 0 0 12px; }
-.chart-picker { display: flex; flex-wrap: wrap; gap: 14px 18px; margin-bottom: 12px; }
-.pick-group { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-.pick-group-label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 200; margin-right: 2px; }
+.chart-picker { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; align-items: center; }
 .series-btn { display: inline-flex; align-items: center; gap: 6px; background: var(--panel); border: 1px solid var(--border); border-radius: 5px; padding: 4px 12px 4px 8px; font-size: 12px; cursor: pointer; color: var(--text); font-family: var(--font); font-weight: 400; }
 .series-btn:hover { background: var(--accent-soft); }
-.series-btn.active { border-color: var(--border-strong); font-weight: 400; }
+.series-btn.active { border-color: var(--accent); background: var(--accent-soft); font-weight: 400; }
 .series-btn .sw { width: 9px; height: 9px; border-radius: 2px; flex: none; background: var(--border-strong); }
+.series-btn.active .sw { background: var(--accent); }
 #chart-host svg { display: block; overflow: hidden; }
 .chart-empty { color: var(--muted); font-size: 13px; padding: 44px 0; text-align: center; }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; font-size: 12px; color: var(--muted2); }
@@ -193,7 +199,7 @@ footer a { color: var(--accent); }
 .tt td { padding: 1px 0; }
 .tt td.v { text-align: right; padding-left: 14px; font-variant-numeric: tabular-nums; white-space: nowrap; }
 @media (max-width: 720px) {
-  .toolbar, .quick-filters, .sources, .tso-row, .chart-picker, .pick-group { flex-direction: column; align-items: stretch; }
+  .toolbar, .quick-filters, .sources, .tso-row, .chart-picker { flex-direction: column; align-items: stretch; }
   .toolbar select, .toolbar input, .toolbar button { width: 100%; }
   .count { margin-left: 0; }
 }
@@ -325,11 +331,16 @@ const CHART_PALETTE_DARK = ["#3987e5", "#d95926", "#199e70", "#c98500", "#d55181
 // here (a new transaction type the API adds later) is appended
 // alphabetically so it still shows up rather than silently disappearing.
 const TRANSACTION_TYPE_ORDER = ["GUS", "Res. Bal.", "Op. Bal.", "Linepack", "Congestion"];
-const PIPELINE_ORDER = ["TAG", "NTS", "TBG"];
+const PIPELINE_ORDER = ["NTS", "TAG", "TBG"];
 
 const comboKey = (pipeline, type) => pipeline + "||" + type;
 const comboLabel = (pipeline, type) => pipeline + " · " + type;
 
+// Chart selection is pipeline chips × type chips (cartesian product of the
+// two toggles), not one chip per (pipeline, type) pair. chartPicked is
+// derived; chartSlots still keys colors by the full combo.
+let chartPipelines = new Set();
+let chartTypes = new Set();
 let chartPicked = new Set();
 let chartResizeTimer = null;
 const chartSlots = new Map();
@@ -344,11 +355,7 @@ function chartColorOf(key) {
   return (dark ? CHART_PALETTE_DARK : CHART_PALETTE_LIGHT)[chartClaimSlot(key)];
 }
 
-// Every (pipeline, transaction type) pair with at least one priced row,
-// anywhere in the dataset -- the picker's chip list, independent of the
-// table's current filters so a chip never disappears just because a
-// filter happens to be narrowing the table right now.
-function availableCombos() {
+function availableComboSet() {
   const seen = new Set();
   for (const r of DATA.rows) {
     if (r["Price"] === null || r["Price"] === undefined) continue;
@@ -356,56 +363,85 @@ function availableCombos() {
     if (!pipeline || !type) continue;
     seen.add(comboKey(pipeline, type));
   }
-  const pipelines = [...new Set([...seen].map(k => k.split("||")[0]))].sort((a, b) => {
+  return seen;
+}
+
+function availablePipelines() {
+  const seen = availableComboSet();
+  return [...new Set([...seen].map(k => k.split("||")[0]))].sort((a, b) => {
     const ai = PIPELINE_ORDER.indexOf(a), bi = PIPELINE_ORDER.indexOf(b);
     return (ai < 0 ? 99 : ai) - (bi < 0 ? 99 : bi) || a.localeCompare(b);
   });
-  return pipelines.map(pipeline => {
-    const types = [...seen].filter(k => k.split("||")[0] === pipeline).map(k => k.split("||")[1]).sort((a, b) => {
-      const ai = TRANSACTION_TYPE_ORDER.indexOf(a), bi = TRANSACTION_TYPE_ORDER.indexOf(b);
-      return (ai < 0 ? 99 : ai) - (bi < 0 ? 99 : bi) || a.localeCompare(b);
-    });
-    return { pipeline, types };
+}
+
+function availableTypes() {
+  const seen = availableComboSet();
+  return [...new Set([...seen].map(k => k.split("||")[1]))].sort((a, b) => {
+    const ai = TRANSACTION_TYPE_ORDER.indexOf(a), bi = TRANSACTION_TYPE_ORDER.indexOf(b);
+    return (ai < 0 ? 99 : ai) - (bi < 0 ? 99 : bi) || a.localeCompare(b);
   });
+}
+
+function syncChartPicked() {
+  const available = availableComboSet();
+  const next = new Set();
+  for (const pipeline of chartPipelines) {
+    for (const type of chartTypes) {
+      const key = comboKey(pipeline, type);
+      if (available.has(key)) {
+        next.add(key);
+        chartClaimSlot(key);
+      }
+    }
+  }
+  for (const key of [...chartSlots.keys()]) {
+    if (!next.has(key)) chartSlots.delete(key);
+  }
+  chartPicked = next;
 }
 
 function buildChartPicker() {
   const host = document.getElementById("chart-picker");
   host.innerHTML = "";
-  for (const group of availableCombos()) {
-    const g = document.createElement("div");
-    g.className = "pick-group";
-    const gl = document.createElement("span");
-    gl.className = "pick-group-label";
-    gl.textContent = group.pipeline;
-    g.appendChild(gl);
-    for (const type of group.types) {
-      const key = comboKey(group.pipeline, type);
-      const btn = document.createElement("button");
-      btn.className = "series-btn";
-      btn.type = "button";
-      btn.dataset.key = key;
-      btn.innerHTML = '<span class="sw"></span>' + escapeHtml(type);
-      btn.addEventListener("click", () => toggleChartCombo(key));
-      g.appendChild(btn);
-    }
-    host.appendChild(g);
+  for (const type of availableTypes()) {
+    const btn = document.createElement("button");
+    btn.className = "series-btn";
+    btn.type = "button";
+    btn.dataset.type = type;
+    btn.innerHTML = '<span class="sw"></span>' + escapeHtml(type);
+    btn.addEventListener("click", () => toggleChartType(type));
+    host.appendChild(btn);
   }
   updateChartPickerButtons();
 }
 
-function toggleChartCombo(key) {
-  if (chartPicked.has(key)) { chartPicked.delete(key); chartSlots.delete(key); }
-  else { chartPicked.add(key); chartClaimSlot(key); }
+function toggleChartType(type) {
+  if (chartTypes.has(type)) chartTypes.delete(type);
+  else chartTypes.add(type);
+  syncChartPicked();
   updateChartPickerButtons();
+  updateTsoChips();
+  renderChart();
+}
+
+function toggleChartPipeline(pipeline) {
+  if (chartPipelines.has(pipeline)) chartPipelines.delete(pipeline);
+  else chartPipelines.add(pipeline);
+  syncChartPicked();
+  updateChartPickerButtons();
+  updateTsoChips();
   renderChart();
 }
 
 function updateChartPickerButtons() {
   document.querySelectorAll(".series-btn").forEach(btn => {
-    const key = btn.dataset.key, active = chartPicked.has(key);
-    btn.classList.toggle("active", active);
-    btn.querySelector(".sw").style.background = active ? chartColorOf(key) : "";
+    btn.classList.toggle("active", chartTypes.has(btn.dataset.type));
+  });
+}
+
+function updateTsoChips() {
+  document.querySelectorAll("#tso-row .tso-chip").forEach(c => {
+    c.classList.toggle("selected", chartPipelines.has(c.dataset.tso));
   });
 }
 
@@ -459,7 +495,7 @@ function renderChart() {
   const host = document.getElementById("chart-host");
   host.innerHTML = "";
   if (!chartPicked.size) {
-    host.innerHTML = '<div class="chart-empty">Pick one or more pipeline / transaction type combinations above to see the price trend.</div>';
+    host.innerHTML = '<div class="chart-empty">Select one or more pipelines above and transaction types below to see the price trend.</div>';
     return;
   }
   const seriesList = [...chartPicked].map(key => {
@@ -613,13 +649,13 @@ function renderChart() {
 }
 
 function initChartDefaults() {
-  for (const group of availableCombos()) {
-    if (group.types.includes("GUS")) {
-      const key = comboKey(group.pipeline, "GUS");
-      chartPicked.add(key);
-      chartClaimSlot(key);
-    }
-  }
+  // Default: every pipeline that has priced data, with GUS on if available
+  // (falls back to the first listed type so the chart isn't blank).
+  for (const pipeline of availablePipelines()) chartPipelines.add(pipeline);
+  const types = availableTypes();
+  if (types.includes("GUS")) chartTypes.add("GUS");
+  else if (types.length) chartTypes.add(types[0]);
+  syncChartPicked();
 }
 
 function fmtNum(v, maxFrac) {
@@ -1039,9 +1075,13 @@ function mean(nums) {
 
 // Shows every known pipeline, even ones with zero trades in the last 7 days --
 // derived from the full dataset, not just the recent window, so a quiet pipeline
-// doesn't just silently disappear from the row.
+// doesn't just silently disappear from the row. Chips also toggle that pipeline
+// on/off for the Price Trend chart (paired with the type chips below).
 function renderTsoRow() {
-  const allTsos = [...new Set(DATA.rows.map(r => r["Transporter (TSO)"]).filter(Boolean))].sort();
+  const allTsos = [...new Set(DATA.rows.map(r => r["Transporter (TSO)"]).filter(Boolean))].sort((a, b) => {
+    const ai = PIPELINE_ORDER.indexOf(a), bi = PIPELINE_ORDER.indexOf(b);
+    return (ai < 0 ? 99 : ai) - (bi < 0 ? 99 : bi) || a.localeCompare(b);
+  });
   const recent = last7dRows();
   const byTso = {};
   for (const r of recent) {
@@ -1054,7 +1094,10 @@ function renderTsoRow() {
   for (const tso of allTsos) {
     const rows = byTso[tso] || [];
     const avg = mean(rows.map(r => r["R$/m3"]));
-    const chip = document.createElement("div");
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.dataset.tso = tso;
+    chip.title = "Toggle " + tso + " on the price chart";
     if (rows.length) {
       const vol = rows.reduce((a, r) => a + (Number(r["Volume Accepted"]) || 0), 0);
       const volLabel = vol >= 1e6
@@ -1066,8 +1109,10 @@ function renderTsoRow() {
       chip.className = "tso-chip empty";
       chip.innerHTML = `<b>${tso}</b> &middot; no trades <span class="muted">(7d)</span>`;
     }
+    chip.addEventListener("click", () => toggleChartPipeline(tso));
     el.appendChild(chip);
   }
+  updateTsoChips();
 }
 
 function isoDate(d) { return d.toISOString().slice(0, 10); }

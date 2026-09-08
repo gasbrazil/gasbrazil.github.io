@@ -312,15 +312,6 @@ th.num .th-filter { text-align: right; }
 .langBtn:hover, #lang-toggle:hover { background: var(--accent-soft); }
 .chrome-tools { display: flex; align-items: center; gap: 6px; }
 
-/* TSO schematic (Flows): simple Brazil trunk lines, not a GIS map. */
-.tso-schematic {
-  display: flex; align-items: center; justify-content: center;
-  gap: 0; min-height: 56px; padding: 6px 8px;
-  background: var(--panel); border: 1px solid var(--border);
-  border-radius: var(--radius);
-}
-.tso-schematic svg { width: 100%; max-width: 280px; height: 56px; }
-
 @media (max-width: 720px) {
   .navlinks, .header-links { gap: 2px 10px; }
   .navlink { font-size: 11.5px; }
@@ -527,7 +518,7 @@ footer a { color: var(--accent); }
 </div>
 <div class="tt" id="chart-tt"></div>
 <script>
-const PAYLOAD_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/contratos/payload.json.gz?v=34182872578";
+const PAYLOAD_URL = "payload.json.gz";
 
 
 function b64ToBytes(b64) {
@@ -815,7 +806,7 @@ const isCurrentlyValid = r => !isExpired(r) && !isNotYetStarted(r);
 const CHART_PALETTE_LIGHT = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#4a3aa7", "#e34948"];
 const CHART_PALETTE_DARK = ["#3987e5", "#d95926", "#199e70", "#c98500", "#d55181", "#008300", "#9085e9", "#e66767"];
 const CATEGORY_ORDER = ["Transport Contract", "Transport Contract (Auction)", "Master Contract"];
-const TSO_ORDER = ["TBG", "TAG", "NTS"];
+const TSO_ORDER = ["NTS", "TAG", "TBG"];
 
 const comboKey = (tso, cat) => tso + "||" + cat;
 const comboLabel = (tso, cat) => tso + " · " + cat;

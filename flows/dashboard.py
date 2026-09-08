@@ -345,16 +345,6 @@ footer a { color: var(--accent); }
       <select id="f-kpi-month"></select>
     </span>
   </div>
-  <div class="tso-schematic" aria-hidden="true">
-    <svg viewBox="0 0 280 56" xmlns="http://www.w3.org/2000/svg">
-      <line x1="24" y1="14" x2="256" y2="14" stroke="var(--accent)" stroke-width="2"/>
-      <text x="24" y="11" fill="var(--muted2)" font-size="9" font-family="var(--font)">NTS</text>
-      <line x1="24" y1="28" x2="256" y2="28" stroke="var(--chart-3)" stroke-width="2"/>
-      <text x="24" y="25" fill="var(--muted2)" font-size="9" font-family="var(--font)">TAG</text>
-      <line x1="24" y1="42" x2="200" y2="42" stroke="var(--chart-5)" stroke-width="2"/>
-      <text x="24" y="39" fill="var(--muted2)" font-size="9" font-family="var(--font)">TBG</text>
-    </svg>
-  </div>
   <div class="kpi-cards" id="kpi-cards"></div>
 </div>
 
