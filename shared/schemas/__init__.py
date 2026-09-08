@@ -27,7 +27,10 @@ FLOWS_POINTS_COLUMNS = (
     "tso",
     "variable",
     "value",
+    "source",  # anp | tag | tbg | nts
 )
+
+FLOWS_POINT_SOURCES = ("anp", "tag", "tbg", "nts")
 
 FLOWS_LEDGER_COLUMNS = (
     "date",

@@ -134,6 +134,11 @@ def load_payload() -> dict:
         kpi_last_date = None
 
     _now_utc = dt.datetime.now(dt.timezone.utc)
+    sources_present = []
+    if len(points_df) and "source" in points_df.columns:
+        sources_present = sorted(points_df["source"].dropna().astype(str).unique().tolist())
+    elif len(points_df):
+        sources_present = ["anp"]
     return {
         "generated": _now_utc.strftime("%Y-%m-%d %H:%M UTC"),
         "generatedIso": _now_utc.isoformat(),
@@ -150,6 +155,7 @@ def load_payload() -> dict:
         "kpiLastDate": kpi_last_date,
         "kpiTotal7d": round(sum(kpi_by_tso.values()), 1) if kpi_by_tso else None,
         "nPoints": len(points_meta),
+        "sources": sources_present,
     }
 
 
@@ -159,7 +165,7 @@ TEMPLATE = """<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pipeline Flows</title>
-<meta name="description" content="Daily physical natural gas flow at every receipt and delivery point on Brazil's transport pipelines, plus system-use gas, losses, imbalance, and linepack -- from ANP's public data.">
+<meta name="description" content="Daily physical natural gas flow at every receipt and delivery point on Brazil's transport pipelines, plus system-use gas, losses, imbalance, and linepack -- from ANP open data and TAG/TBG/NTS Portaria 1/2003 publications.">
 <link rel="canonical" href="https://gasbrazil.com/flows/">
 <link rel="icon" href="__FAVICON_DATA_URI__">
 __FONT_PRELOAD__
@@ -334,7 +340,10 @@ footer a { color: var(--accent); }
 <div class="flagbar" aria-hidden="true"></div>
 <div class="sources">
   <span class="sources-label" data-i18n="sources">Sources</span>
-  <a class="pill" href="https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/dados-consolidados-movimentacao-de-gas-natural-em-gasodutos-de-transporte" target="_blank" rel="noopener">ANP &mdash; movimentação de gás em gasodutos de transporte<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+  <a class="pill" href="https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/dados-consolidados-movimentacao-de-gas-natural-em-gasodutos-de-transporte" target="_blank" rel="noopener">ANP &mdash; movimentação<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+  <a class="pill" href="https://ntag.com.br/transparencia/" target="_blank" rel="noopener">TAG &mdash; Portaria 1/2003<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+  <a class="pill" href="https://www.tbg.com.br/informacoes-a-anp" target="_blank" rel="noopener">TBG &mdash; Portaria 1/2003<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+  <a class="pill" href="https://www.ntsbrasil.com/transparencia/" target="_blank" rel="noopener">NTS &mdash; Portaria 1/2003<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
 </div>
 
 <div class="kpi-card-wrap">
@@ -415,7 +424,7 @@ footer a { color: var(--accent); }
   </table>
 </div>
 <footer>
-  &copy; <span id="year"></span> GasBrazil.com &middot; Data: ANP dados abertos (public CSV) &middot; Shipper capacity is on <a href="../contratos/">POC Contracts</a>; this page shows physical flow totals only &middot; Contact: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
+  &copy; <span id="year"></span> GasBrazil.com &middot; Data: ANP open data + TAG/TBG/NTS Portaria 1/2003 (Actual/Scheduled prefer TSO when available) &middot; Shipper capacity is on <a href="../contratos/">POC Contracts</a>; this page shows physical flow totals only &middot; Contact: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
 </footer>
 </div>
 <div class="tt" id="chart-tt"></div>

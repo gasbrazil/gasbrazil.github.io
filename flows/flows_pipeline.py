@@ -41,9 +41,14 @@ build time to keep the store and the dashboard's embedded payload a
 reasonable size -- shipper capacity belongs on POC Contracts
 (/contratos/); this dashboard is about physical flow totals only.
 
+TSO overlay (Portaria ANP nº 1/2003): TAG / TBG / NTS publish programmed and
+actual meter volumes on their transparency pages, often ahead of ANP's
+consolidated CSV. `fetch` also pulls those files into raw/tso/; `build`
+merges TSO Actual/Scheduled over ANP for matching points (see flows/tso/).
+
 Usage:
-    python flows_pipeline.py fetch    # download raw/gn_<month>_<year>.csv files
-    python flows_pipeline.py build    # raw/*.csv -> data/flows_points.parquet + data/flows_ledger.parquet
+    python flows_pipeline.py fetch    # download ANP CSVs + TSO workbooks
+    python flows_pipeline.py build    # raw -> data/flows_points.parquet + data/flows_ledger.parquet
     python flows_pipeline.py all      # fetch + build
 """
 from __future__ import annotations
@@ -58,6 +63,13 @@ import urllib.request
 from pathlib import Path
 
 import pandas as pd
+
+# Local package for TSO adapters (TAG/TBG/NTS).
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from tso import adapters as tso_adapters  # noqa: E402
+from tso import build_all_points as tso_build_all_points  # noqa: E402
+from tso import fetch_all as tso_fetch_all  # noqa: E402
+from tso import merge_points as tso_merge_points  # noqa: E402
 
 BASE_URL = "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/arquivos/arquivos-movimentacao-de-gas-natural-em-gasodutos-de-transporte"
 
@@ -283,6 +295,10 @@ def cmd_fetch(args) -> None:
             print("Too many failures -- treating as a systemic problem.", file=sys.stderr)
             sys.exit(2)
 
+    # TSO Portaria overlays (soft-fail per adapter -- never wipe ANP success).
+    print("Fetching TSO Portaria 1/2003 programmed/actual files...")
+    tso_fetch_all(tso_adapters(), force=bool(getattr(args, "force", False)))
+
 
 import re
 
@@ -409,7 +425,7 @@ def _aggregate_points(long_df: pd.DataFrame) -> pd.DataFrame:
     if long_df.empty:
         return pd.DataFrame(columns=[
             "date", "point_code", "point_name", "point_type", "pipeline_code", "pipeline_name",
-            "municipality", "uf", "tso", "variable", "value",
+            "municipality", "uf", "tso", "variable", "value", "source",
         ])
     # Volume Solicitado/Programado/Realizado and Alocação are genuine
     # per-shipper splits at a point -- confirmed directly (different
@@ -454,6 +470,7 @@ def _aggregate_points(long_df: pd.DataFrame) -> pd.DataFrame:
         "date", "point_code", "point_name", "point_type", "pipeline_code", "pipeline_name",
         "municipality", "uf", "tso", "variable", "value",
     ]]
+    out["source"] = "anp"
     return out.sort_values(["pipeline_name", "point_name", "variable", "date"]).reset_index(drop=True)
 
 
@@ -487,7 +504,56 @@ def _aggregate_ledger(long_df: pd.DataFrame) -> pd.DataFrame:
 
 
 def cmd_build(args) -> None:
-    points_df, ledger_df = build_tables()
+    try:
+        anp_points, ledger_df = build_tables()
+    except FileNotFoundError as e:
+        print(f"  ANP build skipped: {e}")
+        anp_points = pd.DataFrame(columns=[
+            "date", "point_code", "point_name", "point_type", "pipeline_code", "pipeline_name",
+            "municipality", "uf", "tso", "variable", "value", "source",
+        ])
+        ledger_df = pd.DataFrame(columns=[
+            "date", "pipeline_code", "pipeline_name", "tso", "variable", "value",
+        ])
+    print("Building TSO overlays...")
+    tso_points = tso_build_all_points(tso_adapters())
+    points_df = tso_merge_points(anp_points, tso_points)
+    if len(tso_points):
+        by_src = tso_points.groupby("source").size().to_dict()
+        print(f"  merged TSO overlay: {by_src}; points rows now {len(points_df):,}")
+
+    # Optional crosswalk proposals (printed only; not auto-applied).
+    try:
+        from tso.crosswalk import propose_matches, load_crosswalk, save_crosswalk  # noqa: WPS433
+        proposals_path = HERE / "tso" / "_crosswalk_proposals.json"
+        all_proposals = []
+        for src in ("tag", "tbg", "nts"):
+            subset = tso_points[tso_points["source"] == src] if len(tso_points) else tso_points
+            all_proposals.extend(propose_matches(subset, anp_points, source=src))
+        if all_proposals:
+            proposals_path.write_text(
+                json.dumps(all_proposals, indent=2, ensure_ascii=False) + "\n",
+                encoding="utf-8",
+            )
+            print(f"  wrote {len(all_proposals)} crosswalk proposals → {proposals_path.name}")
+            # Auto-apply high-confidence exact-name proposals into the committed
+            # crosswalk only when the key is still empty (never overwrite manual edits).
+            cw = load_crosswalk()
+            applied = 0
+            for p in all_proposals:
+                bucket = cw.setdefault(p["source"], {})
+                if p["crosswalk_key"] not in bucket and p["tso_point_name"].casefold() == str(p["anp_point_name"]).casefold():
+                    bucket[p["crosswalk_key"]] = p["anp_point_code"]
+                    applied += 1
+            if applied:
+                save_crosswalk(cw)
+                # Rebuild TSO with updated crosswalk so codes align on this run.
+                tso_points = tso_build_all_points(tso_adapters())
+                points_df = tso_merge_points(anp_points, tso_points)
+                print(f"  applied {applied} exact-name crosswalk entries and re-merged")
+    except Exception as e:
+        print(f"  crosswalk proposal warning: {e}")
+
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     points_df.to_parquet(POINTS_PARQUET, index=False)
     ledger_df.to_parquet(LEDGER_PARQUET, index=False)
@@ -498,12 +564,14 @@ def cmd_build(args) -> None:
     problems = []
     if len(points_df) == 0:
         problems.append("zero point-level rows produced")
-    if len(ledger_df) == 0:
+    # Ledger can be empty when only TSO overlays are present (no ANP CSVs).
+    if len(ledger_df) == 0 and len(anp_points) > 0:
         problems.append("zero ledger rows produced")
     if len(points_df):
         latest = points_df["date"].max()
         # Monthly publication with a multi-week lag (see README) -- flag if
         # the newest data we have is implausibly old, not just "not today".
+        # TSO overlays often close that gap; use merged latest.
         staleness_days = (pd.Timestamp.today().normalize() - latest).days
         if staleness_days > 75:
             problems.append(f"latest point data is {staleness_days} days old ({latest.date()})")
@@ -519,9 +587,10 @@ def cmd_build(args) -> None:
     import data_kit as dk  # noqa: E402
     import schemas  # noqa: E402
     schemas.validate_flows_points(points_df)
-    schemas.validate_flows_ledger(ledger_df)
+    if len(ledger_df):
+        schemas.validate_flows_ledger(ledger_df)
+        dk.publish("flows_ledger", LEDGER_PARQUET)
     dk.publish("flows_points", POINTS_PARQUET)
-    dk.publish("flows_ledger", LEDGER_PARQUET)
 
 
 def main() -> None:

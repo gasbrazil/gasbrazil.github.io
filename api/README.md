@@ -19,7 +19,7 @@ uvicorn api.main:app --reload --port 8000
 
 | Method | Path | Notes |
 |--------|------|--------|
-| GET | `/v1/flows/points` | `tso`, `point_code`, `variable`, `from`, `to`, `limit` |
+| GET | `/v1/flows/points` | `tso`, `point_code`, `variable`, `source` (`anp`/`tag`/`tbg`/`nts`), `from`, `to`, `limit` |
 | GET | `/v1/pld/daily` | `submarket`, `from`, `to`, `limit` |
 | GET | `/v1/supply/monthly` | `from`, `to`, `limit` |
 | GET | `/v1/ons/balances` | `subsystem`, `series`, `from`, `to`, `limit` |

@@ -25,6 +25,8 @@ contratos/data/
 # series payloads live on Cloudflare R2.
 flows/raw/
 flows/data/
+flows/tso/_crosswalk_proposals.json
+flows/tso/__pycache__/
 
 # supply/: ANP PPGN-EL + import CSVs and derived monthly parquet — rebuildable;
 # CI caches raw/. supply/index.html is committed; payload on R2.
@@ -50,3 +52,5 @@ hub/teasers.json.gz
 # ADR-002 lake mirrors (rebuildable; mirrored to private R2 lake bucket in CI).
 lake/**
 !lake/README.md
+
+tag_excel/

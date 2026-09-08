@@ -108,6 +108,7 @@ def flows_points(
     tso: Optional[str] = None,
     point_code: Optional[str] = None,
     variable: Optional[str] = None,
+    source: Optional[str] = None,
     date_from: Optional[str] = Query(None, alias="from"),
     date_to: Optional[str] = Query(None, alias="to"),
     limit: int = Query(5000, ge=1, le=50000),
@@ -124,6 +125,8 @@ def flows_points(
         df = df[df["point_code"].astype(str) == point_code]
     if variable:
         df = df[df["variable"].astype(str) == variable]
+    if source and "source" in df.columns:
+        df = df[df["source"].astype(str).str.casefold() == source.casefold()]
     df = df.sort_values(["date", "tso", "point_code"])
     return {"count": int(len(df)), "limit": limit, "rows": _records(df, limit)}
 

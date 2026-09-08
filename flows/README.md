@@ -33,6 +33,13 @@ gunzipped in the browser). Parquet under `data/` stays gitignored / CI-cached.
   Jan–Apr 2024 files were revised after a new TBG receiving point was
   added) — `fetch` always re-downloads the last 3 months even if already
   cached.
+- **TSO overlay (Portaria ANP nº 1/2003):** TAG, TBG, and NTS also publish
+  programmed/actual meter volumes on their transparency pages (often
+  sooner than ANP). `fetch` pulls those into `raw/tso/{tag,tbg,nts}/`;
+  `build` merges Actual/Scheduled over ANP when the same `point_code` +
+  date exists (see [`tso/README.md`](tso/README.md)). TAG units are m³/dia
+  and are converted to thousand m³. Ledger / pressure / allocation /
+  requested stay ANP-only.
 - Encoding is `latin-1`, delimiter is `;`, decimals use a comma. Some files
   have malformed number formatting (stray whitespace, `- 123,45` with a
   space after the minus sign) that silently breaks pandas' built-in
@@ -80,10 +87,10 @@ the repo for anyone who wants it.
 
 ## Files
 
-- `flows_pipeline.py` — `fetch` downloads `raw/gn_<month>_<year>.csv` files,
-  `build` transforms them into `data/flows_points.parquet` +
-  `data/flows_ledger.parquet` (health-gated: exits non-zero on zero rows,
-  staleness beyond ~75 days, or missing point codes). `all` runs both.
+- `flows_pipeline.py` — `fetch` downloads ANP `raw/gn_*.csv` plus TSO files
+  under `raw/tso/{tag,tbg,nts}/`; `build` merges into `data/flows_points.parquet`
+  + `data/flows_ledger.parquet` (health-gated). `all` runs both.
+- `tso/` — Portaria ANP nº 1/2003 adapters (TAG/TBG/NTS) + merge/crosswalk.
 - `dashboard.py` — builds `index.html`, the single-file dashboard. Imports
   `../shared/dashboard_kit.py` for theming, font/favicon embedding, the
   theme toggle, i18n, CSV/XLSX export helpers, and cross-dashboard nav

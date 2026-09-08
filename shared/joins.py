@@ -206,6 +206,16 @@ def join_capacity_vs_flows(
             flow_variable = "Actual Volume (thousand m3)"
     f = f[f["variable"].astype(str) == flow_variable]
     f["tso"] = f["tso"].astype(str).str.upper().str.strip()
+    # Prefer TSO Portaria overlays over ANP when both exist for a transporter,
+    # so utilization does not double-count synthetic-coded TAG/TBG/NTS meters
+    # alongside ANP point codes for the same physical network.
+    if "source" in f.columns:
+        f["_src"] = f["source"].astype(str).str.casefold()
+        tso_with_overlay = set(f.loc[f["_src"].isin(("tag", "tbg", "nts")), "tso"])
+        if tso_with_overlay:
+            keep = ~f["tso"].isin(tso_with_overlay) | f["_src"].isin(("tag", "tbg", "nts"))
+            f = f.loc[keep]
+        f = f.drop(columns=["_src"])
     # Average daily realized over the last 30 days of data per TSO.
     last = f["date"].max()
     window = f[f["date"] >= (last - pd.Timedelta(days=29))]

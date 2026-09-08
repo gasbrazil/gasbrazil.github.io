@@ -1,19 +1,17 @@
 name: Refresh Pipeline Flows dashboard
 
 # ANP publishes one file per month, typically with a lag of several weeks,
-# and revises recently-published months in place. In practice ANP itself
-# only refreshes every 2-4 weeks, so the schedule below pulls fresh data
-# twice a month (the 8th and 20th, UTC) rather than daily -- comfortably
-# ahead of ANP's own cadence without hammering their site on days nothing
-# has changed. fetch_pipeline.py's own REFRESH_LAST_N_MONTHS handles not
-# re-downloading the full history on a normal run (just the last few
-# months, to catch revisions).
+# and revises recently-published months in place. TAG/TBG/NTS Portaria 1/2003
+# workbooks often land sooner for Actual/Scheduled volumes. The schedule
+# below pulls fresh data twice a month (the 8th and 20th, UTC) -- ahead of
+# ANP's cadence without hammering upstream sites daily. fetch refreshes the
+# last few ANP months plus TSO transparency files (see flows/tso/).
 #
 # A push (a code/style change to flows/** or shared/**, not a data refresh)
 # still rebuilds and redeploys the dashboard immediately, but does NOT hit
-# ANP's site again -- it reuses whatever raw ANP data is already cached
+# ANP/TSO sites again -- it reuses whatever raw data is already cached
 # from the last scheduled fetch. Only the twice-monthly schedule, or an
-# on-demand "Run workflow" dispatch, actually pulls fresh data from ANP.
+# on-demand "Run workflow" dispatch, actually pulls fresh upstream data.
 on:
   schedule:
     - cron: "15 12 8,20 * *"
@@ -61,15 +59,14 @@ jobs:
 
       - run: pip install -r requirements.txt
 
-      # Raw ANP files are one CSV per month -- cache the whole raw/ tree
-      # keyed by year-month so a normal run only re-downloads the last few
-      # months (fetch always refreshes those; see REFRESH_LAST_N_MONTHS)
-      # instead of re-pulling the full multi-year history every time.
+      # Raw ANP CSVs + TSO Portaria workbooks under raw/tso/ -- cache the whole
+      # raw/ tree keyed by year-month so a normal run only re-downloads recent
+      # ANP months and refreshed TSO cumulative files.
       - name: Cache key for this month
         id: ym
         run: echo "ym=$(date -u +%Y-%m)" >> "$GITHUB_OUTPUT"
 
-      - name: Restore raw ANP source files
+      - name: Restore raw ANP + TSO source files
         uses: actions/cache@v4
         with:
           path: flows/raw
@@ -77,7 +74,7 @@ jobs:
           restore-keys: |
             flows-raw-
 
-      # A code-only push doesn't need fresh data from ANP -- skip the
+      # A code-only push doesn't need fresh upstream data -- skip the
       # network fetch and rebuild from whatever raw/ the cache restored
       # (from the last scheduled run). The one exception is a cold/evicted
       # cache with nothing in it at all (e.g. this workflow's very first
@@ -91,13 +88,13 @@ jobs:
             echo "has_data=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Fetch new and revised monthly files
+      - name: Fetch ANP + TSO sources
         if: github.event_name != 'push' || steps.rawcheck.outputs.has_data != 'true'
         run: python flows_pipeline.py fetch
 
-      - name: Skip fetch (code-only push, using cached ANP data)
+      - name: Skip fetch (code-only push, using cached raw data)
         if: github.event_name == 'push' && steps.rawcheck.outputs.has_data == 'true'
-        run: echo "Code-only push -- rebuilding from the raw ANP data already cached from the last scheduled fetch (8th/20th), not re-fetching from ANP."
+        run: echo "Code-only push -- rebuilding from raw ANP/TSO data already cached from the last scheduled fetch (8th/20th), not re-fetching upstream."
 
       # Health gate (zero rows, staleness, missing point codes) runs inside
       # `build` and exits non-zero on failure -- a bad build stops here
