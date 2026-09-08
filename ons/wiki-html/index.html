@@ -262,7 +262,19 @@ html, body {
   z-index: 2;
   background: var(--panel);
 }
-.th-label { cursor: pointer; user-select: none; display: block; }
+/* Single-line rows site-wide: overflow truncates with ellipsis instead of
+   wrapping and blowing up row height (POC Contracts especially). */
+.table-wrap th, .table-wrap td,
+.scroll table.data th, .scroll table.data td,
+.meter-table-wrap th, .meter-table-wrap td,
+.drill-card th, .drill-card td,
+.entlist table.data th, .entlist table.data td,
+table.data th, table.data td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.th-label { cursor: pointer; user-select: none; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .th-label:hover { color: var(--text); }
 .th-filter { display: block; width: 100%; margin-top: 4px; padding: 2px 6px; font-size: 11px; font-weight: 300; background: var(--bg); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); color: var(--text); box-sizing: border-box; cursor: text; }
 th.num .th-filter { text-align: right; }
