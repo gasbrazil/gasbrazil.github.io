@@ -109,6 +109,25 @@
   --chart-6: #64748b;
   --chart-7: #1d4ed8;
   --chart-8: #475569;
+
+  /* Pipeline (TSO) identity colors — TAG blue, NTS orange, TBG green.
+     Shade -1 is the base; -2..-4 differentiate secondary series (types,
+     points, contract categories) within the same transporter. */
+  --tso-nts: #d97706;
+  --tso-nts-1: #d97706;
+  --tso-nts-2: #f59e0b;
+  --tso-nts-3: #b45309;
+  --tso-nts-4: #92400e;
+  --tso-tag: #002776;
+  --tso-tag-1: #002776;
+  --tso-tag-2: #2f6fed;
+  --tso-tag-3: #1d4ed8;
+  --tso-tag-4: #60a5fa;
+  --tso-tbg: #15803d;
+  --tso-tbg-1: #15803d;
+  --tso-tbg-2: #22c55e;
+  --tso-tbg-3: #166534;
+  --tso-tbg-4: #4ade80;
 }
 
 [data-theme="dark"] {
@@ -145,6 +164,22 @@
   --chart-6: #788396;
   --chart-7: #93c5fd;
   --chart-8: #475569;
+
+  --tso-nts: #f59e0b;
+  --tso-nts-1: #f59e0b;
+  --tso-nts-2: #fbbf24;
+  --tso-nts-3: #d97706;
+  --tso-nts-4: #fcd34d;
+  --tso-tag: #3f74d9;
+  --tso-tag-1: #3f74d9;
+  --tso-tag-2: #60a5fa;
+  --tso-tag-3: #93c5fd;
+  --tso-tag-4: #bfdbfe;
+  --tso-tbg: #22c55e;
+  --tso-tbg-1: #22c55e;
+  --tso-tbg-2: #4ade80;
+  --tso-tbg-3: #16a34a;
+  --tso-tbg-4: #86efac;
 }
 
 /* Pacaembu is heavy at Regular -- default the whole UI to Light (300).
@@ -229,6 +264,42 @@ html, body {
   background: transparent;
 }
 .navlink:hover { color: var(--accent); border-bottom-color: var(--accent-soft); }
+/* Source links: short agency name + external icon (ONS Balances look). */
+.sources {
+  display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+  margin: 0 0 var(--gap);
+}
+.sources-label {
+  font-size: 11px; text-transform: uppercase; letter-spacing: .06em;
+  color: var(--muted); font-weight: 200; margin-right: 2px;
+}
+.sources a {
+  font-size: 11.5px; color: var(--muted2); text-decoration: none;
+  border: 1px solid var(--ring); border-radius: 5px; padding: 3px 10px;
+  white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;
+  font-weight: 400;
+}
+.sources a:hover {
+  background: var(--accent-soft); color: var(--text); border-color: var(--border-strong);
+}
+.ext-icon { width: 10px; height: 10px; display: inline-block; flex: none; opacity: .75; }
+
+/* Selected TSO chips / toggles use identity colors when data-tso is set. */
+.tso-chip.selected[data-tso="NTS"],
+.tso-toggle.active[data-tso="NTS"] {
+  background: var(--tso-nts); border-color: var(--tso-nts); color: #fff;
+}
+.tso-chip.selected[data-tso="TAG"],
+.tso-toggle.active[data-tso="TAG"] {
+  background: var(--tso-tag); border-color: var(--tso-tag); color: #fff;
+}
+.tso-chip.selected[data-tso="TBG"],
+.tso-toggle.active[data-tso="TBG"] {
+  background: var(--tso-tbg); border-color: var(--tso-tbg); color: #fff;
+}
+.tso-chip.selected .muted,
+.tso-chip.selected[data-tso] .muted { color: rgba(255,255,255,.72); }
+
 .navlink.is-active, .navlink[aria-current="page"] {
   color: var(--accent);
   border-bottom-color: var(--accent);
@@ -425,10 +496,12 @@ main.hub { flex: 1; width: var(--content-w); max-width: var(--content-max); marg
   color: var(--muted); font-weight: 200; margin-bottom: 8px; }
 .sources-block .row { display: flex; flex-wrap: wrap; gap: 6px; }
 .sources-block a {
-  font-size: 12px; font-weight: 300; color: var(--muted2); text-decoration: none;
-  border: 1px solid var(--border); border-radius: 5px; padding: 4px 9px;
+  font-size: 11.5px; font-weight: 400; color: var(--muted2); text-decoration: none;
+  border: 1px solid var(--ring); border-radius: 5px; padding: 3px 10px;
+  white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;
 }
 .sources-block a:hover { background: var(--accent-soft); color: var(--text); border-color: var(--border-strong); }
+.sources-block .ext-icon { width: 10px; height: 10px; display: inline-block; flex: none; opacity: .75; }
 .prose { margin-top: 8px; max-width: 42em; }
 .prose h2 { font-size: 16px; font-weight: 400; margin: 22px 0 6px; }
 .prose p, .prose li { font-size: 14px; font-weight: 300; line-height: 1.6; color: var(--muted2); }
@@ -573,15 +646,20 @@ const GB_I18N = {
     cardPrecosDesc: "ANP Resolution 52/2011 disclosed gas prices.",
     cardDesk: "The Desk",
     cardDeskDesc: "Cross-product snapshot across gas and power.",
+    deskLinkOns: "ONS",
+    deskLinkPld: "CCEE PLD",
+    deskLinkPrecos: "ANP prices",
+    deskLinkPoc: "POC",
+    deskLinkFlows: "ANP flows",
     kpiRefresh: "Last refreshed",
     dataThrough: "Data through",
     sources: "Sources",
-    sourceOns: "ONS open data",
-    sourcePoc: "Portal de Oferta de Capacidade",
-    sourceFlows: "ANP + TAG/TBG/NTS Portaria 1/2003 — pipeline movement",
-    sourceSupply: "ANP PPGN-EL — production by state",
-    sourcePrecos: "ANP — publicidade dos preços de gás natural",
-    sourcePld: "CCEE open data — PLD média diária",
+    sourceOns: "ONS",
+    sourcePoc: "POC",
+    sourceFlows: "ANP",
+    sourceSupply: "ANP",
+    sourcePrecos: "ANP",
+    sourcePld: "CCEE",
     pldSubtitle: "CCEE daily-average PLD by submarket (R$/MWh).",
     pldNote: "PLD (CCEE) is not the same series as ONS CMO. See",
     pldNoteLink: "ONS Balances",
@@ -652,15 +730,20 @@ const GB_I18N = {
     cardPrecosDesc: "Preços divulgados pela ANP (Resolução 52/2011).",
     cardDesk: "The Desk",
     cardDeskDesc: "Retrato cruzado de gás e energia.",
+    deskLinkOns: "ONS",
+    deskLinkPld: "PLD CCEE",
+    deskLinkPrecos: "Preços ANP",
+    deskLinkPoc: "POC",
+    deskLinkFlows: "Fluxos ANP",
     kpiRefresh: "Última atualização",
     dataThrough: "Dados até",
     sources: "Fontes",
-    sourceOns: "Dados abertos da ONS",
-    sourcePoc: "Portal de Oferta de Capacidade",
-    sourceFlows: "ANP + TAG/TBG/NTS Portaria 1/2003 — movimentação em gasodutos",
-    sourceSupply: "ANP PPGN-EL — produção por estado",
-    sourcePrecos: "ANP — publicidade dos preços de gás natural",
-    sourcePld: "Dados abertos da CCEE — PLD média diária",
+    sourceOns: "ONS",
+    sourcePoc: "POC",
+    sourceFlows: "ANP",
+    sourceSupply: "ANP",
+    sourcePrecos: "ANP",
+    sourcePld: "CCEE",
     pldSubtitle: "PLD médio diário da CCEE por submercado (R$/MWh).",
     pldNote: "O PLD (CCEE) não é a mesma série do CMO da ONS. Veja",
     pldNoteLink: "Balanços ONS",

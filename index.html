@@ -109,6 +109,25 @@
   --chart-6: #64748b;
   --chart-7: #1d4ed8;
   --chart-8: #475569;
+
+  /* Pipeline (TSO) identity colors — TAG blue, NTS orange, TBG green.
+     Shade -1 is the base; -2..-4 differentiate secondary series (types,
+     points, contract categories) within the same transporter. */
+  --tso-nts: #d97706;
+  --tso-nts-1: #d97706;
+  --tso-nts-2: #f59e0b;
+  --tso-nts-3: #b45309;
+  --tso-nts-4: #92400e;
+  --tso-tag: #002776;
+  --tso-tag-1: #002776;
+  --tso-tag-2: #2f6fed;
+  --tso-tag-3: #1d4ed8;
+  --tso-tag-4: #60a5fa;
+  --tso-tbg: #15803d;
+  --tso-tbg-1: #15803d;
+  --tso-tbg-2: #22c55e;
+  --tso-tbg-3: #166534;
+  --tso-tbg-4: #4ade80;
 }
 
 [data-theme="dark"] {
@@ -145,6 +164,22 @@
   --chart-6: #788396;
   --chart-7: #93c5fd;
   --chart-8: #475569;
+
+  --tso-nts: #f59e0b;
+  --tso-nts-1: #f59e0b;
+  --tso-nts-2: #fbbf24;
+  --tso-nts-3: #d97706;
+  --tso-nts-4: #fcd34d;
+  --tso-tag: #3f74d9;
+  --tso-tag-1: #3f74d9;
+  --tso-tag-2: #60a5fa;
+  --tso-tag-3: #93c5fd;
+  --tso-tag-4: #bfdbfe;
+  --tso-tbg: #22c55e;
+  --tso-tbg-1: #22c55e;
+  --tso-tbg-2: #4ade80;
+  --tso-tbg-3: #16a34a;
+  --tso-tbg-4: #86efac;
 }
 
 /* Pacaembu is heavy at Regular -- default the whole UI to Light (300).
@@ -229,6 +264,42 @@ html, body {
   background: transparent;
 }
 .navlink:hover { color: var(--accent); border-bottom-color: var(--accent-soft); }
+/* Source links: short agency name + external icon (ONS Balances look). */
+.sources {
+  display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+  margin: 0 0 var(--gap);
+}
+.sources-label {
+  font-size: 11px; text-transform: uppercase; letter-spacing: .06em;
+  color: var(--muted); font-weight: 200; margin-right: 2px;
+}
+.sources a {
+  font-size: 11.5px; color: var(--muted2); text-decoration: none;
+  border: 1px solid var(--ring); border-radius: 5px; padding: 3px 10px;
+  white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;
+  font-weight: 400;
+}
+.sources a:hover {
+  background: var(--accent-soft); color: var(--text); border-color: var(--border-strong);
+}
+.ext-icon { width: 10px; height: 10px; display: inline-block; flex: none; opacity: .75; }
+
+/* Selected TSO chips / toggles use identity colors when data-tso is set. */
+.tso-chip.selected[data-tso="NTS"],
+.tso-toggle.active[data-tso="NTS"] {
+  background: var(--tso-nts); border-color: var(--tso-nts); color: #fff;
+}
+.tso-chip.selected[data-tso="TAG"],
+.tso-toggle.active[data-tso="TAG"] {
+  background: var(--tso-tag); border-color: var(--tso-tag); color: #fff;
+}
+.tso-chip.selected[data-tso="TBG"],
+.tso-toggle.active[data-tso="TBG"] {
+  background: var(--tso-tbg); border-color: var(--tso-tbg); color: #fff;
+}
+.tso-chip.selected .muted,
+.tso-chip.selected[data-tso] .muted { color: rgba(255,255,255,.72); }
+
 .navlink.is-active, .navlink[aria-current="page"] {
   color: var(--accent);
   border-bottom-color: var(--accent);
@@ -425,10 +496,12 @@ main.hub { flex: 1; width: var(--content-w); max-width: var(--content-max); marg
   color: var(--muted); font-weight: 200; margin-bottom: 8px; }
 .sources-block .row { display: flex; flex-wrap: wrap; gap: 6px; }
 .sources-block a {
-  font-size: 12px; font-weight: 300; color: var(--muted2); text-decoration: none;
-  border: 1px solid var(--border); border-radius: 5px; padding: 4px 9px;
+  font-size: 11.5px; font-weight: 400; color: var(--muted2); text-decoration: none;
+  border: 1px solid var(--ring); border-radius: 5px; padding: 3px 10px;
+  white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;
 }
 .sources-block a:hover { background: var(--accent-soft); color: var(--text); border-color: var(--border-strong); }
+.sources-block .ext-icon { width: 10px; height: 10px; display: inline-block; flex: none; opacity: .75; }
 .prose { margin-top: 8px; max-width: 42em; }
 .prose h2 { font-size: 16px; font-weight: 400; margin: 22px 0 6px; }
 .prose p, .prose li { font-size: 14px; font-weight: 300; line-height: 1.6; color: var(--muted2); }
@@ -461,57 +534,55 @@ footer.site a { color: var(--muted); }
       <div class="kpi-label" data-i18n="cardOns">ONS Balances</div>
       <div class="kpi-role">Grid &amp; gas dispatch</div>
       <div class="kpi-val" data-en="3,185 MWmed gas" data-pt="3,185 MWmed a gás">3,185 MWmed gas</div>
-      <div class="kpi-when" data-refresh="2026-09-08 18:59 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-08 20:51 UTC"></div>
     </a>
     <a class="kpi-cell" href="poc/" data-slug="poc">
       <div class="kpi-label" data-i18n="cardPoc">POC Results</div>
       <div class="kpi-role">Capacity auctions</div>
-      <div class="kpi-val" data-en="53.15 R$/MMBtu · 8 trades (7d)" data-pt="53.15 R$/MMBtu · 8 negócios (7d)">53.15 R$/MMBtu · 8 trades (7d)</div>
-      <div class="kpi-when" data-refresh="2026-09-04"></div>
+      <div class="kpi-val" data-en="33.51 R$/MMBtu · 1 trades (7d)" data-pt="33.51 R$/MMBtu · 1 negócios (7d)">33.51 R$/MMBtu · 1 trades (7d)</div>
+      <div class="kpi-when" data-refresh="2026-08-26"></div>
       
     </a>
     <a class="kpi-cell" href="contratos/" data-slug="contratos">
       <div class="kpi-label" data-i18n="cardContratos">POC Contracts</div>
       <div class="kpi-role">Firm transport</div>
-      <div class="kpi-val" data-en="893 contracts · 186,438 thousand m³/d" data-pt="893 contratos · 186,438 mil m³/d">893 contracts · 186,438 thousand m³/d</div>
-      <div class="kpi-when" data-refresh="2026-09-08 18:59 UTC"></div>
+      <div class="kpi-val" data-en="190 contracts · 210,610 thousand m³/d" data-pt="190 contratos · 210,610 mil m³/d">190 contracts · 210,610 thousand m³/d</div>
+      <div class="kpi-when" data-refresh="2026-09-08 21:12 UTC"></div>
     </a>
     <a class="kpi-cell" href="flows/" data-slug="flows">
       <div class="kpi-label" data-i18n="cardFlows">Pipeline Flows</div>
       <div class="kpi-role">Physical movement</div>
-      <div class="kpi-val" data-en="1358.6M m³ realized (7d) · 270 points" data-pt="1358.6M m³ realizados (7d) · 270 points">1358.6M m³ realized (7d) · 270 points</div>
-      <div class="kpi-when" data-refresh="2026-09-08 19:00 UTC"></div>
+      <div class="kpi-val" data-en="370.5M m³ realized (7d) · 123 points" data-pt="370.5M m³ realizados (7d) · 123 points">370.5M m³ realized (7d) · 123 points</div>
+      <div class="kpi-when" data-refresh="2026-09-08 21:12 UTC"></div>
     </a>
     <a class="kpi-cell" href="supply/" data-slug="supply">
       <div class="kpi-label" data-i18n="cardSupply">Gas Supply</div>
       <div class="kpi-role">National balance</div>
       <div class="kpi-val" data-en="6.7M thousand m³ produced · 2026-07" data-pt="6.7M mil m³ produzidos · 2026-07">6.7M thousand m³ produced · 2026-07</div>
-      <div class="kpi-when" data-refresh="2026-09-08 18:59 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-08 21:12 UTC"></div>
       
     </a>
     <a class="kpi-cell" href="precos/" data-slug="precos">
       <div class="kpi-label" data-i18n="cardPrecos">ANP Prices</div>
       <div class="kpi-role">Disclosed R$/MMBtu</div>
-      <div class="kpi-val" data-en="Santos 18.2 R$/MMBtu · 2026-06" data-pt="Santos 18.2 R$/MMBtu · 2026-06">Santos 18.2 R$/MMBtu · 2026-06</div>
-      <div class="kpi-when" data-refresh="2026-09-08 18:59 UTC"></div>
+      <div class="kpi-val" data-en="Santos 12.8 R$/MMBtu · 2026-06" data-pt="Santos 12.8 R$/MMBtu · 2026-06">Santos 12.8 R$/MMBtu · 2026-06</div>
+      <div class="kpi-when" data-refresh="2026-09-08 21:12 UTC"></div>
     </a>
     <a class="kpi-cell" href="pld/" data-slug="pld">
       <div class="kpi-label" data-i18n="cardPld">PLD Prices</div>
       <div class="kpi-role">Power settlement</div>
-      <div class="kpi-val" data-en="SE 97.79 R$/MWh · 2026-09-08" data-pt="SE 97.79 R$/MWh · 2026-09-08">SE 97.79 R$/MWh · 2026-09-08</div>
-      <div class="kpi-when" data-refresh="2026-09-08 18:59 UTC"></div>
+      <div class="kpi-val" data-en="SE 122.33 R$/MWh · 2026-09-06" data-pt="SE 122.33 R$/MWh · 2026-09-06">SE 122.33 R$/MWh · 2026-09-06</div>
+      <div class="kpi-when" data-refresh="2026-09-08 21:12 UTC"></div>
       
     </a>
   </div>
   <div class="sources-block">
     <div class="label" data-i18n="sources">Sources</div>
     <div class="row">
-      <a href="https://dados.ons.org.br" target="_blank" rel="noopener" data-i18n="sourceOns">ONS open data</a>
-      <a href="https://www.ofertadecapacidade.com.br/PEG/resultado" target="_blank" rel="noopener" data-i18n="sourcePoc">Portal de Oferta de Capacidade</a>
-      <a href="https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/dados-consolidados-movimentacao-de-gas-natural-em-gasodutos-de-transporte" target="_blank" rel="noopener" data-i18n="sourceFlows">ANP open data — pipeline movement</a>
-      <a href="https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/producao-de-petroleo-e-gas-natural-por-estado-e-localizacao" target="_blank" rel="noopener" data-i18n="sourceSupply">ANP PPGN-EL — production by state</a>
-      <a href="https://www.gov.br/anp/pt-br/assuntos/movimentacao-estocagem-e-comercializacao-de-gas-natural/acompanhamento-do-mercado-de-gas-natural/publicidade-dos-precos-de-gas-natural" target="_blank" rel="noopener" data-i18n="sourcePrecos">ANP — publicidade dos preços de gás natural</a>
-      <a href="https://dadosabertos.ccee.org.br/dataset/pld_media_diaria" target="_blank" rel="noopener" data-i18n="sourcePld">CCEE open data — PLD média diária</a>
+      <a href="https://dados.ons.org.br" target="_blank" rel="noopener">ONS<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+      <a href="https://www.ofertadecapacidade.com.br/PEG/resultado" target="_blank" rel="noopener">POC<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+      <a href="https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/dados-consolidados-movimentacao-de-gas-natural-em-gasodutos-de-transporte" target="_blank" rel="noopener">ANP<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+      <a href="https://dadosabertos.ccee.org.br/dataset/pld_media_diaria" target="_blank" rel="noopener">CCEE<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
     </div>
   </div>
 </main>
@@ -612,15 +683,20 @@ const GB_I18N = {
     cardPrecosDesc: "ANP Resolution 52/2011 disclosed gas prices.",
     cardDesk: "The Desk",
     cardDeskDesc: "Cross-product snapshot across gas and power.",
+    deskLinkOns: "ONS",
+    deskLinkPld: "CCEE PLD",
+    deskLinkPrecos: "ANP prices",
+    deskLinkPoc: "POC",
+    deskLinkFlows: "ANP flows",
     kpiRefresh: "Last refreshed",
     dataThrough: "Data through",
     sources: "Sources",
-    sourceOns: "ONS open data",
-    sourcePoc: "Portal de Oferta de Capacidade",
-    sourceFlows: "ANP + TAG/TBG/NTS Portaria 1/2003 — pipeline movement",
-    sourceSupply: "ANP PPGN-EL — production by state",
-    sourcePrecos: "ANP — publicidade dos preços de gás natural",
-    sourcePld: "CCEE open data — PLD média diária",
+    sourceOns: "ONS",
+    sourcePoc: "POC",
+    sourceFlows: "ANP",
+    sourceSupply: "ANP",
+    sourcePrecos: "ANP",
+    sourcePld: "CCEE",
     pldSubtitle: "CCEE daily-average PLD by submarket (R$/MWh).",
     pldNote: "PLD (CCEE) is not the same series as ONS CMO. See",
     pldNoteLink: "ONS Balances",
@@ -691,15 +767,20 @@ const GB_I18N = {
     cardPrecosDesc: "Preços divulgados pela ANP (Resolução 52/2011).",
     cardDesk: "The Desk",
     cardDeskDesc: "Retrato cruzado de gás e energia.",
+    deskLinkOns: "ONS",
+    deskLinkPld: "PLD CCEE",
+    deskLinkPrecos: "Preços ANP",
+    deskLinkPoc: "POC",
+    deskLinkFlows: "Fluxos ANP",
     kpiRefresh: "Última atualização",
     dataThrough: "Dados até",
     sources: "Fontes",
-    sourceOns: "Dados abertos da ONS",
-    sourcePoc: "Portal de Oferta de Capacidade",
-    sourceFlows: "ANP + TAG/TBG/NTS Portaria 1/2003 — movimentação em gasodutos",
-    sourceSupply: "ANP PPGN-EL — produção por estado",
-    sourcePrecos: "ANP — publicidade dos preços de gás natural",
-    sourcePld: "Dados abertos da CCEE — PLD média diária",
+    sourceOns: "ONS",
+    sourcePoc: "POC",
+    sourceFlows: "ANP",
+    sourceSupply: "ANP",
+    sourcePrecos: "ANP",
+    sourcePld: "CCEE",
     pldSubtitle: "PLD médio diário da CCEE por submercado (R$/MWh).",
     pldNote: "O PLD (CCEE) não é a mesma série do CMO da ONS. Veja",
     pldNoteLink: "Balanços ONS",

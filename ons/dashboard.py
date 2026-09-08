@@ -446,7 +446,7 @@ h1{font-size:25px;margin:0;letter-spacing:-.01em}
   color:var(--muted);font-weight:200;margin-right:2px}
 .sources a{font-size:11.5px;color:var(--muted2);text-decoration:none;
   border:1px solid var(--ring);border-radius:5px;padding:3px 10px;white-space:nowrap;
-  display:inline-flex;align-items:center;gap:4px}
+  display:inline-flex;align-items:center;gap:4px;font-weight:400}
 .ext-icon{width:10px;height:10px;display:inline-block;flex:none;opacity:.75}
 .sources a:hover{background:var(--accent-soft);color:var(--text);border-color:var(--border-strong)}
 /* .navlink look owned by shared/theme.css (text underline nav, not pills). */
@@ -628,7 +628,7 @@ table.data thead th.sortable:hover{background:var(--accent-soft)}
 
 <div class="sources">
   <span class="sources-label" data-i18n="sources">Sources</span>
-  <a href="https://dados.ons.org.br" target="_blank" rel="noopener">ONS open data<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+  <a href="https://dados.ons.org.br" target="_blank" rel="noopener">ONS<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
 </div>
 
 <div id="boot">Unpacking data&hellip;</div>

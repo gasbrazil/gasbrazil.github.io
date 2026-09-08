@@ -253,7 +253,7 @@ footer a { color: var(--accent); }
 <div class="flagbar" aria-hidden="true"></div>
 <div class="sources">
   <span class="sources-label" data-i18n="sources">Sources</span>
-  <a class="pill" href="https://dadosabertos.ccee.org.br/dataset/pld_media_diaria" target="_blank" rel="noopener" data-i18n="sourcePld">CCEE open data — PLD média diária<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+  <a href="https://dadosabertos.ccee.org.br/dataset/pld_media_diaria" target="_blank" rel="noopener">CCEE<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
 </div>
 <div class="kpi-row" id="kpi-row"></div>
 <div class="chart-card">

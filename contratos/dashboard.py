@@ -131,9 +131,8 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .tso-chip:hover { background: var(--accent-soft); }
 .tso-chip.selected { background: var(--accent); color: #fff; border-color: var(--accent); }
 .tso-chip.selected .muted { color: rgba(255,255,255,.72); }
-.tso-chip.empty { cursor: default; }
+.tso-chip.empty { cursor: default; color: var(--muted); }
 .tso-chip.empty:hover { background: var(--panel); }
-.tso-chip.empty { color: var(--muted); }
 .tso-chip b { font-weight: 400; }
 .tso-chip .muted { color: var(--muted); }
 .quick-filters { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: var(--gap); }
@@ -256,7 +255,7 @@ footer a { color: var(--accent); }
 <div class="flagbar" aria-hidden="true"></div>
 <div class="sources">
   <span class="sources-label" data-i18n="sources">Sources</span>
-  <a class="pill" href="https://ofertadecapacidade.com.br/home/contratos" target="_blank" rel="noopener">Portal de Oferta de Capacidade<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+  <a href="https://ofertadecapacidade.com.br/home/contratos" target="_blank" rel="noopener">POC<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
 </div>
 <div class="tso-row" id="tso-row"></div>
 <div class="drill-card" id="drill-card"></div>
@@ -358,8 +357,7 @@ const isCurrentlyValid = r => !isExpired(r) && !isNotYetStarted(r);
    existing toolbar / quick-filter / column filters narrow the chart exactly
    like they narrow the table.
 ------------------------------------------------------------------------- */
-const CHART_PALETTE_LIGHT = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#4a3aa7", "#e34948"];
-const CHART_PALETTE_DARK = ["#3987e5", "#d95926", "#199e70", "#c98500", "#d55181", "#008300", "#9085e9", "#e66767"];
+__SHARED_JS_CHART_PALETTE__
 const CATEGORY_ORDER = ["Transport Contract", "Transport Contract (Auction)", "Master Contract"];
 const TSO_ORDER = ["NTS", "TAG", "TBG"];
 
@@ -371,13 +369,17 @@ let chartResizeTimer = null;
 const chartSlots = new Map();
 function chartClaimSlot(key) {
   if (chartSlots.has(key)) return chartSlots.get(key);
-  const slot = chartSlots.size % CHART_PALETTE_LIGHT.length;
+  const slot = chartSlots.size % 8;
   chartSlots.set(key, slot);
   return slot;
 }
 function chartColorOf(key) {
-  const dark = document.documentElement.getAttribute("data-theme") === "dark";
-  return (dark ? CHART_PALETTE_DARK : CHART_PALETTE_LIGHT)[chartClaimSlot(key)];
+  const parts = String(key || "").split("||");
+  const tso = parts[0] || "";
+  const cat = parts[1] || "";
+  let shade = CATEGORY_ORDER.indexOf(cat);
+  if (shade < 0) shade = chartClaimSlot(key);
+  return tsoColorOf(tso, shade);
 }
 
 // Every (TSO, category) pair with at least one tariffed row, anywhere in the
@@ -1633,6 +1635,7 @@ def write_dashboard(out_path=DEFAULT_OUT):
         SHARED_JS_CSV=kit.JS_CSV_HELPERS,
         SHARED_JS_XLSX=kit.JS_XLSX_ENGINE,
         SHARED_JS_TABLE_SORT=kit.JS_TABLE_SORT,
+        SHARED_JS_CHART_PALETTE=kit.chart_palette_js(),
         SHARED_SITE_LINKS_JS=kit.site_links_js("contratos"),
         SHARED_NAV_LINKS=kit.nav_links_html("contratos"),
         FAVICON_DATA_URI=kit.embed_favicon(),

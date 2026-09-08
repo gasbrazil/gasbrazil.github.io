@@ -125,11 +125,17 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .pill:hover { background: var(--accent-soft); color: var(--text); border-color: var(--border-strong); }
 .ext-icon { width: 10px; height: 10px; display: inline-block; flex: none; opacity: .75; }
 .lede { font-size: 13px; color: var(--muted2); font-weight: 300; max-width: 48em; line-height: 1.45; margin: 0 0 var(--gap); }
-.kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: var(--gap); }
-.kpi-cell { background: var(--panel); border: 1px solid var(--border); border-radius: 5px; padding: 10px 12px; }
+.kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(148px, 1fr)); gap: 8px; margin-bottom: var(--gap); }
+.kpi-cell { background: var(--panel); border: 1px solid var(--border); border-radius: 5px; padding: 10px 12px; text-align: left; cursor: pointer; font-family: var(--font); color: var(--text); width: 100%; }
+.kpi-cell:hover { background: var(--accent-soft); }
+.kpi-cell.active { border-color: var(--accent); border-width: 2px; padding: 9px 11px; }
 .kpi-cell .lbl { font-size: 11px; font-weight: 400; color: var(--muted2); }
 .kpi-cell .val { font-size: 18px; font-weight: 400; font-variant-numeric: tabular-nums; margin-top: 2px; }
 .kpi-cell .unit { font-size: 11px; color: var(--muted); font-weight: 200; }
+.kpi-cell .delta { font-size: 11px; font-weight: 400; margin-top: 2px; font-variant-numeric: tabular-nums; }
+.kpi-cell .delta.up { color: var(--neg); }
+.kpi-cell .delta.down { color: var(--ok-ink); }
+.kpi-cell .delta.flat { color: var(--muted); }
 .chart-card { background: var(--panel); border: 1px solid var(--border); border-radius: 5px; padding: var(--card-pad); margin-bottom: var(--gap); }
 .panel-title { font-size: 13px; font-weight: 400; margin: 0 0 2px; }
 .panel-note { font-size: 11.5px; color: var(--muted); margin: 0 0 12px; font-weight: 200; }
@@ -187,7 +193,7 @@ footer a { color: var(--accent); }
 <div class="flagbar" aria-hidden="true"></div>
 <div class="sources">
   <span class="sources-label" data-i18n="sources">Sources</span>
-  <a class="pill" href="https://www.gov.br/anp/pt-br/assuntos/movimentacao-estocagem-e-comercializacao-de-gas-natural/acompanhamento-do-mercado-de-gas-natural/publicidade-dos-precos-de-gas-natural" target="_blank" rel="noopener" data-i18n="sourcePrecos">ANP — publicidade dos preços<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+  <a href="https://www.gov.br/anp/pt-br/assuntos/movimentacao-estocagem-e-comercializacao-de-gas-natural/acompanhamento-do-mercado-de-gas-natural/publicidade-dos-precos-de-gas-natural" target="_blank" rel="noopener">ANP<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
 </div>
 <div class="kpi-row" id="kpi-row"></div>
 <div class="chart-card">
@@ -242,9 +248,14 @@ GB_I18N.en.precosMktTitle = "Sales to marketers";
 GB_I18N.en.precosCsv = "Download CSV";
 GB_I18N.en.precosXlsx = "Export Excel";
 GB_I18N.en.precosFooter = "Data: ANP publicidade dos preços de gás natural. Not an official ANP product.";
-GB_I18N.en.precosKpiSantos = "Santos";
-GB_I18N.en.precosKpiMonths = "Months";
-GB_I18N.en.precosKpiMonthsUnit = "in series";
+GB_I18N.en.precosKpiSantos = "Santos wellhead";
+GB_I18N.en.precosKpiCampos = "Campos wellhead";
+GB_I18N.en.precosKpiDistSE = "Dist. SE non-thermal";
+GB_I18N.en.precosKpiMarketers = "Marketers price";
+GB_I18N.en.precosKpiMktVol = "Marketers volume";
+GB_I18N.en.precosKpiMom = "vs prior month";
+GB_I18N.en.precosKpiVolUnit = "thousand m³/d";
+GB_I18N.en.precosKpiHint = "Click to show/hide on the chart";
 GB_I18N.en.precosThMonth = "Month";
 GB_I18N.en.precosThSantos = "Santos";
 GB_I18N.en.precosThCampos = "Campos";
@@ -270,9 +281,14 @@ GB_I18N.pt.precosMktTitle = "Vendas a comercializadores";
 GB_I18N.pt.precosCsv = "Baixar CSV";
 GB_I18N.pt.precosXlsx = "Exportar Excel";
 GB_I18N.pt.precosFooter = "Dados: ANP publicidade dos preços de gás natural. Não é um produto oficial da ANP.";
-GB_I18N.pt.precosKpiSantos = "Santos";
-GB_I18N.pt.precosKpiMonths = "Meses";
-GB_I18N.pt.precosKpiMonthsUnit = "na série";
+GB_I18N.pt.precosKpiSantos = "Poço Santos";
+GB_I18N.pt.precosKpiCampos = "Poço Campos";
+GB_I18N.pt.precosKpiDistSE = "Dist. SE não térmico";
+GB_I18N.pt.precosKpiMarketers = "Preço comercializadores";
+GB_I18N.pt.precosKpiMktVol = "Volume comercializadores";
+GB_I18N.pt.precosKpiMom = "vs mês anterior";
+GB_I18N.pt.precosKpiVolUnit = "mil m³/d";
+GB_I18N.pt.precosKpiHint = "Clique para mostrar/ocultar no gráfico";
 GB_I18N.pt.precosThMonth = "Mês";
 GB_I18N.pt.precosThSantos = "Santos";
 GB_I18N.pt.precosThCampos = "Campos";
@@ -396,12 +412,97 @@ function paintAsof() {
     formatRefreshedLocal(DATA.generatedIso, DATA.generated, currentLang() === "pt" ? "pt-BR" : undefined);
   document.getElementById("asof-through").textContent = DATA.dataThrough || "—";
 }
+function latestPoint(arr) {
+  if (!arr) return null;
+  for (let i = arr.length - 1; i >= 0; i--) {
+    if (arr[i] != null && !isNaN(arr[i])) return { v: arr[i], i, month: DATA.months[i] };
+  }
+  return null;
+}
+function momHtml(arr) {
+  const cur = latestPoint(arr);
+  if (!cur || cur.i <= 0) return "";
+  let prev = null;
+  for (let i = cur.i - 1; i >= 0; i--) {
+    if (arr[i] != null && !isNaN(arr[i])) { prev = arr[i]; break; }
+  }
+  if (prev == null || prev === 0) return "";
+  const d = cur.v - prev;
+  const pct = 100 * d / prev;
+  const cls = Math.abs(pct) < 0.05 ? "flat" : (d > 0 ? "up" : "down");
+  const sign = d > 0 ? "+" : "";
+  return `<div class="delta ${cls}">${sign}${pct.toFixed(1)}% <span class="muted">${escapeHtml(t("precosKpiMom"))}</span></div>`;
+}
 function renderKpis() {
   const host = document.getElementById("kpi-row");
-  const last = DATA.dataThrough || "";
-  host.innerHTML = `
-    <div class="kpi-cell"><div class="lbl" data-i18n="precosKpiSantos">${escapeHtml(t("precosKpiSantos"))}</div><div class="val">${fmt(DATA.kpiSantos)}</div><div class="unit">R$/MMBtu · ${escapeHtml(last)}</div></div>
-    <div class="kpi-cell"><div class="lbl" data-i18n="precosKpiMonths">${escapeHtml(t("precosKpiMonths"))}</div><div class="val">${DATA.nMonths||"—"}</div><div class="unit" data-i18n="precosKpiMonthsUnit">${escapeHtml(t("precosKpiMonthsUnit"))}</div></div>`;
+  const cards = [
+    {
+      id: "santos", labelKey: "precosKpiSantos",
+      arr: DATA.producers.Santos, digits: 1, unit: "R$/MMBtu",
+      active: pickedProd.has("Santos"),
+      onClick: () => toggleProd("Santos"),
+      scrollId: "chart-producers",
+    },
+    {
+      id: "campos", labelKey: "precosKpiCampos",
+      arr: DATA.producers.Campos, digits: 1, unit: "R$/MMBtu",
+      active: pickedProd.has("Campos"),
+      onClick: () => toggleProd("Campos"),
+      scrollId: "chart-producers",
+    },
+    {
+      id: "dist-se", labelKey: "precosKpiDistSE",
+      arr: DATA.distributors["non_thermal|Sudeste"], digits: 1, unit: "R$/MMBtu",
+      active: pickedDist.has("non_thermal|Sudeste"),
+      onClick: () => toggleDist("non_thermal|Sudeste"),
+      scrollId: "chart-distributors",
+    },
+    {
+      id: "mkt", labelKey: "precosKpiMarketers",
+      arr: DATA.marketersPrice, digits: 1, unit: "R$/MMBtu",
+      active: null,
+      onClick: () => {},
+      scrollId: "chart-marketers",
+    },
+    {
+      id: "mkt-vol", labelKey: "precosKpiMktVol",
+      arr: DATA.marketersVolume, digits: 0, unitKey: "precosKpiVolUnit",
+      active: null,
+      onClick: () => {},
+      scrollId: "chart-marketers",
+    },
+  ];
+  host.innerHTML = "";
+  cards.forEach(c => {
+    const pt = latestPoint(c.arr);
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "kpi-cell" + (c.active ? " active" : "");
+    btn.title = t("precosKpiHint");
+    const unit = c.unitKey ? t(c.unitKey) : c.unit;
+    const month = pt ? pt.month : (DATA.dataThrough || "");
+    btn.innerHTML =
+      `<div class="lbl" data-i18n="${c.labelKey}">${escapeHtml(t(c.labelKey))}</div>` +
+      `<div class="val">${fmt(pt && pt.v, c.digits)}</div>` +
+      `<div class="unit">${escapeHtml(unit)}${month ? " · " + escapeHtml(month) : ""}</div>` +
+      momHtml(c.arr);
+    btn.addEventListener("click", () => {
+      c.onClick();
+      refreshPickersAndCharts();
+      renderKpis();
+      const el = document.getElementById(c.scrollId);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
+    host.appendChild(btn);
+  });
+}
+function toggleProd(key) {
+  if (pickedProd.has(key)) { pickedProd.delete(key); prodSlots.delete(key); }
+  else { pickedProd.add(key); colorOf(prodSlots, key); }
+}
+function toggleDist(key) {
+  if (pickedDist.has(key)) { pickedDist.delete(key); distSlots.delete(key); }
+  else { pickedDist.add(key); colorOf(distSlots, key); }
 }
 function renderCharts() {
   const months = DATA.months;
