@@ -1,5 +1,5 @@
 """
-Builds the Market Desk dashboard (cross-product snapshot + spark calculator).
+Builds the Desk dashboard (cross-product snapshot + spark calculator).
 
 Usage: python dashboard.py [output_path]  (default: index.html)
 
@@ -25,8 +25,8 @@ TEMPLATE = r"""<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Market Desk — GasBrazil.com</title>
-<meta name="description" content="Cross-product market desk for Brazil natural gas and power: gas generation, PLD–CMO–CVU, ANP and POC prices, pipeline utilization, and a thermal spark-spread calculator.">
+<title>Desk — GasBrazil.com</title>
+<meta name="description" content="Desk for Brazil natural gas and power: gas generation, PLD–CMO–CVU, ANP and POC prices, pipeline utilization, and a thermal spark-spread calculator.">
 <link rel="canonical" href="https://gasbrazil.com/desk/">
 <link rel="icon" href="__FAVICON_DATA_URI__">
 __FONT_PRELOAD__
@@ -87,6 +87,7 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 @media (max-width: 520px) { .spark-form { grid-template-columns: 1fr; } }
 .spark-form label { display: flex; flex-direction: column; gap: 4px; font-size: 11px; color: var(--muted2); font-weight: 400; }
 .spark-form input, .spark-form select { background: var(--panel); border: 1px solid var(--border-strong); border-radius: 5px; padding: 6px 10px; color: var(--text); font-size: 13px; font-family: var(--font); font-weight: 300; font-variant-numeric: tabular-nums; }
+.spark-hint { font-size: 11px; color: var(--muted); font-weight: 200; margin-top: 2px; }
 .spark-out { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 @media (max-width: 520px) { .spark-out { grid-template-columns: 1fr; } }
 .spark-metric .lbl { font-size: 11px; color: var(--muted2); }
@@ -113,7 +114,7 @@ footer a { color: var(--accent); }
 <div class="wrap">
 <header class="dash-head">
   <div>
-    <h1 data-i18n="navDesk">Market Desk</h1>
+    <h1 data-i18n="navDesk">Desk</h1>
   </div>
   <div class="header-right">
     <div class="header-links">
@@ -157,7 +158,8 @@ footer a { color: var(--accent); }
     <p class="panel-note" data-i18n="deskSparkNote">Implied generation cost from gas price and heat rate, compared with current PLD SE and CMO SE. Optional CVU override replaces the calculated cost.</p>
     <div class="spark-form">
       <label><span data-i18n="deskGasPrice">Gas price</span> (R$/MMBtu)
-        <input type="number" id="spark-gas" step="0.1" min="0" inputmode="decimal">
+        <input type="number" id="spark-gas" step="0.1" min="0" inputmode="decimal" value="12">
+        <span class="spark-hint" id="spark-gas-hint"></span>
       </label>
       <label><span data-i18n="deskHeatRate">Heat rate</span> (kcal/kWh)
         <select id="spark-hr-preset">
@@ -167,10 +169,10 @@ footer a { color: var(--accent); }
         </select>
       </label>
       <label><span data-i18n="deskHrCustom">Custom heat rate</span>
-        <input type="number" id="spark-hr" step="50" min="500" inputmode="decimal">
+        <input type="number" id="spark-hr" step="50" min="500" inputmode="decimal" value="1800">
       </label>
       <label><span data-i18n="deskCvuOverride">CVU override</span> (R$/MWh)
-        <input type="number" id="spark-cvu" step="1" min="0" placeholder="—" inputmode="decimal">
+        <input type="number" id="spark-cvu" step="1" min="0" placeholder="optional" inputmode="decimal">
       </label>
     </div>
     <div class="spark-out">
@@ -224,6 +226,10 @@ GB_I18N.en.deskCompareNote = "Last ~90 days, Southeast. CMO and median gas-plant
 GB_I18N.en.deskSparkTitle = "Thermal spark / implied CVU";
 GB_I18N.en.deskSparkNote = "Implied generation cost from gas price and heat rate, compared with current PLD SE and CMO SE. Optional CVU override replaces the calculated cost.";
 GB_I18N.en.deskGasPrice = "Gas price";
+GB_I18N.en.deskGasHintSantos = "Prefill: ANP Santos";
+GB_I18N.en.deskGasHintPoc = "Prefill: POC 7-day average";
+GB_I18N.en.deskGasHintFallback = "Prefill: illustrative default (edit freely)";
+GB_I18N.en.deskCvuOptional = "optional";
 GB_I18N.en.deskHeatRate = "Heat rate";
 GB_I18N.en.deskHrCustom = "Custom";
 GB_I18N.en.deskHrCcgt = "CCGT 1800";
@@ -263,6 +269,10 @@ GB_I18N.pt.deskCompareNote = "Últimos ~90 dias, Sudeste. CMO e CVU mediano de u
 GB_I18N.pt.deskSparkTitle = "Spark térmico / CVU implícito";
 GB_I18N.pt.deskSparkNote = "Custo implícito de geração a partir do preço do gás e do heat rate, comparado ao PLD SE e ao CMO SE atuais. O override de CVU substitui o custo calculado.";
 GB_I18N.pt.deskGasPrice = "Preço do gás";
+GB_I18N.pt.deskGasHintSantos = "Pré-preenchido: ANP Santos";
+GB_I18N.pt.deskGasHintPoc = "Pré-preenchido: média POC 7 dias";
+GB_I18N.pt.deskGasHintFallback = "Pré-preenchido: valor ilustrativo (edite à vontade)";
+GB_I18N.pt.deskCvuOptional = "opcional";
 GB_I18N.pt.deskHeatRate = "Heat rate";
 GB_I18N.pt.deskHrCustom = "Personalizado";
 GB_I18N.pt.deskHrCcgt = "CCGT 1800";
@@ -378,10 +388,26 @@ function paintAsof() {
 
 function renderNotes() {
   const el = document.getElementById("data-notes");
-  const notes = (DATA.notes || []).filter(Boolean);
-  if (!notes.length) { el.hidden = true; el.textContent = ""; return; }
+  const present = (DATA && DATA.sourcesPresent) || {};
+  const missing = ["ons", "pld", "anp", "poc", "flows", "contratos"].filter(k => !present[k]);
+  if (!missing.length) { el.hidden = true; el.textContent = ""; return; }
+  // Keep the banner short — chart empty-states carry detail.
   el.hidden = false;
-  el.textContent = notes.join(" · ");
+  el.textContent = (currentLang() === "pt"
+    ? "Algumas fontes ainda não estavam no lake no build: "
+    : "Some sources were not in the lake at build time: ")
+    + missing.join(", ") + ".";
+}
+
+function paintGasHint() {
+  const hint = document.getElementById("spark-gas-hint");
+  if (!hint || !DATA) return;
+  const src = (DATA.spark || {}).gasPriceSource || "fallback";
+  if (src === "anp_santos") hint.textContent = t("deskGasHintSantos");
+  else if (src === "poc_7d") hint.textContent = t("deskGasHintPoc");
+  else hint.textContent = t("deskGasHintFallback");
+  const cvu = document.getElementById("spark-cvu");
+  if (cvu) cvu.placeholder = t("deskCvuOptional");
 }
 
 function renderKpis() {
@@ -446,9 +472,11 @@ function initSparkForm() {
   const gasEl = document.getElementById("spark-gas");
   const hrEl = document.getElementById("spark-hr");
   const preset = document.getElementById("spark-hr-preset");
-  if (s.defaultGasPrice != null) gasEl.value = s.defaultGasPrice;
+  const gas = (s.defaultGasPrice != null && !isNaN(s.defaultGasPrice)) ? s.defaultGasPrice : 12;
+  gasEl.value = gas;
   hrEl.value = s.heatRateCcgt || 1800;
   preset.value = "ccgt";
+  paintGasHint();
   ["spark-gas", "spark-hr", "spark-cvu"].forEach(id => {
     document.getElementById(id).addEventListener("input", renderSpark);
   });
@@ -696,6 +724,7 @@ function renderAll() {
   renderCompareChart();
   renderPocAnpChart();
   renderUtil();
+  paintGasHint();
   renderSpark();
   applyI18n();
 }

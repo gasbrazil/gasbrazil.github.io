@@ -1,6 +1,7 @@
-"""Assemble a lean Market Desk payload from lake / sibling parquet stores.
+"""Assemble a lean Desk payload from lake / sibling parquet stores.
 
 Missing sources degrade to empty series + notes — never raise for absent files.
+Pulls lake parquet from R2 via data_kit.ensure_lake when local files are absent.
 """
 from __future__ import annotations
 
@@ -221,59 +222,102 @@ def _series_pld_cmo_cvu(pld: Optional[pd.DataFrame], ons: Optional[pd.DataFrame]
 
 def _series_poc_anp(poc: Optional[pd.DataFrame], anp: Optional[pd.DataFrame]) -> dict:
     empty = {"months": [], "poc": [], "anpSantos": [], "anpNonThermalSe": [], "note": None}
-    if poc is None or poc.empty or anp is None or anp.empty:
-        missing = []
-        if poc is None or poc.empty:
-            missing.append("POC")
-        if anp is None or anp.empty:
-            missing.append("ANP")
-        empty["note"] = f"{' + '.join(missing)} missing - monthly compare empty."
+    has_poc = poc is not None and not poc.empty
+    has_anp = anp is not None and not anp.empty
+    if not has_poc and not has_anp:
+        empty["note"] = "POC + ANP missing - monthly compare empty."
         return empty
-    try:
-        joined = joins.join_poc_vs_anp_monthly(poc, anp)
-        months = sorted(joined["month"].astype(str).unique().tolist())
-        santos = []
-        non_th = []
-        poc_avg = []
-        for m in months:
-            part = joined[joined["month"].astype(str) == m]
-            poc_vals = part["poc_avg_price"].dropna()
-            poc_avg.append(_num(poc_vals.iloc[0], 2) if len(poc_vals) else None)
+    if has_poc and has_anp:
+        try:
+            joined = joins.join_poc_vs_anp_monthly(poc, anp)
+            months = sorted(joined["month"].astype(str).unique().tolist())
+            santos = []
+            non_th = []
+            poc_avg = []
+            for m in months:
+                part = joined[joined["month"].astype(str) == m]
+                poc_vals = part["poc_avg_price"].dropna()
+                poc_avg.append(_num(poc_vals.iloc[0], 2) if len(poc_vals) else None)
 
-            s = part[
-                (part.get("segment", pd.Series(dtype=str)) == "producers")
-                & (part.get("category", pd.Series(dtype=str)).astype(str) == "Santos")
-            ]
-            price_col = "price" if "price" in part.columns else "price_brl_mmbtu"
-            if len(s) and price_col in s.columns and s[price_col].notna().any():
-                santos.append(_num(s[price_col].iloc[0], 2))
-            else:
-                santos.append(None)
+                s = part[
+                    (part.get("segment", pd.Series(dtype=str)) == "producers")
+                    & (part.get("category", pd.Series(dtype=str)).astype(str) == "Santos")
+                ]
+                price_col = "price" if "price" in part.columns else "price_brl_mmbtu"
+                if len(s) and price_col in s.columns and s[price_col].notna().any():
+                    santos.append(_num(s[price_col].iloc[0], 2))
+                else:
+                    santos.append(None)
 
-            nt = part[
-                (part.get("segment", pd.Series(dtype=str)) == "distributors")
-                & (part.get("category", pd.Series(dtype=str)).astype(str) == "non_thermal")
-                & (
-                    part.get("region", pd.Series(dtype=str))
-                    .astype(str)
-                    .str.contains("Sudeste", case=False, na=False)
-                )
-            ]
-            if len(nt) and price_col in nt.columns and nt[price_col].notna().any():
-                non_th.append(_num(nt[price_col].iloc[0], 2))
-            else:
-                non_th.append(None)
+                nt = part[
+                    (part.get("segment", pd.Series(dtype=str)) == "distributors")
+                    & (part.get("category", pd.Series(dtype=str)).astype(str) == "non_thermal")
+                    & (
+                        part.get("region", pd.Series(dtype=str))
+                        .astype(str)
+                        .str.contains("Sudeste", case=False, na=False)
+                    )
+                ]
+                if len(nt) and price_col in nt.columns and nt[price_col].notna().any():
+                    non_th.append(_num(nt[price_col].iloc[0], 2))
+                else:
+                    non_th.append(None)
 
+            return {
+                "months": months,
+                "poc": poc_avg,
+                "anpSantos": santos,
+                "anpNonThermalSe": non_th,
+                "note": None,
+            }
+        except Exception as exc:
+            empty["note"] = f"POC vs ANP join skipped: {exc}"
+            return empty
+
+    # Partial: one source only — still plot what we have.
+    months: list[str] = []
+    poc_avg: list = []
+    santos: list = []
+    non_th: list = []
+    if has_poc:
+        p = poc.copy()
+        p["Trade Date"] = pd.to_datetime(p["Trade Date"], errors="coerce")
+        p = p.dropna(subset=["Trade Date", "Price"])
+        p["month"] = p["Trade Date"].dt.strftime("%Y-%m")
+        g = p.groupby("month")["Price"].mean()
+        months = sorted(g.index.astype(str).tolist())
+        poc_avg = [_num(g[m], 2) for m in months]
+        santos = [None] * len(months)
+        non_th = [None] * len(months)
         return {
             "months": months,
             "poc": poc_avg,
             "anpSantos": santos,
             "anpNonThermalSe": non_th,
-            "note": None,
+            "note": "ANP missing - showing POC only.",
         }
-    except Exception as exc:
-        empty["note"] = f"POC vs ANP join skipped: {exc}"
-        return empty
+    a = anp.copy()
+    a["month"] = a["month"].astype(str).str.slice(0, 7)
+    price_col = "price_brl_mmbtu" if "price_brl_mmbtu" in a.columns else "price"
+    months = sorted(a["month"].dropna().unique().tolist())
+    for m in months:
+        part = a[a["month"] == m]
+        s = part[(part.get("segment", pd.Series(dtype=str)) == "producers") & (part.get("category", pd.Series(dtype=str)).astype(str) == "Santos")]
+        santos.append(_num(s[price_col].iloc[0], 2) if len(s) and s[price_col].notna().any() else None)
+        nt = part[
+            (part.get("segment", pd.Series(dtype=str)) == "distributors")
+            & (part.get("category", pd.Series(dtype=str)).astype(str) == "non_thermal")
+            & (part.get("region", pd.Series(dtype=str)).astype(str).str.contains("Sudeste", case=False, na=False))
+        ]
+        non_th.append(_num(nt[price_col].iloc[0], 2) if len(nt) and nt[price_col].notna().any() else None)
+        poc_avg.append(None)
+    return {
+        "months": months,
+        "poc": poc_avg,
+        "anpSantos": santos,
+        "anpNonThermalSe": non_th,
+        "note": "POC missing - showing ANP only.",
+    }
 
 
 def _util_table(
@@ -313,6 +357,24 @@ def _util_table(
 def build_payload() -> dict:
     heat = xf.ONS_GAS_HEAT
     notes: list[str] = []
+
+    # Pull canonical lake mirrors from R2 when local/sibling parquet are absent
+    # (typical in CI — product data/ trees are gitignored).
+    try:
+        import data_kit as dk  # noqa: E402
+
+        dk.ensure_lake(
+            (
+                "ons_daily",
+                "pld_daily",
+                "anp_prices",
+                "poc_results",
+                "flows_points",
+                "contratos",
+            )
+        )
+    except Exception as exc:
+        notes.append(f"Lake restore skipped: {exc}")
 
     ons = _read_parquet(
         ROOT / "lake" / "power" / "ons_daily.parquet",
@@ -380,8 +442,16 @@ def build_payload() -> dict:
         if block.get("note"):
             notes.append(block["note"])
 
-    # Default gas price for spark calculator: Santos ANP, else POC 7d avg.
+    # Default gas price for spark calculator: Santos ANP, else POC 7d avg,
+    # else a stable illustrative fallback so the form never loads blank.
+    SPARK_FALLBACK_GAS = 12.0
     default_gas = anp_kpi.get("santos") or poc_kpi.get("avgPrice")
+    gas_source = (
+        "anp_santos" if anp_kpi.get("santos") is not None
+        else ("poc_7d" if poc_kpi.get("avgPrice") is not None else "fallback")
+    )
+    if default_gas is None:
+        default_gas = SPARK_FALLBACK_GAS
 
     through_candidates = [
         d for d in (pld_when, cmo_when, gen_when, anp_kpi.get("month"), poc_kpi.get("when"), flows_kpi.get("when"))
@@ -417,6 +487,7 @@ def build_payload() -> dict:
         "utilization": util,
         "spark": {
             "defaultGasPrice": default_gas,
+            "gasPriceSource": gas_source,
             "heatRateCcgt": float(heat["heat_rate_combined_cycle_kcal_per_kwh"]),
             "heatRateOcgt": float(heat["heat_rate_simple_cycle_kcal_per_kwh"]),
             "natgasKcalPerM3": float(heat["natgas_kcal_per_m3"]),

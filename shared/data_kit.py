@@ -87,6 +87,63 @@ def upload_to_r2(
     return f"s3://{bucket}/{key}"
 
 
+def download_from_r2(
+    *,
+    bucket: str,
+    key: str,
+    dest: Path | str,
+) -> Path | None:
+    """Download an R2 object to dest. Returns dest on success, None if missing."""
+    from botocore.exceptions import ClientError
+
+    dest = Path(dest)
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    client = _r2_client()
+    try:
+        client.download_file(bucket, key, str(dest))
+    except ClientError as exc:
+        code = (exc.response or {}).get("Error", {}).get("Code", "")
+        status = (exc.response or {}).get("ResponseMetadata", {}).get("HTTPStatusCode")
+        if code in ("404", "NoSuchKey", "NotFound", "404 Not Found") or status == 404:
+            return None
+        raise
+    return dest
+
+
+def ensure_lake(
+    names: Iterable[str],
+    *,
+    force: bool = False,
+) -> dict[str, Path | None]:
+    """Ensure lake parquet files exist locally; pull from R2 when missing.
+
+    Returns {name: local Path or None if unavailable}. Does not raise for
+    missing remote objects — callers degrade with empty frames.
+    """
+    lake_bucket = os.environ.get("GASBRAZIL_LAKE_BUCKET", "").strip()
+    out: dict[str, Path | None] = {}
+    for name in names:
+        dest = lake_path(name)
+        if dest.exists() and not force:
+            out[name] = dest
+            continue
+        if not (r2_configured() and lake_bucket):
+            out[name] = dest if dest.exists() else None
+            continue
+        rel = dest.relative_to(LAKE_ROOT).as_posix()
+        try:
+            got = download_from_r2(bucket=lake_bucket, key=rel, dest=dest)
+        except Exception as exc:
+            print(f"  lake pull {name}: skipped ({exc})")
+            got = None
+        if got is not None:
+            print(f"  lake pull {name}: {got} ({got.stat().st_size:,} bytes)")
+        else:
+            print(f"  lake pull {name}: not in R2")
+        out[name] = got if got is not None and got.exists() else None
+    return out
+
+
 def publish(name: str, src: Path | pd.DataFrame) -> Path:
     """Copy or write a parquet into the canonical lake path; mirror to R2 when configured."""
     dest = lake_path(name)

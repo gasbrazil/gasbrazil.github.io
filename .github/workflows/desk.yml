@@ -1,4 +1,4 @@
-name: Rebuild Market Desk
+name: Rebuild Desk
 
 on:
   schedule:
@@ -43,7 +43,8 @@ jobs:
           cache-dependency-path: desk/requirements.txt
       - run: pip install -r requirements.txt
       - name: Build desk page
-        run: python dashboard.py index.html
+        run: python dashboard.py desk/index.html
+        working-directory: .
       - name: Publish hub teasers
         working-directory: .
         run: python shared/publish_teasers.py || true
@@ -57,5 +58,12 @@ jobs:
           git commit -m "desk: rebuild $(date -u +%Y-%m-%dT%H:%M:%SZ)"
           for i in 1 2 3 4 5; do
             if git push; then break; fi
-            git pull --rebase origin main
+            echo "Push rejected -- rebasing and retrying ($i)..."
+            git pull --rebase origin main || true
+            # Prefer ours on HTML conflict — fresh rebuild wins.
+            if [ -f desk/index.html ]; then
+              git checkout --ours desk/index.html 2>/dev/null || true
+              git add desk/index.html 2>/dev/null || true
+              GIT_EDITOR=true git rebase --continue 2>/dev/null || true
+            fi
           done
