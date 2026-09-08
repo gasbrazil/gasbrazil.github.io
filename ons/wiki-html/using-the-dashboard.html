@@ -49,6 +49,10 @@
   --card-pad: 10px 12px;
   --gap: 10px;
 
+  /* Data-table body text. Was 12.5px across dashboards; dialed down for
+     denser grids (POC Results especially). Pages use var(--table-font-size). */
+  --table-font-size: 11px;
+
   /* Brazilian flag palette, shared across the whole GasBrazil.com family.
      --brz-* are the flag's own values, used for fills/borders/gradients
      where the surface behind them is dark enough. --ok-ink/--warn-ink are
@@ -116,7 +120,7 @@
 }
 
 /* Pacaembu is heavy at Regular -- default the whole UI to Light (300).
-   Mid emphasis uses Regular (400); wordmark alone uses SemiBold (600).
+   Mid emphasis uses Regular (400); wordmark + page titles use SemiBold (600).
    Never Bold / 700 (that synthesizes badly and the face is already dense). */
 html, body {
   margin: 0;
@@ -126,7 +130,7 @@ html, body {
   background: var(--bg);
 }
 .muted, .when, .sources-label, .asof, .meta-muted { font-weight: 200; color: var(--muted); }
-.wordmark { font-weight: 600; }
+.wordmark, h1 { font-weight: 600; }
 .emph, .navlink, .kpi-title, .card .name, .panel-title, th, b, strong {
   font-weight: 400;
 }
