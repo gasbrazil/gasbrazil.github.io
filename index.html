@@ -264,6 +264,55 @@ html, body {
   background: transparent;
 }
 .navlink:hover { color: var(--accent); border-bottom-color: var(--accent-soft); }
+
+/* "Products" dropdown nav_links_html() builds (Option A of the 2026-09-08
+   nav mockups): collapses every dashboard but Home into one menu instead
+   of a growing row of top-level links. Toggle behavior lives in
+   dashboard_kit.py's _PRODUCTS_DROPDOWN_JS, spliced in right after this
+   markup. */
+.products-dd { position: relative; display: inline-flex; }
+.dd-trigger {
+  font: 400 12px var(--font);
+  color: var(--muted2);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 4px 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.dd-trigger:hover, .dd-trigger[aria-expanded="true"] { color: var(--accent); border-bottom-color: var(--accent-soft); }
+.dd-caret { font-size: 10px; transform: translateY(1px); }
+.dd-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 10px);
+  left: -8px;
+  min-width: 180px;
+  background: var(--panel);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.18);
+  padding: 6px;
+  z-index: 50;
+}
+.dd-menu.is-open { display: block; }
+.dd-menu a, .dd-menu .is-current {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: 400 12.5px var(--font);
+  color: var(--text);
+  text-decoration: none;
+  padding: 7px 8px;
+  border-radius: 5px;
+}
+.dd-menu a:hover { background: var(--accent-soft); color: var(--accent); }
+.dd-menu .is-current { color: var(--accent); font-weight: 600; }
+.dd-menu .chk { width: 12px; font-size: 11px; color: var(--accent); flex: none; }
+
 /* Source links: short agency name + external icon (ONS Balances look). */
 .sources {
   display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
@@ -404,7 +453,7 @@ th.num .th-filter { text-align: right; }
 
 @media (max-width: 720px) {
   .navlinks, .header-links { gap: 2px 10px; }
-  .navlink { font-size: 11.5px; }
+  .navlink, .dd-trigger { font-size: 11.5px; }
   .site-header .header-row, header.top .header-row {
     flex-wrap: wrap;
   }
@@ -533,8 +582,8 @@ footer.site a { color: var(--muted); }
     <a class="kpi-cell" href="ons/" data-slug="ons">
       <div class="kpi-label" data-i18n="cardOns">ONS Balances</div>
       <div class="kpi-role">Grid &amp; gas dispatch</div>
-      <div class="kpi-val" data-en="3,185 MWmed gas" data-pt="3,185 MWmed a gás">3,185 MWmed gas</div>
-      <div class="kpi-when" data-refresh="2026-09-08 21:56 UTC"></div>
+      <div class="kpi-val" data-en="3,181 MWmed gas" data-pt="3,181 MWmed a gás">3,181 MWmed gas</div>
+      <div class="kpi-when" data-refresh="2026-09-08 22:50 UTC"></div>
     </a>
     <a class="kpi-cell" href="poc/" data-slug="poc">
       <div class="kpi-label" data-i18n="cardPoc">POC Results</div>
@@ -547,32 +596,32 @@ footer.site a { color: var(--muted); }
       <div class="kpi-label" data-i18n="cardContratos">POC Contracts</div>
       <div class="kpi-role">Firm transport</div>
       <div class="kpi-val" data-en="898 contracts · 188,979 thousand m³/d" data-pt="898 contratos · 188,979 mil m³/d">898 contracts · 188,979 thousand m³/d</div>
-      <div class="kpi-when" data-refresh="2026-09-08 21:56 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-08 22:50 UTC"></div>
     </a>
     <a class="kpi-cell" href="flows/" data-slug="flows">
       <div class="kpi-label" data-i18n="cardFlows">Pipeline Flows</div>
       <div class="kpi-role">Physical movement</div>
       <div class="kpi-val" data-en="1358.6M m³ realized (7d) · 270 points" data-pt="1358.6M m³ realizados (7d) · 270 points">1358.6M m³ realized (7d) · 270 points</div>
-      <div class="kpi-when" data-refresh="2026-09-08 21:57 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-08 22:51 UTC"></div>
     </a>
     <a class="kpi-cell" href="supply/" data-slug="supply">
       <div class="kpi-label" data-i18n="cardSupply">Gas Supply</div>
       <div class="kpi-role">National balance</div>
       <div class="kpi-val" data-en="6.7M thousand m³ produced · 2026-07" data-pt="6.7M mil m³ produzidos · 2026-07">6.7M thousand m³ produced · 2026-07</div>
-      <div class="kpi-when" data-refresh="2026-09-08 21:55 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-08 22:49 UTC"></div>
       
     </a>
     <a class="kpi-cell" href="precos/" data-slug="precos">
       <div class="kpi-label" data-i18n="cardPrecos">ANP Prices</div>
       <div class="kpi-role">Disclosed R$/MMBtu</div>
       <div class="kpi-val" data-en="Santos 18.2 R$/MMBtu · 2026-06" data-pt="Santos 18.2 R$/MMBtu · 2026-06">Santos 18.2 R$/MMBtu · 2026-06</div>
-      <div class="kpi-when" data-refresh="2026-09-08 21:55 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-08 22:49 UTC"></div>
     </a>
     <a class="kpi-cell" href="pld/" data-slug="pld">
       <div class="kpi-label" data-i18n="cardPld">PLD Prices</div>
       <div class="kpi-role">Power settlement</div>
       <div class="kpi-val" data-en="SE 114.11 R$/MWh · 2026-09-09" data-pt="SE 114.11 R$/MWh · 2026-09-09">SE 114.11 R$/MWh · 2026-09-09</div>
-      <div class="kpi-when" data-refresh="2026-09-08 21:55 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-08 22:49 UTC"></div>
       
     </a>
   </div>
@@ -662,6 +711,7 @@ const GB_I18N = {
     navPld: "PLD Prices",
     navPrecos: "ANP Prices",
     navDesk: "The Desk",
+    navProducts: "Products",
     navAbout: "About",
     navWiki: "Wiki",
     contact: "Contact",
@@ -746,6 +796,7 @@ const GB_I18N = {
     navPld: "Preços PLD",
     navPrecos: "Preços ANP",
     navDesk: "The Desk",
+    navProducts: "Produtos",
     navAbout: "Sobre",
     navWiki: "Wiki",
     contact: "Contato",
