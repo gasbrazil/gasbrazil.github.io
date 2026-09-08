@@ -68,6 +68,11 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .panel-note { font-size: 11.5px; color: var(--muted); margin: 0 0 12px; font-weight: 200; max-width: 52em; }
 .infodot { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--border-strong); font-size: 10px; color: var(--muted2); cursor: help; font-weight: 400; flex: none; }
 .infodot:hover { background: var(--accent-soft); color: var(--text); }
+.series-picker { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.series-btn { display: inline-flex; align-items: center; gap: 6px; background: var(--bg); border: 1px solid var(--border); border-radius: 5px; padding: 4px 12px 4px 8px; font-size: 12px; cursor: pointer; color: var(--text); font-family: var(--font); font-weight: 400; }
+.series-btn:hover { background: var(--accent-soft); }
+.series-btn.active { border-color: var(--border-strong); }
+.series-btn .sw { width: 9px; height: 9px; border-radius: 2px; flex: none; background: var(--border-strong); }
 .chart-host svg { display: block; overflow: hidden; }
 .chart-empty { color: var(--muted); font-size: 13px; padding: 44px 0; text-align: center; }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; font-size: 12px; color: var(--muted2); }
@@ -92,11 +97,15 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .table-wrap { overflow: auto; max-height: 40vh; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
 table.util { border-collapse: collapse; width: 100%; font-size: var(--table-font-size); }
 table.util th, table.util td { padding: 4px 8px; text-align: left; border-bottom: 1px solid var(--border); font-weight: 300; }
-table.util th { color: var(--muted2); font-weight: 400; position: sticky; top: 0; background: var(--bg); }
+table.util th { color: var(--muted2); font-weight: 400; position: sticky; top: 0; background: var(--panel); z-index: 2; }
+th .th-label { cursor: pointer; }
 table.util .num { text-align: right; font-variant-numeric: tabular-nums; }
 table.util tbody tr:hover { background: var(--accent-soft); }
 footer { margin-top: 22px; color: var(--muted); font-size: 11.5px; line-height: 1.7; font-weight: 200; }
 footer a { color: var(--accent); }
+@media (max-width: 720px) {
+  .sources, .series-picker { flex-direction: column; align-items: stretch; }
+}
 </style>
 </head>
 <body>
@@ -137,6 +146,7 @@ footer a { color: var(--accent); }
   <section class="panel" aria-labelledby="compare-title">
     <p class="panel-title" id="compare-title" data-i18n="deskCompareTitle">PLD vs CMO vs gas CVU — SE</p>
     <p class="panel-note" data-i18n="deskCompareNote">Last ~90 days, Southeast. CMO and median gas-plant CVU from ONS (R$/MWh). CVU is a planning cost, not a market price.</p>
+    <div class="series-picker" id="picker-compare"></div>
     <div class="chart-host" id="main-chart"></div>
   </section>
   <section class="panel" aria-labelledby="spark-title">
@@ -151,8 +161,8 @@ footer a { color: var(--accent); }
       </label>
       <label><span data-i18n="deskHeatRate">Heat rate</span> (kcal/kWh)
         <select id="spark-hr-preset">
-          <option value="ccgt">CCGT 1800</option>
-          <option value="ocgt">OCGT 2500</option>
+          <option value="ccgt" data-i18n="deskHrCcgt">CCGT 1800</option>
+          <option value="ocgt" data-i18n="deskHrOcgt">OCGT 2500</option>
           <option value="custom" data-i18n="deskHrCustom">Custom</option>
         </select>
       </label>
@@ -174,6 +184,7 @@ footer a { color: var(--accent); }
 <section class="panel" aria-labelledby="poc-anp-title">
   <p class="panel-title" id="poc-anp-title" data-i18n="deskPocAnpTitle">POC vs ANP — monthly</p>
   <p class="panel-note" data-i18n="deskPocAnpNote">Mean POC auction price vs ANP Santos producers and non-thermal Sudeste distributors (R$/MMBtu).</p>
+  <div class="series-picker" id="picker-poc-anp"></div>
   <div class="chart-host" id="poc-anp-chart"></div>
 </section>
 
@@ -182,12 +193,7 @@ footer a { color: var(--accent); }
   <p class="panel-note" data-i18n="deskUtilNote">Active contracted capacity (thousand m³/d) vs average realized volume over the last 30 days of flow data, by TSO.</p>
   <div class="table-wrap">
     <table class="util" id="util-table">
-      <thead><tr>
-        <th>TSO</th>
-        <th class="num" data-i18n="deskUtilCap">Contracted</th>
-        <th class="num" data-i18n="deskUtilReal">Realized avg</th>
-        <th class="num" data-i18n="deskUtilPct">Utilization</th>
-      </tr></thead>
+      <thead><tr id="util-thead"></tr></thead>
       <tbody id="util-body"></tbody>
     </table>
   </div>
@@ -206,6 +212,7 @@ const PAYLOAD_URL = "__PAYLOAD_URL__";
 
 __SHARED_JS_DECODE__
 __SHARED_JS_ESCAPE_HTML__
+__SHARED_JS_TABLE_SORT__
 __SHARED_JS_CHART_PALETTE__
 __SHARED_JS_THEME_TOGGLE__
 __SHARED_JS_I18N__
@@ -219,6 +226,8 @@ GB_I18N.en.deskSparkNote = "Implied generation cost from gas price and heat rate
 GB_I18N.en.deskGasPrice = "Gas price";
 GB_I18N.en.deskHeatRate = "Heat rate";
 GB_I18N.en.deskHrCustom = "Custom";
+GB_I18N.en.deskHrCcgt = "CCGT 1800";
+GB_I18N.en.deskHrOcgt = "OCGT 2500";
 GB_I18N.en.deskCvuOverride = "CVU override";
 GB_I18N.en.deskImpliedCvu = "Implied CVU";
 GB_I18N.en.deskVsPld = "vs PLD SE";
@@ -227,11 +236,20 @@ GB_I18N.en.deskPocAnpTitle = "POC vs ANP — monthly";
 GB_I18N.en.deskPocAnpNote = "Mean POC auction price vs ANP Santos producers and non-thermal Sudeste distributors (R$/MMBtu).";
 GB_I18N.en.deskUtilTitle = "Contracted capacity vs realized flows";
 GB_I18N.en.deskUtilNote = "Active contracted capacity (thousand m³/d) vs average realized volume over the last 30 days of flow data, by TSO.";
+GB_I18N.en.deskUtilTso = "TSO";
 GB_I18N.en.deskUtilCap = "Contracted";
 GB_I18N.en.deskUtilReal = "Realized avg";
 GB_I18N.en.deskUtilPct = "Utilization";
 GB_I18N.en.deskFooter = "Cross-product snapshot from sibling dashboards. Not an official ONS, ANP, CCEE, or transportadora product.";
 GB_I18N.en.deskEmptyChart = "No series available — sibling parquet missing at build time.";
+GB_I18N.en.deskEmpty = "No series available — sibling parquet missing at build time.";
+GB_I18N.en.deskPickSeries = "Select one or more series.";
+GB_I18N.en.deskSeriesPld = "PLD SE";
+GB_I18N.en.deskSeriesCmo = "CMO SE";
+GB_I18N.en.deskSeriesCvu = "CVU gas med";
+GB_I18N.en.deskSeriesPoc = "POC avg";
+GB_I18N.en.deskSeriesAnpSantos = "ANP Santos";
+GB_I18N.en.deskSeriesAnpNtSe = "ANP non-thermal SE";
 GB_I18N.en.deskKpiGen = "Gas gen SIN";
 GB_I18N.en.deskKpiPld = "PLD SE";
 GB_I18N.en.deskKpiCmo = "CMO SE";
@@ -247,6 +265,8 @@ GB_I18N.pt.deskSparkNote = "Custo implícito de geração a partir do preço do 
 GB_I18N.pt.deskGasPrice = "Preço do gás";
 GB_I18N.pt.deskHeatRate = "Heat rate";
 GB_I18N.pt.deskHrCustom = "Personalizado";
+GB_I18N.pt.deskHrCcgt = "CCGT 1800";
+GB_I18N.pt.deskHrOcgt = "OCGT 2500";
 GB_I18N.pt.deskCvuOverride = "Override de CVU";
 GB_I18N.pt.deskImpliedCvu = "CVU implícito";
 GB_I18N.pt.deskVsPld = "vs PLD SE";
@@ -255,11 +275,20 @@ GB_I18N.pt.deskPocAnpTitle = "POC vs ANP — mensal";
 GB_I18N.pt.deskPocAnpNote = "Preço médio de leilão POC vs produtores Santos e distribuidoras não térmicas Sudeste (R$/MMBtu).";
 GB_I18N.pt.deskUtilTitle = "Capacidade contratada vs fluxos realizados";
 GB_I18N.pt.deskUtilNote = "Capacidade contratada ativa (mil m³/d) vs volume realizado médio nos últimos 30 dias de dados de fluxo, por TSO.";
+GB_I18N.pt.deskUtilTso = "TSO";
 GB_I18N.pt.deskUtilCap = "Contratada";
 GB_I18N.pt.deskUtilReal = "Realizado méd.";
 GB_I18N.pt.deskUtilPct = "Utilização";
 GB_I18N.pt.deskFooter = "Retrato cruzado a partir dos painéis irmãos. Não é um produto oficial da ONS, ANP, CCEE ou transportadoras.";
 GB_I18N.pt.deskEmptyChart = "Sem séries — parquet irmão ausente no build.";
+GB_I18N.pt.deskEmpty = "Sem séries — parquet irmão ausente no build.";
+GB_I18N.pt.deskPickSeries = "Selecione uma ou mais séries.";
+GB_I18N.pt.deskSeriesPld = "PLD SE";
+GB_I18N.pt.deskSeriesCmo = "CMO SE";
+GB_I18N.pt.deskSeriesCvu = "CVU gás méd.";
+GB_I18N.pt.deskSeriesPoc = "POC méd.";
+GB_I18N.pt.deskSeriesAnpSantos = "ANP Santos";
+GB_I18N.pt.deskSeriesAnpNtSe = "ANP não térmico SE";
 GB_I18N.pt.deskKpiGen = "Geração a gás SIN";
 GB_I18N.pt.deskKpiPld = "PLD SE";
 GB_I18N.pt.deskKpiCmo = "CMO SE";
@@ -267,12 +296,68 @@ GB_I18N.pt.deskKpiSantos = "ANP Santos";
 GB_I18N.pt.deskKpiPoc = "POC 7d";
 GB_I18N.pt.deskKpiFlows = "Fluxos 7d";
 
+const COMPARE_META = [
+  { key: "pld", labelKey: "deskSeriesPld", field: "pld" },
+  { key: "cmo", labelKey: "deskSeriesCmo", field: "cmo" },
+  { key: "cvu", labelKey: "deskSeriesCvu", field: "cvu" },
+];
+const POC_ANP_META = [
+  { key: "poc", labelKey: "deskSeriesPoc", field: "poc" },
+  { key: "anpSantos", labelKey: "deskSeriesAnpSantos", field: "anpSantos" },
+  { key: "anpNtSe", labelKey: "deskSeriesAnpNtSe", field: "anpNonThermalSe" },
+];
+
 let DATA = null;
 let chartResizeTimer = null;
+let pickedCompare = new Set();
+let pickedPocAnp = new Set();
+let compareSlots = new Map();
+let pocAnpSlots = new Map();
+let utilSortState = { col: "tso", dir: 1 };
+const utilDefaultSort = { col: "tso", dir: 1 };
+let utilFilters = {};
 
 function fmtNum(v, d) {
   if (v === null || v === undefined || (typeof v === "number" && isNaN(v))) return "—";
-  return Number(v).toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d });
+  const loc = currentLang() === "pt" ? "pt-BR" : "en-US";
+  return Number(v).toLocaleString(loc, { minimumFractionDigits: d, maximumFractionDigits: d });
+}
+
+function colorOf(slots, key) {
+  const pal = chartPalette();
+  if (!slots.has(key)) slots.set(key, slots.size % Math.max(1, pal.length));
+  return pal[slots.get(key) % pal.length] || "var(--accent)";
+}
+
+function buildPicker(hostId, meta, picked, slots, onToggle) {
+  const host = document.getElementById(hostId);
+  host.innerHTML = "";
+  meta.forEach(m => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "series-btn" + (picked.has(m.key) ? " active" : "");
+    btn.innerHTML = '<span class="sw"></span>' + escapeHtml(t(m.labelKey));
+    btn.querySelector(".sw").style.background = picked.has(m.key) ? colorOf(slots, m.key) : "";
+    btn.addEventListener("click", () => {
+      if (picked.has(m.key)) { picked.delete(m.key); slots.delete(m.key); }
+      else { picked.add(m.key); colorOf(slots, m.key); }
+      onToggle();
+    });
+    host.appendChild(btn);
+  });
+}
+
+function refreshCompare() {
+  buildPicker("picker-compare", COMPARE_META, pickedCompare, compareSlots, refreshCompare);
+  renderCompareChart();
+}
+function refreshPocAnp() {
+  buildPicker("picker-poc-anp", POC_ANP_META, pickedPocAnp, pocAnpSlots, refreshPocAnp);
+  renderPocAnpChart();
+}
+function buildPickers() {
+  buildPicker("picker-compare", COMPARE_META, pickedCompare, compareSlots, refreshCompare);
+  buildPicker("picker-poc-anp", POC_ANP_META, pickedPocAnp, pocAnpSlots, refreshPocAnp);
 }
 
 function paintAsof() {
@@ -281,8 +366,9 @@ function paintAsof() {
     const d = new Date(DATA.generatedIso);
     if (!isNaN(d)) {
       const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      refreshedText = d.toLocaleDateString(undefined, { year: "numeric", month: "2-digit", day: "2-digit" })
-        + " " + d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })
+      const loc = currentLang() === "pt" ? "pt-BR" : undefined;
+      refreshedText = d.toLocaleDateString(loc, { year: "numeric", month: "2-digit", day: "2-digit" })
+        + " " + d.toLocaleTimeString(loc, { hour: "2-digit", minute: "2-digit" })
         + " " + tz;
     }
   } catch (e) {}
@@ -322,6 +408,7 @@ function impliedCvu(gas, hr, natgas, mmbtuPer1000) {
 }
 
 function renderSpark() {
+  if (!DATA) return;
   const s = DATA.spark || {};
   const gasEl = document.getElementById("spark-gas");
   const hrEl = document.getElementById("spark-hr");
@@ -377,6 +464,13 @@ function initSparkForm() {
 function drawLineChart(hostId, dates, seriesList, emptyMsg) {
   const host = document.getElementById(hostId);
   host.innerHTML = "";
+  if (!seriesList.length) {
+    const empty = document.createElement("div");
+    empty.className = "chart-empty";
+    empty.textContent = emptyMsg || t("deskPickSeries");
+    host.appendChild(empty);
+    return;
+  }
   const has = seriesList.some(s => (s.values || []).some(v => v != null));
   if (!dates.length || !has) {
     const empty = document.createElement("div");
@@ -424,7 +518,7 @@ function drawLineChart(hostId, dates, seriesList, emptyMsg) {
   }
 
   seriesList.forEach((s, si) => {
-    const color = pal[si % pal.length] || "var(--accent)";
+    const color = s.color || pal[si % pal.length] || "var(--accent)";
     let d = "";
     let drawing = false;
     s.values.forEach((v, i) => {
@@ -473,7 +567,7 @@ function drawLineChart(hostId, dates, seriesList, emptyMsg) {
     seriesList.forEach((s, si) => {
       const v = s.values[best];
       if (v == null) return;
-      const color = pal[si % pal.length] || "var(--accent)";
+      const color = s.color || pal[si % pal.length] || "var(--accent)";
       rows += '<tr><td><span class="sw" style="display:inline-block;width:9px;height:9px;border-radius:2px;background:' +
         color + '"></span> ' + escapeHtml(s.label) + '</td><td class="v">' + fmtNum(v, 2) + '</td></tr>';
     });
@@ -490,7 +584,7 @@ function drawLineChart(hostId, dates, seriesList, emptyMsg) {
   lg.className = "legend";
   seriesList.forEach((s, si) => {
     const span = document.createElement("span");
-    const color = pal[si % pal.length] || "var(--accent)";
+    const color = s.color || pal[si % pal.length] || "var(--accent)";
     span.innerHTML = '<span class="sw" style="background:' + color + '"></span>' + escapeHtml(s.label);
     lg.appendChild(span);
   });
@@ -498,43 +592,99 @@ function drawLineChart(hostId, dates, seriesList, emptyMsg) {
 }
 
 function renderCompareChart() {
+  if (!DATA) return;
   const c = DATA.compareSe || {};
-  drawLineChart("main-chart", c.dates || [], [
-    { label: "PLD SE", values: c.pld || [] },
-    { label: "CMO SE", values: c.cmo || [] },
-    { label: "CVU gas med", values: c.cvu || [] },
-  ], c.note || t("deskEmptyChart"));
+  if (!pickedCompare.size) {
+    drawLineChart("main-chart", [], [], t("deskPickSeries"));
+    return;
+  }
+  const series = COMPARE_META.filter(m => pickedCompare.has(m.key)).map(m => ({
+    label: t(m.labelKey),
+    values: c[m.field] || [],
+    color: colorOf(compareSlots, m.key),
+  }));
+  drawLineChart("main-chart", c.dates || [], series, c.note || t("deskEmptyChart"));
 }
 
 function renderPocAnpChart() {
+  if (!DATA) return;
   const c = DATA.pocAnpMonthly || {};
-  drawLineChart("poc-anp-chart", c.months || [], [
-    { label: "POC avg", values: c.poc || [] },
-    { label: "ANP Santos", values: c.anpSantos || [] },
-    { label: "ANP non-thermal SE", values: c.anpNonThermalSe || [] },
-  ], c.note || t("deskEmptyChart"));
+  if (!pickedPocAnp.size) {
+    drawLineChart("poc-anp-chart", [], [], t("deskPickSeries"));
+    return;
+  }
+  const series = POC_ANP_META.filter(m => pickedPocAnp.has(m.key)).map(m => ({
+    label: t(m.labelKey),
+    values: c[m.field] || [],
+    color: colorOf(pocAnpSlots, m.key),
+  }));
+  drawLineChart("poc-anp-chart", c.months || [], series, c.note || t("deskEmptyChart"));
+}
+
+function utilRawRows() {
+  const u = DATA.utilization || {};
+  return (u.rows || []).map(r => ({
+    tso: r.tso,
+    contracted: r.contracted,
+    realized: r.realized,
+    utilization: r.utilization == null ? null : r.utilization * 100,
+  }));
+}
+
+function utilTableRows() {
+  return utilRawRows().filter(r => {
+    for (const [col, q] of Object.entries(utilFilters)) {
+      if (!q) continue;
+      const v = r[col];
+      if (String(v == null ? "" : v).toLowerCase().indexOf(q) < 0) return false;
+    }
+    return true;
+  }).sort((a, b) => {
+    const av = a[utilSortState.col], bv = b[utilSortState.col];
+    if (av == null && bv == null) return 0;
+    if (av == null) return 1;
+    if (bv == null) return -1;
+    if (typeof av === "number" && typeof bv === "number") return (av - bv) * utilSortState.dir;
+    return String(av).localeCompare(String(bv)) * utilSortState.dir;
+  });
 }
 
 function renderUtil() {
+  if (!DATA) return;
   const u = DATA.utilization || {};
+  const thead = document.getElementById("util-thead");
   const body = document.getElementById("util-body");
-  body.innerHTML = "";
-  const rows = u.rows || [];
-  if (!rows.length) {
-    const tr = document.createElement("tr");
-    tr.innerHTML = '<td colspan="4" style="color:var(--muted)">' + escapeHtml(u.note || t("deskEmptyChart")) + "</td>";
-    body.appendChild(tr);
-    return;
-  }
-  rows.forEach(r => {
-    const tr = document.createElement("tr");
-    const util = r.utilization == null ? "—" : (r.utilization * 100).toFixed(0) + "%";
-    tr.innerHTML =
-      "<td>" + escapeHtml(r.tso) + "</td>" +
-      '<td class="num">' + escapeHtml(fmtNum(r.contracted, 1)) + "</td>" +
-      '<td class="num">' + escapeHtml(fmtNum(r.realized, 1)) + "</td>" +
-      '<td class="num">' + escapeHtml(util) + "</td>";
-    body.appendChild(tr);
+  const cols = [
+    { key: "tso", label: t("deskUtilTso") },
+    { key: "contracted", label: t("deskUtilCap"), num: true },
+    { key: "realized", label: t("deskUtilReal"), num: true },
+    { key: "utilization", label: t("deskUtilPct"), num: true },
+  ];
+  withFocusPreserved(thead.parentElement.parentElement, () => {
+    thead.innerHTML = "";
+    cols.forEach(col => {
+      thead.appendChild(buildSortFilterTh(col, utilSortState, utilDefaultSort, utilFilters, (s, f) => {
+        utilSortState = s; utilFilters = f; renderUtil();
+      }, col.num ? "num" : ""));
+    });
+    body.innerHTML = "";
+    const rows = utilTableRows();
+    if (!(u.rows || []).length) {
+      const tr = document.createElement("tr");
+      tr.innerHTML = '<td colspan="4" style="color:var(--muted)">' + escapeHtml(u.note || t("deskEmptyChart")) + "</td>";
+      body.appendChild(tr);
+      return;
+    }
+    rows.forEach(r => {
+      const tr = document.createElement("tr");
+      const util = r.utilization == null ? "—" : fmtNum(r.utilization, 0) + "%";
+      tr.innerHTML =
+        "<td>" + escapeHtml(r.tso) + "</td>" +
+        '<td class="num">' + escapeHtml(fmtNum(r.contracted, 1)) + "</td>" +
+        '<td class="num">' + escapeHtml(fmtNum(r.realized, 1)) + "</td>" +
+        '<td class="num">' + escapeHtml(util) + "</td>";
+      body.appendChild(tr);
+    });
   });
 }
 
@@ -542,6 +692,7 @@ function renderAll() {
   paintAsof();
   renderNotes();
   renderKpis();
+  buildPickers();
   renderCompareChart();
   renderPocAnpChart();
   renderUtil();
@@ -551,26 +702,39 @@ function renderAll() {
 
 async function init() {
   document.getElementById("year").textContent = new Date().getFullYear();
-  const json = await inflateGzipUrl(PAYLOAD_URL);
-  DATA = JSON.parse(json);
-  initSparkForm();
-  renderAll();
-  window.addEventListener("resize", () => {
-    clearTimeout(chartResizeTimer);
-    chartResizeTimer = setTimeout(() => {
+  initThemeToggle("theme-toggle", () => {
+    if (DATA) {
+      buildPickers();
       renderCompareChart();
       renderPocAnpChart();
-    }, 140);
-  });
-  initThemeToggle("theme-toggle", () => {
-    renderCompareChart();
-    renderPocAnpChart();
+    }
   });
   initLangToggle("lang-toggle", () => {
-    renderAll();
+    if (DATA) renderAll();
+    else applyI18n();
   });
   initCrossLinks();
   applyI18n();
+  try {
+    const json = await inflateGzipUrl(PAYLOAD_URL);
+    DATA = JSON.parse(json);
+    COMPARE_META.forEach(m => { pickedCompare.add(m.key); colorOf(compareSlots, m.key); });
+    POC_ANP_META.forEach(m => { pickedPocAnp.add(m.key); colorOf(pocAnpSlots, m.key); });
+    initSparkForm();
+    renderAll();
+    window.addEventListener("resize", () => {
+      clearTimeout(chartResizeTimer);
+      chartResizeTimer = setTimeout(() => {
+        renderCompareChart();
+        renderPocAnpChart();
+      }, 140);
+    });
+  } catch (err) {
+    console.error(err);
+    const el = document.getElementById("data-notes");
+    el.hidden = false;
+    el.textContent = String(err && err.message || err);
+  }
 }
 init();
 </script>
@@ -597,6 +761,7 @@ def write_dashboard(out_path: Path | str = DEFAULT_OUT) -> Path:
         SHARED_THEME_CSS=kit.render_theme_css(),
         SHARED_JS_DECODE=kit.JS_DECODE,
         SHARED_JS_ESCAPE_HTML=kit.JS_ESCAPE_HTML,
+        SHARED_JS_TABLE_SORT=kit.JS_TABLE_SORT,
         SHARED_JS_THEME_TOGGLE=kit.JS_THEME_TOGGLE,
         SHARED_JS_BOOT=kit.JS_BOOT,
         SHARED_JS_I18N=kit.JS_I18N,

@@ -124,7 +124,6 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .pill { font-size: 11.5px; color: var(--muted2); text-decoration: none; border: 1px solid var(--border); border-radius: 5px; padding: 3px 10px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; }
 .pill:hover { background: var(--accent-soft); color: var(--text); border-color: var(--border-strong); }
 .ext-icon { width: 10px; height: 10px; display: inline-block; flex: none; opacity: .75; }
-#theme-toggle { display: inline-flex; align-items: center; justify-content: center; background: var(--panel); border: 1px solid var(--border-strong); border-radius: 5px; padding: 5px 9px; line-height: 0; cursor: pointer; color: var(--text); }
 .lede { font-size: 13px; color: var(--muted2); font-weight: 300; max-width: 48em; line-height: 1.45; margin: 0 0 var(--gap); }
 .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: var(--gap); }
 .kpi-cell { background: var(--panel); border: 1px solid var(--border); border-radius: 5px; padding: 10px 12px; }
@@ -134,6 +133,11 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .chart-card { background: var(--panel); border: 1px solid var(--border); border-radius: 5px; padding: var(--card-pad); margin-bottom: var(--gap); }
 .panel-title { font-size: 13px; font-weight: 400; margin: 0 0 2px; }
 .panel-note { font-size: 11.5px; color: var(--muted); margin: 0 0 12px; font-weight: 200; }
+.series-picker { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.series-btn { display: inline-flex; align-items: center; gap: 6px; background: var(--bg); border: 1px solid var(--border); border-radius: 5px; padding: 4px 12px 4px 8px; font-size: 12px; cursor: pointer; color: var(--text); font-family: var(--font); font-weight: 400; }
+.series-btn:hover { background: var(--accent-soft); }
+.series-btn.active { border-color: var(--border-strong); }
+.series-btn .sw { width: 9px; height: 9px; border-radius: 2px; flex: none; background: var(--border-strong); }
 .caption { font-size: 12px; color: var(--muted2); margin: 8px 0 0; font-weight: 300; line-height: 1.4; max-width: 52em; }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; font-size: 12px; color: var(--muted2); }
 .legend span { display: flex; align-items: center; gap: 6px; }
@@ -149,11 +153,18 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .table-wrap { background: var(--panel); border: 1px solid var(--border); border-radius: 5px; overflow: auto; max-height: 50vh; }
 table { border-collapse: collapse; width: 100%; font-size: var(--table-font-size); font-weight: 300; }
 th, td { padding: 4px 8px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
-th { position: sticky; top: 0; background: var(--panel); color: var(--muted2); font-weight: 400; }
+th { position: sticky; top: 0; z-index: 2; background: var(--panel); color: var(--muted2); font-weight: 400; }
+th .th-label { cursor: pointer; }
 .num { text-align: right; font-variant-numeric: tabular-nums; }
+tbody tr:hover { background: var(--accent-soft); }
 footer { margin-top: 22px; color: var(--muted); font-size: 11.5px; line-height: 1.7; font-weight: 200; }
 footer a { color: var(--accent); }
 .tt { position: fixed; pointer-events: none; background: var(--panel); border: 1px solid var(--border); border-radius: 5px; padding: 8px 10px; font-size: 12px; z-index: 50; display: none; min-width: 160px; }
+@media (max-width: 720px) {
+  .toolbar, .sources, .series-picker { flex-direction: column; align-items: stretch; }
+  .toolbar button { width: 100%; }
+  .count { margin-left: 0; }
+}
 </style>
 </head>
 <body>
@@ -183,12 +194,14 @@ footer a { color: var(--accent); }
 <div class="chart-card">
   <p class="panel-title" data-i18n="precosProdTitle">Producer sales by basin</p>
   <p class="panel-note" data-i18n="precosProdNote">Wellhead sales between producers. Santos has been the cheapest and most stable; Other basins remain highest.</p>
+  <div class="series-picker" id="picker-producers"></div>
   <div id="chart-producers"></div>
   <div class="legend" id="leg-producers"></div>
 </div>
 <div class="chart-card">
   <p class="panel-title" data-i18n="precosDistTitle">Sales to distributors &amp; free consumers</p>
   <p class="panel-note" data-i18n="precosDistNote">Thermal contracts run far below non-thermal. Blank stretches are ANP suppressions (too few counterparties).</p>
+  <div class="series-picker" id="picker-distributors"></div>
   <div id="chart-distributors"></div>
   <div class="legend" id="leg-distributors"></div>
 </div>
@@ -214,6 +227,7 @@ footer a { color: var(--accent); }
   &copy; <span id="year"></span> GasBrazil.com &middot;
   <span data-i18n="precosFooter">Data: ANP publicidade dos preços de gás natural. Not an official ANP product.</span>
   &middot; <span data-i18n="contact">Contact</span>: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
+  &middot; <a href="../about/" data-i18n="footerAbout">About &amp; methodology</a>
 </footer>
 </div>
 <div class="tt" id="chart-tt"></div>
@@ -241,6 +255,28 @@ GB_I18N.en.precosCaveat2 = "Published with roughly a two-month lag. Chart gaps a
 GB_I18N.en.precosCsv = "Download CSV";
 GB_I18N.en.precosXlsx = "Export Excel";
 GB_I18N.en.precosFooter = "Data: ANP publicidade dos preços de gás natural. Not an official ANP product.";
+GB_I18N.en.precosKpiSantos = "Santos";
+GB_I18N.en.precosKpiMonths = "Months";
+GB_I18N.en.precosKpiMonthsUnit = "in series";
+GB_I18N.en.precosThMonth = "Month";
+GB_I18N.en.precosThSantos = "Santos";
+GB_I18N.en.precosThCampos = "Campos";
+GB_I18N.en.precosThOther = "Other basins";
+GB_I18N.en.precosThMarketers = "Marketers";
+GB_I18N.en.precosThMktVol = "Marketer volume";
+GB_I18N.en.precosPrice = "Price";
+GB_I18N.en.precosEmpty = "No data";
+GB_I18N.en.precosPickSeries = "Select one or more series.";
+GB_I18N.en.precosRowCount = "{n} months";
+GB_I18N.en.precosBasinSantos = "Santos";
+GB_I18N.en.precosBasinCampos = "Campos";
+GB_I18N.en.precosBasinOther = "Other basins";
+GB_I18N.en.precosDistNT_NNE = "Non-thermal N-NE";
+GB_I18N.en.precosDistNT_SE = "Non-thermal SE";
+GB_I18N.en.precosDistNT_SCO = "Non-thermal S-CO";
+GB_I18N.en.precosDistT_NNE = "Thermal N-NE";
+GB_I18N.en.precosDistT_SESCO = "Thermal SE-S-CO";
+
 GB_I18N.pt.precosLede = "Divulgações mensais oficiais da ANP (Resolução 52/2011) — preços agregados com impostos (R$/MMBtu), não benchmarks de spot. Lacunas são omissões da ANP, não falhas de download.";
 GB_I18N.pt.precosProdTitle = "Vendas entre produtores por bacia";
 GB_I18N.pt.precosProdNote = "Vendas na boca do poço. Santos tem sido a mais barata e estável; Demais Bacias, a mais cara.";
@@ -253,9 +289,51 @@ GB_I18N.pt.precosCaveat2 = "Publicação com cerca de dois meses de defasagem. L
 GB_I18N.pt.precosCsv = "Baixar CSV";
 GB_I18N.pt.precosXlsx = "Exportar Excel";
 GB_I18N.pt.precosFooter = "Dados: ANP publicidade dos preços de gás natural. Não é um produto oficial da ANP.";
+GB_I18N.pt.precosKpiSantos = "Santos";
+GB_I18N.pt.precosKpiMonths = "Meses";
+GB_I18N.pt.precosKpiMonthsUnit = "na série";
+GB_I18N.pt.precosThMonth = "Mês";
+GB_I18N.pt.precosThSantos = "Santos";
+GB_I18N.pt.precosThCampos = "Campos";
+GB_I18N.pt.precosThOther = "Demais bacias";
+GB_I18N.pt.precosThMarketers = "Comercializadores";
+GB_I18N.pt.precosThMktVol = "Volume comercializadores";
+GB_I18N.pt.precosPrice = "Preço";
+GB_I18N.pt.precosEmpty = "Sem dados";
+GB_I18N.pt.precosPickSeries = "Selecione uma ou mais séries.";
+GB_I18N.pt.precosRowCount = "{n} meses";
+GB_I18N.pt.precosBasinSantos = "Santos";
+GB_I18N.pt.precosBasinCampos = "Campos";
+GB_I18N.pt.precosBasinOther = "Demais bacias";
+GB_I18N.pt.precosDistNT_NNE = "Não térmico N-NE";
+GB_I18N.pt.precosDistNT_SE = "Não térmico SE";
+GB_I18N.pt.precosDistNT_SCO = "Não térmico S-CO";
+GB_I18N.pt.precosDistT_NNE = "Térmico N-NE";
+GB_I18N.pt.precosDistT_SESCO = "Térmico SE-S-CO";
+
+const PROD_META = [
+  { key: "Santos", labelKey: "precosBasinSantos" },
+  { key: "Campos", labelKey: "precosBasinCampos" },
+  { key: "Other basins", labelKey: "precosBasinOther" },
+];
+const DIST_META = [
+  { key: "non_thermal|Norte-Nordeste", labelKey: "precosDistNT_NNE" },
+  { key: "non_thermal|Sudeste", labelKey: "precosDistNT_SE" },
+  { key: "non_thermal|Sul-Centro-Oeste", labelKey: "precosDistNT_SCO" },
+  { key: "thermal|Norte-Nordeste", labelKey: "precosDistT_NNE" },
+  { key: "thermal|Sudeste-Sul-Centro-Oeste", labelKey: "precosDistT_SESCO" },
+];
 
 let DATA = null;
+let pickedProd = new Set();
+let pickedDist = new Set();
+let prodSlots = new Map();
+let distSlots = new Map();
+let sortState = { col: "month", dir: -1 };
+const defaultSort = { col: "month", dir: -1 };
+let filters = {};
 const NS = "http://www.w3.org/2000/svg";
+
 function el(n, a) { const e = document.createElementNS(NS, n); for (const k in a) e.setAttribute(k, a[k]); return e; }
 function fmt(v, d) {
   if (v == null) return "—";
@@ -270,10 +348,33 @@ function niceTicks(lo, hi, n) {
   for (let v = start; v <= hi + step * 0.01; v += step) out.push(v);
   return out;
 }
+function colorOf(map, key) {
+  const pal = chartPalette();
+  if (!map.has(key)) map.set(key, map.size % Math.max(1, pal.length));
+  return pal[map.get(key) % pal.length] || "var(--accent)";
+}
+function buildPicker(hostId, meta, picked, slots, onToggle) {
+  const host = document.getElementById(hostId);
+  host.innerHTML = "";
+  meta.forEach(m => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "series-btn" + (picked.has(m.key) ? " active" : "");
+    btn.innerHTML = '<span class="sw"></span>' + escapeHtml(t(m.labelKey));
+    btn.querySelector(".sw").style.background = picked.has(m.key) ? colorOf(slots, m.key) : "";
+    btn.addEventListener("click", () => {
+      if (picked.has(m.key)) { picked.delete(m.key); slots.delete(m.key); }
+      else { picked.add(m.key); colorOf(slots, m.key); }
+      onToggle();
+    });
+    host.appendChild(btn);
+  });
+}
 function lineChart(host, legend, series, months) {
   host.innerHTML = ""; legend.innerHTML = "";
   const plot = series.filter(s => s.pts.some(p => p.v != null));
-  if (!plot.length) { host.innerHTML = '<div class="chart-empty">No data</div>'; return; }
+  if (!series.length) { host.innerHTML = '<div class="chart-empty">' + escapeHtml(t("precosPickSeries")) + "</div>"; return; }
+  if (!plot.length) { host.innerHTML = '<div class="chart-empty">' + escapeHtml(t("precosEmpty")) + "</div>"; return; }
   let lo = Infinity, hi = -Infinity;
   plot.forEach(s => s.pts.forEach(p => { if (p.v != null) { lo = Math.min(lo, p.v); hi = Math.max(hi, p.v); } }));
   if (lo > 0 && lo / hi <= 0.4) lo = 0;
@@ -286,14 +387,14 @@ function lineChart(host, legend, series, months) {
   const svg = el("svg", { viewBox: "0 0 "+W+" "+H, width: W, height: H });
   niceTicks(lo, hi, 5).forEach(tk => {
     svg.appendChild(el("line", { x1: ML, x2: W-MR, y1: y(tk), y2: y(tk), stroke: "var(--border)", "stroke-width": 1 }));
-    const t = el("text", { x: ML-8, y: y(tk)+4, "text-anchor": "end", fill: "var(--muted)", "font-size": 11 });
-    t.textContent = fmt(tk, 0); svg.appendChild(t);
+    const tx = el("text", { x: ML-8, y: y(tk)+4, "text-anchor": "end", fill: "var(--muted)", "font-size": 11 });
+    tx.textContent = fmt(tk, 0); svg.appendChild(tx);
   });
   const nT = Math.min(8, months.length);
   for (let i = 0; i < nT; i++) {
     const mi = months[Math.round(i*(months.length-1)/Math.max(1,nT-1))];
-    const t = el("text", { x: x(mi), y: H-8, fill: "var(--muted)", "font-size": 11, "text-anchor": i===0?"start":(i===nT-1?"end":"middle") });
-    t.textContent = mi; svg.appendChild(t);
+    const tx = el("text", { x: x(mi), y: H-8, fill: "var(--muted)", "font-size": 11, "text-anchor": i===0?"start":(i===nT-1?"end":"middle") });
+    tx.textContent = mi; svg.appendChild(tx);
   }
   plot.forEach(s => {
     let d = "", started = false;
@@ -309,77 +410,154 @@ function lineChart(host, legend, series, months) {
   });
   host.appendChild(svg);
 }
+function paintAsof() {
+  let refreshedText = DATA.generated || "—";
+  try {
+    const d = new Date(DATA.generatedIso);
+    if (!isNaN(d)) {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      refreshedText = d.toLocaleDateString(currentLang() === "pt" ? "pt-BR" : undefined, { year: "numeric", month: "2-digit", day: "2-digit" })
+        + " " + d.toLocaleTimeString(currentLang() === "pt" ? "pt-BR" : undefined, { hour: "2-digit", minute: "2-digit" })
+        + " " + tz;
+    }
+  } catch (e) {}
+  document.getElementById("asof-refreshed").textContent = refreshedText;
+  document.getElementById("asof-through").textContent = DATA.dataThrough || "—";
+}
 function renderKpis() {
   const host = document.getElementById("kpi-row");
   const last = DATA.dataThrough || "";
-  const santos = DATA.kpiSantos;
   host.innerHTML = `
-    <div class="kpi-cell"><div class="lbl">Santos</div><div class="val">${fmt(santos)}</div><div class="unit">R$/MMBtu · ${last}</div></div>
-    <div class="kpi-cell"><div class="lbl">Months</div><div class="val">${DATA.nMonths||"—"}</div><div class="unit">in series</div></div>`;
+    <div class="kpi-cell"><div class="lbl" data-i18n="precosKpiSantos">${escapeHtml(t("precosKpiSantos"))}</div><div class="val">${fmt(DATA.kpiSantos)}</div><div class="unit">R$/MMBtu · ${escapeHtml(last)}</div></div>
+    <div class="kpi-cell"><div class="lbl" data-i18n="precosKpiMonths">${escapeHtml(t("precosKpiMonths"))}</div><div class="val">${DATA.nMonths||"—"}</div><div class="unit" data-i18n="precosKpiMonthsUnit">${escapeHtml(t("precosKpiMonthsUnit"))}</div></div>`;
 }
-function renderAll() {
+function renderCharts() {
   const months = DATA.months;
-  const pal = chartPalette();
-  const prod = Object.keys(DATA.producers||{}).map((k,i) => ({
-    label: k, color: pal[i%pal.length],
-    pts: months.map((m,j) => ({ month: m, v: DATA.producers[k][j] }))
+  const prod = PROD_META.filter(m => pickedProd.has(m.key)).map(m => ({
+    label: t(m.labelKey), color: colorOf(prodSlots, m.key),
+    pts: months.map((mo, j) => ({ month: mo, v: (DATA.producers[m.key] || [])[j] }))
   }));
   lineChart(document.getElementById("chart-producers"), document.getElementById("leg-producers"), prod, months);
-  const distLabels = {
-    "non_thermal|Norte-Nordeste": "Non-thermal N-NE",
-    "non_thermal|Sudeste": "Non-thermal SE",
-    "non_thermal|Sul-Centro-Oeste": "Non-thermal S-CO",
-    "thermal|Norte-Nordeste": "Thermal N-NE",
-    "thermal|Sudeste-Sul-Centro-Oeste": "Thermal SE-S-CO"
-  };
-  const dist = Object.keys(DATA.distributors||{}).map((k,i) => ({
-    label: distLabels[k] || k, color: pal[i%pal.length],
-    pts: months.map((m,j) => ({ month: m, v: DATA.distributors[k][j] }))
+  const dist = DIST_META.filter(m => pickedDist.has(m.key)).map(m => ({
+    label: t(m.labelKey), color: colorOf(distSlots, m.key),
+    pts: months.map((mo, j) => ({ month: mo, v: (DATA.distributors[m.key] || [])[j] }))
   }));
   lineChart(document.getElementById("chart-distributors"), document.getElementById("leg-distributors"), dist, months);
-  const mkt = [
-    { label: "Price", color: pal[0], pts: months.map((m,j) => ({ month: m, v: DATA.marketersPrice[j] })) },
-  ];
+  const mkt = [{
+    label: t("precosPrice"), color: chartPalette()[0],
+    pts: months.map((mo, j) => ({ month: mo, v: DATA.marketersPrice[j] }))
+  }];
   lineChart(document.getElementById("chart-marketers"), document.getElementById("leg-marketers"), mkt, months);
-
-  const thead = document.getElementById("thead-row");
-  thead.innerHTML = "<th>Month</th><th>Santos</th><th>Campos</th><th>Other</th><th>Marketers</th><th>Mkt vol</th>";
-  const tb = document.getElementById("tbody");
-  tb.innerHTML = "";
-  for (let i = months.length - 1; i >= 0; i--) {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${months[i]}</td>
-      <td class="num">${fmt(DATA.producers.Santos[i])}</td>
-      <td class="num">${fmt(DATA.producers.Campos[i])}</td>
-      <td class="num">${fmt(DATA.producers["Other basins"][i])}</td>
-      <td class="num">${fmt(DATA.marketersPrice[i])}</td>
-      <td class="num">${fmt(DATA.marketersVolume[i], 0)}</td>`;
-    tb.appendChild(tr);
-  }
-  document.getElementById("row-count").textContent = months.length + " months";
+}
+function tableRawRows() {
+  return DATA.months.map((m, i) => ({
+    month: m,
+    santos: DATA.producers.Santos[i],
+    campos: DATA.producers.Campos[i],
+    other: DATA.producers["Other basins"][i],
+    marketers: DATA.marketersPrice[i],
+    mktVol: DATA.marketersVolume[i],
+  }));
 }
 function tableRows() {
-  const rows = [["month","santos","campos","other_basins","marketers_price","marketers_volume"]];
-  DATA.months.forEach((m,i) => rows.push([
-    m, DATA.producers.Santos[i], DATA.producers.Campos[i], DATA.producers["Other basins"][i],
-    DATA.marketersPrice[i], DATA.marketersVolume[i]
-  ]));
-  return rows;
+  return tableRawRows().filter(r => {
+    for (const [col, q] of Object.entries(filters)) {
+      if (!q) continue;
+      const v = r[col];
+      if (String(v == null ? "" : v).toLowerCase().indexOf(q) < 0) return false;
+    }
+    return true;
+  }).sort((a, b) => {
+    const av = a[sortState.col], bv = b[sortState.col];
+    if (av == null && bv == null) return 0;
+    if (av == null) return 1;
+    if (bv == null) return -1;
+    if (typeof av === "number" && typeof bv === "number") return (av - bv) * sortState.dir;
+    return String(av).localeCompare(String(bv)) * sortState.dir;
+  });
+}
+function renderTable() {
+  const cols = [
+    { key: "month", label: t("precosThMonth") },
+    { key: "santos", label: t("precosThSantos"), num: true },
+    { key: "campos", label: t("precosThCampos"), num: true },
+    { key: "other", label: t("precosThOther"), num: true },
+    { key: "marketers", label: t("precosThMarketers"), num: true },
+    { key: "mktVol", label: t("precosThMktVol"), num: true },
+  ];
+  const host = document.getElementById("thead-row");
+  const tbody = document.getElementById("tbody");
+  withFocusPreserved(host.parentElement.parentElement, () => {
+    host.innerHTML = "";
+    cols.forEach(col => {
+      host.appendChild(buildSortFilterTh(col, sortState, defaultSort, filters, (s, f) => {
+        sortState = s; filters = f; renderTable();
+      }, col.num ? "num" : ""));
+    });
+    const rows = tableRows();
+    tbody.innerHTML = rows.map(r =>
+      "<tr><td>" + escapeHtml(r.month) + "</td>" +
+      '<td class="num">' + fmt(r.santos) + "</td>" +
+      '<td class="num">' + fmt(r.campos) + "</td>" +
+      '<td class="num">' + fmt(r.other) + "</td>" +
+      '<td class="num">' + fmt(r.marketers) + "</td>" +
+      '<td class="num">' + fmt(r.mktVol, 0) + "</td></tr>"
+    ).join("");
+    document.getElementById("row-count").textContent = t("precosRowCount").replace("{n}", String(rows.length));
+  });
+}
+function downloadCsv() {
+  const header = [t("precosThMonth"), t("precosThSantos"), t("precosThCampos"), t("precosThOther"), t("precosThMarketers"), t("precosThMktVol")];
+  const keys = ["month", "santos", "campos", "other", "marketers", "mktVol"];
+  const lines = [header.map(csvEscape).join(",")];
+  tableRows().forEach(r => lines.push(keys.map(k => csvEscape(r[k] == null ? "" : r[k])).join(",")));
+  downloadTextFile(lines.join("\n"), "text/csv;charset=utf-8", "gasbrazil-anp-prices.csv");
+}
+async function downloadXlsx() {
+  const header = [t("precosThMonth"), t("precosThSantos"), t("precosThCampos"), t("precosThOther"), t("precosThMarketers"), t("precosThMktVol")];
+  const keys = ["month", "santos", "campos", "other", "marketers", "mktVol"];
+  const rows = [header];
+  tableRows().forEach(r => rows.push(keys.map(k => r[k] == null ? "" : r[k])));
+  const blob = await buildWorkbookXlsxBlob([{ name: "prices", rows }]);
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "gasbrazil-anp-prices.xlsx";
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+function refreshProd() { buildPicker("picker-producers", PROD_META, pickedProd, prodSlots, refreshProd); renderCharts(); }
+function refreshDist() { buildPicker("picker-distributors", DIST_META, pickedDist, distSlots, refreshDist); renderCharts(); }
+function refreshPickersAndCharts() {
+  buildPicker("picker-producers", PROD_META, pickedProd, prodSlots, refreshProd);
+  buildPicker("picker-distributors", DIST_META, pickedDist, distSlots, refreshDist);
+  renderCharts();
 }
 async function init() {
-  const json = await inflateGzipUrl(PAYLOAD_URL);
-  DATA = JSON.parse(json);
-  document.getElementById("asof-refreshed").textContent = DATA.generated || "—";
-  document.getElementById("asof-through").textContent = DATA.dataThrough || "—";
   document.getElementById("year").textContent = new Date().getFullYear();
-  renderKpis();
-  renderAll();
-  document.getElementById("btn-csv").addEventListener("click", () => downloadCsv("anp-prices.csv", tableRows()));
-  document.getElementById("btn-xlsx").addEventListener("click", () => downloadXlsx("anp-prices.xlsx", [{ name: "prices", rows: tableRows() }]));
-  initThemeToggle("theme-toggle", () => renderAll());
-  initLangToggle("lang-toggle");
+  initThemeToggle("theme-toggle", () => { if (DATA) refreshPickersAndCharts(); });
+  initLangToggle("lang-toggle", () => {
+    if (!DATA) { applyI18n(); return; }
+    paintAsof(); renderKpis(); refreshPickersAndCharts(); renderTable(); applyI18n();
+  });
   initCrossLinks();
-  window.addEventListener("resize", () => { clearTimeout(window.__pr); window.__pr = setTimeout(renderAll, 120); });
+  applyI18n();
+  try {
+    const json = await inflateGzipUrl(PAYLOAD_URL);
+    DATA = JSON.parse(json);
+    PROD_META.forEach(m => { pickedProd.add(m.key); colorOf(prodSlots, m.key); });
+    DIST_META.forEach(m => { pickedDist.add(m.key); colorOf(distSlots, m.key); });
+    paintAsof();
+    renderKpis();
+    refreshPickersAndCharts();
+    renderTable();
+    document.getElementById("btn-csv").addEventListener("click", downloadCsv);
+    document.getElementById("btn-xlsx").addEventListener("click", downloadXlsx);
+    window.addEventListener("resize", () => { clearTimeout(window.__pr); window.__pr = setTimeout(renderCharts, 120); });
+    applyI18n();
+  } catch (err) {
+    console.error(err);
+    document.getElementById("kpi-row").innerHTML = '<div class="kpi-cell"><div class="lbl">Error</div><div class="val" style="font-size:13px">' + escapeHtml(String(err && err.message || err)) + "</div></div>";
+  }
 }
 init();
 </script>

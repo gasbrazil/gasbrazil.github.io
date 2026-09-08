@@ -1,12 +1,11 @@
 name: Refresh PLD dashboard
 
-# CCEE publishes daily-average PLD with a short lag and appends to the
-# current-year CSV in place. Schedule every other day (and allow manual
-# dispatch); code pushes rebuild from cached raw/ without re-hitting CCEE
-# unless the cache is empty.
+# CCEE appends daily-average PLD to the current-year CSV in place.
+# Fetch every run (including code pushes) so Actions caches cannot
+# republish a stale tip over a newer scheduled build.
 on:
   schedule:
-    - cron: "30 13 */2 * *"
+    - cron: "30 13 * * *"
   workflow_dispatch: {}
   push:
     branches: [main]
@@ -57,26 +56,13 @@ jobs:
         uses: actions/cache@v4
         with:
           path: pld/raw
-          key: pld-raw-${{ steps.ym.outputs.ym }}
+          key: pld-raw-${{ steps.ym.outputs.ym }}-${{ github.run_id }}
           restore-keys: |
+            pld-raw-${{ steps.ym.outputs.ym }}-
             pld-raw-
 
-      - name: Check for cached raw data
-        id: rawcheck
-        run: |
-          if [ -n "$(ls -A raw 2>/dev/null)" ]; then
-            echo "has_data=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "has_data=false" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Fetch CCEE yearly CSVs
-        if: github.event_name != 'push' || steps.rawcheck.outputs.has_data != 'true'
         run: python pld_pipeline.py fetch
-
-      - name: Skip fetch (code-only push, using cached CCEE data)
-        if: github.event_name == 'push' && steps.rawcheck.outputs.has_data == 'true'
-        run: echo "Code-only push -- rebuilding from cached raw CCEE CSVs."
 
       - name: Build tidy parquet
         run: python pld_pipeline.py build
