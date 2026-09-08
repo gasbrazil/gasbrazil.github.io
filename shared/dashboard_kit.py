@@ -805,13 +805,20 @@ def site_links_js(self_id: str) -> str:
     )
 
 
-def nav_links_html(self_id: str, about_href: str = "../about/", extra_links_html: str = "") -> str:
+def nav_links_html(
+    self_id: str,
+    about_href: str = "../about/",
+    wiki_href: str = "../wiki/",
+    extra_links_html: str = "",
+) -> str:
     """Standard header text nav: every site in _SITES in fixed order
     (home, ons, poc, contratos, flows, supply, pld, precos, …), with the
     current page marked aria-current=page / is-active (not a link). Then any
-    page-specific extras (e.g. ONS Wiki), then About. href defaults to each
-    site's custom-domain URL; initCrossLinks() rewrites sibling hrefs at
-    view time for hostname/flavor.
+    page-specific extras, then the site-wide Wiki, then About. href defaults
+    to each site's custom-domain URL; initCrossLinks() rewrites sibling
+    hrefs at view time for hostname/flavor. wiki_href/about_href are plain
+    relative paths (not run through initCrossLinks) since the wiki and
+    about page only exist at one location, not mirrored per-flavor.
 
     Single source of truth so every dashboard's nav stays in the same
     order with the same labels, and a newly-added site lands everywhere
@@ -841,6 +848,7 @@ def nav_links_html(self_id: str, about_href: str = "../about/", extra_links_html
             )
     if extra_links_html:
         parts.append(extra_links_html)
+    parts.append(f'<a class="navlink" href="{wiki_href}" data-i18n="navWiki">Wiki</a>')
     parts.append(f'<a class="navlink" href="{about_href}" data-i18n="navAbout">About</a>')
     return "\n      ".join(parts)
 

@@ -26,8 +26,11 @@ without switching tabs. Select all/Deselect all include them like any other
 visible row, but they're left out of the Fuel dropdown's option list and out
 of every fleet-wide KPI sum on this tab (so a subsystem total can't get
 counted into "Gas verified generation" alongside the individual plants that
-make it up) — see [Known Limitations](Known-Limitations-and-Assumptions) for
-exactly what "Verified" on these rows is (and isn't) scoped to.
+make it up) — see [Known Limitations](Known-Limitations) for exactly what
+"Verified" on these rows is (and isn't) scoped to. Note that ONS itself
+never publishes a national "SIN" total for gas generation — the site's own
+Total rows are a sum across the four published subsystems, not a fifth
+ONS-reported figure.
 
 The tab opens with the five Total rows pre-selected and charted. Applying any
 Region/Fuel/search filter replaces the current selection with the top 5
@@ -50,7 +53,10 @@ Thermal fleet utilization, Est. gas consumption), **Thermal by fuel**
 duplicated here from Balance for anyone who wants the full fuel detail),
 **Hydrology** (ENA, EAR, in both absolute and %-of-long-term-average terms),
 and **Prices** (CMO). A Subsystems toggle (SIN/SE/S/NE/N) fans whatever
-you've picked across the selected subsystems at once.
+you've picked across the selected subsystems at once. There is no separate
+published SIN series for anything on this tab either — SIN values here are
+this site's own sum across the four subsystems, same as the Thermal Plants
+Total rows.
 
 Opens with Load, Gas generation, Hydro generation, and EAR % (reservoir
 storage) for SIN selected — gas and hydro side by side since hydro
@@ -129,14 +135,14 @@ depending on the sign of the change across your selected window.
 ## Refresh data
 
 The header's refresh icon triggers a rebuild on demand — it calls a small
-Cloudflare Worker that kicks off the `refresh.yml` GitHub Actions workflow
-(see [Architecture and Deployment](Architecture-and-Deployment)). A real
+Cloudflare Worker that holds a GitHub token server-side and kicks off this
+dashboard's GitHub Actions workflow (see
+[Architecture and Deployment](Architecture-and-Deployment)). A real
 rebuild takes a couple of minutes; the button disables itself for 60 seconds
 after triggering since there's nothing on this static page to poll for
 progress.
 
-## Getting to the other sites
+## Getting to the other pages
 
-Top-right of the header: **← GasBrazil.com**, **POC Results**, **POC Contracts**,
-and **About**. These resolve to path URLs on the host you are on
-(`gasbrazil.com/...` or `gasbrazil.github.io/...`) — see [Home](Home).
+Every other dashboard, the Wiki (see [Home](Home) for the full page
+list), and About are one click away from this dashboard's own header nav.

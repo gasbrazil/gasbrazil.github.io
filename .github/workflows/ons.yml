@@ -100,13 +100,6 @@ jobs:
       - name: Build the dashboard page
         run: python ons_pipeline.py dashboard --html index.html
 
-      # Static wiki pages (Wiki/*.md -> wiki-html/*.html), linked from the
-      # dashboard's own "Wiki" header button. No data dependency -- pure
-      # documentation, rebuilt every run so it always matches whatever's in
-      # Wiki/ on main.
-      - name: Build the wiki pages
-        run: python build_wiki_site.py Wiki wiki-html
-
       # Legacy branch-based Pages deployment (Settings -> Pages -> Deploy
       # from a branch -> main / root), not actions/deploy-pages: that API
       # publishes one artifact as the *entire* site per repo, which would
@@ -119,7 +112,7 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add ons/index.html ons/wiki-html
+          git add ons/index.html
           if git diff --cached --quiet; then
             echo "No changes to commit."
             exit 0

@@ -37,17 +37,21 @@ assumption ONS doesn't publish at all.
 - **The five pinned "Total" rows on Thermal Plants are gas-fleet-only**, not
   whole-thermal-fleet — their "Verified" figure is `gen_gas` (gas generation
   only), matching the "Est. gas consumption" column's scope (which was
-  always gas-only). Earlier builds briefly mixed an all-thermal figure next
-  to a gas-only one on the same row; both columns are gas-scoped now.
+  always gas-only).
 
 ## Derived, not published
 
-- **The SIN (national) row is derived, not published by ONS.** Absolute
-  series are summed across the four subsystems. EAR % is rebuilt as summed
-  stored ÷ summed capacity, not an average of the four subsystem
-  percentages. ENA % of MLT is rebuilt by summing each subsystem's implied
-  long-term-average. CMO for SIN is an unweighted mean of the four subsystem
-  CMOs — a reference level, not a traded price.
+- **The SIN (national) figure is derived, not published by ONS.** ONS's own
+  taxonomy only ever publishes four subsystems (Southeast/Midwest, South,
+  Northeast, North) — there is no fifth "SIN" series in the underlying data
+  for anything on this dashboard. Every SIN number here, including the
+  Thermal Plants tab's "Total — SIN" row and the Subsystems tab's SIN
+  toggle, is this site's own sum across the four published subsystems.
+  Absolute series are summed directly. EAR % is rebuilt as summed stored ÷
+  summed capacity, not an average of the four subsystem percentages. ENA %
+  of MLT is rebuilt by summing each subsystem's implied long-term-average.
+  CMO for SIN is an unweighted mean of the four subsystem CMOs — a
+  reference level, not a traded price.
 - **Deviation % is computed, not published**: `100 × (verified − programmed)
   / programmed`, left blank when programmed generation is zero (the
   bulletin prints −100% in that case instead).
@@ -76,8 +80,9 @@ assumption ONS doesn't publish at all.
   pipeline re-downloads changed files on every run, so a refresh picks
   revisions up, but a figure quoted last week may not match today.
 - **CMO is not PLD.** CMO is ONS's DESSEM marginal cost; PLD is CCEE's
-  settlement price, from a different source. They track each other but are
-  not the same number.
+  settlement price, from a different source (see the
+  [PLD Prices](/wiki/pld/known-limitations.html) page). They track each
+  other but are not the same number.
 - **MWmed vs. MWmês.** Balance and generation series are in MWmed (average
   MW); ENA and EAR are in MWmês — different units, which is why they render
   in separate chart panels rather than sharing an axis.
@@ -116,3 +121,8 @@ assumption ONS doesn't publish at all.
   dispatch phases *and* the synthesized combined-plant rollup for the same
   generation. Fleet-wide KPI sums now explicitly exclude rolled-up phase
   entities.
+- **The Desk's "SIN gas generation" KPI briefly looked up a "SIN" subsystem
+  value directly** (with a fallback to a differently-scoped figure), which
+  doesn't exist in the published data for the reason above — it now sums
+  across the four subsystems the same way this dashboard's own SIN figures
+  do.

@@ -381,9 +381,7 @@ def write_dashboard(df: pd.DataFrame, dest: Path,
         SHARED_JS_I18N=kit.JS_I18N,
         SHARED_JS_ASOF=kit.refreshed_local_js(),
         SHARED_SITE_LINKS_JS=kit.site_links_js("ons"),
-        SHARED_NAV_LINKS=kit.nav_links_html(
-            "ons", extra_links_html='<a class="navlink" href="wiki-html/" data-i18n="navWiki">Wiki</a>'
-        ),
+        SHARED_NAV_LINKS=kit.nav_links_html("ons"),
         FAVICON_DATA_URI=kit.embed_favicon(),
         FONT_PRELOAD=kit.font_preload_html(),
     )

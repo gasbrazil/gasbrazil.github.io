@@ -443,6 +443,7 @@ def _topbar() -> str:
 def _footer(home_href: str = "./") -> str:
     return f"""<footer class="site">
   &copy; <span id="year"></span> GasBrazil.com
+  &middot; <a href="{home_href}wiki/" data-i18n="navWiki">Wiki</a>
   &middot; <a href="{home_href}about/" data-i18n="footerAbout">About &amp; methodology</a>
   &middot; <span data-i18n="contact">Contact</span>: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
 </footer>
@@ -753,7 +754,7 @@ def write_robots_and_sitemap() -> None:
         encoding="utf-8",
     )
     today = dt.date.today().isoformat()
-    urls = ["/", "/ons/", "/poc/", "/contratos/", "/flows/", "/supply/", "/precos/", "/pld/", "/desk/", "/about/"]
+    urls = ["/", "/ons/", "/poc/", "/contratos/", "/flows/", "/supply/", "/precos/", "/pld/", "/desk/", "/wiki/", "/about/"]
     body = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     for u in urls:
         body += f"  <url><loc>https://gasbrazil.com{u}</loc><lastmod>{today}</lastmod></url>\n"
