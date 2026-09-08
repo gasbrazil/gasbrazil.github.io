@@ -248,6 +248,9 @@ select:hover, input:hover { background: var(--accent-soft); }
 .tso-toggle { background: var(--bg); border: 1px solid var(--border-strong); border-radius: 999px; padding: 4px 12px; font-size: 12px; cursor: pointer; color: var(--text); font-family: var(--font); font-weight: 400; }
 .tso-toggle:hover { background: var(--accent-soft); }
 .tso-toggle.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.kpi-card.active[data-tso="NTS"] { border-color: var(--tso-nts); }
+.kpi-card.active[data-tso="TAG"] { border-color: var(--tso-tag); }
+.kpi-card.active[data-tso="TBG"] { border-color: var(--tso-tbg); }
 .flowtype-toggle { background: var(--bg); border: 1px solid var(--border-strong); border-radius: 999px; padding: 4px 12px; font-size: 12px; cursor: pointer; color: var(--text); font-family: var(--font); font-weight: 400; }
 .flowtype-toggle:hover { background: var(--accent-soft); }
 .flowtype-toggle.active { background: var(--text); color: var(--panel); border-color: var(--text); }
@@ -340,10 +343,10 @@ footer a { color: var(--accent); }
 <div class="flagbar" aria-hidden="true"></div>
 <div class="sources">
   <span class="sources-label" data-i18n="sources">Sources</span>
-  <a class="pill" href="https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/dados-consolidados-movimentacao-de-gas-natural-em-gasodutos-de-transporte" target="_blank" rel="noopener">ANP &mdash; movimentação<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
-  <a class="pill" href="https://ntag.com.br/transparencia/" target="_blank" rel="noopener">TAG &mdash; Portaria 1/2003<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
-  <a class="pill" href="https://www.tbg.com.br/informacoes-a-anp" target="_blank" rel="noopener">TBG &mdash; Portaria 1/2003<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
-  <a class="pill" href="https://www.ntsbrasil.com/transparencia/" target="_blank" rel="noopener">NTS &mdash; Portaria 1/2003<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+  <a href="https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/dados-consolidados-movimentacao-de-gas-natural-em-gasodutos-de-transporte" target="_blank" rel="noopener">ANP<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+  <a href="https://ntag.com.br/transparencia/" target="_blank" rel="noopener">TAG<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+  <a href="https://www.tbg.com.br/informacoes-a-anp" target="_blank" rel="noopener">TBG<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+  <a href="https://www.ntsbrasil.com/transparencia/" target="_blank" rel="noopener">NTS<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
 </div>
 
 <div class="kpi-card-wrap">
@@ -493,6 +496,12 @@ function chartClaimSlot(key) {
   return slot;
 }
 function chartColorOf(key) {
+  let tso = tsoFromChartKey(key);
+  if (!tso) {
+    const e = entityById(key);
+    if (e && e.tso) tso = e.tso;
+  }
+  if (tso) return tsoColorOf(tso, chartClaimSlot(key));
   const pal = chartPalette();
   if (!pal.length) return "var(--accent)";
   return pal[chartClaimSlot(key) % pal.length];
@@ -704,6 +713,7 @@ function buildTsoToggles() {
     const btn = document.createElement("button");
     const isActive = tsoFilter.has(tso);
     btn.className = "tso-toggle" + (isActive ? " active" : "");
+    btn.dataset.tso = tso;
     btn.textContent = tso;
     btn.addEventListener("click", () => {
       // Clicking the only active transporter again clears back to "All"
@@ -1132,6 +1142,7 @@ function renderKpiCards() {
     const del = monthlyTotal(tso, DELIVERY, startIdx, endIdx);
     const card = document.createElement("button");
     card.type = "button";
+    if (!isAll) card.dataset.tso = tso;
     card.className = "kpi-card" + (isAll ? "" : (tsoFilter.has(tso) && tsoFilter.size === 1 ? " active" : "")) + (isAll && tsoFilter.size === 0 ? " active" : "");
     if (recv === null && del === null) card.classList.add("empty");
     let bar = "";

@@ -315,12 +315,12 @@ const GB_I18N = {
     kpiRefresh: "Last refreshed",
     dataThrough: "Data through",
     sources: "Sources",
-    sourceOns: "ONS open data",
-    sourcePoc: "Portal de Oferta de Capacidade",
-    sourceFlows: "ANP + TAG/TBG/NTS Portaria 1/2003 — pipeline movement",
-    sourceSupply: "ANP PPGN-EL — production by state",
-    sourcePrecos: "ANP — publicidade dos preços de gás natural",
-    sourcePld: "CCEE open data — PLD média diária",
+    sourceOns: "ONS",
+    sourcePoc: "POC",
+    sourceFlows: "ANP",
+    sourceSupply: "ANP",
+    sourcePrecos: "ANP",
+    sourcePld: "CCEE",
     pldSubtitle: "CCEE daily-average PLD by submarket (R$/MWh).",
     pldNote: "PLD (CCEE) is not the same series as ONS CMO. See",
     pldNoteLink: "ONS Balances",
@@ -399,12 +399,12 @@ const GB_I18N = {
     kpiRefresh: "Última atualização",
     dataThrough: "Dados até",
     sources: "Fontes",
-    sourceOns: "Dados abertos da ONS",
-    sourcePoc: "Portal de Oferta de Capacidade",
-    sourceFlows: "ANP + TAG/TBG/NTS Portaria 1/2003 — movimentação em gasodutos",
-    sourceSupply: "ANP PPGN-EL — produção por estado",
-    sourcePrecos: "ANP — publicidade dos preços de gás natural",
-    sourcePld: "Dados abertos da CCEE — PLD média diária",
+    sourceOns: "ONS",
+    sourcePoc: "POC",
+    sourceFlows: "ANP",
+    sourceSupply: "ANP",
+    sourcePrecos: "ANP",
+    sourcePld: "CCEE",
     pldSubtitle: "PLD médio diário da CCEE por submercado (R$/MWh).",
     pldNote: "O PLD (CCEE) não é a mesma série do CMO da ONS. Veja",
     pldNoteLink: "Balanços ONS",
@@ -846,11 +846,31 @@ def nav_links_html(self_id: str, about_href: str = "../about/", extra_links_html
 
 
 def chart_palette_js() -> str:
-    """JS helper: CHART_PALETTE from CSS custom properties (--chart-1..8)."""
-    return (
-        "function chartPalette() {\n"
-        "  const s = getComputedStyle(document.documentElement);\n"
-        "  return [1,2,3,4,5,6,7,8].map(i => "
-        "(s.getPropertyValue('--chart-' + i) || '').trim()).filter(Boolean);\n"
-        "}\n"
-    )
+    """JS helpers: chartPalette() + tsoColorOf() from CSS custom properties."""
+    return r"""
+function chartPalette() {
+  const s = getComputedStyle(document.documentElement);
+  return [1,2,3,4,5,6,7,8].map(i => (s.getPropertyValue('--chart-' + i) || '').trim()).filter(Boolean);
+}
+function tsoColorOf(tso, shadeIndex) {
+  const s = getComputedStyle(document.documentElement);
+  const code = String(tso || '').toLowerCase();
+  if (!code) return chartPalette()[0] || 'var(--accent)';
+  const shades = [1,2,3,4].map(i => (s.getPropertyValue('--tso-' + code + '-' + i) || '').trim()).filter(Boolean);
+  if (shades.length) {
+    const idx = Math.max(0, Number(shadeIndex) || 0);
+    return shades[idx % shades.length];
+  }
+  const base = (s.getPropertyValue('--tso-' + code) || '').trim();
+  return base || chartPalette()[0] || 'var(--accent)';
+}
+function tsoFromChartKey(key) {
+  const k = String(key || '');
+  if (k.indexOf('||') >= 0) return k.split('||')[0];
+  if (k.indexOf('AGG:') === 0) {
+    const part = k.split(':')[1];
+    return (part && part !== 'ALL') ? part : '';
+  }
+  return '';
+}
+""".lstrip()

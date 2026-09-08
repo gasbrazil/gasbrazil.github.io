@@ -158,7 +158,7 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .tso-chip.empty { color: var(--muted); }
 .tso-chip.empty:hover { background: var(--accent-soft); }
 .tso-chip.empty.selected { background: var(--accent); color: #fff; border-color: var(--accent); }
-.tso-chip.empty.selected:hover { background: var(--accent); }
+.tso-chip.empty.selected:hover { filter: brightness(1.05); }
 .tso-chip.empty.selected .muted { color: rgba(255,255,255,.72); }
 .tso-chip b { font-weight: 400; }
 .tso-chip .muted { color: var(--muted); }
@@ -258,7 +258,7 @@ footer a { color: var(--accent); }
 <div class="flagbar" aria-hidden="true"></div>
 <div class="sources">
   <span class="sources-label" data-i18n="sources">Sources</span>
-  <a class="pill" href="https://www.ofertadecapacidade.com.br/PEG/resultado" target="_blank" rel="noopener">Portal de Oferta de Capacidade<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+  <a href="https://www.ofertadecapacidade.com.br/PEG/resultado" target="_blank" rel="noopener">POC<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
 </div>
 <div class="tso-row" id="tso-row"></div>
 <div class="chart-card">
@@ -353,8 +353,7 @@ const QUICK_FILTERS = [
    and connected date-to-date rather than against a dense calendar grid.
 ------------------------------------------------------------------------- */
 const MMBTU_PER_M3 = 28.8081;
-const CHART_PALETTE_LIGHT = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#4a3aa7", "#e34948"];
-const CHART_PALETTE_DARK = ["#3987e5", "#d95926", "#199e70", "#c98500", "#d55181", "#008300", "#9085e9", "#e66767"];
+__SHARED_JS_CHART_PALETTE__
 // Fixed chip order within a pipeline group -- GUS/Residual first since
 // those are the two Eric most often looks at together; anything not listed
 // here (a new transaction type the API adds later) is appended
@@ -367,7 +366,8 @@ const comboLabel = (pipeline, type) => pipeline + " · " + type;
 
 // Chart selection is pipeline chips × type chips (cartesian product of the
 // two toggles), not one chip per (pipeline, type) pair. chartPicked is
-// derived; chartSlots still keys colors by the full combo.
+// derived; colors are TSO-identity (NTS orange / TAG blue / TBG green) with
+// shade by transaction type within that pipeline.
 let chartPipelines = new Set();
 let chartTypes = new Set();
 let chartPicked = new Set();
@@ -375,13 +375,17 @@ let chartResizeTimer = null;
 const chartSlots = new Map();
 function chartClaimSlot(key) {
   if (chartSlots.has(key)) return chartSlots.get(key);
-  const slot = chartSlots.size % CHART_PALETTE_LIGHT.length;
+  const slot = chartSlots.size % 8;
   chartSlots.set(key, slot);
   return slot;
 }
 function chartColorOf(key) {
-  const dark = document.documentElement.getAttribute("data-theme") === "dark";
-  return (dark ? CHART_PALETTE_DARK : CHART_PALETTE_LIGHT)[chartClaimSlot(key)];
+  const parts = String(key || "").split("||");
+  const tso = parts[0] || "";
+  const type = parts[1] || "";
+  let shade = TRANSACTION_TYPE_ORDER.indexOf(type);
+  if (shade < 0) shade = chartClaimSlot(key);
+  return tsoColorOf(tso, shade);
 }
 
 function availableComboSet() {
@@ -1434,6 +1438,7 @@ def write_dashboard(out_path=DEFAULT_OUT):
         SHARED_JS_CSV=kit.JS_CSV_HELPERS,
         SHARED_JS_XLSX=kit.JS_XLSX_ENGINE,
         SHARED_JS_TABLE_SORT=kit.JS_TABLE_SORT,
+        SHARED_JS_CHART_PALETTE=kit.chart_palette_js(),
         SHARED_SITE_LINKS_JS=kit.site_links_js("poc"),
         SHARED_NAV_LINKS=kit.nav_links_html("poc"),
         FAVICON_DATA_URI=kit.embed_favicon(),

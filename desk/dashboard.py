@@ -136,11 +136,11 @@ footer a { color: var(--accent); }
 <div class="flagbar" aria-hidden="true"></div>
 <div class="sources">
   <span class="sources-label" data-i18n="sources">Sources</span>
-  <a class="pill" href="../ons/" data-i18n="deskLinkOns">ONS</a>
-  <a class="pill" href="../pld/" data-i18n="deskLinkPld">CCEE PLD</a>
-  <a class="pill" href="../precos/" data-i18n="deskLinkPrecos">ANP prices</a>
-  <a class="pill" href="../poc/" data-i18n="deskLinkPoc">POC</a>
-  <a class="pill" href="../flows/" data-i18n="deskLinkFlows">ANP flows</a>
+  <a href="../ons/">ONS</a>
+  <a href="../pld/">CCEE</a>
+  <a href="../precos/">ANP</a>
+  <a href="../poc/">POC</a>
+  <a href="../flows/">Flows</a>
 </div>
 <div class="kpi-row" id="kpi-row"></div>
 
