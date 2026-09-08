@@ -285,6 +285,7 @@ const GB_I18N = {
     navPld: "PLD Prices",
     navPrecos: "ANP Prices",
     navDesk: "The Desk",
+    navProducts: "Products",
     navAbout: "About",
     navWiki: "Wiki",
     contact: "Contact",
@@ -369,6 +370,7 @@ const GB_I18N = {
     navPld: "Preços PLD",
     navPrecos: "Preços ANP",
     navDesk: "The Desk",
+    navProducts: "Produtos",
     navAbout: "Sobre",
     navWiki: "Wiki",
     contact: "Contato",
@@ -805,18 +807,65 @@ def site_links_js(self_id: str) -> str:
     )
 
 
+# Toggle behavior for the "Products" dropdown nav_links_html() builds --
+# delegated on document (not per-trigger listeners) so it works regardless
+# of how many times a page's header markup gets re-rendered, and needs no
+# per-page init call threaded into each dashboard's own boot() function.
+# Locates its paired menu/trigger via DOM adjacency (.dd-trigger's next
+# sibling / .dd-menu's previous sibling), matching the markup
+# nav_links_html() emits below, so no IDs are needed either.
+_PRODUCTS_DROPDOWN_JS = r"""<script>
+(function () {
+  function closeOpenMenus() {
+    document.querySelectorAll(".dd-menu.is-open").forEach(function (menu) {
+      menu.classList.remove("is-open");
+      var btn = menu.previousElementSibling;
+      if (btn && btn.classList.contains("dd-trigger")) btn.setAttribute("aria-expanded", "false");
+    });
+  }
+  document.addEventListener("click", function (e) {
+    var trigger = e.target.closest(".dd-trigger");
+    if (trigger) {
+      var menu = trigger.nextElementSibling;
+      if (menu && menu.classList.contains("dd-menu")) {
+        var open = menu.classList.toggle("is-open");
+        trigger.setAttribute("aria-expanded", open ? "true" : "false");
+      }
+      return;
+    }
+    closeOpenMenus();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") closeOpenMenus();
+  });
+})();
+</script>"""
+
+
 def nav_links_html(
     self_id: str,
     about_href: str = "../about/",
     wiki_href: str = "../wiki/",
     extra_links_html: str = "",
 ) -> str:
-    """Standard header text nav: every site in _SITES in fixed order
-    (home, ons, poc, contratos, flows, supply, pld, precos, …), with the
-    current page marked aria-current=page / is-active (not a link). Then any
-    page-specific extras, then the site-wide Wiki, then About. href defaults
-    to each site's custom-domain URL; initCrossLinks() rewrites sibling
-    hrefs at view time for hostname/flavor. wiki_href/about_href are plain
+    """Standard header text nav: Home stays a top-level link; every other
+    site in _SITES (fixed order: ons, poc, contratos, flows, supply, pld,
+    precos, desk) collapses into one "Products" dropdown menu, with the
+    current page marked inside it as a non-clickable current item
+    (checkmark, not a link) the same way the old flat nav marked the
+    current page with aria-current=page / is-active. Then any page-specific
+    extras, then the site-wide Wiki, then About.
+
+    This is "Option A" of three nav mockups Eric reviewed on 2026-09-08 (a
+    dropdown vs. a two-row header vs. a compact scroll strip) -- chosen so
+    the header doesn't grow a new top-level link every time a dashboard is
+    added.
+
+    href defaults to each site's custom-domain URL; initCrossLinks()
+    rewrites sibling hrefs at view time for hostname/flavor -- the
+    #link-<id> anchors now live inside the dropdown menu instead of flat in
+    the header, but getElementById doesn't care about nesting, so
+    site_links_js() needed no changes. wiki_href/about_href are plain
     relative paths (not run through initCrossLinks) since the wiki and
     about page only exist at one location, not mirrored per-flavor.
 
@@ -834,22 +883,55 @@ def nav_links_html(
         "precos": "navPrecos",
         "desk": "navDesk",
     }
-    parts: list[str] = []
-    for k, v in _SITES.items():
+
+    def i18n_attr(k: str) -> str:
         i18n = i18n_keys.get(k)
-        i18n_attr = f' data-i18n="{i18n}"' if i18n else ""
+        return f' data-i18n="{i18n}"' if i18n else ""
+
+    parts: list[str] = []
+
+    home = _SITES["home"]
+    if self_id == "home":
+        parts.append(
+            f'<span class="navlink is-active" aria-current="page"{i18n_attr("home")}>{home["label"]}</span>'
+        )
+    else:
+        parts.append(
+            f'<a class="navlink" id="link-home" href="{home["custom"]}"{i18n_attr("home")}>{home["label"]}</a>'
+        )
+
+    menu_items: list[str] = []
+    for k, v in _SITES.items():
+        if k == "home":
+            continue
         if k == self_id:
-            parts.append(
-                f'<span class="navlink is-active" aria-current="page"{i18n_attr}>{v["label"]}</span>'
+            menu_items.append(
+                f'<span class="is-current" aria-current="page"{i18n_attr(k)}>'
+                f'<span class="chk">✓</span>{v["label"]}</span>'
             )
         else:
-            parts.append(
-                f'<a class="navlink" id="link-{k}" href="{v["custom"]}"{i18n_attr}>{v["label"]}</a>'
+            menu_items.append(
+                f'<a id="link-{k}" href="{v["custom"]}"{i18n_attr(k)}>'
+                f'<span class="chk"></span>{v["label"]}</a>'
             )
+    # data-i18n goes on the inner span, not the <button> itself: applyI18n()
+    # sets el.textContent, which would silently delete the nested caret span
+    # every time the language toggles (the same bug the site's un-translated
+    # pill link text has been carrying for lack of exactly this treatment --
+    # not repeating it here).
+    parts.append(
+        '<div class="products-dd">'
+        '<button type="button" class="dd-trigger" aria-haspopup="true" aria-expanded="false">'
+        f'<span data-i18n="navProducts">Products</span><span class="dd-caret">▾</span></button>'
+        '<div class="dd-menu">' + "".join(menu_items) + "</div>"
+        "</div>"
+    )
+
     if extra_links_html:
         parts.append(extra_links_html)
     parts.append(f'<a class="navlink" href="{wiki_href}" data-i18n="navWiki">Wiki</a>')
     parts.append(f'<a class="navlink" href="{about_href}" data-i18n="navAbout">About</a>')
+    parts.append(_PRODUCTS_DROPDOWN_JS)
     return "\n      ".join(parts)
 
 

@@ -229,6 +229,55 @@ html, body {
   background: transparent;
 }
 .navlink:hover { color: var(--accent); border-bottom-color: var(--accent-soft); }
+
+/* "Products" dropdown nav_links_html() builds (Option A of the 2026-09-08
+   nav mockups): collapses every dashboard but Home into one menu instead
+   of a growing row of top-level links. Toggle behavior lives in
+   dashboard_kit.py's _PRODUCTS_DROPDOWN_JS, spliced in right after this
+   markup. */
+.products-dd { position: relative; display: inline-flex; }
+.dd-trigger {
+  font: 400 12px var(--font);
+  color: var(--muted2);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 4px 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.dd-trigger:hover, .dd-trigger[aria-expanded="true"] { color: var(--accent); border-bottom-color: var(--accent-soft); }
+.dd-caret { font-size: 10px; transform: translateY(1px); }
+.dd-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 10px);
+  left: -8px;
+  min-width: 180px;
+  background: var(--panel);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.18);
+  padding: 6px;
+  z-index: 50;
+}
+.dd-menu.is-open { display: block; }
+.dd-menu a, .dd-menu .is-current {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: 400 12.5px var(--font);
+  color: var(--text);
+  text-decoration: none;
+  padding: 7px 8px;
+  border-radius: 5px;
+}
+.dd-menu a:hover { background: var(--accent-soft); color: var(--accent); }
+.dd-menu .is-current { color: var(--accent); font-weight: 600; }
+.dd-menu .chk { width: 12px; font-size: 11px; color: var(--accent); flex: none; }
+
 /* Source links: short agency name + external icon (ONS Balances look). */
 .sources {
   display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
@@ -369,7 +418,7 @@ th.num .th-filter { text-align: right; }
 
 @media (max-width: 720px) {
   .navlinks, .header-links { gap: 2px 10px; }
-  .navlink { font-size: 11.5px; }
+  .navlink, .dd-trigger { font-size: 11.5px; }
   .site-header .header-row, header.top .header-row {
     flex-wrap: wrap;
   }
