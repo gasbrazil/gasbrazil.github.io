@@ -290,7 +290,19 @@ html, body {
   z-index: 2;
   background: var(--panel);
 }
-.th-label { cursor: pointer; user-select: none; display: block; }
+/* Single-line rows site-wide: overflow truncates with ellipsis instead of
+   wrapping and blowing up row height (POC Contracts especially). */
+.table-wrap th, .table-wrap td,
+.scroll table.data th, .scroll table.data td,
+.meter-table-wrap th, .meter-table-wrap td,
+.drill-card th, .drill-card td,
+.entlist table.data th, .entlist table.data td,
+table.data th, table.data td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.th-label { cursor: pointer; user-select: none; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .th-label:hover { color: var(--text); }
 .th-filter { display: block; width: 100%; margin-top: 4px; padding: 2px 6px; font-size: 11px; font-weight: 300; background: var(--bg); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); color: var(--text); box-sizing: border-box; cursor: text; }
 th.num .th-filter { text-align: right; }
@@ -442,7 +454,7 @@ footer.site a { color: var(--muted); }
     <a class="kpi-cell" href="ons/">
       <div class="kpi-label" data-i18n="cardOns">ONS Balances</div>
       <div class="kpi-val" data-en="2,873 MWmed gas" data-pt="2,873 MWmed a gás">2,873 MWmed gas</div>
-      <div class="kpi-when" data-refresh="2026-09-07 23:38 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-08 01:40 UTC"></div>
     </a>
     <a class="kpi-cell" href="poc/">
       <div class="kpi-label" data-i18n="cardPoc">POC Results</div>
@@ -457,19 +469,19 @@ footer.site a { color: var(--muted); }
     </a>
     <a class="kpi-cell" href="flows/">
       <div class="kpi-label" data-i18n="cardFlows">Pipeline Flows</div>
-      <div class="kpi-val" data-en="2.2M m³ realized (7d) · 3 points" data-pt="2.2M m³ realizados (7d) · 3 points">2.2M m³ realized (7d) · 3 points</div>
-      <div class="kpi-when" data-refresh="2026-09-08 01:30 UTC"></div>
+      <div class="kpi-val" data-en="1358.6M m³ realized (7d) · 270 points" data-pt="1358.6M m³ realizados (7d) · 270 points">1358.6M m³ realized (7d) · 270 points</div>
+      <div class="kpi-when" data-refresh="2026-09-08 01:40 UTC"></div>
     </a>
     <a class="kpi-cell" href="supply/">
       <div class="kpi-label" data-i18n="cardSupply">Gas Supply</div>
       <div class="kpi-val" data-en="6.7M thousand m³ produced · 2026-07" data-pt="6.7M mil m³ produzidos · 2026-07">6.7M thousand m³ produced · 2026-07</div>
-      <div class="kpi-when" data-refresh="2026-09-08 01:30 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-08 01:39 UTC"></div>
       
     </a>
     <a class="kpi-cell" href="pld/">
       <div class="kpi-label" data-i18n="cardPld">PLD Prices</div>
-      <div class="kpi-val" data-en="SE 122.33 R$/MWh · 2026-09-06" data-pt="SE 122.33 R$/MWh · 2026-09-06">SE 122.33 R$/MWh · 2026-09-06</div>
-      <div class="kpi-when" data-refresh="2026-09-08 01:32 UTC"></div>
+      <div class="kpi-val" data-en="SE 118.05 R$/MWh · 2026-09-06" data-pt="SE 118.05 R$/MWh · 2026-09-06">SE 118.05 R$/MWh · 2026-09-06</div>
+      <div class="kpi-when" data-refresh="2026-09-08 01:39 UTC"></div>
       
     </a>
   </div>
