@@ -461,7 +461,7 @@ footer.site a { color: var(--muted); }
       <div class="kpi-label" data-i18n="cardOns">ONS Balances</div>
       <div class="kpi-role">Grid &amp; gas dispatch</div>
       <div class="kpi-val" data-en="3,185 MWmed gas" data-pt="3,185 MWmed a gás">3,185 MWmed gas</div>
-      <div class="kpi-when" data-refresh="2026-09-08 16:13 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-08 18:59 UTC"></div>
     </a>
     <a class="kpi-cell" href="poc/" data-slug="poc">
       <div class="kpi-label" data-i18n="cardPoc">POC Results</div>
@@ -474,32 +474,32 @@ footer.site a { color: var(--muted); }
       <div class="kpi-label" data-i18n="cardContratos">POC Contracts</div>
       <div class="kpi-role">Firm transport</div>
       <div class="kpi-val" data-en="893 contracts · 186,438 thousand m³/d" data-pt="893 contratos · 186,438 mil m³/d">893 contracts · 186,438 thousand m³/d</div>
-      <div class="kpi-when" data-refresh="2026-09-08 16:13 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-08 18:59 UTC"></div>
     </a>
     <a class="kpi-cell" href="flows/" data-slug="flows">
       <div class="kpi-label" data-i18n="cardFlows">Pipeline Flows</div>
       <div class="kpi-role">Physical movement</div>
       <div class="kpi-val" data-en="1358.6M m³ realized (7d) · 270 points" data-pt="1358.6M m³ realizados (7d) · 270 points">1358.6M m³ realized (7d) · 270 points</div>
-      <div class="kpi-when" data-refresh="2026-09-08 16:14 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-08 19:00 UTC"></div>
     </a>
     <a class="kpi-cell" href="supply/" data-slug="supply">
       <div class="kpi-label" data-i18n="cardSupply">Gas Supply</div>
       <div class="kpi-role">National balance</div>
       <div class="kpi-val" data-en="6.7M thousand m³ produced · 2026-07" data-pt="6.7M mil m³ produzidos · 2026-07">6.7M thousand m³ produced · 2026-07</div>
-      <div class="kpi-when" data-refresh="2026-09-08 16:13 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-08 18:59 UTC"></div>
       
     </a>
     <a class="kpi-cell" href="precos/" data-slug="precos">
       <div class="kpi-label" data-i18n="cardPrecos">ANP Prices</div>
       <div class="kpi-role">Disclosed R$/MMBtu</div>
       <div class="kpi-val" data-en="Santos 18.2 R$/MMBtu · 2026-06" data-pt="Santos 18.2 R$/MMBtu · 2026-06">Santos 18.2 R$/MMBtu · 2026-06</div>
-      <div class="kpi-when" data-refresh="2026-09-08 16:13 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-08 18:59 UTC"></div>
     </a>
     <a class="kpi-cell" href="pld/" data-slug="pld">
       <div class="kpi-label" data-i18n="cardPld">PLD Prices</div>
       <div class="kpi-role">Power settlement</div>
       <div class="kpi-val" data-en="SE 97.79 R$/MWh · 2026-09-08" data-pt="SE 97.79 R$/MWh · 2026-09-08">SE 97.79 R$/MWh · 2026-09-08</div>
-      <div class="kpi-when" data-refresh="2026-09-08 16:13 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-08 18:59 UTC"></div>
       
     </a>
   </div>
@@ -617,7 +617,7 @@ const GB_I18N = {
     sources: "Sources",
     sourceOns: "ONS open data",
     sourcePoc: "Portal de Oferta de Capacidade",
-    sourceFlows: "ANP open data — pipeline movement",
+    sourceFlows: "ANP + TAG/TBG/NTS Portaria 1/2003 — pipeline movement",
     sourceSupply: "ANP PPGN-EL — production by state",
     sourcePrecos: "ANP — publicidade dos preços de gás natural",
     sourcePld: "CCEE open data — PLD média diária",
@@ -646,7 +646,7 @@ const GB_I18N = {
     glossMaster: "Master transport contract — framework for later nominations; not firm capacity itself.",
     aboutCover: "Coverage limits",
     aboutCoverBody: "POC Contracts include Transport and Master rows. Legacy and access-connection contracts are not in the public GraphQL feed yet.",
-    aboutCoverFlows: "Pipeline Flows has no ANP data for 2022 and typically lags several weeks. TSB/GOM can be toggled.",
+    aboutCoverFlows: "Pipeline Flows merges ANP open data with TAG/TBG/NTS Portaria 1/2003 Actual/Scheduled volumes (TSO preferred when both exist). ANP still has no 2022 files and lags several weeks; TSO pubs often close that gap. TSB/GOM can be toggled.",
     aboutCoverSupply: "Gas Supply: ANP PPGN-EL national monthly series plus national imports (no Bolivia vs LNG split in the open CSV).",
     aboutCoverPrecos: "ANP Prices: Resolution 52/2011 monthly disclosures (R$/MMBtu, tax-inclusive). Some months are suppressed for confidentiality.",
     aboutCoverPld: "PLD: CCEE daily averages by submarket; optional ONS CMO and median gas CVU when lake data is present.",
@@ -696,7 +696,7 @@ const GB_I18N = {
     sources: "Fontes",
     sourceOns: "Dados abertos da ONS",
     sourcePoc: "Portal de Oferta de Capacidade",
-    sourceFlows: "Dados abertos da ANP — movimentação em gasodutos",
+    sourceFlows: "ANP + TAG/TBG/NTS Portaria 1/2003 — movimentação em gasodutos",
     sourceSupply: "ANP PPGN-EL — produção por estado",
     sourcePrecos: "ANP — publicidade dos preços de gás natural",
     sourcePld: "Dados abertos da CCEE — PLD média diária",
@@ -725,7 +725,7 @@ const GB_I18N = {
     glossMaster: "Contrato master de transporte — quadro para nomeações posteriores; não é capacidade firme.",
     aboutCover: "Limites de cobertura",
     aboutCoverBody: "Contratos POC incluem Transporte e Master. Legado e conexões de acesso ainda não estão no feed GraphQL público.",
-    aboutCoverFlows: "Fluxos: sem dados ANP para 2022 e com atraso típico de semanas. TSB/GOM podem ser ligados.",
+    aboutCoverFlows: "Fluxos une dados abertos da ANP com volumes Programado/Realizado da Portaria 1/2003 da TAG/TBG/NTS (TSO tem preferência quando ambos existem). A ANP ainda não tem 2022 e atrasa semanas; as publicações das TSO costumam fechar essa lacuna. TSB/GOM podem ser ligados.",
     aboutCoverSupply: "Oferta: séries mensais PPGN-EL da ANP mais importações nacionais (CSV aberto sem split Bolívia vs GNL).",
     aboutCoverPrecos: "Preços ANP: divulgações mensais da Resolução 52/2011 (R$/MMBtu com impostos). Alguns meses são omitidos por confidencialidade.",
     aboutCoverPld: "PLD: médias diárias da CCEE por submercado; CMO e CVU a gás da ONS quando disponíveis no lake.",

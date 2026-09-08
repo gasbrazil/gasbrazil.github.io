@@ -465,7 +465,7 @@ footer.site a { color: var(--muted); }
     </ul>
     <h2 data-i18n="aboutCover">Coverage limits</h2>
     <p data-i18n="aboutCoverBody">POC Contracts currently include Transport Contract and Master Contract rows. Legacy transport contracts and access connections are on the official portal but are not in this feed yet.</p>
-    <p data-i18n="aboutCoverFlows">Pipeline Flows merges ANP open data with TAG/TBG/NTS Portaria 1/2003 Actual/Scheduled volumes (TSO preferred when both exist). ANP still has no 2022 files and typically lags several weeks; operator publications often close that gap. TSB and GOM can be included via a toggle.</p>
+    <p data-i18n="aboutCoverFlows">Pipeline Flows has no published ANP data for 2022, and each month is typically released with a lag of several weeks. Average pressure and shipper-level detail are collected but not shown on the dashboard; both are available in the underlying data files in the repository.</p>
     <p data-i18n="aboutCoverSupply">Gas Supply uses ANP PPGN-EL national monthly series plus national natural-gas imports. The open import CSV does not split Bolivia pipeline vs LNG cargoes.</p>
     <p data-i18n="aboutCoverPrecos">ANP Prices are Resolution 52/2011 monthly disclosures (tax-inclusive R$/MMBtu), not assessed spot benchmarks. Some thermal and Other Basins months are suppressed when too few counterparties report.</p>
     <p data-i18n="aboutCoverPld">PLD Prices shows CCEE daily-average PLD by submarket, with an optional join to ONS CMO and median gas CVU when that lake data is present at build time.</p>
@@ -578,7 +578,7 @@ const GB_I18N = {
     sources: "Sources",
     sourceOns: "ONS open data",
     sourcePoc: "Portal de Oferta de Capacidade",
-    sourceFlows: "ANP open data — pipeline movement",
+    sourceFlows: "ANP + TAG/TBG/NTS Portaria 1/2003 — pipeline movement",
     sourceSupply: "ANP PPGN-EL — production by state",
     sourcePrecos: "ANP — publicidade dos preços de gás natural",
     sourcePld: "CCEE open data — PLD média diária",
@@ -607,7 +607,7 @@ const GB_I18N = {
     glossMaster: "Master transport contract — framework for later nominations; not firm capacity itself.",
     aboutCover: "Coverage limits",
     aboutCoverBody: "POC Contracts include Transport and Master rows. Legacy and access-connection contracts are not in the public GraphQL feed yet.",
-    aboutCoverFlows: "Pipeline Flows merges ANP open data with TAG/TBG/NTS Portaria 1/2003 Actual/Scheduled volumes (TSO preferred when both exist). ANP still has no 2022 files and typically lags several weeks; operator publications often close that gap. TSB and GOM can be included via a toggle.",
+    aboutCoverFlows: "Pipeline Flows merges ANP open data with TAG/TBG/NTS Portaria 1/2003 Actual/Scheduled volumes (TSO preferred when both exist). ANP still has no 2022 files and lags several weeks; TSO pubs often close that gap. TSB/GOM can be toggled.",
     aboutCoverSupply: "Gas Supply: ANP PPGN-EL national monthly series plus national imports (no Bolivia vs LNG split in the open CSV).",
     aboutCoverPrecos: "ANP Prices: Resolution 52/2011 monthly disclosures (R$/MMBtu, tax-inclusive). Some months are suppressed for confidentiality.",
     aboutCoverPld: "PLD: CCEE daily averages by submarket; optional ONS CMO and median gas CVU when lake data is present.",
@@ -657,7 +657,7 @@ const GB_I18N = {
     sources: "Fontes",
     sourceOns: "Dados abertos da ONS",
     sourcePoc: "Portal de Oferta de Capacidade",
-    sourceFlows: "Dados abertos da ANP — movimentação em gasodutos",
+    sourceFlows: "ANP + TAG/TBG/NTS Portaria 1/2003 — movimentação em gasodutos",
     sourceSupply: "ANP PPGN-EL — produção por estado",
     sourcePrecos: "ANP — publicidade dos preços de gás natural",
     sourcePld: "Dados abertos da CCEE — PLD média diária",
@@ -686,7 +686,7 @@ const GB_I18N = {
     glossMaster: "Contrato master de transporte — quadro para nomeações posteriores; não é capacidade firme.",
     aboutCover: "Limites de cobertura",
     aboutCoverBody: "Contratos POC incluem Transporte e Master. Legado e conexões de acesso ainda não estão no feed GraphQL público.",
-    aboutCoverFlows: "Fluxos une dados abertos da ANP com volumes Programado/Realizado da Portaria 1/2003 da TAG/TBG/NTS (TSO tem preferência quando ambos existem). A ANP ainda não tem 2022 e atrasa semanas; as publicações das transportadoras costumam fechar essa lacuna. TSB/GOM podem ser ligados.",
+    aboutCoverFlows: "Fluxos une dados abertos da ANP com volumes Programado/Realizado da Portaria 1/2003 da TAG/TBG/NTS (TSO tem preferência quando ambos existem). A ANP ainda não tem 2022 e atrasa semanas; as publicações das TSO costumam fechar essa lacuna. TSB/GOM podem ser ligados.",
     aboutCoverSupply: "Oferta: séries mensais PPGN-EL da ANP mais importações nacionais (CSV aberto sem split Bolívia vs GNL).",
     aboutCoverPrecos: "Preços ANP: divulgações mensais da Resolução 52/2011 (R$/MMBtu com impostos). Alguns meses são omitidos por confidencialidade.",
     aboutCoverPld: "PLD: médias diárias da CCEE por submercado; CMO e CVU a gás da ONS quando disponíveis no lake.",
