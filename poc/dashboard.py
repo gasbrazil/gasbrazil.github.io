@@ -40,11 +40,24 @@ DISPLAY_NAMES = {
 
 DATE_COLS = {"Trade Date", "Flow Date Start", "Flow Date End"}
 
+# Short labels for the Transaction Type column / filters / chart chips.
+# Covers both current pipeline output and older parquet values still on disk.
+TRANSACTION_TYPE_DISPLAY = {
+    "Aquisição de GUS": "GUS",
+    "GUS Acquisition": "GUS",
+    "Balanceamento Residual": "Res. Bal.",
+    "Residual Balancing": "Res. Bal.",
+    "Balanceamento Operacional": "Op. Bal.",
+    "Operational Balancing": "Op. Bal.",
+    "Congestionamento": "Congestion",
+}
+
 
 def load_payload():
     df = pd.read_parquet(PARQUET_PATH)
     df["R$/m3"] = (df["Price"] / MMBTU_PER_M3).round(2)
     df = df[COLUMNS].copy()
+    df["Transaction Type"] = df["Transaction Type"].replace(TRANSACTION_TYPE_DISPLAY)
     for c in DATE_COLS:
         df[c] = df[c].dt.strftime("%Y-%m-%d").where(df[c].notna(), None)
     # Normalize every remaining missing value (NaN/NaT/pd.NA) to None so json.dumps
@@ -96,7 +109,7 @@ body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--
    viewport width or pill count (see ADR-001: same layout on every
    GasBrazil.com dashboard, not just whichever happens to wrap). */
 header.dash-head { display: flex; flex-direction: column; gap: 10px; margin-bottom: 0; }
-h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; font-weight: 400; }
+h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .header-links { display: flex; gap: 8px; flex-wrap: wrap; }
 .sources { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0 0 var(--gap); }
@@ -129,7 +142,7 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; font-weight: 400; }
    overflow, sticky header), just taller since here the table is the page's
    primary content rather than a small secondary widget. */
 .table-wrap { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; overflow: auto; box-shadow: var(--shadow); max-height: 65vh; }
-table { border-collapse: collapse; width: 100%; font-size: 12.5px; table-layout: fixed; }
+table { border-collapse: collapse; width: 100%; font-size: var(--table-font-size); table-layout: fixed; }
 th, td { padding: 4px 8px; text-align: left; border-bottom: 1px solid var(--border); }
 th { position: sticky; top: 0; background: var(--panel); cursor: pointer; user-select: none; color: var(--muted2); font-weight: 400; z-index: 2; }
 th:hover { background: var(--accent-soft); }
@@ -256,18 +269,19 @@ __SHARED_JS_TABLE_SORT__
 const NUMERIC_COLS = new Set(["Flow Days", "Price", "R$/m3", "Avg Process Price", "Volume Accepted", "Total Value", "Volume Offered", "Total Volume"]);
 const WRAP_COLS = new Set(["Transaction Type", "Delivery Point", "Service Type"]);
 const DEFAULT_COL_WIDTH = {
-  "Pipeline": 56,
+  "Transporter (TSO)": 56,
   "Trade Date": 96,
   "Flow Date Start": 96,
   "Flow Date End": 96,
   "Trade Timing": 88,
-  "Transaction Type": 140,
+  "Transaction Type": 88,
   "Delivery Point": 140,
   "Price": 72,
   "R$/m3": 72,
   "Volume Accepted": 100,
   "Service Type": 160,
 };
+const FALLBACK_COL_WIDTH = 100;
 // Columns hidden by default so the table fits most screens without horizontal
 // scrolling. Users can re-enable any of these (or hide more) from the Columns
 // menu; the choice is remembered in localStorage.
@@ -284,7 +298,7 @@ const DATE_FILTER_COLS = new Set(["Trade Date", "Flow Date Start", "Flow Date En
 const QUICK_FILTERS = [
   { key: "last7", label: "Last 7 Days", col: "Trade Date", type: "days", days: 7 },
   { key: "last30", label: "Last 30 Days", col: "Trade Date", type: "days", days: 30 },
-  { key: "gus-residual", label: "GUS + Residual Balancing", col: "Transaction Type", type: "set", values: ["GUS Acquisition", "Residual Balancing"] },
+  { key: "gus-residual", label: "GUS + Res. Bal.", col: "Transaction Type", type: "set", values: ["GUS", "Res. Bal."] },
   { key: "tso-TAG", label: "TAG", col: "Transporter (TSO)", type: "set", values: ["TAG"] },
   { key: "tso-NTS", label: "NTS", col: "Transporter (TSO)", type: "set", values: ["NTS"] },
   { key: "tso-TBG", label: "TBG", col: "Transporter (TSO)", type: "set", values: ["TBG"] },
@@ -312,7 +326,7 @@ const CHART_PALETTE_DARK = ["#3987e5", "#d95926", "#199e70", "#c98500", "#d55181
 // those are the two Eric most often looks at together; anything not listed
 // here (a new transaction type the API adds later) is appended
 // alphabetically so it still shows up rather than silently disappearing.
-const TRANSACTION_TYPE_ORDER = ["GUS Acquisition", "Residual Balancing", "Operational Balancing", "Linepack", "Congestionamento"];
+const TRANSACTION_TYPE_ORDER = ["GUS", "Res. Bal.", "Op. Bal.", "Linepack", "Congestion"];
 const PIPELINE_ORDER = ["TAG", "NTS", "TBG"];
 
 const comboKey = (pipeline, type) => pipeline + "||" + type;
@@ -602,8 +616,8 @@ function renderChart() {
 
 function initChartDefaults() {
   for (const group of availableCombos()) {
-    if (group.types.includes("GUS Acquisition")) {
-      const key = comboKey(group.pipeline, "GUS Acquisition");
+    if (group.types.includes("GUS")) {
+      const key = comboKey(group.pipeline, "GUS");
       chartPicked.add(key);
       chartClaimSlot(key);
     }
@@ -679,6 +693,14 @@ function applyColWidth(el, px) {
 // Column widths must survive renderTable() rebuilding tbody's innerHTML on every
 // filter/sort/keystroke -- columnWidths is the persistent source of truth; both
 // header cells (rebuilt on reorder) and body cells (rebuilt constantly) read from it.
+function snapColWidth(col, th, idx) {
+  const px = DEFAULT_COL_WIDTH[col] || FALLBACK_COL_WIDTH;
+  columnWidths[col] = px;
+  applyColWidth(th, px);
+  document.querySelectorAll(`#tbody tr > td:nth-child(${idx + 1})`).forEach(td => applyColWidth(td, px));
+  saveColumnPrefs();
+}
+
 function makeResizable() {
   const ths = document.querySelectorAll("#thead-row th");
   const visCols = visibleColumnList();
@@ -687,6 +709,13 @@ function makeResizable() {
     const resizer = document.createElement("div");
     resizer.className = "resizer";
     th.appendChild(resizer);
+    // Double-click the column border to restore that column's default width
+    // (Excel-style snap; persists via saveColumnPrefs like a manual resize).
+    resizer.addEventListener("dblclick", e => {
+      e.preventDefault();
+      e.stopPropagation();
+      snapColWidth(col, th, idx);
+    });
     resizer.addEventListener("mousedown", e => {
       e.preventDefault();
       e.stopPropagation();

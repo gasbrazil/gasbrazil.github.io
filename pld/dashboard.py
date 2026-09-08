@@ -123,7 +123,7 @@ __SHARED_THEME_CSS__
 [hidden] { display: none !important; }
 body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; font-weight: 300; }
 header.dash-head { display: flex; flex-direction: column; gap: 10px; margin-bottom: 0; }
-h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; font-weight: 400; }
+h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .header-links { display: flex; gap: 8px; flex-wrap: wrap; }
 .sources { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0 0 var(--gap); }
@@ -168,7 +168,7 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; font-weight: 400; }
 .toolbar button:hover { background: var(--accent-soft); }
 .count { color: var(--muted); font-size: 12px; margin-left: auto; font-weight: 200; }
 .table-wrap { background: var(--panel); border: 1px solid var(--border); border-radius: 5px; overflow: auto; max-height: 55vh; margin-bottom: var(--gap); }
-table.data { border-collapse: collapse; width: 100%; font-size: 12.5px; font-weight: 300; table-layout: fixed; }
+table.data { border-collapse: collapse; width: 100%; font-size: var(--table-font-size); font-weight: 300; table-layout: fixed; }
 table.data th, table.data td { padding: 4px 8px; text-align: left; border-bottom: 1px solid var(--border); }
 table.data th { position: sticky; top: 0; background: var(--panel); color: var(--muted2); font-weight: 400; z-index: 2; }
 table.data .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }

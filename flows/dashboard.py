@@ -178,7 +178,7 @@ body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--
    viewport width or pill count (see ADR-001: same layout on every
    GasBrazil.com dashboard, not just whichever happens to wrap). */
 header.dash-head { display: flex; flex-direction: column; gap: 10px; margin-bottom: 0; }
-h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; font-weight: 400; }
+h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .header-links { display: flex; gap: 8px; flex-wrap: wrap; }
 .sources { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0 0 var(--gap); }
@@ -261,7 +261,7 @@ select:hover, input:hover { background: var(--accent-soft); }
 .picker-summary { font-size: 12px; color: var(--muted); }
 .chip-scroll { display: flex; flex-wrap: wrap; gap: 6px; max-height: 168px; overflow: auto; padding: 2px; margin-bottom: 4px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); }
 .meter-table-wrap { max-height: 320px; overflow: auto; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 4px; }
-.meter-table-wrap table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.meter-table-wrap table { width: 100%; border-collapse: collapse; font-size: var(--table-font-size); }
 .meter-table-wrap th, #data-table th { position: sticky; top: 0; background: var(--panel); color: var(--muted2); font-weight: 400; text-align: left; padding: 6px 10px 7px; border-bottom: 1px solid var(--border); z-index: 1; cursor: auto; }
 /* Sortable/filterable column header, shared by the meter table and the
    data table below the chart: a clickable label (3 clicks = asc, desc,
@@ -298,7 +298,7 @@ th.num .th-filter { text-align: right; }
 .toolbar button:hover { background: var(--accent-soft); }
 .count { color: var(--muted); font-size: 12px; margin-left: auto; }
 .table-wrap { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; overflow: auto; box-shadow: var(--shadow); max-height: 50vh; }
-table { border-collapse: collapse; width: 100%; font-size: 12.5px; table-layout: fixed; }
+table { border-collapse: collapse; width: 100%; font-size: var(--table-font-size); table-layout: fixed; }
 th, td { padding: 4px 8px; text-align: left; border-bottom: 1px solid var(--border); }
 th { position: sticky; top: 0; background: var(--panel); color: var(--muted2); font-weight: 400; z-index: 2; cursor: pointer; user-select: none; }
 th:hover { background: var(--accent-soft); }

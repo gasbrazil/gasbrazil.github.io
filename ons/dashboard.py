@@ -433,7 +433,7 @@ body{margin:0;background:var(--bg);color:var(--text);
 header.dash-head{display:flex;flex-direction:column;gap:10px;margin-bottom:0}
 .header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .header-links{display:flex;gap:8px;flex-wrap:wrap}
-h1{font-size:25px;margin:0;letter-spacing:-.01em;font-weight:400}
+h1{font-size:25px;margin:0;letter-spacing:-.01em}
 /* Green/yellow/blue band under the header -- the one place the flag appears
    as itself rather than as an accent on something else. Proportions echo the
    flag's own (green field, yellow lozenge, blue disc) rather than being three
@@ -497,7 +497,7 @@ button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);co
   border:1px solid transparent}
 .entlist{max-height:460px;overflow:auto;border:1px solid var(--ring);
   border-radius:8px;padding:0;margin-top:8px}
-.entlist table.data{font-size:12px}
+.entlist table.data{font-size:calc(var(--table-font-size) - 0.5px)}
 .entlist table.data th,.entlist table.data td{padding:3px 7px}
 .entlist th.l,.entlist td.l{text-align:left}
 .entlist tr.total-row{background:var(--accent-soft)}
@@ -558,7 +558,7 @@ svg{display:block;width:100%;overflow:hidden}
 .tt table{border-collapse:collapse;width:100%}
 .tt td{padding:1px 0}
 .tt td.v{text-align:right;padding-left:14px;font-variant-numeric:tabular-nums}
-table.data{border-collapse:collapse;width:100%;font-size:12.5px;
+table.data{border-collapse:collapse;width:100%;font-size:var(--table-font-size);
   font-variant-numeric:tabular-nums}
 table.data th,table.data td{padding:4px 8px;border-bottom:1px solid var(--border);
   text-align:right;white-space:nowrap}

@@ -37,10 +37,11 @@ RAW_PATH = DATA_DIR / "raw_processos.json"
 PARQUET_PATH = DATA_DIR / "poc_results.parquet"
 
 TRANSACTION_TYPE_MAP = {
-    "Aquisição de GUS": "GUS Acquisition",
-    "Balanceamento Residual": "Residual Balancing",
-    "Balanceamento Operacional": "Operational Balancing",
+    "Aquisição de GUS": "GUS",
+    "Balanceamento Residual": "Res. Bal.",
+    "Balanceamento Operacional": "Op. Bal.",
     "Linepack": "Linepack",
+    "Congestionamento": "Congestion",
 }
 
 SERVICE_TYPE_MAP = {

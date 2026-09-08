@@ -40,7 +40,7 @@ DEFAULT_FAVICON_PATH = HERE / "favicon.png"
 FONTS_URL_PREFIX = "/shared/fonts"
 
 # Pacaembu is a heavy geometric face -- site default is Light (300); mid
-# emphasis is Regular (400); wordmark only uses SemiBold (600). Never Bold.
+# emphasis is Regular (400); wordmark + page titles use SemiBold (600). Never Bold.
 # ExtraLight (200) is for muted metadata. File names on disk:
 #   Pacaembu-ExtraLight.ttf, Pacaembu-Light.ttf, Pacaembu-Regular.ttf
 #   (from Adobe "Pacaembu.ttf", true usWeightClass=400), Pacaembu-SemiBold.ttf

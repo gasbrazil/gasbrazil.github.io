@@ -94,7 +94,7 @@ body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--
    viewport width or pill count (see ADR-001: same layout on every
    GasBrazil.com dashboard, not just whichever happens to wrap). */
 header.dash-head { display: flex; flex-direction: column; gap: 10px; margin-bottom: 0; }
-h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; font-weight: 400; }
+h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .header-links { display: flex; gap: 8px; flex-wrap: wrap; }
 .sources { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0 0 var(--gap); }
@@ -120,7 +120,7 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; font-weight: 400; }
 .qf-sep { width: 1px; align-self: stretch; background: var(--border-strong); margin: 0 4px; }
 .qf-btn.qf-validity { border-style: dashed; }
 .drill-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: var(--card-pad); margin-bottom: var(--gap); max-height: 320px; overflow: auto; }
-.drill-card table { border-collapse: collapse; width: 100%; font-size: 12.5px; table-layout: fixed; white-space: nowrap; }
+.drill-card table { border-collapse: collapse; width: 100%; font-size: var(--table-font-size); table-layout: fixed; white-space: nowrap; }
 .drill-card th, .drill-card td { padding: 4px 8px; border-bottom: 1px solid var(--border); text-align: left; }
 .drill-card th { color: var(--muted2); font-weight: 400; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; cursor: default; position: sticky; top: 0; background: var(--panel); z-index: 2; }
 .drill-card thead tr:first-child th { border-bottom: none; padding-bottom: 0; top: 0; }
@@ -154,7 +154,7 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; font-weight: 400; }
 .toolbar button.secondary { background: var(--panel); color: var(--text); border: 1px solid var(--border-strong); }
 .count { color: var(--muted); font-size: 12px; margin-left: auto; }
 .table-wrap { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; overflow: auto; box-shadow: var(--shadow); max-height: 65vh; }
-table { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+table { border-collapse: collapse; width: 100%; font-size: var(--table-font-size); }
 .table-wrap table { table-layout: fixed; }
 th, td { padding: 4px 8px; text-align: left; border-bottom: 1px solid var(--border); }
 th { position: sticky; top: 0; background: var(--panel); cursor: pointer; user-select: none; color: var(--muted2); font-weight: 400; z-index: 2; }
@@ -285,6 +285,7 @@ __SHARED_JS_TABLE_SORT__
 const NUMERIC_COLS = new Set(["Contracted Capacity (000 m3/d)", "Allocated Tariff (R$/MMBtu)", "Tariff Multiplier", "Transporter Ownership %"]);
 const WRAP_COLS = new Set(["Shipper", "Point/Zone", "Contract Category", "Product Type"]);
 const DEFAULT_COL_WIDTH = { "Shipper": 180, "Contract Number": 140, "Point/Zone": 120 };
+const FALLBACK_COL_WIDTH = 100;
 // Columns hidden by default so the table fits most screens without horizontal
 // scrolling. Users can re-enable any of these (or hide more) from the Columns
 // menu; the choice is remembered in localStorage.
@@ -749,6 +750,14 @@ function applyColWidth(el, px) {
 // Column widths must survive renderTable() rebuilding tbody's innerHTML on every
 // filter/sort/keystroke -- columnWidths is the persistent source of truth; both
 // header cells (rebuilt on reorder) and body cells (rebuilt constantly) read from it.
+function snapColWidth(col, th, idx) {
+  const px = DEFAULT_COL_WIDTH[col] || FALLBACK_COL_WIDTH;
+  columnWidths[col] = px;
+  applyColWidth(th, px);
+  document.querySelectorAll(`#tbody tr > td:nth-child(${idx + 1})`).forEach(td => applyColWidth(td, px));
+  saveColumnPrefs();
+}
+
 function makeResizable() {
   const ths = document.querySelectorAll("#thead-row th");
   const visCols = visibleColumnList();
@@ -757,6 +766,13 @@ function makeResizable() {
     const resizer = document.createElement("div");
     resizer.className = "resizer";
     th.appendChild(resizer);
+    // Double-click the column border to restore that column's default width
+    // (Excel-style snap; persists via saveColumnPrefs like a manual resize).
+    resizer.addEventListener("dblclick", e => {
+      e.preventDefault();
+      e.stopPropagation();
+      snapColWidth(col, th, idx);
+    });
     resizer.addEventListener("mousedown", e => {
       e.preventDefault();
       e.stopPropagation();
