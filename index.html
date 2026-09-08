@@ -451,7 +451,7 @@ footer.site a { color: var(--muted); }
   </div>
   <p class="tagline" data-i18n="tagline">Data tools for Brazil's natural gas market &mdash; grid balances, pipeline capacity, contracted transport, physical flows, supply, ANP prices, and power prices.</p>
   <div class="flagbar" aria-hidden="true"></div>
-  <a class="desk-link" href="desk/" data-i18n="cardDesk">Market Desk</a>
+  <a class="desk-link" href="desk/" data-i18n="cardDesk">Desk</a>
   <div class="asof-strip" id="asof-strip" hidden>
     <span class="asof-label" data-i18n="kpiRefresh">Last refreshed</span>
     <span class="asof-val"></span>
@@ -461,7 +461,7 @@ footer.site a { color: var(--muted); }
       <div class="kpi-label" data-i18n="cardOns">ONS Balances</div>
       <div class="kpi-role">Grid &amp; gas dispatch</div>
       <div class="kpi-val" data-en="2,873 MWmed gas" data-pt="2,873 MWmed a gás">2,873 MWmed gas</div>
-      <div class="kpi-when" data-refresh="2026-09-08 13:24 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-08 14:39 UTC"></div>
     </a>
     <a class="kpi-cell" href="poc/" data-slug="poc">
       <div class="kpi-label" data-i18n="cardPoc">POC Results</div>
@@ -474,32 +474,32 @@ footer.site a { color: var(--muted); }
       <div class="kpi-label" data-i18n="cardContratos">POC Contracts</div>
       <div class="kpi-role">Firm transport</div>
       <div class="kpi-val" data-en="893 contracts · 186,438 thousand m³/d" data-pt="893 contratos · 186,438 mil m³/d">893 contracts · 186,438 thousand m³/d</div>
-      <div class="kpi-when" data-refresh="2026-09-08 13:24 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-08 14:38 UTC"></div>
     </a>
     <a class="kpi-cell" href="flows/" data-slug="flows">
       <div class="kpi-label" data-i18n="cardFlows">Pipeline Flows</div>
       <div class="kpi-role">Physical movement</div>
       <div class="kpi-val" data-en="1358.6M m³ realized (7d) · 270 points" data-pt="1358.6M m³ realizados (7d) · 270 points">1358.6M m³ realized (7d) · 270 points</div>
-      <div class="kpi-when" data-refresh="2026-09-08 13:25 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-08 14:39 UTC"></div>
     </a>
     <a class="kpi-cell" href="supply/" data-slug="supply">
       <div class="kpi-label" data-i18n="cardSupply">Gas Supply</div>
       <div class="kpi-role">National balance</div>
       <div class="kpi-val" data-en="6.7M thousand m³ produced · 2026-07" data-pt="6.7M mil m³ produzidos · 2026-07">6.7M thousand m³ produced · 2026-07</div>
-      <div class="kpi-when" data-refresh="2026-09-08 13:24 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-08 14:38 UTC"></div>
       
     </a>
     <a class="kpi-cell" href="precos/" data-slug="precos">
       <div class="kpi-label" data-i18n="cardPrecos">ANP Prices</div>
       <div class="kpi-role">Disclosed R$/MMBtu</div>
       <div class="kpi-val" data-en="Santos 18.2 R$/MMBtu · 2026-06" data-pt="Santos 18.2 R$/MMBtu · 2026-06">Santos 18.2 R$/MMBtu · 2026-06</div>
-      <div class="kpi-when" data-refresh="2026-09-08 13:24 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-08 14:38 UTC"></div>
     </a>
     <a class="kpi-cell" href="pld/" data-slug="pld">
       <div class="kpi-label" data-i18n="cardPld">PLD Prices</div>
       <div class="kpi-role">Power settlement</div>
-      <div class="kpi-val" data-en="SE 118.05 R$/MWh · 2026-09-06" data-pt="SE 118.05 R$/MWh · 2026-09-06">SE 118.05 R$/MWh · 2026-09-06</div>
-      <div class="kpi-when" data-refresh="2026-09-08 13:23 UTC"></div>
+      <div class="kpi-val" data-en="SE 97.79 R$/MWh · 2026-09-08" data-pt="SE 97.79 R$/MWh · 2026-09-08">SE 97.79 R$/MWh · 2026-09-08</div>
+      <div class="kpi-when" data-refresh="2026-09-08 14:38 UTC"></div>
       
     </a>
   </div>
@@ -589,7 +589,7 @@ const GB_I18N = {
     navSupply: "Gas Supply",
     navPld: "PLD Prices",
     navPrecos: "ANP Prices",
-    navDesk: "Market Desk",
+    navDesk: "Desk",
     navAbout: "About",
     navWiki: "Wiki",
     contact: "Contact",
@@ -610,7 +610,7 @@ const GB_I18N = {
     cardPldDesc: "CCEE daily-average PLD (settlement price) by electricity submarket — Southeast, South, Northeast, and North. Not the same as ONS CMO.",
     cardPrecos: "ANP Prices",
     cardPrecosDesc: "ANP monthly disclosed natural-gas trading prices (Resolution 52/2011) — producers, distributors, and marketers. Tax-inclusive R$/MMBtu.",
-    cardDesk: "Market Desk",
+    cardDesk: "Desk",
     cardDeskDesc: "Cross-product snapshot: gas generation, PLD–CMO spread, ANP prices, POC auctions, and pipeline flows.",
     kpiRefresh: "Last refreshed",
     dataThrough: "Data through",
@@ -650,7 +650,7 @@ const GB_I18N = {
     aboutCoverSupply: "Gas Supply uses ANP PPGN-EL national monthly series plus national natural-gas imports. The open import CSV does not split Bolivia pipeline vs LNG cargoes.",
     aboutCoverPrecos: "ANP Prices are Resolution 52/2011 monthly disclosures (tax-inclusive R$/MMBtu), not assessed spot benchmarks. Some thermal and Other Basins months are suppressed when too few counterparties report.",
     aboutCoverPld: "PLD Prices shows CCEE daily-average PLD by submarket, with an optional join to ONS CMO and median gas CVU when that lake data is present at build time.",
-    aboutCoverDesk: "Market Desk joins headline series across products for a single snapshot; each product page remains the place for filters and full history.",
+    aboutCoverDesk: "Desk joins headline series across products for a single snapshot; each product page remains the place for filters and full history.",
     notFound: "This page is not here.",
     notFoundBody: "The hub and dashboards are linked below.",
     backHome: "Back to GasBrazil.com"
@@ -668,7 +668,7 @@ const GB_I18N = {
     navSupply: "Oferta de Gás",
     navPld: "Preços PLD",
     navPrecos: "Preços ANP",
-    navDesk: "Mesa de Mercado",
+    navDesk: "Desk",
     navAbout: "Sobre",
     navWiki: "Wiki",
     contact: "Contato",
@@ -689,7 +689,7 @@ const GB_I18N = {
     cardPldDesc: "PLD médio diário da CCEE por submercado — Sudeste, Sul, Nordeste e Norte. Não é o CMO da ONS.",
     cardPrecos: "Preços ANP",
     cardPrecosDesc: "Preços mensais divulgados pela ANP (Resolução 52/2011) — produtores, distribuidoras e comercializadores. R$/MMBtu com impostos.",
-    cardDesk: "Mesa de Mercado",
+    cardDesk: "Desk",
     cardDeskDesc: "Retrato cruzado: geração a gás, spread PLD–CMO, preços ANP, leilões POC e fluxos.",
     kpiRefresh: "Última atualização",
     dataThrough: "Dados até",
@@ -729,7 +729,7 @@ const GB_I18N = {
     aboutCoverSupply: "Oferta de Gás usa as séries mensais nacionais PPGN-EL da ANP mais importações nacionais de gás natural. O CSV aberto de importação não separa Gasbol (Bolívia) de GNL.",
     aboutCoverPrecos: "Preços ANP são divulgações mensais da Resolução 52/2011 (R$/MMBtu com impostos), não benchmarks de preço spot. Alguns meses térmicos e de Demais Bacias são omitidos quando há poucos agentes.",
     aboutCoverPld: "Preços PLD mostra o PLD médio diário da CCEE por submercado, com junção opcional ao CMO e ao CVU mediano a gás da ONS quando esses dados estão no lake no build.",
-    aboutCoverDesk: "A Mesa de Mercado junta séries-resumo entre produtos; cada painel permanece o lugar para filtros e o histórico completo.",
+    aboutCoverDesk: "O Desk junta séries-resumo entre produtos; cada painel permanece o lugar para filtros e o histórico completo.",
     notFound: "Esta página não existe.",
     notFoundBody: "O hub e os painéis estão nos links abaixo.",
     backHome: "Voltar ao GasBrazil.com"
