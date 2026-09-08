@@ -550,7 +550,7 @@ button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);co
 .cap-bar>div{height:100%}
 .band-label{font-size:11px;font-weight:300;white-space:nowrap}
 .panel-title{font-size:12.5px;font-weight:300;margin:0 0 2px}
-.panel-note{font-size:11.5px;color:var(--muted);margin:0 0 8px}
+.panel-note{font-size:11.5px;color:var(--muted);margin:0 0 8px;font-weight:200}
 .legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:8px;font-size:12px;
   color:var(--muted2)}
 .legend span{display:flex;align-items:center;gap:6px}

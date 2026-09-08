@@ -205,7 +205,7 @@ footer a { color: var(--accent); }
 .filter-menu input[type="text"].fm-search { width: 100%; box-sizing: border-box; padding: 4px 6px; border: 1px solid var(--border); border-radius: 5px; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 12px; margin-bottom: 6px; }
 .chart-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: var(--card-pad); margin: 12px 0 var(--gap); }
 .panel-title { font-size: 13px; font-weight: 400; margin: 0 0 2px; }
-.panel-note { font-size: 11.5px; color: var(--muted); margin: 0 0 12px; }
+.panel-note { font-size: 11.5px; color: var(--muted); margin: 0 0 12px; font-weight: 200; }
 .chart-picker { display: flex; flex-wrap: wrap; gap: 14px 18px; margin-bottom: 12px; }
 .pick-group { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .pick-group-label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 200; margin-right: 2px; }

@@ -18,8 +18,11 @@ sys.path.insert(0, str(ROOT / "shared"))
 import joins  # noqa: E402
 import transforms as xf  # noqa: E402
 
-# POC PCR convention: same factor as poc/dashboard.py
-# (R$/m³ = R$/MMBtu / MMBTU_PER_1000_M3).
+# POC PCR convention: same factor as poc/dashboard.py. MMBTU_PER_1000_M3 is
+# MMBtu per 1000 m3 of gas, so converting a R$/MMBtu price to R$/m3 means
+# multiplying by the MMBtu content of one m3 (MMBTU_PER_1000_M3 / 1000), not
+# dividing by the per-1000-m3 factor directly.
+# R$/m³ = R$/MMBtu × MMBTU_PER_1000_M3 / 1000.
 MMBTU_PER_1000_M3 = 28.8081
 COMPARE_DAYS = 90
 SPARK_FALLBACK_GAS_M3 = 1.2  # illustrative R$/m³ when no GUS trade exists
@@ -28,7 +31,7 @@ SPARK_FALLBACK_GAS_M3 = 1.2  # illustrative R$/m³ when no GUS trade exists
 def _mmbtu_to_m3(price_mmbtu: Optional[float], nd: int = 3) -> Optional[float]:
     if price_mmbtu is None:
         return None
-    return _num(float(price_mmbtu) / MMBTU_PER_1000_M3, nd)
+    return _num(float(price_mmbtu) * MMBTU_PER_1000_M3 / 1000.0, nd)
 
 
 def _first_existing(*candidates: Path) -> Optional[Path]:
@@ -76,6 +79,33 @@ def _latest_ons_value(
         return None, None
     o = o.sort_values("date")
     last = o.iloc[-1]
+    return _num(last["value"], 1), last["date"].strftime("%Y-%m-%d")
+
+
+def _latest_ons_national_sum(
+    ons: pd.DataFrame,
+    series: str,
+) -> tuple[Optional[float], Optional[str]]:
+    """Sum a per-subsystem ONS series to a national (SIN) total.
+
+    ONS never publishes a pre-aggregated "SIN" subsystem -- only SE/CO, S,
+    NE, and N -- so a national figure has to be summed across whichever of
+    those four have data for the latest date, not filtered on a "SIN" value
+    that doesn't exist in the data.
+    """
+    need = {"date", "subsystem", "series", "value"}
+    if not need.issubset(ons.columns):
+        return None, None
+    o = ons.copy()
+    o["date"] = pd.to_datetime(o["date"], errors="coerce")
+    o = o.dropna(subset=["date"])
+    o = o[o["series"].astype(str) == series]
+    if "entity" in o.columns:
+        o = o[o["entity"].astype(str).fillna("") == ""]
+    if o.empty:
+        return None, None
+    daily = o.groupby("date", as_index=False)["value"].sum().sort_values("date")
+    last = daily.iloc[-1]
     return _num(last["value"], 1), last["date"].strftime("%Y-%m-%d")
 
 
@@ -485,9 +515,7 @@ def build_payload() -> dict:
     gen_gas, gen_when = (None, None)
     cmo_se, cmo_when = (None, None)
     if ons is not None and not ons.empty:
-        gen_gas, gen_when = _latest_ons_value(ons, "gen_gas", "SIN")
-        if gen_gas is None:
-            gen_gas, gen_when = _latest_ons_value(ons, "thermal_gas", "SIN")
+        gen_gas, gen_when = _latest_ons_national_sum(ons, "thermal_gas")
         cmo_se, cmo_when = _latest_ons_value(ons, "cmo", "SE")
     else:
         notes.append("ONS daily parquet not found.")

@@ -19,7 +19,9 @@ DEFAULT_OUT = HERE / "index.html"
 
 # Price in the source data is R$/MMBtu. 28.8081 is the MMBtu-per-1000m3 factor
 # implied by the dataset's PCR (poder calorifico de referencia) convention --
-# dividing by it converts R$/MMBtu -> R$/m3.
+# since it's MMBtu per 1000 m3 (not per single m3, despite the variable's
+# name), converting R$/MMBtu -> R$/m3 means multiplying by it and dividing
+# by 1000, not dividing by it directly.
 MMBTU_PER_M3 = 28.8081
 
 COLUMNS = [
@@ -55,7 +57,7 @@ TRANSACTION_TYPE_DISPLAY = {
 
 def load_payload():
     df = pd.read_parquet(PARQUET_PATH)
-    df["R$/m3"] = (df["Price"] / MMBTU_PER_M3).round(2)
+    df["R$/m3"] = (df["Price"] * MMBTU_PER_M3 / 1000).round(2)
     df = df[COLUMNS].copy()
     df["Transaction Type"] = df["Transaction Type"].replace(TRANSACTION_TYPE_DISPLAY)
     for c in DATE_COLS:
@@ -208,7 +210,7 @@ footer a { color: var(--accent); }
 .filter-menu input[type="text"].fm-search { width: 100%; box-sizing: border-box; padding: 4px 6px; border: 1px solid var(--border); border-radius: 5px; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 12px; margin-bottom: 6px; }
 .chart-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: var(--card-pad); margin-bottom: var(--gap); }
 .panel-title { font-size: 13px; font-weight: 400; margin: 0 0 2px; }
-.panel-note { font-size: 11.5px; color: var(--muted); margin: 0 0 12px; }
+.panel-note { font-size: 11.5px; color: var(--muted); margin: 0 0 12px; font-weight: 200; }
 .chart-picker { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; align-items: center; }
 .series-btn { display: inline-flex; align-items: center; gap: 6px; background: var(--panel); border: 1px solid var(--border); border-radius: 5px; padding: 4px 12px 4px 8px; font-size: 12px; cursor: pointer; color: var(--text); font-family: var(--font); font-weight: 400; }
 .series-btn:hover { background: var(--accent-soft); }
@@ -339,8 +341,8 @@ const QUICK_FILTERS = [
    A single combined SVG line chart: pick any Pipeline + Transaction Type
    combination as a toggle chip below, each becomes its own colored line.
    Left axis is R$/MMBtu (the source unit); the right axis mirrors the same
-   gridlines rescaled to R$/m3 (R$/m3 = R$/MMBtu / MMBTU_PER_M3, a fixed
-   linear factor -- same constant used for the table's R$/m3 column), so
+   gridlines rescaled to R$/m3 (R$/m3 = R$/MMBtu * MMBTU_PER_M3 / 1000, a
+   fixed linear factor -- same constant used for the table's R$/m3 column), so
    both units read off one chart instead of duplicating panels. The chart
    plots against the table's `filtered` rows, so the existing toolbar /
    quick-filter / column filters (date range, pipeline, transaction type,
@@ -556,7 +558,7 @@ function renderChart() {
     const lb = chartSvgEl("text", { x: ML - 9, y: y(t) + 4, "text-anchor": "end", fill: "var(--muted)", "font-size": 11.5 });
     lb.textContent = fmtAxisNum(t, 2); lb.style.fontVariantNumeric = "tabular-nums"; svg.appendChild(lb);
     const rb = chartSvgEl("text", { x: W - MR + 9, y: y(t) + 4, "text-anchor": "start", fill: "var(--muted)", "font-size": 11.5 });
-    rb.textContent = fmtAxisNum(t / MMBTU_PER_M3, 2); rb.style.fontVariantNumeric = "tabular-nums"; svg.appendChild(rb);
+    rb.textContent = fmtAxisNum(t * MMBTU_PER_M3 / 1000, 2); rb.style.fontVariantNumeric = "tabular-nums"; svg.appendChild(rb);
   });
   if (lo < 0 && hi > 0) svg.appendChild(chartSvgEl("line", { x1: ML, x2: W - MR, y1: y(0), y2: y(0), stroke: "var(--border-strong)", "stroke-width": 1.5 }));
 
@@ -627,7 +629,7 @@ function renderChart() {
       if (!p) return;
       dots.appendChild(chartSvgEl("circle", { cx: x(p.date), cy: y(p.price), r: 4, fill: chartColorOf(s.key), stroke: "var(--panel)", "stroke-width": 2 }));
       rows += '<tr><td><span class="sw" style="display:inline-block;background:' + chartColorOf(s.key) + '"></span> ' + escapeHtml(comboLabel(s.pipeline, s.type)) +
-        '</td><td class="v">' + fmtAxisNum(p.price, 2) + ' MMBtu · ' + fmtAxisNum(p.price / MMBTU_PER_M3, 2) + ' m³</td></tr>';
+        '</td><td class="v">' + fmtAxisNum(p.price, 2) + ' MMBtu · ' + fmtAxisNum(p.price * MMBTU_PER_M3 / 1000, 2) + ' m³</td></tr>';
     });
     tt.innerHTML = '<div class="d">' + date + '</div><table>' + rows + '</table>';
     tt.style.display = "block";
