@@ -43,8 +43,7 @@ jobs:
           cache-dependency-path: desk/requirements.txt
       - run: pip install -r requirements.txt
       - name: Build desk page
-        run: python dashboard.py desk/index.html
-        working-directory: .
+        run: python dashboard.py index.html
       - name: Publish hub teasers
         working-directory: .
         run: python shared/publish_teasers.py || true
@@ -59,11 +58,5 @@ jobs:
           for i in 1 2 3 4 5; do
             if git push; then break; fi
             echo "Push rejected -- rebasing and retrying ($i)..."
-            git pull --rebase origin main || true
-            # Prefer ours on HTML conflict — fresh rebuild wins.
-            if [ -f desk/index.html ]; then
-              git checkout --ours desk/index.html 2>/dev/null || true
-              git add desk/index.html 2>/dev/null || true
-              GIT_EDITOR=true git rebase --continue 2>/dev/null || true
-            fi
+            git pull --rebase origin main
           done
