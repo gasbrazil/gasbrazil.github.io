@@ -25,8 +25,8 @@ TEMPLATE = r"""<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Desk — GasBrazil.com</title>
-<meta name="description" content="Desk for Brazil natural gas and power: gas generation, PLD–CMO–CVU, ANP and POC prices, pipeline utilization, and a thermal spark-spread calculator.">
+<title>The Desk — GasBrazil.com</title>
+<meta name="description" content="Cross-product Brazil gas and power desk: PLD, CMO, CVU, GUS, ANP, flows, spark.">
 <link rel="canonical" href="https://gasbrazil.com/desk/">
 <link rel="icon" href="__FAVICON_DATA_URI__">
 __FONT_PRELOAD__
@@ -69,6 +69,9 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .infodot { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--border-strong); font-size: 10px; color: var(--muted2); cursor: help; font-weight: 400; flex: none; }
 .infodot:hover { background: var(--accent-soft); color: var(--text); }
 .series-picker { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.compare-tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 0 0 10px; }
+.sm-pick { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted2); font-weight: 400; }
+.sm-pick select { background: var(--panel); border: 1px solid var(--border-strong); border-radius: 5px; padding: 4px 8px; color: var(--text); font: 400 12.5px var(--font); }
 .series-btn { display: inline-flex; align-items: center; gap: 6px; background: var(--bg); border: 1px solid var(--border); border-radius: 5px; padding: 4px 12px 4px 8px; font-size: 12px; cursor: pointer; color: var(--text); font-family: var(--font); font-weight: 400; }
 .series-btn:hover { background: var(--accent-soft); }
 .series-btn.active { border-color: var(--border-strong); }
@@ -114,7 +117,7 @@ footer a { color: var(--accent); }
 <div class="wrap">
 <header class="dash-head">
   <div>
-    <h1 data-i18n="navDesk">Desk</h1>
+    <h1 data-i18n="navDesk">The Desk</h1>
   </div>
   <div class="header-right">
     <div class="header-links">
@@ -133,33 +136,38 @@ footer a { color: var(--accent); }
 <div class="flagbar" aria-hidden="true"></div>
 <div class="sources">
   <span class="sources-label" data-i18n="sources">Sources</span>
-  <a class="pill" href="../ons/" data-i18n="sourceOns">ONS open data</a>
-  <a class="pill" href="../pld/" data-i18n="sourcePld">CCEE open data — PLD média diária</a>
-  <a class="pill" href="../precos/" data-i18n="sourcePrecos">ANP — publicidade dos preços de gás natural</a>
-  <a class="pill" href="../poc/" data-i18n="sourcePoc">Portal de Oferta de Capacidade</a>
-  <a class="pill" href="../flows/" data-i18n="sourceFlows">ANP open data — pipeline movement</a>
+  <a class="pill" href="../ons/" data-i18n="sourceOns">ONS</a>
+  <a class="pill" href="../pld/" data-i18n="sourcePld">CCEE PLD</a>
+  <a class="pill" href="../precos/" data-i18n="sourcePrecos">ANP prices</a>
+  <a class="pill" href="../poc/" data-i18n="sourcePoc">POC</a>
+  <a class="pill" href="../flows/" data-i18n="sourceFlows">ANP flows</a>
 </div>
-<p class="lede" data-i18n="deskLede">One screen across gas and power: latest SIN gas generation, SE PLD and CMO, disclosed ANP and POC prices, pipeline utilization, and a client-side thermal spark calculator. Product pages keep filters and full history.</p>
-<p class="gap-note" id="data-notes" hidden></p>
 <div class="kpi-row" id="kpi-row"></div>
 
 <div class="desk-grid">
   <section class="panel" aria-labelledby="compare-title">
-    <p class="panel-title" id="compare-title" data-i18n="deskCompareTitle">PLD vs CMO vs gas CVU — SE</p>
-    <p class="panel-note" data-i18n="deskCompareNote">Last ~90 days, Southeast. CMO and median gas-plant CVU from ONS (R$/MWh). CVU is a planning cost, not a market price.</p>
+    <p class="panel-title" id="compare-title" data-i18n="deskCompareTitle">PLD · CMO · CVU</p>
+    <div class="compare-tools">
+      <label class="sm-pick"><span data-i18n="deskSubmarket">Submarket</span>
+        <select id="compare-sm">
+          <option value="SE">SE</option>
+          <option value="S">S</option>
+          <option value="NE">NE</option>
+          <option value="N">N</option>
+        </select>
+      </label>
+    </div>
     <div class="series-picker" id="picker-compare"></div>
     <div class="chart-host" id="main-chart"></div>
   </section>
   <section class="panel" aria-labelledby="spark-title">
     <p class="panel-title" id="spark-title">
-      <span data-i18n="deskSparkTitle">Thermal spark / implied CVU</span>
+      <span data-i18n="deskSparkTitle">Spark</span>
       <span class="infodot" id="spark-info" title="" aria-label="Formula">i</span>
     </p>
-    <p class="panel-note" data-i18n="deskSparkNote">Implied generation cost from gas price and heat rate, compared with current PLD SE and CMO SE. Optional CVU override replaces the calculated cost.</p>
     <div class="spark-form">
-      <label><span data-i18n="deskGasPrice">Gas price</span> (R$/MMBtu)
-        <input type="number" id="spark-gas" step="0.1" min="0" inputmode="decimal" value="12">
-        <span class="spark-hint" id="spark-gas-hint"></span>
+      <label><span data-i18n="deskGasPrice">Gas price</span> (R$/m³)
+        <input type="number" id="spark-gas" step="0.01" min="0" inputmode="decimal" value="1.2">
       </label>
       <label><span data-i18n="deskHeatRate">Heat rate</span> (kcal/kWh)
         <select id="spark-hr-preset">
@@ -172,27 +180,25 @@ footer a { color: var(--accent); }
         <input type="number" id="spark-hr" step="50" min="500" inputmode="decimal" value="1800">
       </label>
       <label><span data-i18n="deskCvuOverride">CVU override</span> (R$/MWh)
-        <input type="number" id="spark-cvu" step="1" min="0" placeholder="optional" inputmode="decimal">
+        <input type="number" id="spark-cvu" step="1" min="0" inputmode="decimal">
       </label>
     </div>
     <div class="spark-out">
       <div class="spark-metric"><div class="lbl" data-i18n="deskImpliedCvu">Implied CVU</div><div class="val" id="spark-implied">—</div><div class="unit">R$/MWh</div></div>
-      <div class="spark-metric" id="spark-vs-pld-wrap"><div class="lbl" data-i18n="deskVsPld">vs PLD SE</div><div class="val" id="spark-vs-pld">—</div><div class="unit">R$/MWh</div></div>
-      <div class="spark-metric" id="spark-vs-cmo-wrap"><div class="lbl" data-i18n="deskVsCmo">vs CMO SE</div><div class="val" id="spark-vs-cmo">—</div><div class="unit">R$/MWh</div></div>
+      <div class="spark-metric" id="spark-vs-pld-wrap"><div class="lbl" data-i18n="deskVsPld">vs PLD</div><div class="val" id="spark-vs-pld">—</div><div class="unit">R$/MWh</div></div>
+      <div class="spark-metric" id="spark-vs-cmo-wrap"><div class="lbl" data-i18n="deskVsCmo">vs CMO</div><div class="val" id="spark-vs-cmo">—</div><div class="unit">R$/MWh</div></div>
     </div>
   </section>
 </div>
 
 <section class="panel" aria-labelledby="poc-anp-title">
-  <p class="panel-title" id="poc-anp-title" data-i18n="deskPocAnpTitle">POC vs ANP — monthly</p>
-  <p class="panel-note" data-i18n="deskPocAnpNote">Mean POC auction price vs ANP Santos producers and non-thermal Sudeste distributors (R$/MMBtu).</p>
+  <p class="panel-title" id="poc-anp-title" data-i18n="deskPocAnpTitle">POC · ANP — monthly</p>
   <div class="series-picker" id="picker-poc-anp"></div>
   <div class="chart-host" id="poc-anp-chart"></div>
 </section>
 
 <section class="panel" aria-labelledby="util-title">
-  <p class="panel-title" id="util-title" data-i18n="deskUtilTitle">Contracted capacity vs realized flows</p>
-  <p class="panel-note" data-i18n="deskUtilNote">Active contracted capacity (thousand m³/d) vs average realized volume over the last 30 days of flow data, by TSO.</p>
+  <p class="panel-title" id="util-title" data-i18n="deskUtilTitle">Capacity vs flows</p>
   <div class="table-wrap">
     <table class="util" id="util-table">
       <thead><tr id="util-thead"></tr></thead>
@@ -202,10 +208,9 @@ footer a { color: var(--accent); }
 </section>
 
 <footer>
-  &copy; <span id="year"></span> GasBrazil.com &middot;
-  <span data-i18n="deskFooter">Cross-product snapshot from sibling dashboards. Not an official ONS, ANP, CCEE, or transportadora product.</span>
-  &middot; <span data-i18n="contact">Contact</span>: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
-  &middot; <a href="../about/" data-i18n="footerAbout">About & methodology</a>
+  &copy; <span id="year"></span> GasBrazil.com
+  &middot; <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
+  &middot; <a href="../about/" data-i18n="footerAbout">About</a>
 </footer>
 </div>
 <div class="tt" id="chart-tt"></div>
@@ -220,38 +225,29 @@ __SHARED_JS_THEME_TOGGLE__
 __SHARED_JS_I18N__
 __SHARED_SITE_LINKS_JS__
 
-GB_I18N.en.deskLede = "One screen across gas and power: latest SIN gas generation, SE PLD and CMO, disclosed ANP and POC prices, pipeline utilization, and a client-side thermal spark calculator. Product pages keep filters and full history.";
-GB_I18N.en.deskCompareTitle = "PLD vs CMO vs gas CVU — SE";
-GB_I18N.en.deskCompareNote = "Last ~90 days, Southeast. CMO and median gas-plant CVU from ONS (R$/MWh). CVU is a planning cost, not a market price.";
-GB_I18N.en.deskSparkTitle = "Thermal spark / implied CVU";
-GB_I18N.en.deskSparkNote = "Implied generation cost from gas price and heat rate, compared with current PLD SE and CMO SE. Optional CVU override replaces the calculated cost.";
+GB_I18N.en.deskCompareTitle = "PLD · CMO · CVU";
+GB_I18N.en.deskSubmarket = "Submarket";
+GB_I18N.en.deskSparkTitle = "Spark";
 GB_I18N.en.deskGasPrice = "Gas price";
-GB_I18N.en.deskGasHintSantos = "Prefill: ANP Santos";
-GB_I18N.en.deskGasHintPoc = "Prefill: POC 7-day average";
-GB_I18N.en.deskGasHintFallback = "Prefill: illustrative default (edit freely)";
-GB_I18N.en.deskCvuOptional = "optional";
 GB_I18N.en.deskHeatRate = "Heat rate";
 GB_I18N.en.deskHrCustom = "Custom";
 GB_I18N.en.deskHrCcgt = "CCGT 1800";
 GB_I18N.en.deskHrOcgt = "OCGT 2500";
 GB_I18N.en.deskCvuOverride = "CVU override";
 GB_I18N.en.deskImpliedCvu = "Implied CVU";
-GB_I18N.en.deskVsPld = "vs PLD SE";
-GB_I18N.en.deskVsCmo = "vs CMO SE";
-GB_I18N.en.deskPocAnpTitle = "POC vs ANP — monthly";
-GB_I18N.en.deskPocAnpNote = "Mean POC auction price vs ANP Santos producers and non-thermal Sudeste distributors (R$/MMBtu).";
-GB_I18N.en.deskUtilTitle = "Contracted capacity vs realized flows";
-GB_I18N.en.deskUtilNote = "Active contracted capacity (thousand m³/d) vs average realized volume over the last 30 days of flow data, by TSO.";
+GB_I18N.en.deskVsPld = "vs PLD";
+GB_I18N.en.deskVsCmo = "vs CMO";
+GB_I18N.en.deskPocAnpTitle = "POC · ANP — monthly";
+GB_I18N.en.deskUtilTitle = "Capacity vs flows";
 GB_I18N.en.deskUtilTso = "TSO";
 GB_I18N.en.deskUtilCap = "Contracted";
 GB_I18N.en.deskUtilReal = "Realized avg";
 GB_I18N.en.deskUtilPct = "Utilization";
-GB_I18N.en.deskFooter = "Cross-product snapshot from sibling dashboards. Not an official ONS, ANP, CCEE, or transportadora product.";
-GB_I18N.en.deskEmptyChart = "No series available — sibling parquet missing at build time.";
-GB_I18N.en.deskEmpty = "No series available — sibling parquet missing at build time.";
-GB_I18N.en.deskPickSeries = "Select one or more series.";
-GB_I18N.en.deskSeriesPld = "PLD SE";
-GB_I18N.en.deskSeriesCmo = "CMO SE";
+GB_I18N.en.deskEmptyChart = "No data";
+GB_I18N.en.deskEmpty = "No data";
+GB_I18N.en.deskPickSeries = "Select series";
+GB_I18N.en.deskSeriesPld = "PLD";
+GB_I18N.en.deskSeriesCmo = "CMO";
 GB_I18N.en.deskSeriesCvu = "CVU gas med";
 GB_I18N.en.deskSeriesPoc = "POC avg";
 GB_I18N.en.deskSeriesAnpSantos = "ANP Santos";
@@ -259,42 +255,33 @@ GB_I18N.en.deskSeriesAnpNtSe = "ANP non-thermal SE";
 GB_I18N.en.deskKpiGen = "Gas gen SIN";
 GB_I18N.en.deskKpiPld = "PLD SE";
 GB_I18N.en.deskKpiCmo = "CMO SE";
-GB_I18N.en.deskKpiSantos = "ANP Santos";
+GB_I18N.en.deskKpiGus = "GUS last";
 GB_I18N.en.deskKpiPoc = "POC 7d";
 GB_I18N.en.deskKpiFlows = "Flows 7d";
 
-GB_I18N.pt.deskLede = "Uma tela cruzando gás e energia: geração a gás no SIN, PLD e CMO SE, preços ANP e POC, utilização de gasodutos e calculadora térmica de spark. Os painéis de produto guardam filtros e o histórico completo.";
-GB_I18N.pt.deskCompareTitle = "PLD vs CMO vs CVU a gás — SE";
-GB_I18N.pt.deskCompareNote = "Últimos ~90 dias, Sudeste. CMO e CVU mediano de usinas a gás da ONS (R$/MWh). CVU é custo de planejamento, não preço de mercado.";
-GB_I18N.pt.deskSparkTitle = "Spark térmico / CVU implícito";
-GB_I18N.pt.deskSparkNote = "Custo implícito de geração a partir do preço do gás e do heat rate, comparado ao PLD SE e ao CMO SE atuais. O override de CVU substitui o custo calculado.";
+GB_I18N.pt.deskCompareTitle = "PLD · CMO · CVU";
+GB_I18N.pt.deskSubmarket = "Submercado";
+GB_I18N.pt.deskSparkTitle = "Spark";
 GB_I18N.pt.deskGasPrice = "Preço do gás";
-GB_I18N.pt.deskGasHintSantos = "Pré-preenchido: ANP Santos";
-GB_I18N.pt.deskGasHintPoc = "Pré-preenchido: média POC 7 dias";
-GB_I18N.pt.deskGasHintFallback = "Pré-preenchido: valor ilustrativo (edite à vontade)";
-GB_I18N.pt.deskCvuOptional = "opcional";
 GB_I18N.pt.deskHeatRate = "Heat rate";
 GB_I18N.pt.deskHrCustom = "Personalizado";
 GB_I18N.pt.deskHrCcgt = "CCGT 1800";
 GB_I18N.pt.deskHrOcgt = "OCGT 2500";
 GB_I18N.pt.deskCvuOverride = "Override de CVU";
 GB_I18N.pt.deskImpliedCvu = "CVU implícito";
-GB_I18N.pt.deskVsPld = "vs PLD SE";
-GB_I18N.pt.deskVsCmo = "vs CMO SE";
-GB_I18N.pt.deskPocAnpTitle = "POC vs ANP — mensal";
-GB_I18N.pt.deskPocAnpNote = "Preço médio de leilão POC vs produtores Santos e distribuidoras não térmicas Sudeste (R$/MMBtu).";
-GB_I18N.pt.deskUtilTitle = "Capacidade contratada vs fluxos realizados";
-GB_I18N.pt.deskUtilNote = "Capacidade contratada ativa (mil m³/d) vs volume realizado médio nos últimos 30 dias de dados de fluxo, por TSO.";
+GB_I18N.pt.deskVsPld = "vs PLD";
+GB_I18N.pt.deskVsCmo = "vs CMO";
+GB_I18N.pt.deskPocAnpTitle = "POC · ANP — mensal";
+GB_I18N.pt.deskUtilTitle = "Capacidade vs fluxos";
 GB_I18N.pt.deskUtilTso = "TSO";
 GB_I18N.pt.deskUtilCap = "Contratada";
 GB_I18N.pt.deskUtilReal = "Realizado méd.";
 GB_I18N.pt.deskUtilPct = "Utilização";
-GB_I18N.pt.deskFooter = "Retrato cruzado a partir dos painéis irmãos. Não é um produto oficial da ONS, ANP, CCEE ou transportadoras.";
-GB_I18N.pt.deskEmptyChart = "Sem séries — parquet irmão ausente no build.";
-GB_I18N.pt.deskEmpty = "Sem séries — parquet irmão ausente no build.";
-GB_I18N.pt.deskPickSeries = "Selecione uma ou mais séries.";
-GB_I18N.pt.deskSeriesPld = "PLD SE";
-GB_I18N.pt.deskSeriesCmo = "CMO SE";
+GB_I18N.pt.deskEmptyChart = "Sem dados";
+GB_I18N.pt.deskEmpty = "Sem dados";
+GB_I18N.pt.deskPickSeries = "Selecione séries";
+GB_I18N.pt.deskSeriesPld = "PLD";
+GB_I18N.pt.deskSeriesCmo = "CMO";
 GB_I18N.pt.deskSeriesCvu = "CVU gás méd.";
 GB_I18N.pt.deskSeriesPoc = "POC méd.";
 GB_I18N.pt.deskSeriesAnpSantos = "ANP Santos";
@@ -302,7 +289,7 @@ GB_I18N.pt.deskSeriesAnpNtSe = "ANP não térmico SE";
 GB_I18N.pt.deskKpiGen = "Geração a gás SIN";
 GB_I18N.pt.deskKpiPld = "PLD SE";
 GB_I18N.pt.deskKpiCmo = "CMO SE";
-GB_I18N.pt.deskKpiSantos = "ANP Santos";
+GB_I18N.pt.deskKpiGus = "GUS último";
 GB_I18N.pt.deskKpiPoc = "POC 7d";
 GB_I18N.pt.deskKpiFlows = "Fluxos 7d";
 
@@ -319,6 +306,7 @@ const POC_ANP_META = [
 
 let DATA = null;
 let chartResizeTimer = null;
+let compareSm = "SE";
 let pickedCompare = new Set();
 let pickedPocAnp = new Set();
 let compareSlots = new Map();
@@ -387,37 +375,20 @@ function paintAsof() {
 }
 
 function renderNotes() {
-  const el = document.getElementById("data-notes");
-  const present = (DATA && DATA.sourcesPresent) || {};
-  const missing = ["ons", "pld", "anp", "poc", "flows", "contratos"].filter(k => !present[k]);
-  if (!missing.length) { el.hidden = true; el.textContent = ""; return; }
-  // Keep the banner short — chart empty-states carry detail.
-  el.hidden = false;
-  el.textContent = (currentLang() === "pt"
-    ? "Algumas fontes ainda não estavam no lake no build: "
-    : "Some sources were not in the lake at build time: ")
-    + missing.join(", ") + ".";
+  // Intentionally quiet — chart empty-states carry the detail.
 }
 
-function paintGasHint() {
-  const hint = document.getElementById("spark-gas-hint");
-  if (!hint || !DATA) return;
-  const src = (DATA.spark || {}).gasPriceSource || "fallback";
-  if (src === "anp_santos") hint.textContent = t("deskGasHintSantos");
-  else if (src === "poc_7d") hint.textContent = t("deskGasHintPoc");
-  else hint.textContent = t("deskGasHintFallback");
-  const cvu = document.getElementById("spark-cvu");
-  if (cvu) cvu.placeholder = t("deskCvuOptional");
-}
+function paintGasHint() {}
 
 function renderKpis() {
   const k = DATA.kpi || {};
+  const gusUnit = "R$/m³" + (k.gusWhen ? " · " + k.gusWhen : "") + (k.gusTso ? " · " + k.gusTso : "");
   const cells = [
     { lbl: t("deskKpiGen"), val: fmtNum(k.genGasSin, 0), unit: "MWmed" + (k.genGasWhen ? " · " + k.genGasWhen : "") },
     { lbl: t("deskKpiPld"), val: fmtNum(k.pldSe, 2), unit: "R$/MWh" + (k.pldWhen ? " · " + k.pldWhen : "") },
     { lbl: t("deskKpiCmo"), val: fmtNum(k.cmoSe, 2), unit: "R$/MWh" + (k.cmoWhen ? " · " + k.cmoWhen : "") },
-    { lbl: t("deskKpiSantos"), val: fmtNum(k.anpSantos, 1), unit: "R$/MMBtu" + (k.anpSantosMonth ? " · " + k.anpSantosMonth : "") },
-    { lbl: t("deskKpiPoc"), val: fmtNum(k.pocAvg7d, 2), unit: "R$/MMBtu" + (k.pocTrades7d != null ? " · " + k.pocTrades7d : "") },
+    { lbl: t("deskKpiGus"), val: fmtNum(k.gusLast, 3), unit: gusUnit },
+    { lbl: t("deskKpiPoc"), val: fmtNum(k.pocAvg7d, 3), unit: "R$/m³" + (k.pocTrades7d != null ? " · " + k.pocTrades7d : "") },
     { lbl: t("deskKpiFlows"), val: fmtNum(k.flowsTotal7d, 0), unit: "mil m³" + (k.flowsWhen ? " · " + k.flowsWhen : "") },
   ];
   const host = document.getElementById("kpi-row");
@@ -428,9 +399,9 @@ function renderKpis() {
   ).join("");
 }
 
-function impliedCvu(gas, hr, natgas, mmbtuPer1000) {
-  if (gas == null || hr == null || !(natgas > 0) || !(mmbtuPer1000 > 0)) return null;
-  return gas * hr * 1000 / (natgas * mmbtuPer1000);
+function impliedCvu(gasM3, hr, natgas) {
+  if (gasM3 == null || hr == null || !(natgas > 0)) return null;
+  return gasM3 * hr * 1000 / natgas;
 }
 
 function renderSpark() {
@@ -446,7 +417,7 @@ function renderSpark() {
   else if (preset.value === "ocgt") hr = s.heatRateOcgt;
   if (preset.value !== "custom") hrEl.value = hr;
   const override = ovEl.value === "" ? null : parseFloat(ovEl.value);
-  const calc = impliedCvu(gas, hr, s.natgasKcalPerM3, s.mmbtuPer1000M3);
+  const calc = impliedCvu(gas, hr, s.natgasKcalPerM3);
   const cost = (override != null && !isNaN(override)) ? override : calc;
   document.getElementById("spark-implied").textContent = fmtNum(cost, 1);
   const vsPld = (cost != null && s.pldSe != null) ? (s.pldSe - cost) : null;
@@ -472,11 +443,10 @@ function initSparkForm() {
   const gasEl = document.getElementById("spark-gas");
   const hrEl = document.getElementById("spark-hr");
   const preset = document.getElementById("spark-hr-preset");
-  const gas = (s.defaultGasPrice != null && !isNaN(s.defaultGasPrice)) ? s.defaultGasPrice : 12;
+  const gas = (s.defaultGasPrice != null && !isNaN(s.defaultGasPrice)) ? s.defaultGasPrice : 1.2;
   gasEl.value = gas;
   hrEl.value = s.heatRateCcgt || 1800;
   preset.value = "ccgt";
-  paintGasHint();
   ["spark-gas", "spark-hr", "spark-cvu"].forEach(id => {
     document.getElementById(id).addEventListener("input", renderSpark);
   });
@@ -619,9 +589,24 @@ function drawLineChart(hostId, dates, seriesList, emptyMsg) {
   host.appendChild(lg);
 }
 
+function compareBlock() {
+  const c = DATA.compareSe || {};
+  const by = c.bySubmarket || {};
+  const sm = by[compareSm] ? compareSm : (c.defaultSubmarket || "SE");
+  compareSm = sm;
+  const block = by[sm] || {};
+  return {
+    dates: c.dates || [],
+    note: c.note || null,
+    pld: block.pld || c.pld || [],
+    cmo: block.cmo || c.cmo || [],
+    cvu: block.cvu || c.cvu || [],
+  };
+}
+
 function renderCompareChart() {
   if (!DATA) return;
-  const c = DATA.compareSe || {};
+  const c = compareBlock();
   if (!pickedCompare.size) {
     drawLineChart("main-chart", [], [], t("deskPickSeries"));
     return;
@@ -718,13 +703,11 @@ function renderUtil() {
 
 function renderAll() {
   paintAsof();
-  renderNotes();
   renderKpis();
   buildPickers();
   renderCompareChart();
   renderPocAnpChart();
   renderUtil();
-  paintGasHint();
   renderSpark();
   applyI18n();
 }
@@ -749,6 +732,16 @@ async function init() {
     DATA = JSON.parse(json);
     COMPARE_META.forEach(m => { pickedCompare.add(m.key); colorOf(compareSlots, m.key); });
     POC_ANP_META.forEach(m => { pickedPocAnp.add(m.key); colorOf(pocAnpSlots, m.key); });
+    const smSel = document.getElementById("compare-sm");
+    const c0 = DATA.compareSe || {};
+    compareSm = c0.defaultSubmarket || "SE";
+    if (smSel) {
+      smSel.value = compareSm;
+      smSel.addEventListener("change", () => {
+        compareSm = smSel.value;
+        renderCompareChart();
+      });
+    }
     initSparkForm();
     renderAll();
     window.addEventListener("resize", () => {

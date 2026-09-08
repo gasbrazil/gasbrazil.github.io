@@ -3,16 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Desk — GasBrazil.com</title>
-<meta name="description" content="Desk for Brazil natural gas and power: gas generation, PLD–CMO–CVU, ANP and POC prices, pipeline utilization, and a thermal spark-spread calculator.">
+<title>The Desk — GasBrazil.com</title>
+<meta name="description" content="Cross-product Brazil gas and power desk: PLD, CMO, CVU, GUS, ANP, flows, spark.">
 <link rel="canonical" href="https://gasbrazil.com/desk/">
 <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAWfmNhQlgAABZ+anVtYgAAAB5qdW1kYzJwYQARABCAAACqADibcQNjMnBhAAAAFlhqdW1iAAAAR2p1bWRjMm1hABEAEIAAAKoAOJtxA3VybjpjMnBhOjU2MTg4OGQwLWVlMGUtNDUxMi1iMWFlLWIxZDA1ZTJlMGVkNwAAAAOTanVtYgAAAClqdW1kYzJhcwARABCAAACqADibcQNjMnBhLmFzc2VydGlvbnMAAAAAuGp1bWIAAABEanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5pbmdyZWRpZW50LnYzAAAAABhjMnNo4gTgaH9XqZkctQOIQbs5UwAAAGxjYm9yo2lkYzpmb3JtYXRpaW1hZ2UvcG5namluc3RhbmNlSUR4LHhtcDppaWQ6OWExYjNhMzgtMzFlMC00MDEzLTlhYzgtNzBkYWQ5YzI5ZmZhbHJlbGF0aW9uc2hpcGhwYXJlbnRPZgAAAeJqdW1iAAAAQWp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuYWN0aW9ucy52MgAAAAAYYzJzaBmwAaQCOClUt1pakePxtPYAAAGZY2JvcqJnYWN0aW9uc4KiZmFjdGlvbmtjMnBhLm9wZW5lZGpwYXJhbWV0ZXJzoWtpbmdyZWRpZW50c4GiY3VybHgtc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5pbmdyZWRpZW50LnYzZGhhc2hYILgXQJmB90FCeWpU9yM5wck2ssm8gNMSOTKsbIqM7JMWpGZhY3Rpb254HWNvbS5hbnRocm9waWMuY2xhdWRlLnByb3ZpZGVkanBhcmFtZXRlcnOheB9jb20uYW50aHJvcGljLm9yaWdpbi1jb25maWRlbmNlZ3Vua25vd25rZGVzY3JpcHRpb254ZkNsYXVkZSBwcm92aWRlZCB0aGlzIGZpbGUgYXQgdGhlIHJlcXVlc3Qgb2YgYSB1c2VyIGFuZCBtYXkgaGF2ZSBjcmVhdGVkIG9yIG1vZGlmaWVkIHRoZSBmaWxlIGNvbnRlbnRzLm1zb2Z0d2FyZUFnZW50oWRuYW1lZkNsYXVkZXJhbGxBY3Rpb25zSW5jbHVkZWT1AAAAyGp1bWIAAABAanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5oYXNoLmRhdGEAAAAAGGMyc2hvaBcg8egxuusfvaLjEh3ZAAAAgGNib3KlY2FsZ2ZzaGEyNTZjcGFkTQAAAAAAAAAAAAAAAABkaGFzaFggEHs/X0eRoBfqXKonxqhtPZAtAxLhW4MPGl6h8m4o19VkbmFtZW5qdW1iZiBtYW5pZmVzdGpleGNsdXNpb25zgaJlc3RhcnQYIWZsZW5ndGgZFooAAAI+anVtYgAAACdqdW1kYzJjbAARABCAAACqADibcQNjMnBhLmNsYWltLnYyAAAAAg9jYm9ypWNhbGdmc2hhMjU2aXNpZ25hdHVyZXhNc2VsZiNqdW1iZj0vYzJwYS91cm46YzJwYTo1NjE4ODhkMC1lZTBlLTQ1MTItYjFhZS1iMWQwNWUyZTBlZDcvYzJwYS5zaWduYXR1cmVqaW5zdGFuY2VJRHgseG1wOmlpZDowODE5OWU3ZS0xMzQxLTQ5NDYtOGQ5NS04NTE4ZmM4ZWE3NjJyY3JlYXRlZF9hc3NlcnRpb25zg6JjdXJseC1zZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmluZ3JlZGllbnQudjNkaGFzaFgguBdAmYH3QUJ5alT3IznByTayybyA0xI5MqxsiozskxaiY3VybHgqc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5hY3Rpb25zLnYyZGhhc2hYIEVjoyjLpTwDTmNpz5hKDTtjzeLLTMILWtWsgonEOBnRomN1cmx4KXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaGFzaC5kYXRhZGhhc2hYIHT+73+MbebY3SG+rgnZzuxTRaWczwct0guW356j8KCSdGNsYWltX2dlbmVyYXRvcl9pbmZvo2RuYW1lb0FudGhyb3BpYyBGaWxlc2d2ZXJzaW9uZTEuMC4wa3NwZWNWZXJzaW9uZTIuNC4wAAAQOGp1bWIAAAAoanVtZGMyY3MAEQAQgAAAqgA4m3EDYzJwYS5zaWduYXR1cmUAAAAQCGNib3LShFkCEqIBJhghWQIKMIICBjCCAY2gAwIBAgIUQOWgCu7COdC+uIP6BkIFPWdVEwAwCgYIKoZIzj0EAwMwSTEXMBUGA1UEChMOQW50aHJvcGljLCBQQkMxLjAsBgNVBAMTJUFudGhyb3BpYyBDb250ZW50IENyZWRlbnRpYWxzIFJvb3QgQ0EwHhcNMjYwODA3MTg0MzU2WhcNMjgwODA2MTk0MzU2WjBEMRcwFQYDVQQKEw5BbnRocm9waWMsIFBCQzEpMCcGA1UEAxMgQW50aHJvcGljIENsYXVkZSBDb250ZW50IFNpZ25pbmcwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAASYegpry1AYBRTVNL1CpTlbROnY3dey+UrsF9C3phYrATN3ZHf93Mo8RQN0KOUuOn19P4oWNFWe5n2/She9N7eTo1gwVjAOBgNVHQ8BAf8EBAMCB4AwFQYDVR0lBA4wDAYKKwYBBAGD6F4CATAMBgNVHRMBAf8EAjAAMB8GA1UdIwQYMBaAFM5R4gSBTmRbI/jjxM+aPpzB11zCMAoGCCqGSM49BAMDA2cAMGQCMDFzHRSeAXrSy1WOzkbhPZ6Km2wGTmZ/2gK18k8BQGXyqz88Rdrz6CTX9flAnYNVxgIwcF9c3fVhqmJKpi+UhasNUMko69cyX6STPfta3Q8EjyzDjzoyrol46FP6VFHhvUcJoWNwYWRZDZ4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA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o889xfcw1vWutvm7jAkYGx2ASNynWB3Ru+8PROSOI+78wSd/vPxX714ePRdEzrlyUCKIKCOih5Ot9pa197zvphWLl587f8E3xhNiiQh9S2p66eBSe+uT/z744V9/9U3DjQ22Yrp06EIHYT1/rwP12+a94cGPL7joA0S0NBOal6KF7WW36lLPNfrJLc8c96FffvmuV9/wTgmueoPQl061lavOcOUvnc745xNt37cvbT22/tmzAWCxLB6XIdgLFlcNANy/8cnaqd//gOAfT47pCwsTfPYEmfv18+WdN3/62V88dd87RPxlKfvrdb2ziardfokILaguMOnP+jerl73v72774sojv3mh4HOvF3zmJKuuPDVR/3gKv73+iWhjsvVNAHDdsuuCl+o7VKvVbLgRHt72XPWMH3xI8OFXhaidKLOvPlfe+uNPNOorf/MvIrJX0U+Y2L2XcFULJ1REem59+ndvu/zWL6w8/lvvkUmfP13w2dcLBv8qufCng81E5CwAqKYa+z8O99IN/den//3zx37t3YKPHCtHXPsOeedNn932o5V3fF1EDiuiFk3o/I4xCyLS83S09m1fvucHt57/o49uPeZb75KuL5wm5/3wY/LbF1b+9VjB+e9sflVErRxdP/ufbvvWb8+48SPSt+j9UlvynftvX33/xSKyf/bc/nr/BNzvSLNQFATtR7Tsd/fah977uTtvuLH/B//w/Idvvqp5+8O/PxUA1et1/d/9HBExP/rtrd+s/ey6f7thxS+vEJFTMhtf2PgJuN95giB6bDgrIr1/3LL64Bt/938PKsL4/+BzXmRKqourZkLjdyUfoVpV1cWLDfr7x4cL6O/X1cWLTV0mPPvdAhmqImpioybWxJpYE2tiTayJNbEm1sSaWBNr7Pr/AXXJwfiNDfvfAAAAAElFTkSuQmCC">
 <link rel="preload" href="/shared/fonts/Pacaembu-Light.ttf" as="font" type="font/ttf" crossorigin>
 <!-- home-page teaser marker, read by ../build_home.py:
      generated: 2026-09-08 16:23 UTC
      kpi_pld_se: 97.79
-     kpi_gen_gas: 
-     data_through: 2026-09-08 -->
+     kpi_gen_gas: data_through: 2026-09-08 -->
+     data_through: 2026-09-08 --> -->
 <script>
 (function(){
   try {
@@ -366,6 +366,9 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .infodot { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--border-strong); font-size: 10px; color: var(--muted2); cursor: help; font-weight: 400; flex: none; }
 .infodot:hover { background: var(--accent-soft); color: var(--text); }
 .series-picker { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.compare-tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 0 0 10px; }
+.sm-pick { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted2); font-weight: 400; }
+.sm-pick select { background: var(--panel); border: 1px solid var(--border-strong); border-radius: 5px; padding: 4px 8px; color: var(--text); font: 400 12.5px var(--font); }
 .series-btn { display: inline-flex; align-items: center; gap: 6px; background: var(--bg); border: 1px solid var(--border); border-radius: 5px; padding: 4px 12px 4px 8px; font-size: 12px; cursor: pointer; color: var(--text); font-family: var(--font); font-weight: 400; }
 .series-btn:hover { background: var(--accent-soft); }
 .series-btn.active { border-color: var(--border-strong); }
@@ -411,7 +414,7 @@ footer a { color: var(--accent); }
 <div class="wrap">
 <header class="dash-head">
   <div>
-    <h1 data-i18n="navDesk">Desk</h1>
+    <h1 data-i18n="navDesk">The Desk</h1>
   </div>
   <div class="header-right">
     <div class="header-links">
@@ -423,7 +426,7 @@ footer a { color: var(--accent); }
       <a class="navlink" id="link-supply" href="https://gasbrazil.com/supply/" data-i18n="navSupply">Gas Supply</a>
       <a class="navlink" id="link-pld" href="https://gasbrazil.com/pld/" data-i18n="navPld">PLD Prices</a>
       <a class="navlink" id="link-precos" href="https://gasbrazil.com/precos/" data-i18n="navPrecos">ANP Prices</a>
-      <span class="navlink is-active" aria-current="page" data-i18n="navDesk">Desk</span>
+      <span class="navlink is-active" aria-current="page" data-i18n="navDesk">The Desk</span>
       <a class="navlink" href="../about/" data-i18n="navAbout">About</a>
     </div>
     <button type="button" id="lang-toggle" class="langBtn" aria-label="Português">PT</button>
@@ -439,33 +442,38 @@ footer a { color: var(--accent); }
 <div class="flagbar" aria-hidden="true"></div>
 <div class="sources">
   <span class="sources-label" data-i18n="sources">Sources</span>
-  <a class="pill" href="../ons/" data-i18n="sourceOns">ONS open data</a>
-  <a class="pill" href="../pld/" data-i18n="sourcePld">CCEE open data — PLD média diária</a>
-  <a class="pill" href="../precos/" data-i18n="sourcePrecos">ANP — publicidade dos preços de gás natural</a>
-  <a class="pill" href="../poc/" data-i18n="sourcePoc">Portal de Oferta de Capacidade</a>
-  <a class="pill" href="../flows/" data-i18n="sourceFlows">ANP open data — pipeline movement</a>
+  <a class="pill" href="../ons/" data-i18n="sourceOns">ONS</a>
+  <a class="pill" href="../pld/" data-i18n="sourcePld">CCEE PLD</a>
+  <a class="pill" href="../precos/" data-i18n="sourcePrecos">ANP prices</a>
+  <a class="pill" href="../poc/" data-i18n="sourcePoc">POC</a>
+  <a class="pill" href="../flows/" data-i18n="sourceFlows">ANP flows</a>
 </div>
-<p class="lede" data-i18n="deskLede">One screen across gas and power: latest SIN gas generation, SE PLD and CMO, disclosed ANP and POC prices, pipeline utilization, and a client-side thermal spark calculator. Product pages keep filters and full history.</p>
-<p class="gap-note" id="data-notes" hidden></p>
 <div class="kpi-row" id="kpi-row"></div>
 
 <div class="desk-grid">
   <section class="panel" aria-labelledby="compare-title">
-    <p class="panel-title" id="compare-title" data-i18n="deskCompareTitle">PLD vs CMO vs gas CVU — SE</p>
-    <p class="panel-note" data-i18n="deskCompareNote">Last ~90 days, Southeast. CMO and median gas-plant CVU from ONS (R$/MWh). CVU is a planning cost, not a market price.</p>
+    <p class="panel-title" id="compare-title" data-i18n="deskCompareTitle">PLD · CMO · CVU</p>
+    <div class="compare-tools">
+      <label class="sm-pick"><span data-i18n="deskSubmarket">Submarket</span>
+        <select id="compare-sm">
+          <option value="SE">SE</option>
+          <option value="S">S</option>
+          <option value="NE">NE</option>
+          <option value="N">N</option>
+        </select>
+      </label>
+    </div>
     <div class="series-picker" id="picker-compare"></div>
     <div class="chart-host" id="main-chart"></div>
   </section>
   <section class="panel" aria-labelledby="spark-title">
     <p class="panel-title" id="spark-title">
-      <span data-i18n="deskSparkTitle">Thermal spark / implied CVU</span>
+      <span data-i18n="deskSparkTitle">Spark</span>
       <span class="infodot" id="spark-info" title="" aria-label="Formula">i</span>
     </p>
-    <p class="panel-note" data-i18n="deskSparkNote">Implied generation cost from gas price and heat rate, compared with current PLD SE and CMO SE. Optional CVU override replaces the calculated cost.</p>
     <div class="spark-form">
-      <label><span data-i18n="deskGasPrice">Gas price</span> (R$/MMBtu)
-        <input type="number" id="spark-gas" step="0.1" min="0" inputmode="decimal" value="12">
-        <span class="spark-hint" id="spark-gas-hint"></span>
+      <label><span data-i18n="deskGasPrice">Gas price</span> (R$/m³)
+        <input type="number" id="spark-gas" step="0.01" min="0" inputmode="decimal" value="1.2">
       </label>
       <label><span data-i18n="deskHeatRate">Heat rate</span> (kcal/kWh)
         <select id="spark-hr-preset">
@@ -478,27 +486,25 @@ footer a { color: var(--accent); }
         <input type="number" id="spark-hr" step="50" min="500" inputmode="decimal" value="1800">
       </label>
       <label><span data-i18n="deskCvuOverride">CVU override</span> (R$/MWh)
-        <input type="number" id="spark-cvu" step="1" min="0" placeholder="optional" inputmode="decimal">
+        <input type="number" id="spark-cvu" step="1" min="0" inputmode="decimal">
       </label>
     </div>
     <div class="spark-out">
       <div class="spark-metric"><div class="lbl" data-i18n="deskImpliedCvu">Implied CVU</div><div class="val" id="spark-implied">—</div><div class="unit">R$/MWh</div></div>
-      <div class="spark-metric" id="spark-vs-pld-wrap"><div class="lbl" data-i18n="deskVsPld">vs PLD SE</div><div class="val" id="spark-vs-pld">—</div><div class="unit">R$/MWh</div></div>
-      <div class="spark-metric" id="spark-vs-cmo-wrap"><div class="lbl" data-i18n="deskVsCmo">vs CMO SE</div><div class="val" id="spark-vs-cmo">—</div><div class="unit">R$/MWh</div></div>
+      <div class="spark-metric" id="spark-vs-pld-wrap"><div class="lbl" data-i18n="deskVsPld">vs PLD</div><div class="val" id="spark-vs-pld">—</div><div class="unit">R$/MWh</div></div>
+      <div class="spark-metric" id="spark-vs-cmo-wrap"><div class="lbl" data-i18n="deskVsCmo">vs CMO</div><div class="val" id="spark-vs-cmo">—</div><div class="unit">R$/MWh</div></div>
     </div>
   </section>
 </div>
 
 <section class="panel" aria-labelledby="poc-anp-title">
-  <p class="panel-title" id="poc-anp-title" data-i18n="deskPocAnpTitle">POC vs ANP — monthly</p>
-  <p class="panel-note" data-i18n="deskPocAnpNote">Mean POC auction price vs ANP Santos producers and non-thermal Sudeste distributors (R$/MMBtu).</p>
+  <p class="panel-title" id="poc-anp-title" data-i18n="deskPocAnpTitle">POC · ANP — monthly</p>
   <div class="series-picker" id="picker-poc-anp"></div>
   <div class="chart-host" id="poc-anp-chart"></div>
 </section>
 
 <section class="panel" aria-labelledby="util-title">
-  <p class="panel-title" id="util-title" data-i18n="deskUtilTitle">Contracted capacity vs realized flows</p>
-  <p class="panel-note" data-i18n="deskUtilNote">Active contracted capacity (thousand m³/d) vs average realized volume over the last 30 days of flow data, by TSO.</p>
+  <p class="panel-title" id="util-title" data-i18n="deskUtilTitle">Capacity vs flows</p>
   <div class="table-wrap">
     <table class="util" id="util-table">
       <thead><tr id="util-thead"></tr></thead>
@@ -508,10 +514,9 @@ footer a { color: var(--accent); }
 </section>
 
 <footer>
-  &copy; <span id="year"></span> GasBrazil.com &middot;
-  <span data-i18n="deskFooter">Cross-product snapshot from sibling dashboards. Not an official ONS, ANP, CCEE, or transportadora product.</span>
-  &middot; <span data-i18n="contact">Contact</span>: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
-  &middot; <a href="../about/" data-i18n="footerAbout">About & methodology</a>
+  &copy; <span id="year"></span> GasBrazil.com
+  &middot; <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
+  &middot; <a href="../about/" data-i18n="footerAbout">About</a>
 </footer>
 </div>
 <div class="tt" id="chart-tt"></div>
@@ -643,29 +648,29 @@ const GB_I18N = {
     navSupply: "Gas Supply",
     navPld: "PLD Prices",
     navPrecos: "ANP Prices",
-    navDesk: "Desk",
+    navDesk: "The Desk",
     navAbout: "About",
     navWiki: "Wiki",
     contact: "Contact",
-    tagline: "Data tools for Brazil's natural gas market — grid balances, pipeline capacity, contracted transport, physical flows, supply, ANP prices, and power prices.",
-    aboutLead: "Independent, public-data dashboards. Nothing here is an official ONS, ANP, CCEE, or transportadora product.",
-    aboutBody: "GasBrazil.com consolidates open Brazilian gas and power data into self-contained tools you can filter, chart, and export. Numbers come from public APIs and open-data portals; caveats live on each dashboard and on the About page.",
+    tagline: "Public data for Brazil's natural gas and power markets.",
+    aboutLead: "Independent public-data dashboards. Not an official ONS, ANP, CCEE, or transportadora product.",
+    aboutBody: "GasBrazil.com republishes open Brazilian gas and power data as filterable dashboards. Caveats are on each page and on About.",
     cardOns: "ONS Balances",
-    cardOnsDesc: "Daily grid balances, thermal generation by plant, and gas-fired dispatch across Brazil's interconnected power system.",
+    cardOnsDesc: "Daily SIN balances and gas-fired dispatch.",
     cardPoc: "POC Results",
-    cardPocDesc: "Pipeline capacity offer results — balancing, GUS acquisition, and linepack trades across TBG, TAG, and NTS.",
+    cardPocDesc: "Capacity offer results — balancing, GUS, and linepack.",
     cardContratos: "POC Contracts",
-    cardContratosDesc: "Active transport and master transport contracts across TBG, TAG, and NTS. Legacy and access-connection contracts are not yet included.",
+    cardContratosDesc: "Active transport and master contracts (TBG, TAG, NTS).",
     cardFlows: "Pipeline Flows",
-    cardFlowsDesc: "Daily physical gas flow at every receipt and delivery point on Brazil's transport pipelines, plus system-use gas, losses, imbalance, and linepack.",
+    cardFlowsDesc: "Daily receipt and delivery flows on the transport network.",
     cardSupply: "Gas Supply",
-    cardSupplyDesc: "National monthly natural gas supply balance from ANP — production, available gas, flare and loss, own use, reinjection, LGN, and imports.",
+    cardSupplyDesc: "ANP national monthly supply balance.",
     cardPld: "PLD Prices",
-    cardPldDesc: "CCEE daily-average PLD (settlement price) by electricity submarket — Southeast, South, Northeast, and North. Not the same as ONS CMO.",
+    cardPldDesc: "CCEE daily-average PLD by submarket.",
     cardPrecos: "ANP Prices",
-    cardPrecosDesc: "ANP monthly disclosed natural-gas trading prices (Resolution 52/2011) — producers, distributors, and marketers. Tax-inclusive R$/MMBtu.",
-    cardDesk: "Desk",
-    cardDeskDesc: "Cross-product snapshot: gas generation, PLD–CMO spread, ANP prices, POC auctions, and pipeline flows.",
+    cardPrecosDesc: "ANP Resolution 52/2011 disclosed gas prices.",
+    cardDesk: "The Desk",
+    cardDeskDesc: "Cross-product snapshot across gas and power.",
     kpiRefresh: "Last refreshed",
     dataThrough: "Data through",
     sources: "Sources",
@@ -675,36 +680,36 @@ const GB_I18N = {
     sourceSupply: "ANP PPGN-EL — production by state",
     sourcePrecos: "ANP — publicidade dos preços de gás natural",
     sourcePld: "CCEE open data — PLD média diária",
-    pldSubtitle: "CCEE daily-average settlement price (PLD) by electricity submarket, in R$/MWh.",
-    pldNote: "PLD is CCEE's settlement price — related to ONS CMO, not the same series. See",
+    pldSubtitle: "CCEE daily-average PLD by submarket (R$/MWh).",
+    pldNote: "PLD (CCEE) is not the same series as ONS CMO. See",
     pldNoteLink: "ONS Balances",
     pldChartTitle: "Daily PLD by submarket",
-    pldChartNote: "Last 24 months. Toggle submarkets and window below.",
+    pldChartNote: "",
     pldCompareTitle: "PLD vs CMO vs gas CVU",
-    pldCompareNote: "CMO and median gas-plant CVU from ONS (R$/MWh). CVU is a planning cost, not a market price.",
+    pldCompareNote: "",
     pldWindow: "Window",
     pldCsv: "Download CSV",
     pldXlsx: "Export all data (Excel)",
     pldFooter: "Data: CCEE (PLD média diária). Not an official CCEE product.",
-    footerAbout: "About & methodology",
+    footerAbout: "About",
     aboutH1: "About GasBrazil",
     aboutWho: "What this is",
-    aboutWhoBody: "A small independent site that republishes public Brazilian natural-gas and power-system data as filterable dashboards. It is not affiliated with ONS, ANP, CCEE, TBG, TAG, or NTS.",
+    aboutWhoBody: "Independent public-data dashboards for Brazilian gas and power. Not affiliated with ONS, ANP, CCEE, TBG, TAG, or NTS.",
     aboutHow: "How the data is built",
-    aboutHowBody: "Each dashboard is a static page on GitHub Pages. GitHub Actions fetch the source, transform it, and publish an HTML shell plus a gzip data artifact on Cloudflare R2. There is no live query API behind the published site.",
+    aboutHowBody: "Static pages on GitHub Pages. Actions fetch sources, transform, and publish HTML plus gzip artifacts on Cloudflare R2.",
     aboutGloss: "Glossary",
     glossGus: "GUS — gas acquired by a transportadora for system use.",
-    glossLinepack: "Linepack — inventory held inside the pipeline, traded to balance the network.",
-    glossBal: "Residual / operational balancing — short-term PEG processes that clear imbalances.",
-    glossCmo: "CMO — ONS marginal operating cost (R$/MWh). Not the same as CCEE's PLD settlement price.",
-    glossMaster: "Master transport contract — framework that enables later transport nominations; not itself a firm capacity booking.",
+    glossLinepack: "Linepack — inventory held inside the pipeline.",
+    glossBal: "Residual / operational balancing — short-term PEG imbalance clearing.",
+    glossCmo: "CMO — ONS marginal operating cost (R$/MWh). Not CCEE PLD.",
+    glossMaster: "Master transport contract — framework for later nominations; not firm capacity itself.",
     aboutCover: "Coverage limits",
-    aboutCoverBody: "POC Contracts currently include Transport Contract and Master Contract rows. Legacy transport contracts and access connections appear on the official portal UI but are not served by the public GraphQL API (re-verified September 2026: no legado/conexão fields in the schema). They will be added when that endpoint is identified.",
-    aboutCoverFlows: "Pipeline Flows has no published ANP data for 2022, and each month is typically released with a lag of several weeks. Average pressure is available in the dashboard variable list. Shipper-level flow detail is not embedded (capacity by shipper lives on POC Contracts). TSB and GOM can be included via a toggle.",
-    aboutCoverSupply: "Gas Supply uses ANP PPGN-EL national monthly series plus national natural-gas imports. The open import CSV does not split Bolivia pipeline vs LNG cargoes.",
-    aboutCoverPrecos: "ANP Prices are Resolution 52/2011 monthly disclosures (tax-inclusive R$/MMBtu), not assessed spot benchmarks. Some thermal and Other Basins months are suppressed when too few counterparties report.",
-    aboutCoverPld: "PLD Prices shows CCEE daily-average PLD by submarket, with an optional join to ONS CMO and median gas CVU when that lake data is present at build time.",
-    aboutCoverDesk: "Desk joins headline series across products for a single snapshot; each product page remains the place for filters and full history.",
+    aboutCoverBody: "POC Contracts include Transport and Master rows. Legacy and access-connection contracts are not in the public GraphQL feed yet.",
+    aboutCoverFlows: "Pipeline Flows has no ANP data for 2022 and typically lags several weeks. TSB/GOM can be toggled.",
+    aboutCoverSupply: "Gas Supply: ANP PPGN-EL national monthly series plus national imports (no Bolivia vs LNG split in the open CSV).",
+    aboutCoverPrecos: "ANP Prices: Resolution 52/2011 monthly disclosures (R$/MMBtu, tax-inclusive). Some months are suppressed for confidentiality.",
+    aboutCoverPld: "PLD: CCEE daily averages by submarket; optional ONS CMO and median gas CVU when lake data is present.",
+    aboutCoverDesk: "The Desk: cross-product headline series. Full history and filters live on each product page.",
     notFound: "This page is not here.",
     notFoundBody: "The hub and dashboards are linked below.",
     backHome: "Back to GasBrazil.com"
@@ -722,29 +727,29 @@ const GB_I18N = {
     navSupply: "Oferta de Gás",
     navPld: "Preços PLD",
     navPrecos: "Preços ANP",
-    navDesk: "Desk",
+    navDesk: "The Desk",
     navAbout: "Sobre",
     navWiki: "Wiki",
     contact: "Contato",
-    tagline: "Ferramentas de dados para o mercado de gás natural do Brasil — balanços do SIN, capacidade, contratos, fluxos, oferta, preços ANP e preços de energia.",
-    aboutLead: "Painéis independentes com dados públicos. Isto não é um produto oficial da ONS, da ANP, da CCEE ou das transportadoras.",
-    aboutBody: "O GasBrazil.com reúne dados abertos de gás e energia do Brasil em ferramentas que você pode filtrar, graficar e exportar. Os números vêm de APIs e portais públicos; as ressalvas estão em cada painel e na página Sobre.",
+    tagline: "Dados públicos do mercado de gás e energia do Brasil.",
+    aboutLead: "Painéis independentes com dados públicos. Não é produto oficial da ONS, ANP, CCEE ou transportadoras.",
+    aboutBody: "O GasBrazil.com republica dados abertos de gás e energia em painéis filtráveis. Ressalvas em cada página e em Sobre.",
     cardOns: "Balanços ONS",
-    cardOnsDesc: "Balanços diários do SIN, geração térmica por usina e despacho a gás no sistema interligado.",
+    cardOnsDesc: "Balanços diários do SIN e despacho a gás.",
     cardPoc: "Resultados POC",
-    cardPocDesc: "Resultados da oferta de capacidade — balanceamento, aquisição de GUS e linepack em TBG, TAG e NTS.",
+    cardPocDesc: "Resultados da oferta de capacidade — balanceamento, GUS e linepack.",
     cardContratos: "Contratos POC",
-    cardContratosDesc: "Contratos de transporte e contratos master ativos em TBG, TAG e NTS. Contratos legados e conexões de acesso ainda não entram.",
+    cardContratosDesc: "Contratos de transporte e master ativos (TBG, TAG, NTS).",
     cardFlows: "Fluxos de Gasodutos",
-    cardFlowsDesc: "Fluxo físico diário em cada ponto de recebimento e entrega dos gasodutos de transporte do Brasil, além de gás de uso do sistema, perdas, desequilíbrio e linepack.",
+    cardFlowsDesc: "Fluxos diários de recebimento e entrega na malha de transporte.",
     cardSupply: "Oferta de Gás",
-    cardSupplyDesc: "Balanço mensal nacional de gás natural da ANP — produção, disponível, queima e perda, consumo próprio, reinjeção, LGN e importações.",
+    cardSupplyDesc: "Balanço mensal nacional de gás da ANP.",
     cardPld: "Preços PLD",
-    cardPldDesc: "PLD médio diário da CCEE por submercado — Sudeste, Sul, Nordeste e Norte. Não é o CMO da ONS.",
+    cardPldDesc: "PLD médio diário da CCEE por submercado.",
     cardPrecos: "Preços ANP",
-    cardPrecosDesc: "Preços mensais divulgados pela ANP (Resolução 52/2011) — produtores, distribuidoras e comercializadores. R$/MMBtu com impostos.",
-    cardDesk: "Desk",
-    cardDeskDesc: "Retrato cruzado: geração a gás, spread PLD–CMO, preços ANP, leilões POC e fluxos.",
+    cardPrecosDesc: "Preços divulgados pela ANP (Resolução 52/2011).",
+    cardDesk: "The Desk",
+    cardDeskDesc: "Retrato cruzado de gás e energia.",
     kpiRefresh: "Última atualização",
     dataThrough: "Dados até",
     sources: "Fontes",
@@ -754,36 +759,36 @@ const GB_I18N = {
     sourceSupply: "ANP PPGN-EL — produção por estado",
     sourcePrecos: "ANP — publicidade dos preços de gás natural",
     sourcePld: "Dados abertos da CCEE — PLD média diária",
-    pldSubtitle: "Preço médio diário de liquidação (PLD) da CCEE por submercado, em R$/MWh.",
-    pldNote: "O PLD é o preço de liquidação da CCEE — relaciona-se ao CMO da ONS, mas não é a mesma série. Veja",
+    pldSubtitle: "PLD médio diário da CCEE por submercado (R$/MWh).",
+    pldNote: "O PLD (CCEE) não é a mesma série do CMO da ONS. Veja",
     pldNoteLink: "Balanços ONS",
     pldChartTitle: "PLD diário por submercado",
-    pldChartNote: "Últimos 24 meses. Alterne submercados e a janela abaixo.",
+    pldChartNote: "",
     pldCompareTitle: "PLD vs CMO vs CVU a gás",
-    pldCompareNote: "CMO e CVU mediano de usinas a gás da ONS (R$/MWh). CVU é custo de planejamento, não preço de mercado.",
+    pldCompareNote: "",
     pldWindow: "Janela",
     pldCsv: "Baixar CSV",
     pldXlsx: "Exportar tudo (Excel)",
     pldFooter: "Dados: CCEE (PLD média diária). Não é um produto oficial da CCEE.",
-    footerAbout: "Sobre e metodologia",
+    footerAbout: "Sobre",
     aboutH1: "Sobre o GasBrazil",
     aboutWho: "O que é isto",
-    aboutWhoBody: "Um site independente que republica dados públicos de gás natural e do sistema elétrico brasileiro em painéis filtráveis. Não tem vínculo com ONS, ANP, CCEE, TBG, TAG ou NTS.",
+    aboutWhoBody: "Painéis independentes com dados públicos de gás e energia no Brasil. Sem vínculo com ONS, ANP, CCEE, TBG, TAG ou NTS.",
     aboutHow: "Como os dados são montados",
-    aboutHowBody: "Cada painel é uma página estática no GitHub Pages. O GitHub Actions busca a fonte, transforma e publica um shell HTML mais um artefato gzip no Cloudflare R2. O site publicado não tem API de consulta ao vivo.",
+    aboutHowBody: "Páginas estáticas no GitHub Pages. O Actions busca, transforma e publica HTML mais artefatos gzip no Cloudflare R2.",
     aboutGloss: "Glossário",
     glossGus: "GUS — gás adquirido pela transportadora para uso do sistema.",
-    glossLinepack: "Linepack — estoque dentro do gasoduto, negociado para balancear a rede.",
-    glossBal: "Balanceamento residual / operacional — processos de curto prazo da PEG que zeram desequilíbrios.",
+    glossLinepack: "Linepack — estoque dentro do gasoduto.",
+    glossBal: "Balanceamento residual / operacional — processos de curto prazo da PEG.",
     glossCmo: "CMO — custo marginal de operação da ONS (R$/MWh). Não é o PLD da CCEE.",
-    glossMaster: "Contrato master de transporte — quadro que habilita nomeações posteriores; não é, por si, uma reserva firme de capacidade.",
+    glossMaster: "Contrato master de transporte — quadro para nomeações posteriores; não é capacidade firme.",
     aboutCover: "Limites de cobertura",
-    aboutCoverBody: "Contratos POC incluem hoje Contrato de Transporte e Contrato Master. Contratos de transporte legado e conexões de acesso aparecem na UI do portal oficial, mas não são servidos pela API GraphQL pública (reconfirmado em setembro de 2026: sem campos legado/conexão no schema). Serão adicionados quando esse endpoint for identificado.",
-    aboutCoverFlows: "Fluxos de Gasodutos não tem dados publicados pela ANP para 2022, e cada mês costuma ser divulgado com semanas de atraso. A pressão média está na lista de variáveis do painel. O detalhe por carregador não é embutido (capacidade por carregador fica em Contratos POC). TSB e GOM podem ser incluídos por um seletor.",
-    aboutCoverSupply: "Oferta de Gás usa as séries mensais nacionais PPGN-EL da ANP mais importações nacionais de gás natural. O CSV aberto de importação não separa Gasbol (Bolívia) de GNL.",
-    aboutCoverPrecos: "Preços ANP são divulgações mensais da Resolução 52/2011 (R$/MMBtu com impostos), não benchmarks de preço spot. Alguns meses térmicos e de Demais Bacias são omitidos quando há poucos agentes.",
-    aboutCoverPld: "Preços PLD mostra o PLD médio diário da CCEE por submercado, com junção opcional ao CMO e ao CVU mediano a gás da ONS quando esses dados estão no lake no build.",
-    aboutCoverDesk: "O Desk junta séries-resumo entre produtos; cada painel permanece o lugar para filtros e o histórico completo.",
+    aboutCoverBody: "Contratos POC incluem Transporte e Master. Legado e conexões de acesso ainda não estão no feed GraphQL público.",
+    aboutCoverFlows: "Fluxos: sem dados ANP para 2022 e com atraso típico de semanas. TSB/GOM podem ser ligados.",
+    aboutCoverSupply: "Oferta: séries mensais PPGN-EL da ANP mais importações nacionais (CSV aberto sem split Bolívia vs GNL).",
+    aboutCoverPrecos: "Preços ANP: divulgações mensais da Resolução 52/2011 (R$/MMBtu com impostos). Alguns meses são omitidos por confidencialidade.",
+    aboutCoverPld: "PLD: médias diárias da CCEE por submercado; CMO e CVU a gás da ONS quando disponíveis no lake.",
+    aboutCoverDesk: "The Desk: séries-resumo entre produtos. Histórico e filtros ficam em cada painel.",
     notFound: "Esta página não existe.",
     notFoundBody: "O hub e os painéis estão nos links abaixo.",
     backHome: "Voltar ao GasBrazil.com"
@@ -891,38 +896,29 @@ function initCrossLinks() {
 }
 
 
-GB_I18N.en.deskLede = "One screen across gas and power: latest SIN gas generation, SE PLD and CMO, disclosed ANP and POC prices, pipeline utilization, and a client-side thermal spark calculator. Product pages keep filters and full history.";
-GB_I18N.en.deskCompareTitle = "PLD vs CMO vs gas CVU — SE";
-GB_I18N.en.deskCompareNote = "Last ~90 days, Southeast. CMO and median gas-plant CVU from ONS (R$/MWh). CVU is a planning cost, not a market price.";
-GB_I18N.en.deskSparkTitle = "Thermal spark / implied CVU";
-GB_I18N.en.deskSparkNote = "Implied generation cost from gas price and heat rate, compared with current PLD SE and CMO SE. Optional CVU override replaces the calculated cost.";
+GB_I18N.en.deskCompareTitle = "PLD · CMO · CVU";
+GB_I18N.en.deskSubmarket = "Submarket";
+GB_I18N.en.deskSparkTitle = "Spark";
 GB_I18N.en.deskGasPrice = "Gas price";
-GB_I18N.en.deskGasHintSantos = "Prefill: ANP Santos";
-GB_I18N.en.deskGasHintPoc = "Prefill: POC 7-day average";
-GB_I18N.en.deskGasHintFallback = "Prefill: illustrative default (edit freely)";
-GB_I18N.en.deskCvuOptional = "optional";
 GB_I18N.en.deskHeatRate = "Heat rate";
 GB_I18N.en.deskHrCustom = "Custom";
 GB_I18N.en.deskHrCcgt = "CCGT 1800";
 GB_I18N.en.deskHrOcgt = "OCGT 2500";
 GB_I18N.en.deskCvuOverride = "CVU override";
 GB_I18N.en.deskImpliedCvu = "Implied CVU";
-GB_I18N.en.deskVsPld = "vs PLD SE";
-GB_I18N.en.deskVsCmo = "vs CMO SE";
-GB_I18N.en.deskPocAnpTitle = "POC vs ANP — monthly";
-GB_I18N.en.deskPocAnpNote = "Mean POC auction price vs ANP Santos producers and non-thermal Sudeste distributors (R$/MMBtu).";
-GB_I18N.en.deskUtilTitle = "Contracted capacity vs realized flows";
-GB_I18N.en.deskUtilNote = "Active contracted capacity (thousand m³/d) vs average realized volume over the last 30 days of flow data, by TSO.";
+GB_I18N.en.deskVsPld = "vs PLD";
+GB_I18N.en.deskVsCmo = "vs CMO";
+GB_I18N.en.deskPocAnpTitle = "POC · ANP — monthly";
+GB_I18N.en.deskUtilTitle = "Capacity vs flows";
 GB_I18N.en.deskUtilTso = "TSO";
 GB_I18N.en.deskUtilCap = "Contracted";
 GB_I18N.en.deskUtilReal = "Realized avg";
 GB_I18N.en.deskUtilPct = "Utilization";
-GB_I18N.en.deskFooter = "Cross-product snapshot from sibling dashboards. Not an official ONS, ANP, CCEE, or transportadora product.";
-GB_I18N.en.deskEmptyChart = "No series available — sibling parquet missing at build time.";
-GB_I18N.en.deskEmpty = "No series available — sibling parquet missing at build time.";
-GB_I18N.en.deskPickSeries = "Select one or more series.";
-GB_I18N.en.deskSeriesPld = "PLD SE";
-GB_I18N.en.deskSeriesCmo = "CMO SE";
+GB_I18N.en.deskEmptyChart = "No data";
+GB_I18N.en.deskEmpty = "No data";
+GB_I18N.en.deskPickSeries = "Select series";
+GB_I18N.en.deskSeriesPld = "PLD";
+GB_I18N.en.deskSeriesCmo = "CMO";
 GB_I18N.en.deskSeriesCvu = "CVU gas med";
 GB_I18N.en.deskSeriesPoc = "POC avg";
 GB_I18N.en.deskSeriesAnpSantos = "ANP Santos";
@@ -930,42 +926,33 @@ GB_I18N.en.deskSeriesAnpNtSe = "ANP non-thermal SE";
 GB_I18N.en.deskKpiGen = "Gas gen SIN";
 GB_I18N.en.deskKpiPld = "PLD SE";
 GB_I18N.en.deskKpiCmo = "CMO SE";
-GB_I18N.en.deskKpiSantos = "ANP Santos";
+GB_I18N.en.deskKpiGus = "GUS last";
 GB_I18N.en.deskKpiPoc = "POC 7d";
 GB_I18N.en.deskKpiFlows = "Flows 7d";
 
-GB_I18N.pt.deskLede = "Uma tela cruzando gás e energia: geração a gás no SIN, PLD e CMO SE, preços ANP e POC, utilização de gasodutos e calculadora térmica de spark. Os painéis de produto guardam filtros e o histórico completo.";
-GB_I18N.pt.deskCompareTitle = "PLD vs CMO vs CVU a gás — SE";
-GB_I18N.pt.deskCompareNote = "Últimos ~90 dias, Sudeste. CMO e CVU mediano de usinas a gás da ONS (R$/MWh). CVU é custo de planejamento, não preço de mercado.";
-GB_I18N.pt.deskSparkTitle = "Spark térmico / CVU implícito";
-GB_I18N.pt.deskSparkNote = "Custo implícito de geração a partir do preço do gás e do heat rate, comparado ao PLD SE e ao CMO SE atuais. O override de CVU substitui o custo calculado.";
+GB_I18N.pt.deskCompareTitle = "PLD · CMO · CVU";
+GB_I18N.pt.deskSubmarket = "Submercado";
+GB_I18N.pt.deskSparkTitle = "Spark";
 GB_I18N.pt.deskGasPrice = "Preço do gás";
-GB_I18N.pt.deskGasHintSantos = "Pré-preenchido: ANP Santos";
-GB_I18N.pt.deskGasHintPoc = "Pré-preenchido: média POC 7 dias";
-GB_I18N.pt.deskGasHintFallback = "Pré-preenchido: valor ilustrativo (edite à vontade)";
-GB_I18N.pt.deskCvuOptional = "opcional";
 GB_I18N.pt.deskHeatRate = "Heat rate";
 GB_I18N.pt.deskHrCustom = "Personalizado";
 GB_I18N.pt.deskHrCcgt = "CCGT 1800";
 GB_I18N.pt.deskHrOcgt = "OCGT 2500";
 GB_I18N.pt.deskCvuOverride = "Override de CVU";
 GB_I18N.pt.deskImpliedCvu = "CVU implícito";
-GB_I18N.pt.deskVsPld = "vs PLD SE";
-GB_I18N.pt.deskVsCmo = "vs CMO SE";
-GB_I18N.pt.deskPocAnpTitle = "POC vs ANP — mensal";
-GB_I18N.pt.deskPocAnpNote = "Preço médio de leilão POC vs produtores Santos e distribuidoras não térmicas Sudeste (R$/MMBtu).";
-GB_I18N.pt.deskUtilTitle = "Capacidade contratada vs fluxos realizados";
-GB_I18N.pt.deskUtilNote = "Capacidade contratada ativa (mil m³/d) vs volume realizado médio nos últimos 30 dias de dados de fluxo, por TSO.";
+GB_I18N.pt.deskVsPld = "vs PLD";
+GB_I18N.pt.deskVsCmo = "vs CMO";
+GB_I18N.pt.deskPocAnpTitle = "POC · ANP — mensal";
+GB_I18N.pt.deskUtilTitle = "Capacidade vs fluxos";
 GB_I18N.pt.deskUtilTso = "TSO";
 GB_I18N.pt.deskUtilCap = "Contratada";
 GB_I18N.pt.deskUtilReal = "Realizado méd.";
 GB_I18N.pt.deskUtilPct = "Utilização";
-GB_I18N.pt.deskFooter = "Retrato cruzado a partir dos painéis irmãos. Não é um produto oficial da ONS, ANP, CCEE ou transportadoras.";
-GB_I18N.pt.deskEmptyChart = "Sem séries — parquet irmão ausente no build.";
-GB_I18N.pt.deskEmpty = "Sem séries — parquet irmão ausente no build.";
-GB_I18N.pt.deskPickSeries = "Selecione uma ou mais séries.";
-GB_I18N.pt.deskSeriesPld = "PLD SE";
-GB_I18N.pt.deskSeriesCmo = "CMO SE";
+GB_I18N.pt.deskEmptyChart = "Sem dados";
+GB_I18N.pt.deskEmpty = "Sem dados";
+GB_I18N.pt.deskPickSeries = "Selecione séries";
+GB_I18N.pt.deskSeriesPld = "PLD";
+GB_I18N.pt.deskSeriesCmo = "CMO";
 GB_I18N.pt.deskSeriesCvu = "CVU gás méd.";
 GB_I18N.pt.deskSeriesPoc = "POC méd.";
 GB_I18N.pt.deskSeriesAnpSantos = "ANP Santos";
@@ -973,7 +960,7 @@ GB_I18N.pt.deskSeriesAnpNtSe = "ANP não térmico SE";
 GB_I18N.pt.deskKpiGen = "Geração a gás SIN";
 GB_I18N.pt.deskKpiPld = "PLD SE";
 GB_I18N.pt.deskKpiCmo = "CMO SE";
-GB_I18N.pt.deskKpiSantos = "ANP Santos";
+GB_I18N.pt.deskKpiGus = "GUS último";
 GB_I18N.pt.deskKpiPoc = "POC 7d";
 GB_I18N.pt.deskKpiFlows = "Fluxos 7d";
 
@@ -990,6 +977,7 @@ const POC_ANP_META = [
 
 let DATA = null;
 let chartResizeTimer = null;
+let compareSm = "SE";
 let pickedCompare = new Set();
 let pickedPocAnp = new Set();
 let compareSlots = new Map();
@@ -1058,37 +1046,20 @@ function paintAsof() {
 }
 
 function renderNotes() {
-  const el = document.getElementById("data-notes");
-  const present = (DATA && DATA.sourcesPresent) || {};
-  const missing = ["ons", "pld", "anp", "poc", "flows", "contratos"].filter(k => !present[k]);
-  if (!missing.length) { el.hidden = true; el.textContent = ""; return; }
-  // Keep the banner short — chart empty-states carry detail.
-  el.hidden = false;
-  el.textContent = (currentLang() === "pt"
-    ? "Algumas fontes ainda não estavam no lake no build: "
-    : "Some sources were not in the lake at build time: ")
-    + missing.join(", ") + ".";
+  // Intentionally quiet — chart empty-states carry the detail.
 }
 
-function paintGasHint() {
-  const hint = document.getElementById("spark-gas-hint");
-  if (!hint || !DATA) return;
-  const src = (DATA.spark || {}).gasPriceSource || "fallback";
-  if (src === "anp_santos") hint.textContent = t("deskGasHintSantos");
-  else if (src === "poc_7d") hint.textContent = t("deskGasHintPoc");
-  else hint.textContent = t("deskGasHintFallback");
-  const cvu = document.getElementById("spark-cvu");
-  if (cvu) cvu.placeholder = t("deskCvuOptional");
-}
+function paintGasHint() {}
 
 function renderKpis() {
   const k = DATA.kpi || {};
+  const gusUnit = "R$/m³" + (k.gusWhen ? " · " + k.gusWhen : "") + (k.gusTso ? " · " + k.gusTso : "");
   const cells = [
     { lbl: t("deskKpiGen"), val: fmtNum(k.genGasSin, 0), unit: "MWmed" + (k.genGasWhen ? " · " + k.genGasWhen : "") },
     { lbl: t("deskKpiPld"), val: fmtNum(k.pldSe, 2), unit: "R$/MWh" + (k.pldWhen ? " · " + k.pldWhen : "") },
     { lbl: t("deskKpiCmo"), val: fmtNum(k.cmoSe, 2), unit: "R$/MWh" + (k.cmoWhen ? " · " + k.cmoWhen : "") },
-    { lbl: t("deskKpiSantos"), val: fmtNum(k.anpSantos, 1), unit: "R$/MMBtu" + (k.anpSantosMonth ? " · " + k.anpSantosMonth : "") },
-    { lbl: t("deskKpiPoc"), val: fmtNum(k.pocAvg7d, 2), unit: "R$/MMBtu" + (k.pocTrades7d != null ? " · " + k.pocTrades7d : "") },
+    { lbl: t("deskKpiGus"), val: fmtNum(k.gusLast, 3), unit: gusUnit },
+    { lbl: t("deskKpiPoc"), val: fmtNum(k.pocAvg7d, 3), unit: "R$/m³" + (k.pocTrades7d != null ? " · " + k.pocTrades7d : "") },
     { lbl: t("deskKpiFlows"), val: fmtNum(k.flowsTotal7d, 0), unit: "mil m³" + (k.flowsWhen ? " · " + k.flowsWhen : "") },
   ];
   const host = document.getElementById("kpi-row");
@@ -1099,9 +1070,9 @@ function renderKpis() {
   ).join("");
 }
 
-function impliedCvu(gas, hr, natgas, mmbtuPer1000) {
-  if (gas == null || hr == null || !(natgas > 0) || !(mmbtuPer1000 > 0)) return null;
-  return gas * hr * 1000 / (natgas * mmbtuPer1000);
+function impliedCvu(gasM3, hr, natgas) {
+  if (gasM3 == null || hr == null || !(natgas > 0)) return null;
+  return gasM3 * hr * 1000 / natgas;
 }
 
 function renderSpark() {
@@ -1117,7 +1088,7 @@ function renderSpark() {
   else if (preset.value === "ocgt") hr = s.heatRateOcgt;
   if (preset.value !== "custom") hrEl.value = hr;
   const override = ovEl.value === "" ? null : parseFloat(ovEl.value);
-  const calc = impliedCvu(gas, hr, s.natgasKcalPerM3, s.mmbtuPer1000M3);
+  const calc = impliedCvu(gas, hr, s.natgasKcalPerM3);
   const cost = (override != null && !isNaN(override)) ? override : calc;
   document.getElementById("spark-implied").textContent = fmtNum(cost, 1);
   const vsPld = (cost != null && s.pldSe != null) ? (s.pldSe - cost) : null;
@@ -1143,11 +1114,10 @@ function initSparkForm() {
   const gasEl = document.getElementById("spark-gas");
   const hrEl = document.getElementById("spark-hr");
   const preset = document.getElementById("spark-hr-preset");
-  const gas = (s.defaultGasPrice != null && !isNaN(s.defaultGasPrice)) ? s.defaultGasPrice : 12;
+  const gas = (s.defaultGasPrice != null && !isNaN(s.defaultGasPrice)) ? s.defaultGasPrice : 1.2;
   gasEl.value = gas;
   hrEl.value = s.heatRateCcgt || 1800;
   preset.value = "ccgt";
-  paintGasHint();
   ["spark-gas", "spark-hr", "spark-cvu"].forEach(id => {
     document.getElementById(id).addEventListener("input", renderSpark);
   });
@@ -1290,9 +1260,24 @@ function drawLineChart(hostId, dates, seriesList, emptyMsg) {
   host.appendChild(lg);
 }
 
+function compareBlock() {
+  const c = DATA.compareSe || {};
+  const by = c.bySubmarket || {};
+  const sm = by[compareSm] ? compareSm : (c.defaultSubmarket || "SE");
+  compareSm = sm;
+  const block = by[sm] || {};
+  return {
+    dates: c.dates || [],
+    note: c.note || null,
+    pld: block.pld || c.pld || [],
+    cmo: block.cmo || c.cmo || [],
+    cvu: block.cvu || c.cvu || [],
+  };
+}
+
 function renderCompareChart() {
   if (!DATA) return;
-  const c = DATA.compareSe || {};
+  const c = compareBlock();
   if (!pickedCompare.size) {
     drawLineChart("main-chart", [], [], t("deskPickSeries"));
     return;
@@ -1389,13 +1374,11 @@ function renderUtil() {
 
 function renderAll() {
   paintAsof();
-  renderNotes();
   renderKpis();
   buildPickers();
   renderCompareChart();
   renderPocAnpChart();
   renderUtil();
-  paintGasHint();
   renderSpark();
   applyI18n();
 }
@@ -1420,6 +1403,16 @@ async function init() {
     DATA = JSON.parse(json);
     COMPARE_META.forEach(m => { pickedCompare.add(m.key); colorOf(compareSlots, m.key); });
     POC_ANP_META.forEach(m => { pickedPocAnp.add(m.key); colorOf(pocAnpSlots, m.key); });
+    const smSel = document.getElementById("compare-sm");
+    const c0 = DATA.compareSe || {};
+    compareSm = c0.defaultSubmarket || "SE";
+    if (smSel) {
+      smSel.value = compareSm;
+      smSel.addEventListener("change", () => {
+        compareSm = smSel.value;
+        renderCompareChart();
+      });
+    }
     initSparkForm();
     renderAll();
     window.addEventListener("resize", () => {

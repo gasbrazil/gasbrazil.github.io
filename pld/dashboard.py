@@ -255,11 +255,9 @@ footer a { color: var(--accent); }
   <span class="sources-label" data-i18n="sources">Sources</span>
   <a class="pill" href="https://dadosabertos.ccee.org.br/dataset/pld_media_diaria" target="_blank" rel="noopener" data-i18n="sourcePld">CCEE open data — PLD média diária<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
 </div>
-<p class="note-strip"><span data-i18n="pldNote">PLD is CCEE's settlement price — related to ONS CMO, not the same series. See</span> <a href="../ons/" id="pld-ons-note">ONS Balances</a>.</p>
 <div class="kpi-row" id="kpi-row"></div>
 <div class="chart-card">
   <p class="panel-title" data-i18n="pldChartTitle">Daily PLD by submarket</p>
-  <p class="panel-note" data-i18n="pldChartNote">Last 24 months. Toggle submarkets and window below.</p>
   <div class="chart-controls">
     <label for="f-preset" data-i18n="pldWindow">Window</label>
     <select id="f-preset">
@@ -275,7 +273,6 @@ footer a { color: var(--accent); }
 </div>
 <div class="chart-card" id="compare-card" hidden>
   <p class="panel-title" data-i18n="pldCompareTitle">PLD vs CMO vs gas CVU</p>
-  <p class="panel-note" data-i18n="pldCompareNote">CMO and median gas-plant CVU from ONS (R$/MWh). CVU is a planning cost, not a market price.</p>
   <div class="chart-controls">
     <label for="f-compare-sm">Submarket</label>
     <select id="f-compare-sm">
@@ -712,14 +709,8 @@ async function init() {
     chartResizeTimer = setTimeout(() => { renderChart(); renderCompare(); }, 140);
   });
   initThemeToggle("theme-toggle", () => { renderChart(); renderCompare(); });
-  initLangToggle("lang-toggle", () => {
-    const ons = document.getElementById("pld-ons-note");
-    if (ons) ons.textContent = t("pldNoteLink");
-    paintChrome();
-  });
+  initLangToggle("lang-toggle", () => { paintChrome(); });
   initCrossLinks();
-  const onsLink = document.getElementById("pld-ons-note");
-  if (onsLink) onsLink.textContent = t("pldNoteLink");
   paintChrome();
 }
 init();

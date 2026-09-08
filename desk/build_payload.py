@@ -18,9 +18,17 @@ sys.path.insert(0, str(ROOT / "shared"))
 import joins  # noqa: E402
 import transforms as xf  # noqa: E402
 
-# POC PCR convention: MMBtu per 1000 m³ (same factor as poc/dashboard.py).
+# POC PCR convention: same factor as poc/dashboard.py
+# (R$/m³ = R$/MMBtu / MMBTU_PER_1000_M3).
 MMBTU_PER_1000_M3 = 28.8081
 COMPARE_DAYS = 90
+SPARK_FALLBACK_GAS_M3 = 1.2  # illustrative R$/m³ when no GUS trade exists
+
+
+def _mmbtu_to_m3(price_mmbtu: Optional[float], nd: int = 3) -> Optional[float]:
+    if price_mmbtu is None:
+        return None
+    return _num(float(price_mmbtu) / MMBTU_PER_1000_M3, nd)
 
 
 def _first_existing(*candidates: Path) -> Optional[Path]:
@@ -127,7 +135,7 @@ def _kpi_anp(anp: pd.DataFrame) -> dict:
 
 
 def _kpi_poc_7d(poc: pd.DataFrame) -> dict:
-    out = {"avgPrice": None, "trades": None, "when": None}
+    out = {"avgPrice": None, "avgPriceM3": None, "trades": None, "when": None}
     if poc is None or poc.empty or "Trade Date" not in poc.columns or "Price" not in poc.columns:
         return out
     p = poc.copy()
@@ -140,7 +148,42 @@ def _kpi_poc_7d(poc: pd.DataFrame) -> dict:
     out["when"] = last.strftime("%Y-%m-%d")
     out["trades"] = int(len(week))
     if week["Price"].notna().any():
-        out["avgPrice"] = _num(week["Price"].mean(), 2)
+        avg = _num(week["Price"].mean(), 2)
+        out["avgPrice"] = avg
+        out["avgPriceM3"] = _mmbtu_to_m3(avg)
+    return out
+
+
+def _last_gus_trade(poc: Optional[pd.DataFrame]) -> dict:
+    """Most recent GUS acquisition trade price (on-system gas)."""
+    out = {"priceM3": None, "priceMmbtu": None, "when": None, "tso": None}
+    if poc is None or poc.empty:
+        return out
+    need = {"Trade Date", "Price"}
+    if not need.issubset(poc.columns):
+        return out
+    p = poc.copy()
+    p["Trade Date"] = pd.to_datetime(p["Trade Date"], errors="coerce")
+    p = p.dropna(subset=["Trade Date", "Price"])
+    if "Transaction Type" in p.columns:
+        tt = p["Transaction Type"].astype(str)
+        gus = p[tt.isin(["GUS", "Aquisição de GUS", "GUS Acquisition"])]
+        if gus.empty:
+            # Fall back to raw finalidade strings if type was not normalized.
+            gus = p[tt.str.contains("GUS", case=False, na=False)]
+        p = gus if not gus.empty else p.iloc[0:0]
+    if p.empty:
+        return out
+    p = p.sort_values("Trade Date")
+    last = p.iloc[-1]
+    mmbtu = _num(last["Price"], 2)
+    out["priceMmbtu"] = mmbtu
+    out["priceM3"] = _mmbtu_to_m3(mmbtu)
+    out["when"] = pd.Timestamp(last["Trade Date"]).strftime("%Y-%m-%d")
+    if "Transporter (TSO)" in p.columns:
+        out["tso"] = str(last["Transporter (TSO)"]) if pd.notna(last["Transporter (TSO)"]) else None
+    elif "TSO" in p.columns:
+        out["tso"] = str(last["TSO"]) if pd.notna(last["TSO"]) else None
     return out
 
 
@@ -177,42 +220,80 @@ def _kpi_flows_7d(flows: pd.DataFrame) -> dict:
 
 
 def _series_pld_cmo_cvu(pld: Optional[pd.DataFrame], ons: Optional[pd.DataFrame]) -> dict:
-    empty = {"dates": [], "pld": [], "cmo": [], "cvu": [], "note": None}
+    """PLD / CMO / CVU series for all CCEE submarkets (SE, S, NE, N)."""
+    empty = {
+        "dates": [],
+        "bySubmarket": {},
+        "defaultSubmarket": "SE",
+        "note": None,
+    }
+    sms = ["SE", "S", "NE", "N"]
     if pld is None or pld.empty:
         empty["note"] = "PLD parquet missing - chart empty."
         return empty
+
+    p = pld.copy()
+    p["date"] = pd.to_datetime(p["date"], errors="coerce")
+    p = p.dropna(subset=["date", "pld"])
+    p["submarket"] = p["submarket"].astype(str).str.upper()
+    p = p[p["submarket"].isin(sms)]
+    if p.empty:
+        empty["note"] = "No PLD rows."
+        return empty
+    last = p["date"].max()
+    date_from = last - pd.Timedelta(days=COMPARE_DAYS) if pd.notna(last) else None
+
     if ons is None or ons.empty:
-        # Still show PLD SE alone if available.
-        p = pld.copy()
-        p["date"] = pd.to_datetime(p["date"], errors="coerce")
-        p = p.dropna(subset=["date", "pld"])
-        p = p[p["submarket"].astype(str).str.upper() == "SE"].sort_values("date")
-        if p.empty:
-            empty["note"] = "No SE PLD rows."
-            return empty
-        last = p["date"].max()
-        p = p[p["date"] >= (last - pd.Timedelta(days=COMPARE_DAYS))]
+        by_sm: dict = {}
+        dates = sorted(
+            d.strftime("%Y-%m-%d")
+            for d in p.loc[p["date"] >= date_from, "date"].unique()
+        ) if date_from is not None else []
+        for sm in sms:
+            part = p[(p["submarket"] == sm) & (p["date"] >= date_from)].sort_values("date")
+            lookup = {d.strftime("%Y-%m-%d"): _num(v, 2) for d, v in zip(part["date"], part["pld"])}
+            by_sm[sm] = {
+                "pld": [lookup.get(d) for d in dates],
+                "cmo": [None] * len(dates),
+                "cvu": [None] * len(dates),
+            }
         return {
-            "dates": [d.strftime("%Y-%m-%d") for d in p["date"]],
-            "pld": [_num(v, 2) for v in p["pld"]],
-            "cmo": [None] * len(p),
-            "cvu": [None] * len(p),
+            "dates": dates,
+            "bySubmarket": by_sm,
+            "defaultSubmarket": "SE",
             "note": "ONS daily missing - CMO/CVU empty.",
         }
+
     try:
-        last = pd.to_datetime(pld["date"], errors="coerce").max()
-        date_from = last - pd.Timedelta(days=COMPARE_DAYS) if pd.notna(last) else None
         joined = joins.join_pld_cmo_cvu(pld, ons, date_from=date_from, how="left")
-        joined = joined[joined["submarket"].astype(str).str.upper() == "SE"]
-        joined = joined.sort_values("date")
+        joined["submarket"] = joined["submarket"].astype(str).str.upper()
+        joined = joined[joined["submarket"].isin(sms)].copy()
+        joined["date"] = pd.to_datetime(joined["date"], errors="coerce")
+        joined = joined.dropna(subset=["date"]).sort_values("date")
         if joined.empty:
-            empty["note"] = "No SE overlap for PLD/CMO/CVU."
+            empty["note"] = "No PLD/CMO/CVU overlap."
             return empty
+        joined["d"] = joined["date"].dt.strftime("%Y-%m-%d")
+        dates = sorted(joined["d"].unique().tolist())
+        by_sm = {}
+        for sm in sms:
+            part = (
+                joined[joined["submarket"] == sm]
+                .drop_duplicates("d", keep="last")
+                .set_index("d")
+            )
+            by_sm[sm] = {
+                "pld": [_num(part.loc[d, "pld"], 2) if d in part.index else None for d in dates],
+                "cmo": [_num(part.loc[d, "cmo"], 2) if d in part.index else None for d in dates],
+                "cvu": [
+                    _num(part.loc[d, "cvu_gas_med"], 2) if d in part.index else None
+                    for d in dates
+                ],
+            }
         return {
-            "dates": [d.strftime("%Y-%m-%d") for d in joined["date"]],
-            "pld": [_num(v, 2) for v in joined["pld"]],
-            "cmo": [_num(v, 2) for v in joined["cmo"]],
-            "cvu": [_num(v, 2) for v in joined["cvu_gas_med"]],
+            "dates": dates,
+            "bySubmarket": by_sm,
+            "defaultSubmarket": "SE",
             "note": None,
         }
     except Exception as exc:
@@ -424,10 +505,12 @@ def build_payload() -> dict:
         notes.append("ANP prices parquet not found.")
 
     poc_kpi = _kpi_poc_7d(poc) if poc is not None else {
-        "avgPrice": None, "trades": None, "when": None,
+        "avgPrice": None, "avgPriceM3": None, "trades": None, "when": None,
     }
     if poc is None:
         notes.append("POC parquet not found.")
+
+    gus = _last_gus_trade(poc)
 
     flows_kpi = _kpi_flows_7d(flows) if flows is not None else {
         "total": None, "when": None,
@@ -436,25 +519,45 @@ def build_payload() -> dict:
         notes.append("Flows parquet not found.")
 
     compare = _series_pld_cmo_cvu(pld, ons)
+    # KPI CMO/PLD stay SE-default (largest load center); spark uses same.
+    se_block = (compare.get("bySubmarket") or {}).get("SE") or {}
+    if pld_se is None and se_block.get("pld"):
+        for i in range(len(se_block["pld"]) - 1, -1, -1):
+            if se_block["pld"][i] is not None:
+                pld_se = se_block["pld"][i]
+                break
+    if cmo_se is None and se_block.get("cmo"):
+        for i in range(len(se_block["cmo"]) - 1, -1, -1):
+            if se_block["cmo"][i] is not None:
+                cmo_se = se_block["cmo"][i]
+                break
+
     poc_anp = _series_poc_anp(poc, anp)
+    # Desk gas prices are shown in R$/m³ (POC convention).
+    for key in ("poc", "anpSantos", "anpNonThermalSe"):
+        if key in poc_anp and isinstance(poc_anp[key], list):
+            poc_anp[key] = [_mmbtu_to_m3(v) for v in poc_anp[key]]
     util = _util_table(contratos, flows)
     for block in (compare, poc_anp, util):
         if block.get("note"):
             notes.append(block["note"])
 
-    # Default gas price for spark calculator: Santos ANP, else POC 7d avg,
-    # else a stable illustrative fallback so the form never loads blank.
-    SPARK_FALLBACK_GAS = 12.0
-    default_gas = anp_kpi.get("santos") or poc_kpi.get("avgPrice")
-    gas_source = (
-        "anp_santos" if anp_kpi.get("santos") is not None
-        else ("poc_7d" if poc_kpi.get("avgPrice") is not None else "fallback")
-    )
-    if default_gas is None:
-        default_gas = SPARK_FALLBACK_GAS
+    # Spark default: last GUS trade (R$/m³), else POC 7d avg m³, else fallback.
+    if gus.get("priceM3") is not None:
+        default_gas = gus["priceM3"]
+        gas_source = "gus_last"
+    elif poc_kpi.get("avgPriceM3") is not None:
+        default_gas = poc_kpi["avgPriceM3"]
+        gas_source = "poc_7d"
+    else:
+        default_gas = SPARK_FALLBACK_GAS_M3
+        gas_source = "fallback"
 
     through_candidates = [
-        d for d in (pld_when, cmo_when, gen_when, anp_kpi.get("month"), poc_kpi.get("when"), flows_kpi.get("when"))
+        d for d in (
+            pld_when, cmo_when, gen_when, anp_kpi.get("month"),
+            gus.get("when"), poc_kpi.get("when"), flows_kpi.get("when"),
+        )
         if d
     ]
     data_through = max(through_candidates) if through_candidates else None
@@ -472,11 +575,14 @@ def build_payload() -> dict:
             "pldWhen": pld_when,
             "cmoSe": cmo_se,
             "cmoWhen": cmo_when,
-            "anpSantos": anp_kpi.get("santos"),
+            "gusLast": gus.get("priceM3"),
+            "gusWhen": gus.get("when"),
+            "gusTso": gus.get("tso"),
+            "anpSantos": _mmbtu_to_m3(anp_kpi.get("santos")),
             "anpSantosMonth": anp_kpi.get("month"),
-            "anpNonThermalSe": anp_kpi.get("nonThermalSe"),
+            "anpNonThermalSe": _mmbtu_to_m3(anp_kpi.get("nonThermalSe")),
             "anpNonThermalSeMonth": anp_kpi.get("monthNonThermalSe"),
-            "pocAvg7d": poc_kpi.get("avgPrice"),
+            "pocAvg7d": poc_kpi.get("avgPriceM3"),
             "pocTrades7d": poc_kpi.get("trades"),
             "pocWhen": poc_kpi.get("when"),
             "flowsTotal7d": flows_kpi.get("total"),
@@ -488,6 +594,7 @@ def build_payload() -> dict:
         "spark": {
             "defaultGasPrice": default_gas,
             "gasPriceSource": gas_source,
+            "gasUnit": "R$/m3",
             "heatRateCcgt": float(heat["heat_rate_combined_cycle_kcal_per_kwh"]),
             "heatRateOcgt": float(heat["heat_rate_simple_cycle_kcal_per_kwh"]),
             "natgasKcalPerM3": float(heat["natgas_kcal_per_m3"]),
@@ -495,14 +602,12 @@ def build_payload() -> dict:
             "pldSe": pld_se,
             "cmoSe": cmo_se,
             "formulaEn": (
-                "Implied CVU (R$/MWh) = gas (R$/MMBtu) × heat rate (kcal/kWh) × 1000 "
-                f"/ ({heat['natgas_kcal_per_m3']:g} kcal/m³ × {MMBTU_PER_1000_M3} MMBtu/1000 m³). "
-                "Same PCS / PCR conventions as ONS estimated burn and POC R$/m³."
+                "Implied CVU (R$/MWh) = gas (R$/m³) × heat rate (kcal/kWh) × 1000 "
+                f"/ {heat['natgas_kcal_per_m3']:g} kcal/m³."
             ),
             "formulaPt": (
-                "CVU implícito (R$/MWh) = gás (R$/MMBtu) × heat rate (kcal/kWh) × 1000 "
-                f"/ ({heat['natgas_kcal_per_m3']:g} kcal/m³ × {MMBTU_PER_1000_M3} MMBtu/1000 m³). "
-                "Mesmas convenções de PCS/PCR do consumo estimado ONS e do R$/m³ POC."
+                "CVU implícito (R$/MWh) = gás (R$/m³) × heat rate (kcal/kWh) × 1000 "
+                f"/ {heat['natgas_kcal_per_m3']:g} kcal/m³."
             ),
         },
         "sourcesPresent": {

@@ -189,32 +189,24 @@ footer a { color: var(--accent); }
   <span class="sources-label" data-i18n="sources">Sources</span>
   <a class="pill" href="https://www.gov.br/anp/pt-br/assuntos/movimentacao-estocagem-e-comercializacao-de-gas-natural/acompanhamento-do-mercado-de-gas-natural/publicidade-dos-precos-de-gas-natural" target="_blank" rel="noopener" data-i18n="sourcePrecos">ANP — publicidade dos preços<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
 </div>
-<p class="lede" data-i18n="precosLede">Official monthly ANP disclosures under Resolution 52/2011 — aggregated trading prices (tax-inclusive R$/MMBtu), not assessed spot benchmarks. Gaps are suppressions, not missing downloads.</p>
 <div class="kpi-row" id="kpi-row"></div>
 <div class="chart-card">
   <p class="panel-title" data-i18n="precosProdTitle">Producer sales by basin</p>
-  <p class="panel-note" data-i18n="precosProdNote">Wellhead sales between producers. Santos has been the cheapest and most stable; Other basins remain highest.</p>
   <div class="series-picker" id="picker-producers"></div>
   <div id="chart-producers"></div>
   <div class="legend" id="leg-producers"></div>
 </div>
 <div class="chart-card">
   <p class="panel-title" data-i18n="precosDistTitle">Sales to distributors &amp; free consumers</p>
-  <p class="panel-note" data-i18n="precosDistNote">Thermal contracts run far below non-thermal. Blank stretches are ANP suppressions (too few counterparties).</p>
   <div class="series-picker" id="picker-distributors"></div>
   <div id="chart-distributors"></div>
   <div class="legend" id="leg-distributors"></div>
 </div>
 <div class="chart-card">
   <p class="panel-title" data-i18n="precosMktTitle">Sales to marketers</p>
-  <p class="panel-note" data-i18n="precosMktNote">Brazil-wide. Watch volume and price spikes in recent months — still short history.</p>
   <div id="chart-marketers"></div>
   <div class="legend" id="leg-marketers"></div>
 </div>
-<ul class="notes">
-  <li data-i18n="precosCaveat1">Prices include ICMS, PIS and Cofins. Volumes in thousand m³/day at reference conditions.</li>
-  <li data-i18n="precosCaveat2">Published with roughly a two-month lag. Chart gaps are intentional — do not interpolate.</li>
-</ul>
 <div class="toolbar">
   <button type="button" id="btn-csv" data-i18n="precosCsv">Download CSV</button>
   <button type="button" id="btn-xlsx" data-i18n="precosXlsx">Export Excel</button>
@@ -227,7 +219,7 @@ footer a { color: var(--accent); }
   &copy; <span id="year"></span> GasBrazil.com &middot;
   <span data-i18n="precosFooter">Data: ANP publicidade dos preços de gás natural. Not an official ANP product.</span>
   &middot; <span data-i18n="contact">Contact</span>: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
-  &middot; <a href="../about/" data-i18n="footerAbout">About &amp; methodology</a>
+  &middot; <a href="../about/" data-i18n="footerAbout">About</a>
 </footer>
 </div>
 <div class="tt" id="chart-tt"></div>
@@ -243,15 +235,9 @@ __SHARED_SITE_LINKS_JS__
 __SHARED_JS_THEME_TOGGLE__
 __SHARED_JS_I18N__
 
-GB_I18N.en.precosLede = "Official monthly ANP disclosures under Resolution 52/2011 — aggregated trading prices (tax-inclusive R$/MMBtu), not assessed spot benchmarks. Gaps are suppressions, not missing downloads.";
 GB_I18N.en.precosProdTitle = "Producer sales by basin";
-GB_I18N.en.precosProdNote = "Wellhead sales between producers. Santos has been the cheapest and most stable; Other basins remain highest.";
 GB_I18N.en.precosDistTitle = "Sales to distributors & free consumers";
-GB_I18N.en.precosDistNote = "Thermal contracts run far below non-thermal. Blank stretches are ANP suppressions (too few counterparties).";
 GB_I18N.en.precosMktTitle = "Sales to marketers";
-GB_I18N.en.precosMktNote = "Brazil-wide. Watch volume and price spikes in recent months — still short history.";
-GB_I18N.en.precosCaveat1 = "Prices include ICMS, PIS and Cofins. Volumes in thousand m³/day at reference conditions.";
-GB_I18N.en.precosCaveat2 = "Published with roughly a two-month lag. Chart gaps are intentional — do not interpolate.";
 GB_I18N.en.precosCsv = "Download CSV";
 GB_I18N.en.precosXlsx = "Export Excel";
 GB_I18N.en.precosFooter = "Data: ANP publicidade dos preços de gás natural. Not an official ANP product.";
@@ -277,15 +263,9 @@ GB_I18N.en.precosDistNT_SCO = "Non-thermal S-CO";
 GB_I18N.en.precosDistT_NNE = "Thermal N-NE";
 GB_I18N.en.precosDistT_SESCO = "Thermal SE-S-CO";
 
-GB_I18N.pt.precosLede = "Divulgações mensais oficiais da ANP (Resolução 52/2011) — preços agregados com impostos (R$/MMBtu), não benchmarks de spot. Lacunas são omissões da ANP, não falhas de download.";
 GB_I18N.pt.precosProdTitle = "Vendas entre produtores por bacia";
-GB_I18N.pt.precosProdNote = "Vendas na boca do poço. Santos tem sido a mais barata e estável; Demais Bacias, a mais cara.";
 GB_I18N.pt.precosDistTitle = "Vendas a distribuidoras e consumidores livres";
-GB_I18N.pt.precosDistNote = "Contratos térmicos ficam bem abaixo dos não térmicos. Trechos em branco são omissões da ANP.";
 GB_I18N.pt.precosMktTitle = "Vendas a comercializadores";
-GB_I18N.pt.precosMktNote = "Nacional. Acompanhe volume e preços recentes — histórico ainda curto.";
-GB_I18N.pt.precosCaveat1 = "Preços incluem ICMS, PIS e Cofins. Volumes em mil m³/dia nas condições de referência.";
-GB_I18N.pt.precosCaveat2 = "Publicação com cerca de dois meses de defasagem. Lacunas no gráfico são intencionais — sem interpolar.";
 GB_I18N.pt.precosCsv = "Baixar CSV";
 GB_I18N.pt.precosXlsx = "Exportar Excel";
 GB_I18N.pt.precosFooter = "Dados: ANP publicidade dos preços de gás natural. Não é um produto oficial da ANP.";

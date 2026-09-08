@@ -1,4 +1,4 @@
-# Desk
+# The Desk
 
 Cross-product snapshot at `/desk/`: SIN gas generation, PLD–CMO–CVU (SE),
 ANP / POC prices, pipeline utilization, and a client-side thermal spark
