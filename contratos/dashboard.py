@@ -156,7 +156,7 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .table-wrap { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; overflow: auto; box-shadow: var(--shadow); max-height: 65vh; }
 table { border-collapse: collapse; width: 100%; font-size: var(--table-font-size); }
 .table-wrap table { table-layout: fixed; }
-th, td { padding: 4px 8px; text-align: left; border-bottom: 1px solid var(--border); }
+th, td { padding: 4px 8px; text-align: left; border-bottom: 1px solid var(--border); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 th { position: sticky; top: 0; background: var(--panel); cursor: pointer; user-select: none; color: var(--muted2); font-weight: 400; z-index: 2; }
 th:hover { background: var(--accent-soft); }
 th.dragging { opacity: .4; }
@@ -168,7 +168,6 @@ th .filter-icon:hover, th .filter-icon.active { opacity: 1; color: var(--accent)
 th .resizer { position: absolute; right: 0; top: 0; width: 6px; height: 100%; cursor: col-resize; z-index: 3; }
 th .resizer:hover, th .resizer.active { background: var(--accent); opacity: .5; }
 .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-td.wrap, th.wrap { white-space: normal; word-break: break-word; }
 tbody tr:hover { background: var(--accent-soft); }
 .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 footer { margin-top: 22px; color: var(--muted); font-size: 11.5px; line-height: 1.7; }
@@ -283,7 +282,6 @@ __SHARED_JS_XLSX__
 __SHARED_JS_TABLE_SORT__
 
 const NUMERIC_COLS = new Set(["Contracted Capacity (000 m3/d)", "Allocated Tariff (R$/MMBtu)", "Tariff Multiplier", "Transporter Ownership %"]);
-const WRAP_COLS = new Set(["Shipper", "Point/Zone", "Contract Category", "Product Type"]);
 const DEFAULT_COL_WIDTH = { "Shipper": 180, "Contract Number": 140, "Point/Zone": 120 };
 const FALLBACK_COL_WIDTH = 100;
 // Columns hidden by default so the table fits most screens without horizontal
@@ -1379,10 +1377,10 @@ function renderTable() {
         td.textContent = v === "" ? "" : fmtNum(v);
       } else {
         td.textContent = v;
-        if (WRAP_COLS.has(col)) td.classList.add("wrap");
-        else td.classList.add("truncate");
+        td.classList.add("truncate");
       }
       if (columnWidths[col]) applyColWidth(td, columnWidths[col]);
+      if (v !== "" && v != null) td.title = String(v);
       tr.appendChild(td);
     }
     frag.appendChild(tr);

@@ -452,7 +452,7 @@ h1{font-size:25px;margin:0;letter-spacing:-.01em}
 /* "Refresh data" triggers a real rebuild, so it reads as an action rather
    than another navigation pill -- green sets it apart from the blue-accented
    links beside it. */
-#refreshBtn{color:var(--ok-ink);border-color:var(--brz-green);font-weight:400}
+#refreshBtn{color:var(--ok-ink);border-color:var(--brz-green);font-weight:300}
 #refreshBtn:hover:not(:disabled){background:var(--brz-green);color:#fff;
   border-color:var(--brz-green)}
 #refreshBtn:disabled{opacity:.55}
@@ -468,18 +468,22 @@ h1{font-size:25px;margin:0;letter-spacing:-.01em}
   flex-wrap:wrap;gap:10px;border-bottom:1px solid var(--ring);margin-bottom:var(--gap)}
 .tabs{display:flex;gap:4px}
 .tabs button{border:0;border-bottom:2px solid transparent;background:none;
-  border-radius:0;padding:9px 14px;color:var(--muted2);font-weight:400;font-size:13.5px}
+  border-radius:0;padding:6px 12px;color:var(--muted2);font-weight:300;font-size:12px}
 .tabs button[aria-pressed=true]{color:#fff;background:var(--accent);
   border-bottom-color:var(--accent);border-radius:6px 6px 0 0}
 .tabs button:hover{background:var(--accent-soft)}
 .tabs button[aria-pressed=true]:hover{background:var(--accent)}
-.controls{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-end}
-.ctl{display:flex;flex-direction:column;gap:6px}
+.controls{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end}
+.ctl{display:flex;flex-direction:column;gap:5px}
 .ctl > label{font-size:11px;text-transform:uppercase;letter-spacing:.06em;
   color:var(--muted);font-weight:200}
 .row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
-button,select,input{font:inherit;color:var(--text);background:var(--panel);
-  border:1px solid var(--border-strong);border-radius:5px;padding:5px 10px;font-weight:400}
+/* Explicit 12.5px / 300 -- other dashboards set this on toolbar controls;
+   font:inherit here was picking up the browser's ~16px body default and
+   making every filter chip look oversized vs POC/Flows/etc. */
+button,select,input{font-family:var(--font);font-size:12.5px;color:var(--text);
+  background:var(--panel);border:1px solid var(--border-strong);border-radius:5px;
+  padding:5px 10px;font-weight:300}
 button,select{cursor:pointer}
 button:hover,select:hover{background:var(--accent-soft)}
 button:disabled{opacity:.45;cursor:not-allowed;background:var(--panel)}
@@ -488,7 +492,7 @@ button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);co
 .pick h3{font-size:11px;text-transform:uppercase;letter-spacing:.06em;
   color:var(--muted);margin:0 0 6px;font-weight:200}
 .opt{display:flex;align-items:center;gap:8px;padding:2px 0;cursor:pointer;
-  font-size:13px;line-height:1.35}
+  font-size:12px;line-height:1.35;font-weight:300}
 .opt input{accent-color:var(--accent);margin:0;flex:none}
 .opt.disabled{opacity:.4;cursor:not-allowed}
 .opt .grp{color:var(--muted);font-size:11.5px;margin-left:auto;padding-left:10px;
@@ -501,7 +505,7 @@ button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);co
 .entlist table.data th,.entlist table.data td{padding:3px 7px}
 .entlist th.l,.entlist td.l{text-align:left}
 .entlist tr.total-row{background:var(--accent-soft)}
-.entlist tr.total-row td.l{font-weight:400}
+.entlist tr.total-row td.l{font-weight:300}
 .entlist table.data th.th-metric{white-space:nowrap}
 .th-metric-inner{display:flex;align-items:center;justify-content:flex-end;
   gap:3px}
@@ -511,7 +515,7 @@ button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);co
 /* Amber rather than the accent: an active column filter means what you are
    looking at is a subset, which is worth flagging differently from the blue
    used for ordinary selected/active chrome. */
-.colFilterBtn.active{color:var(--warn-ink);font-weight:400}
+.colFilterBtn.active{color:var(--warn-ink);font-weight:300}
 .colFilterPop{position:fixed;background:var(--panel);border:1px solid var(--ring);
   border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.16);padding:8px;font-size:12px;
   display:flex;flex-direction:column;gap:6px;z-index:60;min-width:180px}
@@ -528,7 +532,7 @@ button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);co
 .tile .nm{display:flex;align-items:flex-start;gap:5px;font-size:11px;color:var(--muted2);
   margin-bottom:3px;line-height:1.3;overflow-wrap:anywhere}
 .tile .nm .sw{flex:none;margin-top:2px}
-.tile .big{font-size:18px;font-weight:400;letter-spacing:-.02em;
+.tile .big{font-size:16px;font-weight:300;letter-spacing:-.02em;
   overflow-wrap:anywhere;line-height:1.2}
 .tile .meta{font-size:10.5px;color:var(--muted);margin-top:2px;line-height:1.35;
   font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
@@ -544,8 +548,8 @@ button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);co
 .cap-bar{height:10px;border-radius:4px;overflow:hidden;background:var(--border);
   min-width:90px}
 .cap-bar>div{height:100%}
-.band-label{font-size:11px;font-weight:400;white-space:nowrap}
-.panel-title{font-size:13px;font-weight:400;margin:0 0 2px}
+.band-label{font-size:11px;font-weight:300;white-space:nowrap}
+.panel-title{font-size:12.5px;font-weight:300;margin:0 0 2px}
 .panel-note{font-size:11.5px;color:var(--muted);margin:0 0 8px}
 .legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:8px;font-size:12px;
   color:var(--muted2)}
@@ -561,11 +565,11 @@ svg{display:block;width:100%;overflow:hidden}
 table.data{border-collapse:collapse;width:100%;font-size:var(--table-font-size);
   font-variant-numeric:tabular-nums}
 table.data th,table.data td{padding:4px 8px;border-bottom:1px solid var(--border);
-  text-align:right;white-space:nowrap}
+  text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 table.data th:first-child,table.data td:first-child{text-align:left}
 table.data th.l,table.data td.l{text-align:left}
 table.data thead th{position:sticky;top:0;background:var(--panel);
-  color:var(--muted2);font-weight:400}
+  color:var(--muted2);font-weight:300}
 table.data thead th.sortable{cursor:pointer;user-select:none}
 table.data thead th.sortable:hover{background:var(--accent-soft)}
 .scroll{overflow-x:auto;max-height:460px;overflow-y:auto}
@@ -574,7 +578,7 @@ table.data thead th.sortable:hover{background:var(--accent-soft)}
 /* Methodology lives behind a disclosure rather than as 450 words of footer
    prose: nothing is lost, but the page reads as a tool. */
 .foot details{margin-top:4px}
-.foot summary{cursor:pointer;color:var(--accent);font-weight:400;
+.foot summary{cursor:pointer;color:var(--accent);font-weight:300;
   list-style:none;display:inline-block}
 .foot summary::-webkit-details-marker{display:none}
 .foot summary::after{content:"\00a0\25B8";display:inline-block;transition:transform .12s ease}

@@ -299,13 +299,12 @@ th.num .th-filter { text-align: right; }
 .count { color: var(--muted); font-size: 12px; margin-left: auto; }
 .table-wrap { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; overflow: auto; box-shadow: var(--shadow); max-height: 50vh; }
 table { border-collapse: collapse; width: 100%; font-size: var(--table-font-size); table-layout: fixed; }
-th, td { padding: 4px 8px; text-align: left; border-bottom: 1px solid var(--border); }
+th, td { padding: 4px 8px; text-align: left; border-bottom: 1px solid var(--border); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 th { position: sticky; top: 0; background: var(--panel); color: var(--muted2); font-weight: 400; z-index: 2; cursor: pointer; user-select: none; }
 th:hover { background: var(--accent-soft); }
 th .arrow { opacity: .4; margin-left: 3px; }
 tbody tr:hover { background: var(--accent-soft); }
 .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-td.wrap, th.wrap { white-space: normal; word-break: break-word; }
 .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 footer { margin-top: 22px; color: var(--muted); font-size: 11.5px; line-height: 1.7; }
 footer a { color: var(--accent); }
