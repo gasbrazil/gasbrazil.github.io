@@ -368,6 +368,7 @@ main.hub { flex: 1; width: var(--content-w); max-width: var(--content-max); marg
 /* Full-width flagband — do not override shared .flagbar width. */
 .flagbar { margin: 16px 0 0; }
 .hub .asof-strip { margin-top: 12px; }
+/*  KPI strip is the only product launcher on the hub (description cards removed). */
 .kpi-strip {
   display: grid; grid-template-columns: repeat(3, 1fr);
   gap: 8px; margin-top: 14px;
@@ -382,13 +383,18 @@ main.hub { flex: 1; width: var(--content-w); max-width: var(--content-max); marg
 }
 .kpi-cell:hover { border-color: var(--accent); }
 .kpi-cell .kpi-label { font-size: 11px; font-weight: 400; color: var(--muted2); }
+.kpi-cell .kpi-role { font-size: 10.5px; font-weight: 200; color: var(--muted); line-height: 1.3; }
 .kpi-cell .kpi-val { font-size: 13px; font-weight: 400; color: var(--text);
   line-height: 1.35; min-height: 1.2em; }
 .kpi-cell .kpi-when { font-size: 10.5px; font-weight: 200; color: var(--muted); min-height: 1em; }
 .kpi-spark { display: block; width: 100%; height: 28px; margin-top: 2px; color: var(--accent); }
 .kpi-spark polyline { fill: none; stroke: currentColor; stroke-width: 1.5;
   stroke-linejoin: round; stroke-linecap: round; }
-/* 2×3 for six live dashboards (ONS, POC, Contratos, Flows, Supply, PLD). */
+.desk-link {
+  display: inline-flex; align-items: center; gap: 6px; margin-top: 14px;
+  font-size: 13px; font-weight: 400; color: var(--accent); text-decoration: none;
+}
+.desk-link:hover { text-decoration: underline; }
 .cards { display: grid; grid-template-columns: repeat(3, 1fr);
   gap: 8px; margin-top: 16px; }
 @media (max-width: 720px) { .cards { grid-template-columns: repeat(2, 1fr); } }
@@ -453,9 +459,11 @@ footer.site a { color: var(--muted); }
     <p data-i18n="aboutCoverBody">POC Contracts currently include Transport Contract and Master Contract rows. Legacy transport contracts and access connections are on the official portal but are not in this feed yet.</p>
     <p data-i18n="aboutCoverFlows">Pipeline Flows has no published ANP data for 2022, and each month is typically released with a lag of several weeks. Average pressure and shipper-level detail are collected but not shown on the dashboard; both are available in the underlying data files in the repository.</p>
     <p data-i18n="aboutCoverSupply">Gas Supply uses ANP PPGN-EL national monthly series plus national natural-gas imports. The open import CSV does not split Bolivia pipeline vs LNG cargoes.</p>
-    <p data-i18n="aboutCoverPld">PLD Prices shows CCEE daily-average PLD by submarket. It is not ONS CMO — see ONS Balances for marginal operating cost.</p>
+    <p data-i18n="aboutCoverPrecos">ANP Prices are Resolution 52/2011 monthly disclosures (tax-inclusive R$/MMBtu), not assessed spot benchmarks. Some thermal and Other Basins months are suppressed when too few counterparties report.</p>
+    <p data-i18n="aboutCoverPld">PLD Prices shows CCEE daily-average PLD by submarket, with an optional join to ONS CMO and median gas CVU when that lake data is present at build time.</p>
+    <p data-i18n="aboutCoverDesk">Market Desk joins headline series across products for a single snapshot; each product page remains the place for filters and full history.</p>
     <p>
-      <a href="../ons/">ONS</a> · <a href="../poc/">POC</a> · <a href="../contratos/">Contratos</a> · <a href="../flows/">Flows</a> · <a href="../supply/">Supply</a> · <a href="../pld/">PLD</a> ·
+      <a href="../ons/">ONS</a> · <a href="../poc/">POC</a> · <a href="../contratos/">Contratos</a> · <a href="../flows/">Flows</a> · <a href="../supply/">Supply</a> · <a href="../precos/">ANP Prices</a> · <a href="../pld/">PLD</a> · <a href="../desk/">Desk</a> ·
       <a href="../ons/wiki-html/">ONS wiki</a>
     </p>
   </div>
@@ -466,6 +474,32 @@ footer.site a { color: var(--muted); }
   &middot; <span data-i18n="contact">Contact</span>: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
 </footer>
 <script>
+
+function b64ToBytes(b64) {
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes;
+}
+async function inflateGzipB64(b64) {
+  if (typeof DecompressionStream !== "function") {
+    throw new Error("This browser lacks DecompressionStream (needs Chrome/Edge 80+, Firefox 113+, or Safari 16.4+).");
+  }
+  const ds = new DecompressionStream("gzip");
+  const stream = new Blob([b64ToBytes(b64)]).stream().pipeThrough(ds);
+  return new TextDecoder().decode(await new Response(stream).arrayBuffer());
+}
+async function inflateGzipUrl(url) {
+  if (typeof DecompressionStream !== "function") {
+    throw new Error("This browser lacks DecompressionStream (needs Chrome/Edge 80+, Firefox 113+, or Safari 16.4+).");
+  }
+  const res = await fetch(url, { cache: "no-cache" });
+  if (!res.ok) throw new Error("Failed to load " + url + " (" + res.status + ")");
+  const ds = new DecompressionStream("gzip");
+  const stream = res.body.pipeThrough(ds);
+  return new TextDecoder().decode(await new Response(stream).arrayBuffer());
+}
+
 
 const SUN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>';
 const MOON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
@@ -507,10 +541,12 @@ const GB_I18N = {
     navFlows: "Pipeline Flows",
     navSupply: "Gas Supply",
     navPld: "PLD Prices",
+    navPrecos: "ANP Prices",
+    navDesk: "Market Desk",
     navAbout: "About",
     navWiki: "Wiki",
     contact: "Contact",
-    tagline: "Data tools for Brazil's natural gas market — grid balances, pipeline capacity, contracted transport, physical flows, supply balance, and power prices, refreshed regularly.",
+    tagline: "Data tools for Brazil's natural gas market — grid balances, pipeline capacity, contracted transport, physical flows, supply, ANP prices, and power prices.",
     aboutLead: "Independent, public-data dashboards. Nothing here is an official ONS, ANP, CCEE, or transportadora product.",
     aboutBody: "GasBrazil.com consolidates open Brazilian gas and power data into self-contained tools you can filter, chart, and export. Numbers come from public APIs and open-data portals; caveats live on each dashboard and on the About page.",
     cardOns: "ONS Balances",
@@ -525,20 +561,26 @@ const GB_I18N = {
     cardSupplyDesc: "National monthly natural gas supply balance from ANP — production, available gas, flare and loss, own use, reinjection, LGN, and imports.",
     cardPld: "PLD Prices",
     cardPldDesc: "CCEE daily-average PLD (settlement price) by electricity submarket — Southeast, South, Northeast, and North. Not the same as ONS CMO.",
+    cardPrecos: "ANP Prices",
+    cardPrecosDesc: "ANP monthly disclosed natural-gas trading prices (Resolution 52/2011) — producers, distributors, and marketers. Tax-inclusive R$/MMBtu.",
+    cardDesk: "Market Desk",
+    cardDeskDesc: "Cross-product snapshot: gas generation, PLD–CMO spread, ANP prices, POC auctions, and pipeline flows.",
     kpiRefresh: "Last refreshed",
     dataThrough: "Data through",
     sources: "Sources",
     sourceOns: "ONS open data",
     sourcePoc: "Portal de Oferta de Capacidade",
-    sourceAnp: "ANP gas transport movement",
     sourceFlows: "ANP open data — pipeline movement",
     sourceSupply: "ANP PPGN-EL — production by state",
+    sourcePrecos: "ANP — publicidade dos preços de gás natural",
     sourcePld: "CCEE open data — PLD média diária",
     pldSubtitle: "CCEE daily-average settlement price (PLD) by electricity submarket, in R$/MWh.",
-    pldNote: "PLD is CCEE's settlement price. It is related to, but not the same as, ONS CMO (marginal operating cost) — see",
+    pldNote: "PLD is CCEE's settlement price — related to ONS CMO, not the same series. See",
     pldNoteLink: "ONS Balances",
     pldChartTitle: "Daily PLD by submarket",
-    pldChartNote: "Last 24 months embedded. Toggle submarkets and date window below.",
+    pldChartNote: "Last 24 months. Toggle submarkets and window below.",
+    pldCompareTitle: "PLD vs CMO vs gas CVU",
+    pldCompareNote: "CMO and median gas-plant CVU from ONS (R$/MWh). CVU is a planning cost, not a market price.",
     pldWindow: "Window",
     pldCsv: "Download CSV",
     pldXlsx: "Export all data (Excel)",
@@ -548,7 +590,7 @@ const GB_I18N = {
     aboutWho: "What this is",
     aboutWhoBody: "A small independent site that republishes public Brazilian natural-gas and power-system data as filterable dashboards. It is not affiliated with ONS, ANP, CCEE, TBG, TAG, or NTS.",
     aboutHow: "How the data is built",
-    aboutHowBody: "Each dashboard is a static page on GitHub Pages. GitHub Actions fetch the source, transform it, and publish an HTML shell (plus a gzip data artifact for the larger dashboards). There is no live API behind the published site.",
+    aboutHowBody: "Each dashboard is a static page on GitHub Pages. GitHub Actions fetch the source, transform it, and publish an HTML shell plus a gzip data artifact on Cloudflare R2. There is no live query API behind the published site.",
     aboutGloss: "Glossary",
     glossGus: "GUS — gas acquired by a transportadora for system use.",
     glossLinepack: "Linepack — inventory held inside the pipeline, traded to balance the network.",
@@ -559,7 +601,9 @@ const GB_I18N = {
     aboutCoverBody: "POC Contracts currently include Transport Contract and Master Contract rows. Legacy transport contracts and access connections appear on the official portal UI but are not served by the public GraphQL API (re-verified September 2026: no legado/conexão fields in the schema). They will be added when that endpoint is identified.",
     aboutCoverFlows: "Pipeline Flows has no published ANP data for 2022, and each month is typically released with a lag of several weeks. Average pressure is available in the dashboard variable list. Shipper-level flow detail is not embedded (capacity by shipper lives on POC Contracts). TSB and GOM can be included via a toggle.",
     aboutCoverSupply: "Gas Supply uses ANP PPGN-EL national monthly series plus national natural-gas imports. The open import CSV does not split Bolivia pipeline vs LNG cargoes.",
-    aboutCoverPld: "PLD Prices shows CCEE daily-average PLD by submarket. It is not ONS CMO — see ONS Balances for marginal operating cost.",
+    aboutCoverPrecos: "ANP Prices are Resolution 52/2011 monthly disclosures (tax-inclusive R$/MMBtu), not assessed spot benchmarks. Some thermal and Other Basins months are suppressed when too few counterparties report.",
+    aboutCoverPld: "PLD Prices shows CCEE daily-average PLD by submarket, with an optional join to ONS CMO and median gas CVU when that lake data is present at build time.",
+    aboutCoverDesk: "Market Desk joins headline series across products for a single snapshot; each product page remains the place for filters and full history.",
     notFound: "This page is not here.",
     notFoundBody: "The hub and dashboards are linked below.",
     backHome: "Back to GasBrazil.com"
@@ -576,10 +620,12 @@ const GB_I18N = {
     navFlows: "Fluxos de Gasodutos",
     navSupply: "Oferta de Gás",
     navPld: "Preços PLD",
+    navPrecos: "Preços ANP",
+    navDesk: "Mesa de Mercado",
     navAbout: "Sobre",
     navWiki: "Wiki",
     contact: "Contato",
-    tagline: "Ferramentas de dados para o mercado de gás natural do Brasil — balanços do SIN, capacidade de gasodutos, contratos de transporte, fluxos físicos e preços de energia, atualizados diariamente.",
+    tagline: "Ferramentas de dados para o mercado de gás natural do Brasil — balanços do SIN, capacidade, contratos, fluxos, oferta, preços ANP e preços de energia.",
     aboutLead: "Painéis independentes com dados públicos. Isto não é um produto oficial da ONS, da ANP, da CCEE ou das transportadoras.",
     aboutBody: "O GasBrazil.com reúne dados abertos de gás e energia do Brasil em ferramentas que você pode filtrar, graficar e exportar. Os números vêm de APIs e portais públicos; as ressalvas estão em cada painel e na página Sobre.",
     cardOns: "Balanços ONS",
@@ -594,20 +640,26 @@ const GB_I18N = {
     cardSupplyDesc: "Balanço mensal nacional de gás natural da ANP — produção, disponível, queima e perda, consumo próprio, reinjeção, LGN e importações.",
     cardPld: "Preços PLD",
     cardPldDesc: "PLD médio diário da CCEE por submercado — Sudeste, Sul, Nordeste e Norte. Não é o CMO da ONS.",
+    cardPrecos: "Preços ANP",
+    cardPrecosDesc: "Preços mensais divulgados pela ANP (Resolução 52/2011) — produtores, distribuidoras e comercializadores. R$/MMBtu com impostos.",
+    cardDesk: "Mesa de Mercado",
+    cardDeskDesc: "Retrato cruzado: geração a gás, spread PLD–CMO, preços ANP, leilões POC e fluxos.",
     kpiRefresh: "Última atualização",
     dataThrough: "Dados até",
     sources: "Fontes",
     sourceOns: "Dados abertos da ONS",
     sourcePoc: "Portal de Oferta de Capacidade",
-    sourceAnp: "Movimentação de gás da ANP",
     sourceFlows: "Dados abertos da ANP — movimentação em gasodutos",
     sourceSupply: "ANP PPGN-EL — produção por estado",
+    sourcePrecos: "ANP — publicidade dos preços de gás natural",
     sourcePld: "Dados abertos da CCEE — PLD média diária",
     pldSubtitle: "Preço médio diário de liquidação (PLD) da CCEE por submercado, em R$/MWh.",
-    pldNote: "O PLD é o preço de liquidação da CCEE. Relaciona-se ao CMO da ONS (custo marginal de operação), mas não é a mesma série — veja",
+    pldNote: "O PLD é o preço de liquidação da CCEE — relaciona-se ao CMO da ONS, mas não é a mesma série. Veja",
     pldNoteLink: "Balanços ONS",
     pldChartTitle: "PLD diário por submercado",
-    pldChartNote: "Últimos 24 meses embutidos. Alterne submercados e a janela abaixo.",
+    pldChartNote: "Últimos 24 meses. Alterne submercados e a janela abaixo.",
+    pldCompareTitle: "PLD vs CMO vs CVU a gás",
+    pldCompareNote: "CMO e CVU mediano de usinas a gás da ONS (R$/MWh). CVU é custo de planejamento, não preço de mercado.",
     pldWindow: "Janela",
     pldCsv: "Baixar CSV",
     pldXlsx: "Exportar tudo (Excel)",
@@ -617,7 +669,7 @@ const GB_I18N = {
     aboutWho: "O que é isto",
     aboutWhoBody: "Um site independente que republica dados públicos de gás natural e do sistema elétrico brasileiro em painéis filtráveis. Não tem vínculo com ONS, ANP, CCEE, TBG, TAG ou NTS.",
     aboutHow: "Como os dados são montados",
-    aboutHowBody: "Cada painel é uma página estática no GitHub Pages. O GitHub Actions busca a fonte, transforma e publica um shell HTML (mais um artefato gzip para os painéis maiores). O site publicado não tem API ao vivo.",
+    aboutHowBody: "Cada painel é uma página estática no GitHub Pages. O GitHub Actions busca a fonte, transforma e publica um shell HTML mais um artefato gzip no Cloudflare R2. O site publicado não tem API de consulta ao vivo.",
     aboutGloss: "Glossário",
     glossGus: "GUS — gás adquirido pela transportadora para uso do sistema.",
     glossLinepack: "Linepack — estoque dentro do gasoduto, negociado para balancear a rede.",
@@ -628,7 +680,9 @@ const GB_I18N = {
     aboutCoverBody: "Contratos POC incluem hoje Contrato de Transporte e Contrato Master. Contratos de transporte legado e conexões de acesso aparecem na UI do portal oficial, mas não são servidos pela API GraphQL pública (reconfirmado em setembro de 2026: sem campos legado/conexão no schema). Serão adicionados quando esse endpoint for identificado.",
     aboutCoverFlows: "Fluxos de Gasodutos não tem dados publicados pela ANP para 2022, e cada mês costuma ser divulgado com semanas de atraso. A pressão média está na lista de variáveis do painel. O detalhe por carregador não é embutido (capacidade por carregador fica em Contratos POC). TSB e GOM podem ser incluídos por um seletor.",
     aboutCoverSupply: "Oferta de Gás usa as séries mensais nacionais PPGN-EL da ANP mais importações nacionais de gás natural. O CSV aberto de importação não separa Gasbol (Bolívia) de GNL.",
-    aboutCoverPld: "Preços PLD mostra o PLD médio diário da CCEE por submercado. Não é o CMO da ONS — veja Balanços ONS para o custo marginal de operação.",
+    aboutCoverPrecos: "Preços ANP são divulgações mensais da Resolução 52/2011 (R$/MMBtu com impostos), não benchmarks de preço spot. Alguns meses térmicos e de Demais Bacias são omitidos quando há poucos agentes.",
+    aboutCoverPld: "Preços PLD mostra o PLD médio diário da CCEE por submercado, com junção opcional ao CMO e ao CVU mediano a gás da ONS quando esses dados estão no lake no build.",
+    aboutCoverDesk: "A Mesa de Mercado junta séries-resumo entre produtos; cada painel permanece o lugar para filtros e o histórico completo.",
     notFound: "Esta página não existe.",
     notFoundBody: "O hub e os painéis estão nos links abaixo.",
     backHome: "Voltar ao GasBrazil.com"

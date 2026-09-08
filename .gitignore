@@ -35,8 +35,17 @@ supply/data/
 pld/raw/
 pld/data/
 
+# precos/: ANP Resolution 52/2011 PPG CSVs and derived parquet — rebuildable;
+# CI caches raw/. precos/index.html is committed; payload on R2.
+precos/raw/
+precos/data/
+
+# desk/: thin shell only; payload on R2 (no own raw store).
+# (desk has no data/ — builds from lake/ or sibling project parquet.)
+
 # Track B artifacts (local rebuilds + R2 uploads; not committed).
 **/payload.json.gz
+hub/teasers.json.gz
 
 # ADR-002 lake mirrors (rebuildable; mirrored to private R2 lake bucket in CI).
 lake/**

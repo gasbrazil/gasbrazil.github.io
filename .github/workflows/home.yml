@@ -38,6 +38,17 @@ jobs:
       - name: Build home page
         run: python build_home.py
 
+      - name: Publish hub teasers
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT_URL: ${{ secrets.R2_ENDPOINT_URL }}
+          GASBRAZIL_ARTIFACTS_BUCKET: ${{ secrets.GASBRAZIL_ARTIFACTS_BUCKET }}
+          GASBRAZIL_DATA_BASE_URL: ${{ secrets.GASBRAZIL_DATA_BASE_URL }}
+          GASBRAZIL_DATA_CACHE_BUST: ${{ github.run_id }}
+        run: python shared/publish_teasers.py || true
+
       - name: Commit refreshed home page
         run: |
           git config user.name  "github-actions[bot]"

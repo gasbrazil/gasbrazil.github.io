@@ -59,12 +59,26 @@ def load_payload():
 
     print(f"Excluded {excluded_concluded} concluded contract(s) of {total_rows} total; shipping {len(records)} rows.")
 
+    # Hub teaser from the shipped (non-concluded) set.
+    n_active = len(records)
+    cap_col = "Contracted Capacity (000 m3/d)"
+    cap_sum = 0.0
+    for r in records:
+        v = r.get(cap_col)
+        if v is not None:
+            try:
+                cap_sum += float(v)
+            except (TypeError, ValueError):
+                pass
+
     return {
         "generated": generated,
         "columns": COLUMNS,
         "displayNames": DISPLAY_NAMES,
         "rows": records,
         "excludedConcluded": excluded_concluded,
+        "kpiContracts": n_active,
+        "kpiCapacity": round(cap_sum, 1),
     }
 
 
@@ -78,6 +92,10 @@ TEMPLATE = """<!doctype html>
 <link rel="canonical" href="https://gasbrazil.com/contratos/">
 <link rel="icon" href="{{FAVICON_DATA_URI}}">
 __FONT_PRELOAD__
+<!-- home-page teaser marker, read by ../build_home.py:
+     generated: __GENERATED__
+     kpi_contracts: __KPI_CONTRACTS__
+     kpi_capacity: __KPI_CAPACITY__ -->
 <script>__SHARED_JS_BOOT__</script>
 <style>
 __SHARED_THEME_CSS__
@@ -1598,6 +1616,9 @@ def write_dashboard(out_path=DEFAULT_OUT):
     html = kit.render(
         TEMPLATE,
         PAYLOAD_URL=payload_href,
+        GENERATED=payload.get("generated") or "",
+        KPI_CONTRACTS=str(payload.get("kpiContracts") or ""),
+        KPI_CAPACITY=str(payload.get("kpiCapacity") if payload.get("kpiCapacity") is not None else ""),
         SHARED_THEME_CSS=kit.render_theme_css(),
         SHARED_JS_DECODE=kit.JS_DECODE,
         SHARED_JS_ESCAPE_HTML=kit.JS_ESCAPE_HTML,

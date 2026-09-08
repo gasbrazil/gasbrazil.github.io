@@ -60,7 +60,9 @@ poc/                    POC capacity-offer-results dashboard -- see poc/README.m
 contratos/              POC transport-contracts dashboard -- see contratos/README.md
 flows/                  ANP pipeline-flows (thin HTML shell; data on R2)
 supply/                 ANP national gas supply balance -- see supply/README.md
+precos/                 ANP Resolution 52/2011 gas price disclosures
 pld/                    CCEE daily-average PLD prices -- see pld/README.md
+desk/                   Cross-product market desk + spark calculator
 build_home.py           builds the landing page (this file) from shared/theme.css
 index.html              built landing page (committed -- served at /)
 .github/workflows/
@@ -70,7 +72,9 @@ index.html              built landing page (committed -- served at /)
   contratos.yml           contratos/'s own fetch -> build -> deploy
   flows.yml               flows/'s own fetch -> build -> health-gate -> deploy
   supply.yml              supply/'s own fetch -> build -> deploy
+  precos.yml              precos/'s own fetch -> build -> deploy
   pld.yml                 pld/'s own fetch -> build -> deploy
+  desk.yml                desk rebuild from lake/sibling parquet
 ```
 
 ## Making a visual change
@@ -112,7 +116,9 @@ Path-based under one domain, per ADR-001 Decision 1 Option C:
 | `/contratos/` | POC transport contracts |
 | `/flows/` | ANP pipeline flows |
 | `/supply/` | ANP national gas supply balance |
+| `/precos/` | ANP Resolution 52/2011 gas price disclosures |
 | `/pld/` | CCEE daily-average PLD prices |
+| `/desk/` | Cross-product market desk + spark calculator |
 
 Before the `gasbrazil.com` domain is cut over to this repo, the same
 structure is reachable at `gasbrazil.github.io/...` for verification.

@@ -19,6 +19,7 @@ lake/                          # local (gitignored)
     pld_daily.parquet
   supply/
     supply_monthly.parquet
+    anp_prices.parquet
 ```
 
 Production mirror (private R2): same relative keys under

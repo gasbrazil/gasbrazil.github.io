@@ -86,6 +86,57 @@ def load_payload() -> dict:
 
     se_latest = latest.get("SE")
     _now_utc = dt.datetime.now(dt.timezone.utc)
+
+    # Optional PLD × CMO × CVU join when ONS daily parquet is available.
+    compare: dict | None = None
+    ons_candidates = [
+        HERE.parent / "ons" / "data" / "daily.parquet",
+        HERE.parent / "lake" / "power" / "ons_daily.parquet",
+    ]
+    for ons_path in ons_candidates:
+        if not ons_path.exists():
+            continue
+        try:
+            sys.path.insert(0, str(HERE.parent / "shared"))
+            import joins  # noqa: E402
+
+            ons = pd.read_parquet(ons_path)
+            joined = joins.join_pld_cmo_cvu(
+                df[df["date"] >= cutoff],
+                ons,
+                date_from=cutoff,
+                how="left",
+            )
+            # Keep only dates in the embed window; series keyed by submarket.
+            joined = joined[joined["date"].isin(date_index)]
+            by_sm: dict[str, dict[str, list]] = {}
+            for sm in SUBMARKET_ORDER:
+                part = joined[joined["submarket"] == sm].set_index("date")
+                part = part[~part.index.duplicated(keep="last")].reindex(date_index)
+
+                def _col(name: str) -> list:
+                    if name not in part.columns:
+                        return [None] * len(dates)
+                    return [
+                        None if (v is None or (isinstance(v, float) and pd.isna(v))) else round(float(v), 2)
+                        for v in part[name].tolist()
+                    ]
+
+                by_sm[sm] = {
+                    "pld": _col("pld"),
+                    "cmo": _col("cmo"),
+                    "cvu_gas_med": _col("cvu_gas_med"),
+                }
+            # Only expose if we got any CMO points.
+            has_cmo = any(
+                any(v is not None for v in by_sm[sm]["cmo"]) for sm in SUBMARKET_ORDER
+            )
+            if has_cmo:
+                compare = {"dates": dates, "bySubmarket": by_sm}
+            break
+        except Exception as e:
+            print(f"  note: PLD/CMO/CVU join skipped ({ons_path.name}): {e}")
+
     return {
         "generated": _now_utc.strftime("%Y-%m-%d %H:%M UTC"),
         "generatedIso": _now_utc.isoformat(),
@@ -97,6 +148,7 @@ def load_payload() -> dict:
         "latest": latest,
         "latestDate": latest_date,
         "kpiSe": se_latest,
+        "compare": compare,
         "source": "CCEE — PLD média diária",
         "note": "PLD is CCEE's settlement price (R$/MWh). It is not ONS CMO.",
     }
@@ -203,11 +255,11 @@ footer a { color: var(--accent); }
   <span class="sources-label" data-i18n="sources">Sources</span>
   <a class="pill" href="https://dadosabertos.ccee.org.br/dataset/pld_media_diaria" target="_blank" rel="noopener" data-i18n="sourcePld">CCEE open data — PLD média diária<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
 </div>
-<p class="note-strip"><span data-i18n="pldNote">PLD is CCEE's settlement price. It is related to, but not the same as, ONS CMO (marginal operating cost) — see</span> <a href="../ons/" id="pld-ons-note">ONS Balances</a>.</p>
+<p class="note-strip"><span data-i18n="pldNote">PLD is CCEE's settlement price — related to ONS CMO, not the same series. See</span> <a href="../ons/" id="pld-ons-note">ONS Balances</a>.</p>
 <div class="kpi-row" id="kpi-row"></div>
 <div class="chart-card">
   <p class="panel-title" data-i18n="pldChartTitle">Daily PLD by submarket</p>
-  <p class="panel-note" data-i18n="pldChartNote">Last 24 months embedded. Toggle submarkets and date window below.</p>
+  <p class="panel-note" data-i18n="pldChartNote">Last 24 months. Toggle submarkets and window below.</p>
   <div class="chart-controls">
     <label for="f-preset" data-i18n="pldWindow">Window</label>
     <select id="f-preset">
@@ -220,6 +272,21 @@ footer a { color: var(--accent); }
   </div>
   <div class="sm-toggles" id="sm-toggles"></div>
   <div id="chart-host"></div>
+</div>
+<div class="chart-card" id="compare-card" hidden>
+  <p class="panel-title" data-i18n="pldCompareTitle">PLD vs CMO vs gas CVU</p>
+  <p class="panel-note" data-i18n="pldCompareNote">CMO and median gas-plant CVU from ONS (R$/MWh). CVU is a planning cost, not a market price.</p>
+  <div class="chart-controls">
+    <label for="f-compare-sm">Submarket</label>
+    <select id="f-compare-sm">
+      <option value="SE" selected>SE</option>
+      <option value="S">S</option>
+      <option value="NE">NE</option>
+      <option value="N">N</option>
+    </select>
+  </div>
+  <div id="compare-host"></div>
+  <div class="legend" id="compare-legend"></div>
 </div>
 <div class="toolbar">
   <button id="btn-csv" data-i18n="pldCsv">Download CSV</button>
@@ -561,7 +628,54 @@ function paintChrome() {
   renderKpis();
   buildSmToggles();
   renderChart();
+  renderCompare();
   renderTable(tableSort, tableFilters);
+}
+
+function renderCompare() {
+  const card = document.getElementById("compare-card");
+  const host = document.getElementById("compare-host");
+  const legend = document.getElementById("compare-legend");
+  if (!card || !host) return;
+  const cmp = DATA && DATA.compare;
+  if (!cmp || !cmp.bySubmarket) { card.hidden = true; return; }
+  card.hidden = false;
+  const sm = (document.getElementById("f-compare-sm") || {}).value || "SE";
+  const block = cmp.bySubmarket[sm] || {};
+  const dates = cmp.dates || [];
+  const pal = chartPalette();
+  const series = [
+    { key: "pld", label: "PLD", color: pal[0] || "#002776", pts: dates.map((d,i) => ({ d, v: (block.pld||[])[i] })) },
+    { key: "cmo", label: "CMO", color: pal[1] || "#4a5568", pts: dates.map((d,i) => ({ d, v: (block.cmo||[])[i] })) },
+    { key: "cvu", label: "CVU gas med", color: pal[2] || "#2f6fed", pts: dates.map((d,i) => ({ d, v: (block.cvu_gas_med||[])[i] })) },
+  ].filter(s => s.pts.some(p => p.v != null));
+  host.innerHTML = ""; legend.innerHTML = "";
+  if (!series.length) { host.innerHTML = '<div class="chart-empty">No CMO/CVU overlap for this window.</div>'; return; }
+  let lo = Infinity, hi = -Infinity;
+  series.forEach(s => s.pts.forEach(p => { if (p.v != null) { lo = Math.min(lo, p.v); hi = Math.max(hi, p.v); } }));
+  if (lo > 0 && lo / hi <= 0.35) lo = 0;
+  const pad = (hi - lo) * 0.08 || 1; hi += pad;
+  const W = Math.max(640, host.clientWidth || 640), H = 300, ML = 52, MR = 12, MT = 18, MB = 28;
+  const NS = "http://www.w3.org/2000/svg";
+  function el(n,a){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);return e;}
+  const dNum = d => Date.parse(d + "T00:00:00Z");
+  const minD = dNum(dates[0]), maxD = dNum(dates[dates.length-1]);
+  const x = d => ML + (W-ML-MR) * (maxD===minD ? 0.5 : (dNum(d)-minD)/(maxD-minD));
+  const y = v => MT + (H-MT-MB) * (1 - (v-lo)/(hi-lo));
+  const svg = el("svg", { viewBox: "0 0 "+W+" "+H, width: W, height: H });
+  series.forEach(s => {
+    let path = "", started = false;
+    s.pts.forEach(p => {
+      if (p.v == null) { started = false; return; }
+      path += (started ? "L" : "M") + x(p.d).toFixed(1) + " " + y(p.v).toFixed(1) + " ";
+      started = true;
+    });
+    if (path) svg.appendChild(el("path", { d: path.trim(), fill: "none", stroke: s.color, "stroke-width": 2 }));
+    const span = document.createElement("span");
+    span.innerHTML = '<span class="sw" style="background:'+s.color+'"></span>' + s.label;
+    legend.appendChild(span);
+  });
+  host.appendChild(svg);
 }
 
 __SHARED_JS_THEME_TOGGLE__
@@ -589,13 +703,15 @@ async function init() {
     datePreset = e.target.value;
     paintChrome();
   });
+  const cmpSm = document.getElementById("f-compare-sm");
+  if (cmpSm) cmpSm.addEventListener("change", renderCompare);
   document.getElementById("btn-csv").addEventListener("click", downloadCsv);
   document.getElementById("btn-xlsx").addEventListener("click", downloadXlsx);
   window.addEventListener("resize", () => {
     clearTimeout(chartResizeTimer);
-    chartResizeTimer = setTimeout(renderChart, 140);
+    chartResizeTimer = setTimeout(() => { renderChart(); renderCompare(); }, 140);
   });
-  initThemeToggle("theme-toggle", renderChart);
+  initThemeToggle("theme-toggle", () => { renderChart(); renderCompare(); });
   initLangToggle("lang-toggle", () => {
     const ons = document.getElementById("pld-ons-note");
     if (ons) ons.textContent = t("pldNoteLink");

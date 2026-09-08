@@ -19,6 +19,9 @@ HERE = Path(__file__).resolve().parent
 REPO_ROOT = HERE.parent
 LAKE_ROOT = REPO_ROOT / "lake"
 
+# Dashboard slug → artifact key prefix under the public R2 artifacts bucket.
+ARTIFACT_DOMAINS = ("ons", "flows", "poc", "contratos", "supply", "pld", "precos", "desk", "hub")
+
 # Domain → relative lake path (parquet files).
 LAKE_PATHS = {
     "flows_points": LAKE_ROOT / "transport" / "flows_points.parquet",
@@ -29,10 +32,8 @@ LAKE_PATHS = {
     "ons_entities": LAKE_ROOT / "power" / "ons_entities.parquet",
     "pld_daily": LAKE_ROOT / "power" / "pld_daily.parquet",
     "supply_monthly": LAKE_ROOT / "supply" / "supply_monthly.parquet",
+    "anp_prices": LAKE_ROOT / "supply" / "anp_prices.parquet",
 }
-
-# Dashboard slug → artifact key prefix under the public R2 artifacts bucket.
-ARTIFACT_DOMAINS = ("ons", "flows", "poc", "contratos", "supply", "pld")
 
 
 def lake_path(name: str) -> Path:
@@ -187,3 +188,38 @@ def write_and_publish_artifact(
         )
 
     return path, payload_url(domain)
+
+
+def teaser_url() -> str:
+    """Public URL for hub teasers aggregate, or local sibling for offline."""
+    base = os.environ.get("GASBRAZIL_DATA_BASE_URL", "").strip().rstrip("/")
+    bust = os.environ.get("GASBRAZIL_DATA_CACHE_BUST", "").strip()
+    if not base:
+        return "hub/teasers.json.gz"
+    url = f"{base}/hub/teasers.json.gz"
+    if bust:
+        url += f"?v={bust}"
+    return url
+
+
+def write_and_publish_teasers(
+    teasers: dict,
+    local_dir: Path | str | None = None,
+    *,
+    compresslevel: int = 9,
+) -> tuple[Path, str]:
+    """Write hub/teasers.json.gz and upload to R2 when configured."""
+    local_dir = Path(local_dir) if local_dir else (REPO_ROOT / "hub")
+    local_dir.mkdir(parents=True, exist_ok=True)
+    path = write_json_gzip(teasers, local_dir / "teasers.json.gz", compresslevel=compresslevel)
+    art_bucket = os.environ.get("GASBRAZIL_ARTIFACTS_BUCKET", "").strip()
+    if r2_configured() and art_bucket:
+        uri = upload_to_r2(
+            path,
+            bucket=art_bucket,
+            key="hub/teasers.json.gz",
+            content_type="application/gzip",
+            cache_control="public, max-age=120",
+        )
+        print(f"  R2 hub teasers: {uri}")
+    return path, teaser_url()

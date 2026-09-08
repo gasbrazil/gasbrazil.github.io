@@ -101,6 +101,21 @@ SUPPLY_MONTHLY_COLUMNS = (
     "imports",
 )
 
+# --- Prices (ANP Resolution 52/2011) -----------------------------------------
+
+# Long tidy frame: producers (basin), distributors (market type × region),
+# marketers (national). Suppressed months keep null price_brl_mmbtu.
+ANP_PRICES_COLUMNS = (
+    "month",
+    "segment",
+    "category",
+    "region",
+    "price_brl_mmbtu",
+    "volume_thousand_m3_day",
+)
+
+ANP_PRICE_SEGMENTS = ("producers", "distributors", "marketers")
+
 TSO_CODES = ("NTS", "TAG", "TBG", "TSB", "GOM")
 
 
@@ -132,6 +147,10 @@ def validate_pld_daily(df: "pd.DataFrame") -> None:
 
 def validate_supply_monthly(df: "pd.DataFrame") -> None:
     _require(df, SUPPLY_MONTHLY_COLUMNS, "supply_monthly")
+
+
+def validate_anp_prices(df: "pd.DataFrame") -> None:
+    _require(df, ANP_PRICES_COLUMNS, "anp_prices")
 
 
 def validate_poc_results(df: "pd.DataFrame") -> None:

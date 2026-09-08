@@ -3,22 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>GasBrazil.com</title>
-<meta name="description" content="Independent data tools for Brazil's natural gas market: ONS grid balances, POC capacity results, transport contracts, pipeline flows, and CCEE PLD prices.">
-<link rel="canonical" href="https://gasbrazil.com/">
-<link rel="preload" href="/shared/fonts/Pacaembu-Light.ttf" as="font" type="font/ttf" crossorigin>
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="GasBrazil.com">
-<meta property="og:title" content="GasBrazil.com">
-<meta property="og:description" content="Independent data tools for Brazil's natural gas market: ONS grid balances, POC capacity results, transport contracts, pipeline flows, and CCEE PLD prices.">
-<meta property="og:url" content="https://gasbrazil.com/">
-<meta property="og:locale" content="en_US">
-<meta property="og:locale:alternate" content="pt_BR">
-<link rel="alternate" hreflang="en" href="https://gasbrazil.com/">
-<link rel="alternate" hreflang="pt-BR" href="https://gasbrazil.com/">
-<link rel="alternate" hreflang="x-default" href="https://gasbrazil.com/">
-<link rel="alternate" href="https://gasbrazil.github.io">
+<title>Market Desk — GasBrazil.com</title>
+<meta name="description" content="Cross-product market desk for Brazil natural gas and power: gas generation, PLD–CMO–CVU, ANP and POC prices, pipeline utilization, and a thermal spark-spread calculator.">
+<link rel="canonical" href="https://gasbrazil.com/desk/">
 <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAWfmNhQlgAABZ+anVtYgAAAB5qdW1kYzJwYQARABCAAACqADibcQNjMnBhAAAAFlhqdW1iAAAAR2p1bWRjMm1hABEAEIAAAKoAOJtxA3VybjpjMnBhOjU2MTg4OGQwLWVlMGUtNDUxMi1iMWFlLWIxZDA1ZTJlMGVkNwAAAAOTanVtYgAAAClqdW1kYzJhcwARABCAAACqADibcQNjMnBhLmFzc2VydGlvbnMAAAAAuGp1bWIAAABEanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5pbmdyZWRpZW50LnYzAAAAABhjMnNo4gTgaH9XqZkctQOIQbs5UwAAAGxjYm9yo2lkYzpmb3JtYXRpaW1hZ2UvcG5namluc3RhbmNlSUR4LHhtcDppaWQ6OWExYjNhMzgtMzFlMC00MDEzLTlhYzgtNzBkYWQ5YzI5ZmZhbHJlbGF0aW9uc2hpcGhwYXJlbnRPZgAAAeJqdW1iAAAAQWp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuYWN0aW9ucy52MgAAAAAYYzJzaBmwAaQCOClUt1pakePxtPYAAAGZY2JvcqJnYWN0aW9uc4KiZmFjdGlvbmtjMnBhLm9wZW5lZGpwYXJhbWV0ZXJzoWtpbmdyZWRpZW50c4GiY3VybHgtc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5pbmdyZWRpZW50LnYzZGhhc2hYILgXQJmB90FCeWpU9yM5wck2ssm8gNMSOTKsbIqM7JMWpGZhY3Rpb254HWNvbS5hbnRocm9waWMuY2xhdWRlLnByb3ZpZGVkanBhcmFtZXRlcnOheB9jb20uYW50aHJvcGljLm9yaWdpbi1jb25maWRlbmNlZ3Vua25vd25rZGVzY3JpcHRpb254ZkNsYXVkZSBwcm92aWRlZCB0aGlzIGZpbGUgYXQgdGhlIHJlcXVlc3Qgb2YgYSB1c2VyIGFuZCBtYXkgaGF2ZSBjcmVhdGVkIG9yIG1vZGlmaWVkIHRoZSBmaWxlIGNvbnRlbnRzLm1zb2Z0d2FyZUFnZW50oWRuYW1lZkNsYXVkZXJhbGxBY3Rpb25zSW5jbHVkZWT1AAAAyGp1bWIAAABAanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5oYXNoLmRhdGEAAAAAGGMyc2hvaBcg8egxuusfvaLjEh3ZAAAAgGNib3KlY2FsZ2ZzaGEyNTZjcGFkTQAAAAAAAAAAAAAAAABkaGFzaFggEHs/X0eRoBfqXKonxqhtPZAtAxLhW4MPGl6h8m4o19VkbmFtZW5qdW1iZiBtYW5pZmVzdGpleGNsdXNpb25zgaJlc3RhcnQYIWZsZW5ndGgZFooAAAI+anVtYgAAACdqdW1kYzJjbAARABCAAACqADibcQNjMnBhLmNsYWltLnYyAAAAAg9jYm9ypWNhbGdmc2hhMjU2aXNpZ25hdHVyZXhNc2VsZiNqdW1iZj0vYzJwYS91cm46YzJwYTo1NjE4ODhkMC1lZTBlLTQ1MTItYjFhZS1iMWQwNWUyZTBlZDcvYzJwYS5zaWduYXR1cmVqaW5zdGFuY2VJRHgseG1wOmlpZDowODE5OWU3ZS0xMzQxLTQ5NDYtOGQ5NS04NTE4ZmM4ZWE3NjJyY3JlYXRlZF9hc3NlcnRpb25zg6JjdXJseC1zZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmluZ3JlZGllbnQudjNkaGFzaFgguBdAmYH3QUJ5alT3IznByTayybyA0xI5MqxsiozskxaiY3VybHgqc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5hY3Rpb25zLnYyZGhhc2hYIEVjoyjLpTwDTmNpz5hKDTtjzeLLTMILWtWsgonEOBnRomN1cmx4KXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaGFzaC5kYXRhZGhhc2hYIHT+73+MbebY3SG+rgnZzuxTRaWczwct0guW356j8KCSdGNsYWltX2dlbmVyYXRvcl9pbmZvo2RuYW1lb0FudGhyb3BpYyBGaWxlc2d2ZXJzaW9uZTEuMC4wa3NwZWNWZXJzaW9uZTIuNC4wAAAQOGp1bWIAAAAoanVtZGMyY3MAEQAQgAAAqgA4m3EDYzJwYS5zaWduYXR1cmUAAAAQCGNib3LShFkCEqIBJhghWQIKMIICBjCCAY2gAwIBAgIUQOWgCu7COdC+uIP6BkIFPWdVEwAwCgYIKoZIzj0EAwMwSTEXMBUGA1UEChMOQW50aHJvcGljLCBQQkMxLjAsBgNVBAMTJUFudGhyb3BpYyBDb250ZW50IENyZWRlbnRpYWxzIFJvb3QgQ0EwHhcNMjYwODA3MTg0MzU2WhcNMjgwODA2MTk0MzU2WjBEMRcwFQYDVQQKEw5BbnRocm9waWMsIFBCQzEpMCcGA1UEAxMgQW50aHJvcGljIENsYXVkZSBDb250ZW50IFNpZ25pbmcwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAASYegpry1AYBRTVNL1CpTlbROnY3dey+UrsF9C3phYrATN3ZHf93Mo8RQN0KOUuOn19P4oWNFWe5n2/She9N7eTo1gwVjAOBgNVHQ8BAf8EBAMCB4AwFQYDVR0lBA4wDAYKKwYBBAGD6F4CATAMBgNVHRMBAf8EAjAAMB8GA1UdIwQYMBaAFM5R4gSBTmRbI/jjxM+aPpzB11zCMAoGCCqGSM49BAMDA2cAMGQCMDFzHRSeAXrSy1WOzkbhPZ6Km2wGTmZ/2gK18k8BQGXyqz88Rdrz6CTX9flAnYNVxgIwcF9c3fVhqmJKpi+UhasNUMko69cyX6STPfta3Q8EjyzDjzoyrol46FP6VFHhvUcJoWNwYWRZDZ4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA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o889xfcw1vWutvm7jAkYGx2ASNynWB3Ru+8PROSOI+78wSd/vPxX714ePRdEzrlyUCKIKCOih5Ot9pa197zvphWLl587f8E3xhNiiQh9S2p66eBSe+uT/z744V9/9U3DjQ22Yrp06EIHYT1/rwP12+a94cGPL7joA0S0NBOal6KF7WW36lLPNfrJLc8c96FffvmuV9/wTgmueoPQl061lavOcOUvnc745xNt37cvbT22/tmzAWCxLB6XIdgLFlcNANy/8cnaqd//gOAfT47pCwsTfPYEmfv18+WdN3/62V88dd87RPxlKfvrdb2ziardfokILaguMOnP+jerl73v72774sojv3mh4HOvF3zmJKuuPDVR/3gKv73+iWhjsvVNAHDdsuuCl+o7VKvVbLgRHt72XPWMH3xI8OFXhaidKLOvPlfe+uNPNOorf/MvIrJX0U+Y2L2XcFULJ1REem59+ndvu/zWL6w8/lvvkUmfP13w2dcLBv8qufCng81E5CwAqKYa+z8O99IN/den//3zx37t3YKPHCtHXPsOeedNn932o5V3fF1EDiuiFk3o/I4xCyLS83S09m1fvucHt57/o49uPeZb75KuL5wm5/3wY/LbF1b+9VjB+e9sflVErRxdP/ufbvvWb8+48SPSt+j9UlvynftvX33/xSKyf/bc/nr/BNzvSLNQFATtR7Tsd/fah977uTtvuLH/B//w/Idvvqp5+8O/PxUA1et1/d/9HBExP/rtrd+s/ey6f7thxS+vEJFTMhtf2PgJuN95giB6bDgrIr1/3LL64Bt/938PKsL4/+BzXmRKqourZkLjdyUfoVpV1cWLDfr7x4cL6O/X1cWLTV0mPPvdAhmqImpioybWxJpYE2tiTayJNbEm1sSaWBNr7Pr/AXXJwfiNDfvfAAAAAElFTkSuQmCC">
+<link rel="preload" href="/shared/fonts/Pacaembu-Light.ttf" as="font" type="font/ttf" crossorigin>
+<!-- home-page teaser marker, read by ../build_home.py:
+     generated: 2026-09-08 08:31 UTC
+     kpi_pld_se: 122.33
+     kpi_gen_gas: 
+     data_through: 2026-09-06 -->
 <script>
 (function(){
   try {
@@ -333,186 +327,181 @@ th.num .th-filter { text-align: right; }
   .filters-collapsible.is-collapsed { display: none; }
 }
 
-
 * { box-sizing: border-box; }
-html, body { height: 100%; }
-body {
-  margin: 0; background: var(--bg); color: var(--text); font-family: var(--font);
-  font-weight: 300; display: flex; flex-direction: column; min-height: 100vh;
-}
-.topbar {
-  position: fixed; top: 16px; right: 16px; z-index: 20;
-  display: flex; gap: 6px;
-}
-#theme-toggle {
-  background: var(--panel); border: 1px solid var(--border);
-  border-radius: 5px; width: 34px; height: 34px; cursor: pointer; color: var(--muted2);
-  display: flex; align-items: center; justify-content: center;
-}
-#theme-toggle svg { width: 17px; height: 17px; }
-/* Match dashboard .wrap: shared --content-w / --content-max (~1280px). */
-main.hub { flex: 1; width: var(--content-w); max-width: var(--content-max); margin: 0 auto;
-  padding: 48px 0 40px; }
-@media (max-width: 900px) { main.hub { width: auto; padding: 36px 16px 40px; } }
-/* Home's own header row -- wordmark left, PT/theme controls right, same
-   idea as the header every dashboard uses, just without a redundant nav
-   row here since the product cards below already link to every page. */
-.hub-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.hub-controls { display: flex; gap: 6px; flex: none; }
-.hub-controls #theme-toggle { position: static; }
-.wordmark { font-size: 26px; font-weight: 600; letter-spacing: -.01em; }
-.wordmark .dot { color: var(--accent); }
-.wordmark a { color: inherit; text-decoration: none; }
-.tagline { color: var(--muted); font-weight: 200; font-size: 14.5px; margin-top: 8px;
-  max-width: 46em; line-height: 1.5; }
-/* Full-width flagband — do not override shared .flagbar width. */
-.flagbar { margin: 16px 0 0; }
-.hub .asof-strip { margin-top: 12px; }
-/*  KPI strip is the only product launcher on the hub (description cards removed). */
-.kpi-strip {
-  display: grid; grid-template-columns: repeat(3, 1fr);
-  gap: 8px; margin-top: 14px;
-}
-@media (max-width: 900px) { .kpi-strip { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 480px) { .kpi-strip { grid-template-columns: 1fr; } }
-.kpi-cell {
-  background: var(--panel); border: 1px solid var(--border); border-radius: 5px;
-  padding: 10px 12px; text-decoration: none; color: var(--text);
-  display: flex; flex-direction: column; gap: 3px; min-width: 0;
-  transition: border-color .15s ease;
-}
-.kpi-cell:hover { border-color: var(--accent); }
-.kpi-cell .kpi-label { font-size: 11px; font-weight: 400; color: var(--muted2); }
-.kpi-cell .kpi-role { font-size: 10.5px; font-weight: 200; color: var(--muted); line-height: 1.3; }
-.kpi-cell .kpi-val { font-size: 13px; font-weight: 400; color: var(--text);
-  line-height: 1.35; min-height: 1.2em; }
-.kpi-cell .kpi-when { font-size: 10.5px; font-weight: 200; color: var(--muted); min-height: 1em; }
-.kpi-spark { display: block; width: 100%; height: 28px; margin-top: 2px; color: var(--accent); }
-.kpi-spark polyline { fill: none; stroke: currentColor; stroke-width: 1.5;
-  stroke-linejoin: round; stroke-linecap: round; }
-.desk-link {
-  display: inline-flex; align-items: center; gap: 6px; margin-top: 14px;
-  font-size: 13px; font-weight: 400; color: var(--accent); text-decoration: none;
-}
-.desk-link:hover { text-decoration: underline; }
-.cards { display: grid; grid-template-columns: repeat(3, 1fr);
-  gap: 8px; margin-top: 16px; }
-@media (max-width: 720px) { .cards { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 480px) { .cards { grid-template-columns: 1fr; } }
-.card {
-  background: var(--panel); border: 1px solid var(--border); border-radius: 5px;
-  padding: var(--card-pad, 10px 12px);
-  text-align: left; text-decoration: none; color: var(--text);
-  transition: border-color .15s ease;
-  display: flex; flex-direction: column;
-}
-.card:hover { border-color: var(--accent); }
-.card .name { font-size: 13.5px; font-weight: 400; display: flex; align-items: center;
-  gap: 7px; }
-.card .name .dot { width: 6px; height: 6px; border-radius: 50%; flex: none; background: var(--accent); }
-.card .desc { color: var(--muted); font-weight: 200; font-size: 12px; margin-top: 5px;
-  line-height: 1.4; flex: 1; }
-.sources-block { margin-top: 24px; }
-.sources-block .label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em;
-  color: var(--muted); font-weight: 200; margin-bottom: 8px; }
-.sources-block .row { display: flex; flex-wrap: wrap; gap: 6px; }
-.sources-block a {
-  font-size: 12px; font-weight: 300; color: var(--muted2); text-decoration: none;
-  border: 1px solid var(--border); border-radius: 5px; padding: 4px 9px;
-}
-.sources-block a:hover { background: var(--accent-soft); color: var(--text); border-color: var(--border-strong); }
-.prose { margin-top: 8px; max-width: 42em; }
-.prose h2 { font-size: 16px; font-weight: 400; margin: 22px 0 6px; }
-.prose p, .prose li { font-size: 14px; font-weight: 300; line-height: 1.6; color: var(--muted2); }
-.prose ul { padding-left: 1.2em; }
-footer.site { padding: 14px 24px; color: var(--muted); font-weight: 200; font-size: 11.5px; text-align: center; }
-footer.site a { color: var(--muted); }
-
+body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; font-weight: 300; }
+header.dash-head { display: flex; flex-direction: column; gap: 10px; margin-bottom: 0; }
+h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
+.header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.header-links { display: flex; gap: 8px; flex-wrap: wrap; }
+.sources { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0 0 var(--gap); }
+.sources-label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 200; margin-right: 2px; }
+.pill { font-size: 11.5px; color: var(--muted2); text-decoration: none; border: 1px solid var(--border); border-radius: 5px; padding: 3px 10px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; }
+.pill:hover { background: var(--accent-soft); color: var(--text); border-color: var(--border-strong); }
+.ext-icon { width: 10px; height: 10px; display: inline-block; flex: none; opacity: .75; }
+#theme-toggle { display: inline-flex; align-items: center; justify-content: center; background: var(--panel); border: 1px solid var(--border-strong); border-radius: 5px; padding: 5px 9px; line-height: 0; cursor: pointer; color: var(--text); }
+#theme-toggle:hover { background: var(--accent-soft); }
+#theme-toggle svg { width: 16px; height: 16px; display: block; }
+.lede { font-size: 13px; color: var(--muted2); font-weight: 300; margin: 0 0 var(--gap); line-height: 1.45; max-width: 54em; }
+.gap-note { font-size: 12px; color: var(--muted); margin: 0 0 var(--gap); font-weight: 200; }
+.kpi-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: var(--gap); }
+@media (max-width: 960px) { .kpi-row { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 520px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } }
+.kpi-cell { padding: 2px 0 6px; border-bottom: 1px solid var(--border); }
+.kpi-cell .lbl { font-size: 11px; color: var(--muted2); font-weight: 400; }
+.kpi-cell .val { font-size: 18px; font-weight: 400; font-variant-numeric: tabular-nums; margin-top: 4px; letter-spacing: -.01em; }
+.kpi-cell .unit { font-size: 11px; color: var(--muted); font-weight: 200; }
+.desk-grid { display: grid; grid-template-columns: 1.35fr 1fr; gap: var(--gap); margin-bottom: var(--gap); align-items: start; }
+@media (max-width: 900px) { .desk-grid { grid-template-columns: 1fr; } }
+.panel { background: transparent; border: none; padding: 0; margin: 0 0 var(--gap); }
+.panel-title { font-size: 13px; font-weight: 400; margin: 0 0 2px; display: flex; align-items: baseline; gap: 8px; }
+.panel-note { font-size: 11.5px; color: var(--muted); margin: 0 0 12px; font-weight: 200; max-width: 52em; }
+.infodot { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--border-strong); font-size: 10px; color: var(--muted2); cursor: help; font-weight: 400; flex: none; }
+.infodot:hover { background: var(--accent-soft); color: var(--text); }
+.chart-host svg { display: block; overflow: hidden; }
+.chart-empty { color: var(--muted); font-size: 13px; padding: 44px 0; text-align: center; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; font-size: 12px; color: var(--muted2); }
+.legend span { display: flex; align-items: center; gap: 6px; }
+.legend .sw { width: 9px; height: 9px; border-radius: 2px; flex: none; }
+.tt { position: fixed; pointer-events: none; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 12px; box-shadow: 0 6px 20px rgba(0,0,0,.16); z-index: 50; display: none; min-width: 180px; }
+.tt .d { font-weight: 400; margin-bottom: 5px; }
+.tt table { border-collapse: collapse; width: 100%; }
+.tt td { padding: 1px 0; }
+.tt td.v { text-align: right; padding-left: 14px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.spark-form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; margin-bottom: 14px; }
+@media (max-width: 520px) { .spark-form { grid-template-columns: 1fr; } }
+.spark-form label { display: flex; flex-direction: column; gap: 4px; font-size: 11px; color: var(--muted2); font-weight: 400; }
+.spark-form input, .spark-form select { background: var(--panel); border: 1px solid var(--border-strong); border-radius: 5px; padding: 6px 10px; color: var(--text); font-size: 13px; font-family: var(--font); font-weight: 300; font-variant-numeric: tabular-nums; }
+.spark-out { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+@media (max-width: 520px) { .spark-out { grid-template-columns: 1fr; } }
+.spark-metric .lbl { font-size: 11px; color: var(--muted2); }
+.spark-metric .val { font-size: 20px; font-weight: 400; font-variant-numeric: tabular-nums; margin-top: 2px; letter-spacing: -.01em; }
+.spark-metric .unit { font-size: 11px; color: var(--muted); font-weight: 200; }
+.spark-metric.pos .val { color: var(--accent); }
+.spark-metric.neg .val { color: var(--muted2); }
+.table-wrap { overflow: auto; max-height: 40vh; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+table.util { border-collapse: collapse; width: 100%; font-size: var(--table-font-size); }
+table.util th, table.util td { padding: 4px 8px; text-align: left; border-bottom: 1px solid var(--border); font-weight: 300; }
+table.util th { color: var(--muted2); font-weight: 400; position: sticky; top: 0; background: var(--bg); }
+table.util .num { text-align: right; font-variant-numeric: tabular-nums; }
+table.util tbody tr:hover { background: var(--accent-soft); }
+footer { margin-top: 22px; color: var(--muted); font-size: 11.5px; line-height: 1.7; font-weight: 200; }
+footer a { color: var(--accent); }
 </style>
 </head>
-
 <body>
-<a class="skip-link" href="#main" data-i18n="skip">Skip to content</a>
-<main class="hub" id="main">
-  <div class="hub-header">
-    <div class="wordmark">GasBrazil<span class="dot">.</span>com</div>
-    <div class="hub-controls">
-      <button type="button" id="lang-toggle" class="langBtn" aria-label="Português">PT</button>
-      <button id="theme-toggle" title="Toggle theme" aria-label="Toggle theme"></button>
+<a class="skip-link" href="#main-chart" data-i18n="skip">Skip to content</a>
+<div class="wrap">
+<header class="dash-head">
+  <div>
+    <h1 data-i18n="navDesk">Market Desk</h1>
+  </div>
+  <div class="header-right">
+    <div class="header-links">
+      <a class="navlink" id="link-home" href="https://gasbrazil.com" data-i18n="navHome">GasBrazil.com</a>
+      <a class="navlink" id="link-ons" href="https://gasbrazil.com/ons/" data-i18n="navOns">ONS Balances</a>
+      <a class="navlink" id="link-poc" href="https://gasbrazil.com/poc/" data-i18n="navPoc">POC Results</a>
+      <a class="navlink" id="link-contratos" href="https://gasbrazil.com/contratos/" data-i18n="navContratos">POC Contracts</a>
+      <a class="navlink" id="link-flows" href="https://gasbrazil.com/flows/" data-i18n="navFlows">Pipeline Flows</a>
+      <a class="navlink" id="link-supply" href="https://gasbrazil.com/supply/" data-i18n="navSupply">Gas Supply</a>
+      <a class="navlink" id="link-pld" href="https://gasbrazil.com/pld/" data-i18n="navPld">PLD Prices</a>
+      <a class="navlink" id="link-precos" href="https://gasbrazil.com/precos/" data-i18n="navPrecos">ANP Prices</a>
+      <span class="navlink is-active" aria-current="page" data-i18n="navDesk">Market Desk</span>
+      <a class="navlink" href="../about/" data-i18n="navAbout">About</a>
     </div>
+    <button type="button" id="lang-toggle" class="langBtn" aria-label="Português">PT</button>
+    <button id="theme-toggle" title="Toggle theme" aria-label="Toggle theme"></button>
   </div>
-  <p class="tagline" data-i18n="tagline">Data tools for Brazil's natural gas market &mdash; grid balances, pipeline capacity, contracted transport, physical flows, supply, ANP prices, and power prices.</p>
-  <div class="flagbar" aria-hidden="true"></div>
-  <a class="desk-link" href="desk/" data-i18n="cardDesk">Market Desk</a>
-  <div class="asof-strip" id="asof-strip" hidden>
-    <span class="asof-label" data-i18n="kpiRefresh">Last refreshed</span>
-    <span class="asof-val"></span>
-  </div>
-  <div class="kpi-strip">
-    <a class="kpi-cell" href="ons/" data-slug="ons">
-      <div class="kpi-label" data-i18n="cardOns">ONS Balances</div>
-      <div class="kpi-role">Grid &amp; gas dispatch</div>
-      <div class="kpi-val" data-en="2,873 MWmed gas" data-pt="2,873 MWmed a gás">2,873 MWmed gas</div>
-      <div class="kpi-when" data-refresh="2026-09-08 05:45 UTC"></div>
-    </a>
-    <a class="kpi-cell" href="poc/" data-slug="poc">
-      <div class="kpi-label" data-i18n="cardPoc">POC Results</div>
-      <div class="kpi-role">Capacity auctions</div>
-      <div class="kpi-val" data-en="33.51 R$/MMBtu · 1 trades (7d)" data-pt="33.51 R$/MMBtu · 1 negócios (7d)">33.51 R$/MMBtu · 1 trades (7d)</div>
-      <div class="kpi-when" data-refresh="2026-08-26"></div>
-      <svg class="kpi-spark" viewBox="0 0 120 28" width="120" height="28" aria-hidden="true"><polyline points="2.0,26.0 60.0,2.0 118.0,15.1"/></svg>
-    </a>
-    <a class="kpi-cell" href="contratos/" data-slug="contratos">
-      <div class="kpi-label" data-i18n="cardContratos">POC Contracts</div>
-      <div class="kpi-role">Firm transport</div>
-      <div class="kpi-val" data-en="190 contracts · 210,610 thousand m³/d" data-pt="190 contratos · 210,610 mil m³/d">190 contracts · 210,610 thousand m³/d</div>
-      <div class="kpi-when" data-refresh="2026-09-08"></div>
-    </a>
-    <a class="kpi-cell" href="flows/" data-slug="flows">
-      <div class="kpi-label" data-i18n="cardFlows">Pipeline Flows</div>
-      <div class="kpi-role">Physical movement</div>
-      <div class="kpi-val" data-en="2.2M m³ realized (7d) · 3 points" data-pt="2.2M m³ realizados (7d) · 3 points">2.2M m³ realized (7d) · 3 points</div>
-      <div class="kpi-when" data-refresh="2026-09-08 05:36 UTC"></div>
-    </a>
-    <a class="kpi-cell" href="supply/" data-slug="supply">
-      <div class="kpi-label" data-i18n="cardSupply">Gas Supply</div>
-      <div class="kpi-role">National balance</div>
-      <div class="kpi-val" data-en="6.7M thousand m³ produced · 2026-07" data-pt="6.7M mil m³ produzidos · 2026-07">6.7M thousand m³ produced · 2026-07</div>
-      <div class="kpi-when" data-refresh="2026-09-08 05:45 UTC"></div>
-      <svg class="kpi-spark" viewBox="0 0 120 28" width="120" height="28" aria-hidden="true"><polyline points="2.0,20.5 7.0,18.9 12.1,20.8 17.1,22.9 22.2,20.1 27.2,20.2 32.3,26.0 37.3,18.6 42.3,19.6 47.4,16.3 52.4,15.1 57.5,10.1 62.5,10.7 67.6,12.2 72.6,8.8 77.7,14.8 82.7,8.9 87.7,9.3 92.8,14.2 97.8,5.6 102.9,7.0 107.9,5.0 113.0,3.6 118.0,2.0"/></svg>
-    </a>
-    <a class="kpi-cell" href="precos/" data-slug="precos">
-      <div class="kpi-label" data-i18n="cardPrecos">ANP Prices</div>
-      <div class="kpi-role">Disclosed R$/MMBtu</div>
-      <div class="kpi-val" data-en="Santos 12.8 R$/MMBtu · 2026-06" data-pt="Santos 12.8 R$/MMBtu · 2026-06">Santos 12.8 R$/MMBtu · 2026-06</div>
-      <div class="kpi-when" data-refresh="2026-09-08 06:42 UTC"></div>
-    </a>
-    <a class="kpi-cell" href="pld/" data-slug="pld">
-      <div class="kpi-label" data-i18n="cardPld">PLD Prices</div>
-      <div class="kpi-role">Power settlement</div>
-      <div class="kpi-val" data-en="SE 118.05 R$/MWh · 2026-09-06" data-pt="SE 118.05 R$/MWh · 2026-09-06">SE 118.05 R$/MWh · 2026-09-06</div>
-      <div class="kpi-when" data-refresh="2026-09-08 05:45 UTC"></div>
-      <svg class="kpi-spark" viewBox="0 0 120 28" width="120" height="28" aria-hidden="true"><polyline points="2.0,26.0 4.6,22.0 7.3,18.0 9.9,14.0 12.5,10.0 15.2,6.0 17.8,2.0 20.5,26.0 23.1,22.0 25.7,18.0 28.4,14.0 31.0,10.0 33.6,6.0 36.3,2.0 38.9,26.0 41.5,22.0 44.2,18.0 46.8,14.0 49.5,10.0 52.1,6.0 54.7,2.0 57.4,26.0 60.0,22.0 62.6,18.0 65.3,14.0 67.9,10.0 70.5,6.0 73.2,2.0 75.8,26.0 78.5,22.0 81.1,18.0 83.7,14.0 86.4,10.0 89.0,6.0 91.6,2.0 94.3,26.0 96.9,22.0 99.5,18.0 102.2,14.0 104.8,10.0 107.5,6.0 110.1,2.0 112.7,26.0 115.4,22.0 118.0,18.0"/></svg>
-    </a>
-  </div>
-  <div class="sources-block">
-    <div class="label" data-i18n="sources">Sources</div>
-    <div class="row">
-      <a href="https://dados.ons.org.br" target="_blank" rel="noopener" data-i18n="sourceOns">ONS open data</a>
-      <a href="https://www.ofertadecapacidade.com.br/PEG/resultado" target="_blank" rel="noopener" data-i18n="sourcePoc">Portal de Oferta de Capacidade</a>
-      <a href="https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/dados-consolidados-movimentacao-de-gas-natural-em-gasodutos-de-transporte" target="_blank" rel="noopener" data-i18n="sourceFlows">ANP open data — pipeline movement</a>
-      <a href="https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/producao-de-petroleo-e-gas-natural-por-estado-e-localizacao" target="_blank" rel="noopener" data-i18n="sourceSupply">ANP PPGN-EL — production by state</a>
-      <a href="https://www.gov.br/anp/pt-br/assuntos/movimentacao-estocagem-e-comercializacao-de-gas-natural/acompanhamento-do-mercado-de-gas-natural/publicidade-dos-precos-de-gas-natural" target="_blank" rel="noopener" data-i18n="sourcePrecos">ANP — publicidade dos preços de gás natural</a>
-      <a href="https://dadosabertos.ccee.org.br/dataset/pld_media_diaria" target="_blank" rel="noopener" data-i18n="sourcePld">CCEE open data — PLD média diária</a>
+</header>
+<div class="asof-strip" id="asof-strip">
+  <span class="asof-label" data-i18n="kpiRefresh">Last refreshed</span>
+  <span class="asof-val" id="asof-refreshed">&mdash;</span>
+  <span class="asof-label" data-i18n="dataThrough">Data through</span>
+  <span class="asof-val" id="asof-through">&mdash;</span>
+</div>
+<div class="flagbar" aria-hidden="true"></div>
+<div class="sources">
+  <span class="sources-label" data-i18n="sources">Sources</span>
+  <a class="pill" href="../ons/" data-i18n="sourceOns">ONS open data</a>
+  <a class="pill" href="../pld/" data-i18n="sourcePld">CCEE open data — PLD média diária</a>
+  <a class="pill" href="../precos/" data-i18n="sourcePrecos">ANP — publicidade dos preços de gás natural</a>
+  <a class="pill" href="../poc/" data-i18n="sourcePoc">Portal de Oferta de Capacidade</a>
+  <a class="pill" href="../flows/" data-i18n="sourceFlows">ANP open data — pipeline movement</a>
+</div>
+<p class="lede" data-i18n="deskLede">One screen across gas and power: latest SIN gas generation, SE PLD and CMO, disclosed ANP and POC prices, pipeline utilization, and a client-side thermal spark calculator. Product pages keep filters and full history.</p>
+<p class="gap-note" id="data-notes" hidden></p>
+<div class="kpi-row" id="kpi-row"></div>
+
+<div class="desk-grid">
+  <section class="panel" aria-labelledby="compare-title">
+    <p class="panel-title" id="compare-title" data-i18n="deskCompareTitle">PLD vs CMO vs gas CVU — SE</p>
+    <p class="panel-note" data-i18n="deskCompareNote">Last ~90 days, Southeast. CMO and median gas-plant CVU from ONS (R$/MWh). CVU is a planning cost, not a market price.</p>
+    <div class="chart-host" id="main-chart"></div>
+  </section>
+  <section class="panel" aria-labelledby="spark-title">
+    <p class="panel-title" id="spark-title">
+      <span data-i18n="deskSparkTitle">Thermal spark / implied CVU</span>
+      <span class="infodot" id="spark-info" title="" aria-label="Formula">i</span>
+    </p>
+    <p class="panel-note" data-i18n="deskSparkNote">Implied generation cost from gas price and heat rate, compared with current PLD SE and CMO SE. Optional CVU override replaces the calculated cost.</p>
+    <div class="spark-form">
+      <label><span data-i18n="deskGasPrice">Gas price</span> (R$/MMBtu)
+        <input type="number" id="spark-gas" step="0.1" min="0" inputmode="decimal">
+      </label>
+      <label><span data-i18n="deskHeatRate">Heat rate</span> (kcal/kWh)
+        <select id="spark-hr-preset">
+          <option value="ccgt">CCGT 1800</option>
+          <option value="ocgt">OCGT 2500</option>
+          <option value="custom" data-i18n="deskHrCustom">Custom</option>
+        </select>
+      </label>
+      <label><span data-i18n="deskHrCustom">Custom heat rate</span>
+        <input type="number" id="spark-hr" step="50" min="500" inputmode="decimal">
+      </label>
+      <label><span data-i18n="deskCvuOverride">CVU override</span> (R$/MWh)
+        <input type="number" id="spark-cvu" step="1" min="0" placeholder="—" inputmode="decimal">
+      </label>
     </div>
+    <div class="spark-out">
+      <div class="spark-metric"><div class="lbl" data-i18n="deskImpliedCvu">Implied CVU</div><div class="val" id="spark-implied">—</div><div class="unit">R$/MWh</div></div>
+      <div class="spark-metric" id="spark-vs-pld-wrap"><div class="lbl" data-i18n="deskVsPld">vs PLD SE</div><div class="val" id="spark-vs-pld">—</div><div class="unit">R$/MWh</div></div>
+      <div class="spark-metric" id="spark-vs-cmo-wrap"><div class="lbl" data-i18n="deskVsCmo">vs CMO SE</div><div class="val" id="spark-vs-cmo">—</div><div class="unit">R$/MWh</div></div>
+    </div>
+  </section>
+</div>
+
+<section class="panel" aria-labelledby="poc-anp-title">
+  <p class="panel-title" id="poc-anp-title" data-i18n="deskPocAnpTitle">POC vs ANP — monthly</p>
+  <p class="panel-note" data-i18n="deskPocAnpNote">Mean POC auction price vs ANP Santos producers and non-thermal Sudeste distributors (R$/MMBtu).</p>
+  <div class="chart-host" id="poc-anp-chart"></div>
+</section>
+
+<section class="panel" aria-labelledby="util-title">
+  <p class="panel-title" id="util-title" data-i18n="deskUtilTitle">Contracted capacity vs realized flows</p>
+  <p class="panel-note" data-i18n="deskUtilNote">Active contracted capacity (thousand m³/d) vs average realized volume over the last 30 days of flow data, by TSO.</p>
+  <div class="table-wrap">
+    <table class="util" id="util-table">
+      <thead><tr>
+        <th>TSO</th>
+        <th class="num" data-i18n="deskUtilCap">Contracted</th>
+        <th class="num" data-i18n="deskUtilReal">Realized avg</th>
+        <th class="num" data-i18n="deskUtilPct">Utilization</th>
+      </tr></thead>
+      <tbody id="util-body"></tbody>
+    </table>
   </div>
-</main>
-<footer class="site">
-  &copy; <span id="year"></span> GasBrazil.com
-  &middot; <a href="./about/" data-i18n="footerAbout">About &amp; methodology</a>
+</section>
+
+<footer>
+  &copy; <span id="year"></span> GasBrazil.com &middot;
+  <span data-i18n="deskFooter">Cross-product snapshot from sibling dashboards. Not an official ONS, ANP, CCEE, or transportadora product.</span>
   &middot; <span data-i18n="contact">Contact</span>: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
+  &middot; <a href="../about/" data-i18n="footerAbout">About & methodology</a>
 </footer>
+</div>
+<div class="tt" id="chart-tt"></div>
 <script>
+const PAYLOAD_URL = "payload.json.gz";
+
 
 function b64ToBytes(b64) {
   const bin = atob(b64);
@@ -537,6 +526,16 @@ async function inflateGzipUrl(url) {
   const ds = new DecompressionStream("gzip");
   const stream = res.body.pipeThrough(ds);
   return new TextDecoder().decode(await new Response(stream).arrayBuffer());
+}
+
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+function chartPalette() {
+  const s = getComputedStyle(document.documentElement);
+  return [1,2,3,4,5,6,7,8].map(i => (s.getPropertyValue('--chart-' + i) || '').trim()).filter(Boolean);
 }
 
 
@@ -768,69 +767,429 @@ function initLangToggle(buttonId, onChange) {
   });
 }
 
-document.getElementById("year").textContent = new Date().getFullYear();
-initThemeToggle("theme-toggle");
-initLangToggle("lang-toggle");
+const SITE_LINKS = {
+  "home": {
+    "custom": "https://gasbrazil.com",
+    "caissonpoint": "https://caissonpoint.github.io/gasbrazil-com/",
+    "hub": "https://gasbrazil.github.io/"
+  },
+  "ons": {
+    "custom": "https://gasbrazil.com/ons/",
+    "caissonpoint": "https://caissonpoint.github.io/ons-dashboard/",
+    "hub": "https://gasbrazil.github.io/ons/"
+  },
+  "poc": {
+    "custom": "https://gasbrazil.com/poc/",
+    "caissonpoint": "https://caissonpoint.github.io/poc-dashboard/",
+    "hub": "https://gasbrazil.github.io/poc/"
+  },
+  "contratos": {
+    "custom": "https://gasbrazil.com/contratos/",
+    "caissonpoint": "https://caissonpoint.github.io/poc-contratos/",
+    "hub": "https://gasbrazil.github.io/contratos/"
+  },
+  "flows": {
+    "custom": "https://gasbrazil.com/flows/",
+    "caissonpoint": "https://gasbrazil.com/flows/",
+    "hub": "https://gasbrazil.github.io/flows/"
+  },
+  "supply": {
+    "custom": "https://gasbrazil.com/supply/",
+    "caissonpoint": "https://gasbrazil.com/supply/",
+    "hub": "https://gasbrazil.github.io/supply/"
+  },
+  "pld": {
+    "custom": "https://gasbrazil.com/pld/",
+    "caissonpoint": "https://gasbrazil.com/pld/",
+    "hub": "https://gasbrazil.github.io/pld/"
+  },
+  "precos": {
+    "custom": "https://gasbrazil.com/precos/",
+    "caissonpoint": "https://gasbrazil.com/precos/",
+    "hub": "https://gasbrazil.github.io/precos/"
+  }
+};
+function siteFlavor() {
+  const h = location.hostname;
+  if (h === "gasbrazil.github.io") return "hub";
+  if (h === "caissonpoint.github.io") return "caissonpoint";
+  return "custom";
+}
+function initCrossLinks() {
+  const flavor = siteFlavor();
+  { const el = document.getElementById("link-home"); if (el) el.href = SITE_LINKS.home[flavor]; }
+  { const el = document.getElementById("link-ons"); if (el) el.href = SITE_LINKS.ons[flavor]; }
+  { const el = document.getElementById("link-poc"); if (el) el.href = SITE_LINKS.poc[flavor]; }
+  { const el = document.getElementById("link-contratos"); if (el) el.href = SITE_LINKS.contratos[flavor]; }
+  { const el = document.getElementById("link-flows"); if (el) el.href = SITE_LINKS.flows[flavor]; }
+  { const el = document.getElementById("link-supply"); if (el) el.href = SITE_LINKS.supply[flavor]; }
+  { const el = document.getElementById("link-pld"); if (el) el.href = SITE_LINKS.pld[flavor]; }
+  { const el = document.getElementById("link-precos"); if (el) el.href = SITE_LINKS.precos[flavor]; }
+}
+
+
+GB_I18N.en.deskLede = "One screen across gas and power: latest SIN gas generation, SE PLD and CMO, disclosed ANP and POC prices, pipeline utilization, and a client-side thermal spark calculator. Product pages keep filters and full history.";
+GB_I18N.en.deskCompareTitle = "PLD vs CMO vs gas CVU — SE";
+GB_I18N.en.deskCompareNote = "Last ~90 days, Southeast. CMO and median gas-plant CVU from ONS (R$/MWh). CVU is a planning cost, not a market price.";
+GB_I18N.en.deskSparkTitle = "Thermal spark / implied CVU";
+GB_I18N.en.deskSparkNote = "Implied generation cost from gas price and heat rate, compared with current PLD SE and CMO SE. Optional CVU override replaces the calculated cost.";
+GB_I18N.en.deskGasPrice = "Gas price";
+GB_I18N.en.deskHeatRate = "Heat rate";
+GB_I18N.en.deskHrCustom = "Custom";
+GB_I18N.en.deskCvuOverride = "CVU override";
+GB_I18N.en.deskImpliedCvu = "Implied CVU";
+GB_I18N.en.deskVsPld = "vs PLD SE";
+GB_I18N.en.deskVsCmo = "vs CMO SE";
+GB_I18N.en.deskPocAnpTitle = "POC vs ANP — monthly";
+GB_I18N.en.deskPocAnpNote = "Mean POC auction price vs ANP Santos producers and non-thermal Sudeste distributors (R$/MMBtu).";
+GB_I18N.en.deskUtilTitle = "Contracted capacity vs realized flows";
+GB_I18N.en.deskUtilNote = "Active contracted capacity (thousand m³/d) vs average realized volume over the last 30 days of flow data, by TSO.";
+GB_I18N.en.deskUtilCap = "Contracted";
+GB_I18N.en.deskUtilReal = "Realized avg";
+GB_I18N.en.deskUtilPct = "Utilization";
+GB_I18N.en.deskFooter = "Cross-product snapshot from sibling dashboards. Not an official ONS, ANP, CCEE, or transportadora product.";
+GB_I18N.en.deskEmptyChart = "No series available — sibling parquet missing at build time.";
+GB_I18N.en.deskKpiGen = "Gas gen SIN";
+GB_I18N.en.deskKpiPld = "PLD SE";
+GB_I18N.en.deskKpiCmo = "CMO SE";
+GB_I18N.en.deskKpiSantos = "ANP Santos";
+GB_I18N.en.deskKpiPoc = "POC 7d";
+GB_I18N.en.deskKpiFlows = "Flows 7d";
+
+GB_I18N.pt.deskLede = "Uma tela cruzando gás e energia: geração a gás no SIN, PLD e CMO SE, preços ANP e POC, utilização de gasodutos e calculadora térmica de spark. Os painéis de produto guardam filtros e o histórico completo.";
+GB_I18N.pt.deskCompareTitle = "PLD vs CMO vs CVU a gás — SE";
+GB_I18N.pt.deskCompareNote = "Últimos ~90 dias, Sudeste. CMO e CVU mediano de usinas a gás da ONS (R$/MWh). CVU é custo de planejamento, não preço de mercado.";
+GB_I18N.pt.deskSparkTitle = "Spark térmico / CVU implícito";
+GB_I18N.pt.deskSparkNote = "Custo implícito de geração a partir do preço do gás e do heat rate, comparado ao PLD SE e ao CMO SE atuais. O override de CVU substitui o custo calculado.";
+GB_I18N.pt.deskGasPrice = "Preço do gás";
+GB_I18N.pt.deskHeatRate = "Heat rate";
+GB_I18N.pt.deskHrCustom = "Personalizado";
+GB_I18N.pt.deskCvuOverride = "Override de CVU";
+GB_I18N.pt.deskImpliedCvu = "CVU implícito";
+GB_I18N.pt.deskVsPld = "vs PLD SE";
+GB_I18N.pt.deskVsCmo = "vs CMO SE";
+GB_I18N.pt.deskPocAnpTitle = "POC vs ANP — mensal";
+GB_I18N.pt.deskPocAnpNote = "Preço médio de leilão POC vs produtores Santos e distribuidoras não térmicas Sudeste (R$/MMBtu).";
+GB_I18N.pt.deskUtilTitle = "Capacidade contratada vs fluxos realizados";
+GB_I18N.pt.deskUtilNote = "Capacidade contratada ativa (mil m³/d) vs volume realizado médio nos últimos 30 dias de dados de fluxo, por TSO.";
+GB_I18N.pt.deskUtilCap = "Contratada";
+GB_I18N.pt.deskUtilReal = "Realizado méd.";
+GB_I18N.pt.deskUtilPct = "Utilização";
+GB_I18N.pt.deskFooter = "Retrato cruzado a partir dos painéis irmãos. Não é um produto oficial da ONS, ANP, CCEE ou transportadoras.";
+GB_I18N.pt.deskEmptyChart = "Sem séries — parquet irmão ausente no build.";
+GB_I18N.pt.deskKpiGen = "Geração a gás SIN";
+GB_I18N.pt.deskKpiPld = "PLD SE";
+GB_I18N.pt.deskKpiCmo = "CMO SE";
+GB_I18N.pt.deskKpiSantos = "ANP Santos";
+GB_I18N.pt.deskKpiPoc = "POC 7d";
+GB_I18N.pt.deskKpiFlows = "Fluxos 7d";
+
+let DATA = null;
+let chartResizeTimer = null;
+
+function fmtNum(v, d) {
+  if (v === null || v === undefined || (typeof v === "number" && isNaN(v))) return "—";
+  return Number(v).toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d });
+}
+
+function paintAsof() {
+  let refreshedText = DATA.generated || "—";
+  try {
+    const d = new Date(DATA.generatedIso);
+    if (!isNaN(d)) {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      refreshedText = d.toLocaleDateString(undefined, { year: "numeric", month: "2-digit", day: "2-digit" })
+        + " " + d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })
+        + " " + tz;
+    }
+  } catch (e) {}
+  document.getElementById("asof-refreshed").textContent = refreshedText;
+  document.getElementById("asof-through").textContent = DATA.dataThrough || "—";
+}
+
+function renderNotes() {
+  const el = document.getElementById("data-notes");
+  const notes = (DATA.notes || []).filter(Boolean);
+  if (!notes.length) { el.hidden = true; el.textContent = ""; return; }
+  el.hidden = false;
+  el.textContent = notes.join(" · ");
+}
+
+function renderKpis() {
+  const k = DATA.kpi || {};
+  const cells = [
+    { lbl: t("deskKpiGen"), val: fmtNum(k.genGasSin, 0), unit: "MWmed" + (k.genGasWhen ? " · " + k.genGasWhen : "") },
+    { lbl: t("deskKpiPld"), val: fmtNum(k.pldSe, 2), unit: "R$/MWh" + (k.pldWhen ? " · " + k.pldWhen : "") },
+    { lbl: t("deskKpiCmo"), val: fmtNum(k.cmoSe, 2), unit: "R$/MWh" + (k.cmoWhen ? " · " + k.cmoWhen : "") },
+    { lbl: t("deskKpiSantos"), val: fmtNum(k.anpSantos, 1), unit: "R$/MMBtu" + (k.anpSantosMonth ? " · " + k.anpSantosMonth : "") },
+    { lbl: t("deskKpiPoc"), val: fmtNum(k.pocAvg7d, 2), unit: "R$/MMBtu" + (k.pocTrades7d != null ? " · " + k.pocTrades7d : "") },
+    { lbl: t("deskKpiFlows"), val: fmtNum(k.flowsTotal7d, 0), unit: "mil m³" + (k.flowsWhen ? " · " + k.flowsWhen : "") },
+  ];
+  const host = document.getElementById("kpi-row");
+  host.innerHTML = cells.map(c =>
+    '<div class="kpi-cell"><div class="lbl">' + escapeHtml(c.lbl) + '</div>' +
+    '<div class="val">' + escapeHtml(c.val) + '</div>' +
+    '<div class="unit">' + escapeHtml(c.unit) + '</div></div>'
+  ).join("");
+}
+
+function impliedCvu(gas, hr, natgas, mmbtuPer1000) {
+  if (gas == null || hr == null || !(natgas > 0) || !(mmbtuPer1000 > 0)) return null;
+  return gas * hr * 1000 / (natgas * mmbtuPer1000);
+}
+
+function renderSpark() {
+  const s = DATA.spark || {};
+  const gasEl = document.getElementById("spark-gas");
+  const hrEl = document.getElementById("spark-hr");
+  const preset = document.getElementById("spark-hr-preset");
+  const ovEl = document.getElementById("spark-cvu");
+  const gas = parseFloat(gasEl.value);
+  let hr = parseFloat(hrEl.value);
+  if (preset.value === "ccgt") hr = s.heatRateCcgt;
+  else if (preset.value === "ocgt") hr = s.heatRateOcgt;
+  if (preset.value !== "custom") hrEl.value = hr;
+  const override = ovEl.value === "" ? null : parseFloat(ovEl.value);
+  const calc = impliedCvu(gas, hr, s.natgasKcalPerM3, s.mmbtuPer1000M3);
+  const cost = (override != null && !isNaN(override)) ? override : calc;
+  document.getElementById("spark-implied").textContent = fmtNum(cost, 1);
+  const vsPld = (cost != null && s.pldSe != null) ? (s.pldSe - cost) : null;
+  const vsCmo = (cost != null && s.cmoSe != null) ? (s.cmoSe - cost) : null;
+  const pldEl = document.getElementById("spark-vs-pld");
+  const cmoEl = document.getElementById("spark-vs-cmo");
+  pldEl.textContent = fmtNum(vsPld, 1);
+  cmoEl.textContent = fmtNum(vsCmo, 1);
+  const pldWrap = document.getElementById("spark-vs-pld-wrap");
+  const cmoWrap = document.getElementById("spark-vs-cmo-wrap");
+  pldWrap.classList.toggle("pos", vsPld != null && vsPld > 0);
+  pldWrap.classList.toggle("neg", vsPld != null && vsPld < 0);
+  cmoWrap.classList.toggle("pos", vsCmo != null && vsCmo > 0);
+  cmoWrap.classList.toggle("neg", vsCmo != null && vsCmo < 0);
+  const info = document.getElementById("spark-info");
+  const formula = currentLang() === "pt" ? (s.formulaPt || "") : (s.formulaEn || "");
+  info.title = formula;
+  info.setAttribute("aria-label", formula);
+}
+
+function initSparkForm() {
+  const s = DATA.spark || {};
+  const gasEl = document.getElementById("spark-gas");
+  const hrEl = document.getElementById("spark-hr");
+  const preset = document.getElementById("spark-hr-preset");
+  if (s.defaultGasPrice != null) gasEl.value = s.defaultGasPrice;
+  hrEl.value = s.heatRateCcgt || 1800;
+  preset.value = "ccgt";
+  ["spark-gas", "spark-hr", "spark-cvu"].forEach(id => {
+    document.getElementById(id).addEventListener("input", renderSpark);
+  });
+  preset.addEventListener("change", () => {
+    const s2 = DATA.spark || {};
+    if (preset.value === "ccgt") hrEl.value = s2.heatRateCcgt;
+    else if (preset.value === "ocgt") hrEl.value = s2.heatRateOcgt;
+    renderSpark();
+  });
+  renderSpark();
+}
+
+function drawLineChart(hostId, dates, seriesList, emptyMsg) {
+  const host = document.getElementById(hostId);
+  host.innerHTML = "";
+  const has = seriesList.some(s => (s.values || []).some(v => v != null));
+  if (!dates.length || !has) {
+    const empty = document.createElement("div");
+    empty.className = "chart-empty";
+    empty.textContent = emptyMsg || t("deskEmptyChart");
+    host.appendChild(empty);
+    return;
+  }
+  const pal = chartPalette();
+  const W = Math.max(320, host.clientWidth || 640);
+  const H = 260;
+  const pad = { t: 16, r: 16, b: 36, l: 48 };
+  const iw = W - pad.l - pad.r, ih = H - pad.t - pad.b;
+  let lo = Infinity, hi = -Infinity;
+  seriesList.forEach(s => s.values.forEach(v => {
+    if (v == null) return;
+    if (v < lo) lo = v;
+    if (v > hi) hi = v;
+  }));
+  if (!(hi > lo)) { lo = 0; hi = 1; }
+  const padY = (hi - lo) * 0.08;
+  lo -= padY; hi += padY;
+  const xAt = i => pad.l + (dates.length <= 1 ? iw / 2 : i / (dates.length - 1) * iw);
+  const yAt = v => pad.t + (1 - (v - lo) / (hi - lo)) * ih;
+
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("width", W);
+  svg.setAttribute("height", H);
+  svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+
+  for (let g = 0; g <= 4; g++) {
+    const y = pad.t + ih * g / 4;
+    const line = document.createElementNS(svg.namespaceURI, "line");
+    line.setAttribute("x1", pad.l); line.setAttribute("x2", pad.l + iw);
+    line.setAttribute("y1", y); line.setAttribute("y2", y);
+    line.setAttribute("stroke", "var(--border)"); line.setAttribute("stroke-width", "1");
+    svg.appendChild(line);
+    const lab = document.createElementNS(svg.namespaceURI, "text");
+    const val = hi - (hi - lo) * g / 4;
+    lab.textContent = fmtNum(val, 0);
+    lab.setAttribute("x", pad.l - 8); lab.setAttribute("y", y + 3);
+    lab.setAttribute("text-anchor", "end"); lab.setAttribute("fill", "var(--muted)");
+    lab.setAttribute("font-size", "10"); lab.setAttribute("font-family", "var(--font)");
+    svg.appendChild(lab);
+  }
+
+  seriesList.forEach((s, si) => {
+    const color = pal[si % pal.length] || "var(--accent)";
+    let d = "";
+    let drawing = false;
+    s.values.forEach((v, i) => {
+      if (v == null) { drawing = false; return; }
+      const cmd = drawing ? "L" : "M";
+      d += cmd + " " + xAt(i) + " " + yAt(v) + " ";
+      drawing = true;
+    });
+    if (!d) return;
+    const path = document.createElementNS(svg.namespaceURI, "path");
+    path.setAttribute("d", d.trim());
+    path.setAttribute("fill", "none");
+    path.setAttribute("stroke", color);
+    path.setAttribute("stroke-width", "1.75");
+    path.setAttribute("stroke-linejoin", "round");
+    path.setAttribute("stroke-linecap", "round");
+    svg.appendChild(path);
+  });
+
+  const nLabel = Math.min(5, dates.length);
+  for (let i = 0; i < nLabel; i++) {
+    const idx = nLabel === 1 ? 0 : Math.round(i * (dates.length - 1) / (nLabel - 1));
+    const lab = document.createElementNS(svg.namespaceURI, "text");
+    lab.textContent = dates[idx];
+    lab.setAttribute("x", xAt(idx)); lab.setAttribute("y", H - 10);
+    lab.setAttribute("text-anchor", "middle"); lab.setAttribute("fill", "var(--muted)");
+    lab.setAttribute("font-size", "10"); lab.setAttribute("font-family", "var(--font)");
+    svg.appendChild(lab);
+  }
+
+  const tt = document.getElementById("chart-tt");
+  const hit = document.createElementNS(svg.namespaceURI, "rect");
+  hit.setAttribute("x", pad.l); hit.setAttribute("y", pad.t);
+  hit.setAttribute("width", iw); hit.setAttribute("height", ih);
+  hit.setAttribute("fill", "transparent");
+  svg.appendChild(hit);
+  hit.addEventListener("pointermove", ev => {
+    const r = svg.getBoundingClientRect();
+    const px = (ev.clientX - r.left) / r.width * W;
+    let best = 0, bestDist = Infinity;
+    for (let i = 0; i < dates.length; i++) {
+      const dist = Math.abs(xAt(i) - px);
+      if (dist < bestDist) { bestDist = dist; best = i; }
+    }
+    let rows = "";
+    seriesList.forEach((s, si) => {
+      const v = s.values[best];
+      if (v == null) return;
+      const color = pal[si % pal.length] || "var(--accent)";
+      rows += '<tr><td><span class="sw" style="display:inline-block;width:9px;height:9px;border-radius:2px;background:' +
+        color + '"></span> ' + escapeHtml(s.label) + '</td><td class="v">' + fmtNum(v, 2) + '</td></tr>';
+    });
+    tt.innerHTML = '<div class="d">' + escapeHtml(dates[best]) + '</div><table>' + rows + '</table>';
+    tt.style.display = "block";
+    const tw = tt.offsetWidth, th = tt.offsetHeight;
+    tt.style.left = Math.min(window.innerWidth - tw - 12, ev.clientX + 16) + "px";
+    tt.style.top = Math.min(window.innerHeight - th - 12, Math.max(8, ev.clientY - th / 2)) + "px";
+  });
+  hit.addEventListener("pointerleave", () => { tt.style.display = "none"; });
+
+  host.appendChild(svg);
+  const lg = document.createElement("div");
+  lg.className = "legend";
+  seriesList.forEach((s, si) => {
+    const span = document.createElement("span");
+    const color = pal[si % pal.length] || "var(--accent)";
+    span.innerHTML = '<span class="sw" style="background:' + color + '"></span>' + escapeHtml(s.label);
+    lg.appendChild(span);
+  });
+  host.appendChild(lg);
+}
+
+function renderCompareChart() {
+  const c = DATA.compareSe || {};
+  drawLineChart("main-chart", c.dates || [], [
+    { label: "PLD SE", values: c.pld || [] },
+    { label: "CMO SE", values: c.cmo || [] },
+    { label: "CVU gas med", values: c.cvu || [] },
+  ], c.note || t("deskEmptyChart"));
+}
+
+function renderPocAnpChart() {
+  const c = DATA.pocAnpMonthly || {};
+  drawLineChart("poc-anp-chart", c.months || [], [
+    { label: "POC avg", values: c.poc || [] },
+    { label: "ANP Santos", values: c.anpSantos || [] },
+    { label: "ANP non-thermal SE", values: c.anpNonThermalSe || [] },
+  ], c.note || t("deskEmptyChart"));
+}
+
+function renderUtil() {
+  const u = DATA.utilization || {};
+  const body = document.getElementById("util-body");
+  body.innerHTML = "";
+  const rows = u.rows || [];
+  if (!rows.length) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = '<td colspan="4" style="color:var(--muted)">' + escapeHtml(u.note || t("deskEmptyChart")) + "</td>";
+    body.appendChild(tr);
+    return;
+  }
+  rows.forEach(r => {
+    const tr = document.createElement("tr");
+    const util = r.utilization == null ? "—" : (r.utilization * 100).toFixed(0) + "%";
+    tr.innerHTML =
+      "<td>" + escapeHtml(r.tso) + "</td>" +
+      '<td class="num">' + escapeHtml(fmtNum(r.contracted, 1)) + "</td>" +
+      '<td class="num">' + escapeHtml(fmtNum(r.realized, 1)) + "</td>" +
+      '<td class="num">' + escapeHtml(util) + "</td>";
+    body.appendChild(tr);
+  });
+}
+
+function renderAll() {
+  paintAsof();
+  renderNotes();
+  renderKpis();
+  renderCompareChart();
+  renderPocAnpChart();
+  renderUtil();
+  renderSpark();
+  applyI18n();
+}
+
+async function init() {
+  document.getElementById("year").textContent = new Date().getFullYear();
+  const json = await inflateGzipUrl(PAYLOAD_URL);
+  DATA = JSON.parse(json);
+  initSparkForm();
+  renderAll();
+  window.addEventListener("resize", () => {
+    clearTimeout(chartResizeTimer);
+    chartResizeTimer = setTimeout(() => {
+      renderCompareChart();
+      renderPocAnpChart();
+    }, 140);
+  });
+  initThemeToggle("theme-toggle", () => {
+    renderCompareChart();
+    renderPocAnpChart();
+  });
+  initLangToggle("lang-toggle", () => {
+    renderAll();
+  });
+  initCrossLinks();
+  applyI18n();
+}
+init();
 </script>
 </body>
 </html>
-
-<script>
-const TEASERS_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/hub/teasers.json.gz";
-function paintRefreshLabels() {
-  document.querySelectorAll(".kpi-when[data-refresh]").forEach(el => {
-    const when = el.getAttribute("data-refresh");
-    el.textContent = when ? when : "";
-  });
-  document.querySelectorAll(".kpi-val[data-en]").forEach(el => {
-    const en = el.getAttribute("data-en");
-    const pt = el.getAttribute("data-pt");
-    const val = currentLang() === "pt" ? (pt || en) : en;
-    el.textContent = val || "";
-    el.hidden = !val;
-  });
-  const strip = document.getElementById("asof-strip");
-  if (strip) {
-    const parts = [];
-    document.querySelectorAll(".kpi-cell").forEach(cell => {
-      const whenEl = cell.querySelector(".kpi-when[data-refresh]");
-      const when = whenEl && whenEl.getAttribute("data-refresh");
-      const labelEl = cell.querySelector(".kpi-label");
-      const label = labelEl ? labelEl.textContent.trim() : "";
-      if (when) parts.push(label ? (label + " " + when) : when);
-    });
-    const dates = strip.querySelector(".asof-val");
-    if (dates) dates.textContent = parts.join(" · ");
-    strip.hidden = parts.length === 0;
-  }
-}
-async function loadLiveTeasers() {
-  if (!TEASERS_URL || TEASERS_URL.indexOf("teasers") < 0) return;
-  try {
-    const raw = await inflateGzipUrl(TEASERS_URL);
-    const data = JSON.parse(raw);
-    const items = (data && data.items) || data || {};
-    document.querySelectorAll(".kpi-cell[data-slug]").forEach(cell => {
-      const slug = cell.getAttribute("data-slug");
-      const t = items[slug];
-      if (!t) return;
-      const val = cell.querySelector(".kpi-val");
-      const when = cell.querySelector(".kpi-when");
-      if (val && (t.kpi || t.kpiEn)) {
-        const en = t.kpiEn || t.kpi || "";
-        const pt = t.kpiPt || en;
-        val.setAttribute("data-en", en);
-        val.setAttribute("data-pt", pt);
-      }
-      if (when && t.when) when.setAttribute("data-refresh", t.when);
-    });
-    paintRefreshLabels();
-  } catch (e) {
-    /* Build-time markers remain the fallback. */
-  }
-}
-const _apply = applyI18n;
-applyI18n = function() { _apply(); paintRefreshLabels(); };
-paintRefreshLabels();
-loadLiveTeasers();
-</script>

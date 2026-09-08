@@ -69,12 +69,34 @@ def load_payload():
     generated = _now_utc.strftime("%Y-%m-%d %H:%M UTC")
     generatedIso = _now_utc.isoformat()
 
+    # Hub teaser: volume-weighted? plain mean of last 7 trade days is fine.
+    kpi_price = None
+    kpi_n = 0
+    kpi_when = None
+    try:
+        pdf = pd.read_parquet(PARQUET_PATH)
+        if "Trade Date" in pdf.columns and "Price" in pdf.columns:
+            pdf = pdf.dropna(subset=["Trade Date", "Price"]).copy()
+            pdf["Trade Date"] = pd.to_datetime(pdf["Trade Date"], errors="coerce")
+            pdf = pdf.dropna(subset=["Trade Date"])
+            if len(pdf):
+                latest = pdf["Trade Date"].max()
+                week = pdf[pdf["Trade Date"] >= (latest - pd.Timedelta(days=7))]
+                kpi_price = round(float(week["Price"].mean()), 2) if len(week) else None
+                kpi_n = int(week["Price"].notna().sum()) if len(week) else 0
+                kpi_when = latest.strftime("%Y-%m-%d")
+    except Exception:
+        pass
+
     return {
         "generated": generated,
         "generatedIso": generatedIso,
         "columns": COLUMNS,
         "displayNames": DISPLAY_NAMES,
         "rows": records,
+        "kpiPrice7d": kpi_price,
+        "kpiTrades7d": kpi_n,
+        "kpiWhen": kpi_when,
     }
 
 
@@ -88,6 +110,11 @@ TEMPLATE = """<!doctype html>
 <link rel="canonical" href="https://gasbrazil.com/poc/">
 <link rel="icon" href="{{FAVICON_DATA_URI}}">
 __FONT_PRELOAD__
+<!-- home-page teaser marker, read by ../build_home.py:
+     generated: __GENERATED__
+     kpi_price_7d: __KPI_PRICE_7D__
+     kpi_trades_7d: __KPI_TRADES_7D__
+     kpi_when: __KPI_WHEN__ -->
 <script>__SHARED_JS_BOOT__</script>
 <style>
 __SHARED_THEME_CSS__
@@ -1387,9 +1414,15 @@ def write_dashboard(out_path=DEFAULT_OUT):
     import data_kit as dk  # noqa: E402
     here = Path(__file__).resolve().parent
     payload_path, payload_href = dk.write_and_publish_artifact("poc", payload, here)
+    kpi_p = payload.get("kpiPrice7d")
+    kpi_n = payload.get("kpiTrades7d") or 0
     html = kit.render(
         TEMPLATE,
         PAYLOAD_URL=payload_href,
+        GENERATED=payload.get("generated") or "",
+        KPI_PRICE_7D="" if kpi_p is None else str(kpi_p),
+        KPI_TRADES_7D=str(kpi_n),
+        KPI_WHEN=payload.get("kpiWhen") or "",
         SHARED_THEME_CSS=kit.render_theme_css(),
         SHARED_JS_DECODE=kit.JS_DECODE,
         SHARED_JS_ESCAPE_HTML=kit.JS_ESCAPE_HTML,
