@@ -321,6 +321,14 @@ th.num .th-filter { text-align: right; }
   font: 400 11.5px/1 var(--font); letter-spacing: .04em;
 }
 .langBtn:hover, #lang-toggle:hover { background: var(--accent-soft); }
+#theme-toggle {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 34px; height: 34px; padding: 5px 9px; line-height: 0;
+  background: var(--panel); border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm); color: var(--text); cursor: pointer;
+}
+#theme-toggle:hover { background: var(--accent-soft); }
+#theme-toggle svg { width: 16px; height: 16px; display: block; flex: none; }
 .chrome-tools { display: flex; align-items: center; gap: 6px; }
 
 @media (max-width: 720px) {

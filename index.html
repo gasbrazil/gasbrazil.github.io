@@ -321,6 +321,14 @@ th.num .th-filter { text-align: right; }
   font: 400 11.5px/1 var(--font); letter-spacing: .04em;
 }
 .langBtn:hover, #lang-toggle:hover { background: var(--accent-soft); }
+#theme-toggle {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 34px; height: 34px; padding: 5px 9px; line-height: 0;
+  background: var(--panel); border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm); color: var(--text); cursor: pointer;
+}
+#theme-toggle:hover { background: var(--accent-soft); }
+#theme-toggle svg { width: 16px; height: 16px; display: block; flex: none; }
 .chrome-tools { display: flex; align-items: center; gap: 6px; }
 
 @media (max-width: 720px) {
@@ -453,45 +461,45 @@ footer.site a { color: var(--muted); }
       <div class="kpi-label" data-i18n="cardOns">ONS Balances</div>
       <div class="kpi-role">Grid &amp; gas dispatch</div>
       <div class="kpi-val" data-en="2,873 MWmed gas" data-pt="2,873 MWmed a gás">2,873 MWmed gas</div>
-      <div class="kpi-when" data-refresh="2026-09-08 05:45 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-08 13:24 UTC"></div>
     </a>
     <a class="kpi-cell" href="poc/" data-slug="poc">
       <div class="kpi-label" data-i18n="cardPoc">POC Results</div>
       <div class="kpi-role">Capacity auctions</div>
-      <div class="kpi-val" data-en="" data-pt=""></div>
-      <div class="kpi-when" data-refresh=""></div>
+      <div class="kpi-val" data-en="50.02 R$/MMBtu · 7 trades (7d)" data-pt="50.02 R$/MMBtu · 7 negócios (7d)">50.02 R$/MMBtu · 7 trades (7d)</div>
+      <div class="kpi-when" data-refresh="2026-09-04"></div>
       
     </a>
     <a class="kpi-cell" href="contratos/" data-slug="contratos">
       <div class="kpi-label" data-i18n="cardContratos">POC Contracts</div>
       <div class="kpi-role">Firm transport</div>
-      <div class="kpi-val" data-en="" data-pt=""></div>
-      <div class="kpi-when" data-refresh=""></div>
+      <div class="kpi-val" data-en="893 contracts · 186,438 thousand m³/d" data-pt="893 contratos · 186,438 mil m³/d">893 contracts · 186,438 thousand m³/d</div>
+      <div class="kpi-when" data-refresh="2026-09-08 13:24 UTC"></div>
     </a>
     <a class="kpi-cell" href="flows/" data-slug="flows">
       <div class="kpi-label" data-i18n="cardFlows">Pipeline Flows</div>
       <div class="kpi-role">Physical movement</div>
       <div class="kpi-val" data-en="1358.6M m³ realized (7d) · 270 points" data-pt="1358.6M m³ realizados (7d) · 270 points">1358.6M m³ realized (7d) · 270 points</div>
-      <div class="kpi-when" data-refresh="2026-09-08 12:37 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-08 13:25 UTC"></div>
     </a>
     <a class="kpi-cell" href="supply/" data-slug="supply">
       <div class="kpi-label" data-i18n="cardSupply">Gas Supply</div>
       <div class="kpi-role">National balance</div>
       <div class="kpi-val" data-en="6.7M thousand m³ produced · 2026-07" data-pt="6.7M mil m³ produzidos · 2026-07">6.7M thousand m³ produced · 2026-07</div>
-      <div class="kpi-when" data-refresh="2026-09-08 05:45 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-08 13:24 UTC"></div>
       
     </a>
     <a class="kpi-cell" href="precos/" data-slug="precos">
       <div class="kpi-label" data-i18n="cardPrecos">ANP Prices</div>
       <div class="kpi-role">Disclosed R$/MMBtu</div>
-      <div class="kpi-val" data-en="Santos 12.8 R$/MMBtu · 2026-06" data-pt="Santos 12.8 R$/MMBtu · 2026-06">Santos 12.8 R$/MMBtu · 2026-06</div>
-      <div class="kpi-when" data-refresh="2026-09-08 06:42 UTC"></div>
+      <div class="kpi-val" data-en="Santos 18.2 R$/MMBtu · 2026-06" data-pt="Santos 18.2 R$/MMBtu · 2026-06">Santos 18.2 R$/MMBtu · 2026-06</div>
+      <div class="kpi-when" data-refresh="2026-09-08 13:24 UTC"></div>
     </a>
     <a class="kpi-cell" href="pld/" data-slug="pld">
       <div class="kpi-label" data-i18n="cardPld">PLD Prices</div>
       <div class="kpi-role">Power settlement</div>
       <div class="kpi-val" data-en="SE 118.05 R$/MWh · 2026-09-06" data-pt="SE 118.05 R$/MWh · 2026-09-06">SE 118.05 R$/MWh · 2026-09-06</div>
-      <div class="kpi-when" data-refresh="2026-09-08 05:45 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-08 13:23 UTC"></div>
       
     </a>
   </div>
