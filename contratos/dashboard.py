@@ -55,7 +55,8 @@ def load_payload():
     df = df.astype(object).where(pd.notna(df), None)
     records = df.to_dict(orient="records")
 
-    generated = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    _now = dt.datetime.now(dt.timezone.utc)
+    generated = _now.strftime("%Y-%m-%d %H:%M UTC")
 
     print(f"Excluded {excluded_concluded} concluded contract(s) of {total_rows} total; shipping {len(records)} rows.")
 
@@ -73,6 +74,7 @@ def load_payload():
 
     return {
         "generated": generated,
+        "generatedIso": _now.isoformat(),
         "columns": COLUMNS,
         "displayNames": DISPLAY_NAMES,
         "rows": records,
@@ -1526,6 +1528,7 @@ async function downloadAllXLSX() {
 // page's own post-toggle repaint (renderChart/updateChartPickerButtons).
 __SHARED_JS_THEME_TOGGLE__
 __SHARED_JS_I18N__
+__SHARED_JS_ASOF__
 
 async function init() {
   document.getElementById("year").textContent = new Date().getFullYear();
@@ -1544,7 +1547,8 @@ async function init() {
     if (Array.isArray(savedPrefs.hidden)) hiddenCols = new Set(savedPrefs.hidden.filter(c => validCols.has(c)));
     if (savedPrefs.widths && typeof savedPrefs.widths === "object") columnWidths = Object.assign({}, DEFAULT_COL_WIDTH, savedPrefs.widths);
   }
-  document.getElementById("asof-refreshed").textContent = DATA.generated || "—";
+  document.getElementById("asof-refreshed").textContent =
+    formatRefreshedLocal(DATA.generatedIso, DATA.generated);
   let through = "";
   for (const r of DATA.rows) {
     const d = r["End Date"] || r["Start Date"];
@@ -1625,6 +1629,7 @@ def write_dashboard(out_path=DEFAULT_OUT):
         SHARED_JS_THEME_TOGGLE=kit.JS_THEME_TOGGLE,
         SHARED_JS_BOOT=kit.JS_BOOT,
         SHARED_JS_I18N=kit.JS_I18N,
+        SHARED_JS_ASOF=kit.refreshed_local_js(),
         SHARED_JS_CSV=kit.JS_CSV_HELPERS,
         SHARED_JS_XLSX=kit.JS_XLSX_ENGINE,
         SHARED_JS_TABLE_SORT=kit.JS_TABLE_SORT,

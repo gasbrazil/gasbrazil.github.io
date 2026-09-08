@@ -854,3 +854,32 @@ def chart_palette_js() -> str:
         "(s.getPropertyValue('--chart-' + i) || '').trim()).filter(Boolean);\n"
         "}\n"
     )
+
+
+def refreshed_local_js() -> str:
+    """JS helper: format an ISO timestamp as local time only -- 24-hour
+    HH:MM, viewer's IANA timezone name, no UTC. Single source of truth for
+    the "Last refreshed" asof-strip value across every dashboard, so a
+    format change (like dropping UTC or switching to 24-hour time) only
+    has to happen once. Falls back to `fallback` (the server-rendered UTC
+    string) if the ISO string can't be parsed. `locale` is optional and
+    only affects date-part punctuation / month-day order (e.g. "pt-BR");
+    the time part is always 24-hour regardless of locale, since that's the
+    whole point -- no AM/PM ambiguity.
+    """
+    return (
+        "function formatRefreshedLocal(iso, fallback, locale) {\n"
+        "  try {\n"
+        "    const d = new Date(iso);\n"
+        "    if (isNaN(d.getTime())) return fallback || \"\u2014\";\n"
+        "    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;\n"
+        "    const datePart = d.toLocaleDateString(locale, "
+        "{ year: 'numeric', month: '2-digit', day: '2-digit' });\n"
+        "    const timePart = d.toLocaleTimeString(locale, "
+        "{ hour: '2-digit', minute: '2-digit', hour12: false });\n"
+        "    return datePart + ' ' + timePart + ' ' + tz;\n"
+        "  } catch (e) {\n"
+        "    return fallback || \"\u2014\";\n"
+        "  }\n"
+        "}\n"
+    )

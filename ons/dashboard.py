@@ -379,6 +379,7 @@ def write_dashboard(df: pd.DataFrame, dest: Path,
         SHARED_JS_THEME_TOGGLE=kit.JS_THEME_TOGGLE,
         SHARED_JS_BOOT=kit.JS_BOOT,
         SHARED_JS_I18N=kit.JS_I18N,
+        SHARED_JS_ASOF=kit.refreshed_local_js(),
         SHARED_SITE_LINKS_JS=kit.site_links_js("ons"),
         SHARED_NAV_LINKS=kit.nav_links_html(
             "ons", extra_links_html='<a class="navlink" href="wiki-html/" data-i18n="navWiki">Wiki</a>'
@@ -821,6 +822,7 @@ const colorOf = (k, v) => {
    at once. initThemeToggle is wired to the #theme-toggle button down in boot(). */
 __SHARED_JS_THEME_TOGGLE__
 __SHARED_JS_I18N__
+__SHARED_JS_ASOF__
 /* ONS-local chrome strings (tabs, control labels, view blurbs). Shared kit
    covers site-wide nav; this pack covers what is unique to this dashboard. */
 const ONS_I18N = {
@@ -3093,17 +3095,8 @@ async function boot(){
   state.tbl.to=last;
   state.tbl.from=DATA.dates[Math.max(0,DATA.dates.length-30)];
 
-  let refreshedText = DATA.generated || "—";
-  try {
-    const d = new Date(DATA.generatedIso);
-    if (!isNaN(d)) {
-      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      const localDate = d.toLocaleDateString(undefined, {year:"numeric", month:"2-digit", day:"2-digit"});
-      const localTime = d.toLocaleTimeString(undefined, {hour:"2-digit", minute:"2-digit"});
-      refreshedText += " (" + localDate + " " + localTime + " " + tz + ")";
-    }
-  } catch (e) { /* fall back to UTC-only text above */ }
-  document.getElementById("asof-refreshed").textContent = refreshedText;
+  document.getElementById("asof-refreshed").textContent =
+    formatRefreshedLocal(DATA.generatedIso, DATA.generated);
   document.getElementById("asof-through").textContent = last || "—";
   // Visible footer is one line: attribution, the single averaging rule that
   // changes how every number reads, and a disclosure. Everything that used to

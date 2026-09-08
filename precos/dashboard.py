@@ -234,6 +234,7 @@ __SHARED_JS_CHART_PALETTE__
 __SHARED_SITE_LINKS_JS__
 __SHARED_JS_THEME_TOGGLE__
 __SHARED_JS_I18N__
+__SHARED_JS_ASOF__
 
 GB_I18N.en.precosProdTitle = "Producer sales by basin";
 GB_I18N.en.precosDistTitle = "Sales to distributors & free consumers";
@@ -391,17 +392,8 @@ function lineChart(host, legend, series, months) {
   host.appendChild(svg);
 }
 function paintAsof() {
-  let refreshedText = DATA.generated || "—";
-  try {
-    const d = new Date(DATA.generatedIso);
-    if (!isNaN(d)) {
-      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      refreshedText = d.toLocaleDateString(currentLang() === "pt" ? "pt-BR" : undefined, { year: "numeric", month: "2-digit", day: "2-digit" })
-        + " " + d.toLocaleTimeString(currentLang() === "pt" ? "pt-BR" : undefined, { hour: "2-digit", minute: "2-digit" })
-        + " " + tz;
-    }
-  } catch (e) {}
-  document.getElementById("asof-refreshed").textContent = refreshedText;
+  document.getElementById("asof-refreshed").textContent =
+    formatRefreshedLocal(DATA.generatedIso, DATA.generated, currentLang() === "pt" ? "pt-BR" : undefined);
   document.getElementById("asof-through").textContent = DATA.dataThrough || "—";
 }
 function renderKpis() {
@@ -564,6 +556,7 @@ def write_dashboard(out_path=DEFAULT_OUT):
         SHARED_JS_THEME_TOGGLE=kit.JS_THEME_TOGGLE,
         SHARED_JS_BOOT=kit.JS_BOOT,
         SHARED_JS_I18N=kit.JS_I18N,
+        SHARED_JS_ASOF=kit.refreshed_local_js(),
         SHARED_JS_CSV=kit.JS_CSV_HELPERS,
         SHARED_JS_XLSX=kit.JS_XLSX_ENGINE,
         SHARED_JS_TABLE_SORT=kit.JS_TABLE_SORT,

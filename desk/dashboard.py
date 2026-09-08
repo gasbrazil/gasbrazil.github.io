@@ -223,6 +223,7 @@ __SHARED_JS_TABLE_SORT__
 __SHARED_JS_CHART_PALETTE__
 __SHARED_JS_THEME_TOGGLE__
 __SHARED_JS_I18N__
+__SHARED_JS_ASOF__
 __SHARED_SITE_LINKS_JS__
 
 GB_I18N.en.deskCompareTitle = "PLD · CMO · CVU";
@@ -359,18 +360,8 @@ function buildPickers() {
 }
 
 function paintAsof() {
-  let refreshedText = DATA.generated || "—";
-  try {
-    const d = new Date(DATA.generatedIso);
-    if (!isNaN(d)) {
-      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      const loc = currentLang() === "pt" ? "pt-BR" : undefined;
-      refreshedText = d.toLocaleDateString(loc, { year: "numeric", month: "2-digit", day: "2-digit" })
-        + " " + d.toLocaleTimeString(loc, { hour: "2-digit", minute: "2-digit" })
-        + " " + tz;
-    }
-  } catch (e) {}
-  document.getElementById("asof-refreshed").textContent = refreshedText;
+  document.getElementById("asof-refreshed").textContent =
+    formatRefreshedLocal(DATA.generatedIso, DATA.generated, currentLang() === "pt" ? "pt-BR" : undefined);
   document.getElementById("asof-through").textContent = DATA.dataThrough || "—";
 }
 
@@ -787,6 +778,7 @@ def write_dashboard(out_path: Path | str = DEFAULT_OUT) -> Path:
         SHARED_JS_THEME_TOGGLE=kit.JS_THEME_TOGGLE,
         SHARED_JS_BOOT=kit.JS_BOOT,
         SHARED_JS_I18N=kit.JS_I18N,
+        SHARED_JS_ASOF=kit.refreshed_local_js(),
         SHARED_JS_CHART_PALETTE=kit.chart_palette_js(),
         SHARED_SITE_LINKS_JS=kit.site_links_js("desk"),
         SHARED_NAV_LINKS=kit.nav_links_html("desk"),

@@ -1534,6 +1534,7 @@ function resetAllFilters() {
 
 __SHARED_JS_THEME_TOGGLE__
 __SHARED_JS_I18N__
+__SHARED_JS_ASOF__
 
 async function init() {
   document.getElementById("year").textContent = new Date().getFullYear();
@@ -1543,17 +1544,8 @@ async function init() {
 
   const through = DATA.dates.length ? DATA.dates[DATA.dates.length - 1] : "—";
   document.getElementById("asof-through").textContent = through;
-  let refreshedText = DATA.generated || "—";
-  try {
-    const d = new Date(DATA.generatedIso);
-    if (!isNaN(d)) {
-      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      const localDate = d.toLocaleDateString(undefined, { year: "numeric", month: "2-digit", day: "2-digit" });
-      const localTime = d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
-      refreshedText = localDate + " " + localTime + " " + tz;
-    }
-  } catch (e) {}
-  document.getElementById("asof-refreshed").textContent = refreshedText;
+  document.getElementById("asof-refreshed").textContent =
+    formatRefreshedLocal(DATA.generatedIso, DATA.generated);
 
   buildKpiMonthSelect();
   applyQueryState();
@@ -1620,6 +1612,7 @@ def write_dashboard(out_path=DEFAULT_OUT):
         SHARED_JS_THEME_TOGGLE=kit.JS_THEME_TOGGLE,
         SHARED_JS_BOOT=kit.JS_BOOT,
         SHARED_JS_I18N=kit.JS_I18N,
+        SHARED_JS_ASOF=kit.refreshed_local_js(),
         SHARED_JS_CSV=kit.JS_CSV_HELPERS,
         SHARED_JS_XLSX=kit.JS_XLSX_ENGINE,
         SHARED_JS_CHART_PALETTE=kit.chart_palette_js(),
