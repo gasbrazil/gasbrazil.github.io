@@ -80,11 +80,7 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; font-size: 12px; color: var(--muted2); }
 .legend span { display: flex; align-items: center; gap: 6px; }
 .legend .sw { width: 9px; height: 9px; border-radius: 2px; flex: none; }
-.tt { position: fixed; pointer-events: none; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 12px; box-shadow: 0 6px 20px rgba(0,0,0,.16); z-index: 50; display: none; min-width: 180px; }
-.tt .d { font-weight: 400; margin-bottom: 5px; }
-.tt table { border-collapse: collapse; width: 100%; }
-.tt td { padding: 1px 0; }
-.tt td.v { text-align: right; padding-left: 14px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+/* Chart tooltip (.tt) styles live in shared/theme.css */
 .spark-form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; margin-bottom: 14px; }
 @media (max-width: 520px) { .spark-form { grid-template-columns: 1fr; } }
 .spark-form label { display: flex; flex-direction: column; gap: 4px; font-size: 11px; color: var(--muted2); font-weight: 400; }
@@ -560,10 +556,7 @@ function drawLineChart(hostId, dates, seriesList, emptyMsg) {
         color + '"></span> ' + escapeHtml(s.label) + '</td><td class="v">' + fmtNum(v, 2) + '</td></tr>';
     });
     tt.innerHTML = '<div class="d">' + escapeHtml(dates[best]) + '</div><table>' + rows + '</table>';
-    tt.style.display = "block";
-    const tw = tt.offsetWidth, th = tt.offsetHeight;
-    tt.style.left = Math.min(window.innerWidth - tw - 12, ev.clientX + 16) + "px";
-    tt.style.top = Math.min(window.innerHeight - th - 12, Math.max(8, ev.clientY - th / 2)) + "px";
+    placeChartTooltip(tt, ev.clientX, ev.clientY);
   });
   hit.addEventListener("pointerleave", () => { tt.style.display = "none"; });
 

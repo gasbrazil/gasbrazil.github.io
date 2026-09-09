@@ -147,11 +147,7 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; font-size: 12px; color: var(--muted2); }
 .legend span { display: flex; align-items: center; gap: 6px; }
 .legend .sw { width: 9px; height: 9px; border-radius: 2px; flex: none; }
-.tt { position: fixed; pointer-events: none; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 12px; box-shadow: 0 6px 20px rgba(0,0,0,.16); z-index: 50; display: none; min-width: 200px; }
-.tt .d { font-weight: 400; margin-bottom: 5px; }
-.tt table { border-collapse: collapse; width: 100%; }
-.tt td { padding: 1px 0; }
-.tt td.v { text-align: right; padding-left: 14px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+/* Chart tooltip (.tt) styles live in shared/theme.css */
 
 .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
 .toolbar button { background: var(--panel); color: var(--text); border: 1px solid var(--border-strong); border-radius: 5px; padding: 5px 10px; font-size: 12.5px; cursor: pointer; font-family: var(--font); font-weight: 400; }
@@ -460,9 +456,7 @@ function renderChart() {
       rows += "<tr><td>" + escapeHtml(metricLabel(s.meta)) + '</td><td class="v">' + fmtNum(p.v) + "</td></tr>";
     });
     tt.innerHTML = '<div class="d">' + best + "</div><table>" + rows + "</table>";
-    tt.style.display = "block";
-    tt.style.left = Math.min(ev.clientX + 14, window.innerWidth - 220) + "px";
-    tt.style.top = (ev.clientY + 14) + "px";
+    placeChartTooltip(tt, ev.clientX, ev.clientY);
   });
   overlay.addEventListener("mouseleave", () => {
     cross.setAttribute("visibility", "hidden");

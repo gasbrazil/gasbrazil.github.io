@@ -554,13 +554,7 @@ button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);co
   color:var(--muted2)}
 .legend span{display:flex;align-items:center;gap:6px}
 svg{display:block;width:100%;overflow:hidden}
-.tt{position:fixed;pointer-events:none;background:var(--panel);
-  border:1px solid var(--ring);border-radius:8px;padding:8px 10px;font-size:12px;
-  box-shadow:0 6px 20px rgba(0,0,0,.16);z-index:50;display:none;min-width:180px}
-.tt .d{font-weight:400;margin-bottom:5px}
-.tt table{border-collapse:collapse;width:100%}
-.tt td{padding:1px 0}
-.tt td.v{text-align:right;padding-left:14px;font-variant-numeric:tabular-nums}
+/* Chart tooltip (.tt) styles live in shared/theme.css */
 table.data{border-collapse:collapse;width:100%;font-size:var(--table-font-size);
   font-variant-numeric:tabular-nums}
 table.data th,table.data td{padding:4px 8px;border-bottom:1px solid var(--border);
@@ -1795,10 +1789,7 @@ function drawPanel(unit,title,keys,W){
         '</td><td class="v">'+fmtNum(v,decs)+'</td></tr>';
     });
     tt.innerHTML='<div class="d">'+dates[i]+'</div><table>'+rows+'</table>';
-    tt.style.display="block";
-    const tw=tt.offsetWidth, th=tt.offsetHeight;
-    tt.style.left=Math.min(window.innerWidth-tw-12, clientX+16)+"px";
-    tt.style.top=Math.min(window.innerHeight-th-12, Math.max(8,clientY-th/2))+"px";
+    placeChartTooltip(tt, clientX, clientY);
   }
   function hideTooltip(){
     tt.style.display="none"; cross.setAttribute("opacity",0);

@@ -221,11 +221,7 @@ footer a { color: var(--accent); }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; font-size: 12px; color: var(--muted2); }
 .legend span { display: flex; align-items: center; gap: 6px; }
 .legend .sw { width: 9px; height: 9px; border-radius: 2px; flex: none; }
-.tt { position: fixed; pointer-events: none; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 12px; box-shadow: 0 6px 20px rgba(0,0,0,.16); z-index: 50; display: none; min-width: 200px; }
-.tt .d { font-weight: 400; margin-bottom: 5px; }
-.tt table { border-collapse: collapse; width: 100%; }
-.tt td { padding: 1px 0; }
-.tt td.v { text-align: right; padding-left: 14px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+/* Chart tooltip (.tt) styles live in shared/theme.css */
 @media (max-width: 720px) {
   .toolbar, .quick-filters, .sources, .tso-row, .chart-picker { flex-direction: column; align-items: stretch; }
   .toolbar select, .toolbar input, .toolbar button { width: 100%; }
@@ -635,10 +631,7 @@ function renderChart() {
         '</td><td class="v">' + fmtAxisNum(p.price, 2) + ' MMBtu · ' + fmtAxisNum(p.price * MMBTU_PER_M3 / 1000, 2) + ' m³</td></tr>';
     });
     tt.innerHTML = '<div class="d">' + date + '</div><table>' + rows + '</table>';
-    tt.style.display = "block";
-    const tw = tt.offsetWidth, th = tt.offsetHeight;
-    tt.style.left = Math.min(window.innerWidth - tw - 12, clientX + 16) + "px";
-    tt.style.top = Math.min(window.innerHeight - th - 12, Math.max(8, clientY - th / 2)) + "px";
+    placeChartTooltip(tt, clientX, clientY);
   }
   function hideTooltip() {
     tt.style.display = "none"; cross.setAttribute("opacity", 0); dots.setAttribute("opacity", 0);

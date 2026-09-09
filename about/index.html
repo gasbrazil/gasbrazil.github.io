@@ -608,6 +608,63 @@ th.num .th-filter { text-align: right; }
 #theme-toggle svg { width: 16px; height: 16px; display: block; flex: none; }
 .chrome-tools { display: flex; align-items: center; gap: 6px; }
 
+/* Chart hover tooltip — content-sized popup (never viewport-wide).
+   Pages used to set `.tt table { width: 100% }` on a position:fixed host with
+   no max-width; percentage width then resolved against the viewport and the
+   tip spanned the page. Keep width:max-content + width:auto on the table. */
+.tt {
+  position: fixed;
+  pointer-events: none;
+  z-index: 80;
+  display: none;
+  width: max-content;
+  max-width: min(280px, calc(100vw - 24px));
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  font: 300 12px var(--font);
+  color: var(--text);
+  background: var(--panel-grad);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--elevate);
+}
+.tt .d {
+  font-weight: 500;
+  margin-bottom: 5px;
+  color: var(--muted2);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.tt table {
+  border-collapse: collapse;
+  width: auto;
+  max-width: 100%;
+  table-layout: auto;
+}
+.tt td {
+  padding: 1px 0;
+  font-weight: 300;
+  color: var(--text);
+  vertical-align: baseline;
+}
+.tt td.v {
+  text-align: right;
+  padding-left: 14px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  font-weight: 400;
+}
+.tt .sw {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  display: inline-block;
+  vertical-align: -1px;
+  margin-right: 4px;
+  border: none;
+}
+
 /* Pin language + theme to the viewport's top-right on every surface. */
 .hub-controls,
 .topbar.chrome-tools {

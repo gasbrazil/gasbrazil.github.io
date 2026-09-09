@@ -164,7 +164,7 @@ th .th-label { cursor: pointer; }
 tbody tr:hover { background: var(--accent-soft); }
 footer { margin-top: 22px; color: var(--muted); font-size: 11.5px; line-height: 1.7; font-weight: 200; }
 footer a { color: var(--accent); }
-.tt { position: fixed; pointer-events: none; background: var(--panel); border: 1px solid var(--border); border-radius: 5px; padding: 8px 10px; font-size: 12px; z-index: 50; display: none; min-width: 160px; }
+/* Chart tooltip (.tt) styles live in shared/theme.css */
 @media (max-width: 720px) {
   .toolbar, .sources, .series-picker { flex-direction: column; align-items: stretch; }
   .toolbar button { width: 100%; }
@@ -403,6 +403,37 @@ function lineChart(host, legend, series, months) {
     const leg = document.createElement("span");
     leg.innerHTML = '<span class="sw" style="background:'+s.color+'"></span>' + escapeHtml(s.label);
     legend.appendChild(leg);
+  });
+  const cross = el("line", { x1: 0, x2: 0, y1: MT, y2: H - MB, stroke: "var(--muted)", "stroke-width": 1, "stroke-dasharray": "3 3", visibility: "hidden" });
+  svg.appendChild(cross);
+  const overlay = el("rect", { x: ML, y: MT, width: W - ML - MR, height: H - MT - MB, fill: "transparent" });
+  svg.appendChild(overlay);
+  const tt = document.getElementById("chart-tt");
+  const allM = months.slice();
+  overlay.addEventListener("mousemove", ev => {
+    const r = svg.getBoundingClientRect();
+    const px = (ev.clientX - r.left) / r.width * W;
+    let best = allM[0], bestDist = Infinity;
+    allM.forEach(m => {
+      const dist = Math.abs(x(m) - px);
+      if (dist < bestDist) { bestDist = dist; best = m; }
+    });
+    cross.setAttribute("x1", x(best)); cross.setAttribute("x2", x(best));
+    cross.setAttribute("visibility", "visible");
+    let rows = "";
+    plot.forEach(s => {
+      const p = s.pts.find(pt => pt.month === best);
+      if (!p || p.v == null) return;
+      rows += '<tr><td><span class="sw" style="background:' + s.color + '"></span> ' +
+        escapeHtml(s.label) + '</td><td class="v">' + fmt(p.v, 2) + "</td></tr>";
+    });
+    if (!rows) { tt.style.display = "none"; return; }
+    tt.innerHTML = '<div class="d">' + escapeHtml(best) + "</div><table>" + rows + "</table>";
+    placeChartTooltip(tt, ev.clientX, ev.clientY);
+  });
+  overlay.addEventListener("mouseleave", () => {
+    cross.setAttribute("visibility", "hidden");
+    tt.style.display = "none";
   });
   host.appendChild(svg);
 }

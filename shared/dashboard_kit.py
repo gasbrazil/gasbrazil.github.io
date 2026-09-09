@@ -985,7 +985,11 @@ def nav_links_html(
 
 
 def chart_palette_js() -> str:
-    """JS helpers: chartPalette() + tsoColorOf() from CSS custom properties."""
+    """JS helpers: chartPalette() + tsoColorOf() + placeChartTooltip().
+
+    placeChartTooltip keeps hover tips compact and on-screen: prefer to the
+    right of the cursor, flip left near the right edge, clamp vertically.
+    """
     return r"""
 function chartPalette() {
   const s = getComputedStyle(document.documentElement);
@@ -1011,6 +1015,22 @@ function tsoFromChartKey(key) {
     return (part && part !== 'ALL') ? part : '';
   }
   return '';
+}
+function placeChartTooltip(tt, clientX, clientY) {
+  if (!tt) return;
+  tt.style.display = "block";
+  const pad = 12, gap = 14;
+  const tw = tt.offsetWidth, th = tt.offsetHeight;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  let left = clientX + gap;
+  if (left + tw > vw - pad) left = clientX - tw - gap;
+  if (left < pad) left = pad;
+  if (left + tw > vw - pad) left = Math.max(pad, vw - tw - pad);
+  let top = clientY - th / 2;
+  if (top < pad) top = pad;
+  if (top + th > vh - pad) top = Math.max(pad, vh - th - pad);
+  tt.style.left = left + "px";
+  tt.style.top = top + "px";
 }
 """.lstrip()
 

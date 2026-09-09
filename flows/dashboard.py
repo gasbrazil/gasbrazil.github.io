@@ -296,11 +296,7 @@ th.num .th-filter { text-align: right; }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; font-size: 12px; color: var(--muted2); }
 .legend span { display: flex; align-items: center; gap: 6px; }
 .legend .sw { width: 9px; height: 9px; border-radius: 2px; flex: none; }
-.tt { position: fixed; pointer-events: none; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 12px; box-shadow: 0 6px 20px rgba(0,0,0,.16); z-index: 50; display: none; min-width: 200px; }
-.tt .d { font-weight: 400; margin-bottom: 5px; }
-.tt table { border-collapse: collapse; width: 100%; }
-.tt td { padding: 1px 0; }
-.tt td.v { text-align: right; padding-left: 14px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+/* Chart tooltip (.tt) styles live in shared/theme.css */
 .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: var(--gap); }
 .toolbar button { background: var(--panel); color: var(--text); border: 1px solid var(--border-strong); border-radius: 6px; padding: 5px 10px; font-size: 12.5px; cursor: pointer; font-family: var(--font); }
 .toolbar button:hover { background: var(--accent-soft); }
@@ -1304,10 +1300,7 @@ function renderChart() {
         '</td><td class="v">' + fmtAxisNum(p.v, unit === "%" ? 1 : 1) + ' ' + unit + '</td></tr>';
     });
     tt.innerHTML = '<div class="d">' + date + '</div><table>' + rows + '</table>';
-    tt.style.display = "block";
-    const tw = tt.offsetWidth, th = tt.offsetHeight;
-    tt.style.left = Math.min(window.innerWidth - tw - 12, clientX + 16) + "px";
-    tt.style.top = Math.min(window.innerHeight - th - 12, Math.max(8, clientY - th / 2)) + "px";
+    placeChartTooltip(tt, clientX, clientY);
   }
   function hideTooltip() { tt.style.display = "none"; cross.setAttribute("opacity", 0); dots.setAttribute("opacity", 0); }
 

@@ -600,6 +600,63 @@ th.num .th-filter { text-align: right; }
 #theme-toggle svg { width: 16px; height: 16px; display: block; flex: none; }
 .chrome-tools { display: flex; align-items: center; gap: 6px; }
 
+/* Chart hover tooltip — content-sized popup (never viewport-wide).
+   Pages used to set `.tt table { width: 100% }` on a position:fixed host with
+   no max-width; percentage width then resolved against the viewport and the
+   tip spanned the page. Keep width:max-content + width:auto on the table. */
+.tt {
+  position: fixed;
+  pointer-events: none;
+  z-index: 80;
+  display: none;
+  width: max-content;
+  max-width: min(280px, calc(100vw - 24px));
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  font: 300 12px var(--font);
+  color: var(--text);
+  background: var(--panel-grad);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--elevate);
+}
+.tt .d {
+  font-weight: 500;
+  margin-bottom: 5px;
+  color: var(--muted2);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.tt table {
+  border-collapse: collapse;
+  width: auto;
+  max-width: 100%;
+  table-layout: auto;
+}
+.tt td {
+  padding: 1px 0;
+  font-weight: 300;
+  color: var(--text);
+  vertical-align: baseline;
+}
+.tt td.v {
+  text-align: right;
+  padding-left: 14px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  font-weight: 400;
+}
+.tt .sw {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  display: inline-block;
+  vertical-align: -1px;
+  margin-right: 4px;
+  border: none;
+}
+
 /* Pin language + theme to the viewport's top-right on every surface. */
 .hub-controls,
 .topbar.chrome-tools {
@@ -637,6 +694,14 @@ header.top #theme-toggle,
   }
   .filters-drawer-toggle { display: inline-flex !important; }
   .filters-collapsible.is-collapsed { display: none; }
+  header.dash-head #lang-toggle,
+  header.top #lang-toggle,
+  .site-header #lang-toggle { right: 52px; }
+}
+  header.dash-head #lang-toggle,
+  header.top #lang-toggle,
+  .site-header #lang-toggle { right: 52px; }
+}
   header.dash-head #lang-toggle,
   header.top #lang-toggle,
   .site-header #lang-toggle { right: 52px; }
@@ -1260,6 +1325,63 @@ th.num .th-filter { text-align: right; }
 #theme-toggle svg { width: 16px; height: 16px; display: block; flex: none; }
 .chrome-tools { display: flex; align-items: center; gap: 6px; }
 
+/* Chart hover tooltip — content-sized popup (never viewport-wide).
+   Pages used to set `.tt table { width: 100% }` on a position:fixed host with
+   no max-width; percentage width then resolved against the viewport and the
+   tip spanned the page. Keep width:max-content + width:auto on the table. */
+.tt {
+  position: fixed;
+  pointer-events: none;
+  z-index: 80;
+  display: none;
+  width: max-content;
+  max-width: min(280px, calc(100vw - 24px));
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  font: 300 12px var(--font);
+  color: var(--text);
+  background: var(--panel-grad);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--elevate);
+}
+.tt .d {
+  font-weight: 500;
+  margin-bottom: 5px;
+  color: var(--muted2);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.tt table {
+  border-collapse: collapse;
+  width: auto;
+  max-width: 100%;
+  table-layout: auto;
+}
+.tt td {
+  padding: 1px 0;
+  font-weight: 300;
+  color: var(--text);
+  vertical-align: baseline;
+}
+.tt td.v {
+  text-align: right;
+  padding-left: 14px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  font-weight: 400;
+}
+.tt .sw {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  display: inline-block;
+  vertical-align: -1px;
+  margin-right: 4px;
+  border: none;
+}
+
 /* Pin language + theme to the viewport's top-right on every surface. */
 .hub-controls,
 .topbar.chrome-tools {
@@ -1297,6 +1419,14 @@ header.top #theme-toggle,
   }
   .filters-drawer-toggle { display: inline-flex !important; }
   .filters-collapsible.is-collapsed { display: none; }
+  header.dash-head #lang-toggle,
+  header.top #lang-toggle,
+  .site-header #lang-toggle { right: 52px; }
+}
+  header.dash-head #lang-toggle,
+  header.top #lang-toggle,
+  .site-header #lang-toggle { right: 52px; }
+}
   header.dash-head #lang-toggle,
   header.top #lang-toggle,
   .site-header #lang-toggle { right: 52px; }
@@ -1457,13 +1587,7 @@ button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);co
   color:var(--muted2)}
 .legend span{display:flex;align-items:center;gap:6px}
 svg{display:block;width:100%;overflow:hidden}
-.tt{position:fixed;pointer-events:none;background:var(--panel);
-  border:1px solid var(--ring);border-radius:8px;padding:8px 10px;font-size:12px;
-  box-shadow:0 6px 20px rgba(0,0,0,.16);z-index:50;display:none;min-width:180px}
-.tt .d{font-weight:400;margin-bottom:5px}
-.tt table{border-collapse:collapse;width:100%}
-.tt td{padding:1px 0}
-.tt td.v{text-align:right;padding-left:14px;font-variant-numeric:tabular-nums}
+/* Chart tooltip (.tt) styles live in shared/theme.css */
 table.data{border-collapse:collapse;width:100%;font-size:var(--table-font-size);
   font-variant-numeric:tabular-nums}
 table.data th,table.data td{padding:4px 8px;border-bottom:1px solid var(--border);
@@ -1823,6 +1947,22 @@ function tsoFromChartKey(key) {
     return (part && part !== 'ALL') ? part : '';
   }
   return '';
+}
+function placeChartTooltip(tt, clientX, clientY) {
+  if (!tt) return;
+  tt.style.display = "block";
+  const pad = 12, gap = 14;
+  const tw = tt.offsetWidth, th = tt.offsetHeight;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  let left = clientX + gap;
+  if (left + tw > vw - pad) left = clientX - tw - gap;
+  if (left < pad) left = pad;
+  if (left + tw > vw - pad) left = Math.max(pad, vw - tw - pad);
+  let top = clientY - th / 2;
+  if (top < pad) top = pad;
+  if (top + th > vh - pad) top = Math.max(pad, vh - th - pad);
+  tt.style.left = left + "px";
+  tt.style.top = top + "px";
 }
 
 const TOTAL_COLOR_LIGHT = {SIN:"#002776", SE:"#009C3B", S:"#C9A400", NE:"#7c3aed", N:"#be123c"};
@@ -3071,10 +3211,7 @@ function drawPanel(unit,title,keys,W){
         '</td><td class="v">'+fmtNum(v,decs)+'</td></tr>';
     });
     tt.innerHTML='<div class="d">'+dates[i]+'</div><table>'+rows+'</table>';
-    tt.style.display="block";
-    const tw=tt.offsetWidth, th=tt.offsetHeight;
-    tt.style.left=Math.min(window.innerWidth-tw-12, clientX+16)+"px";
-    tt.style.top=Math.min(window.innerHeight-th-12, Math.max(8,clientY-th/2))+"px";
+    placeChartTooltip(tt, clientX, clientY);
   }
   function hideTooltip(){
     tt.style.display="none"; cross.setAttribute("opacity",0);
