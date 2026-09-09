@@ -251,6 +251,8 @@ main.hub { flex: 1; width: var(--content-w); max-width: var(--content-max); marg
 .wordmark a { color: inherit; text-decoration: none; }
 .tagline { color: var(--text); font-weight: 600; font-size: 15px; margin: 10px 0 0;
   max-width: 36em; line-height: 1.45; }
+.hub-hint { color: var(--muted); font-weight: 300; font-size: 13.5px; margin: 6px 0 0;
+  max-width: 38em; line-height: 1.45; }
 /* Full-width flagband — do not override shared .flagbar width. */
 .flagbar { margin: 18px 0 0; }
 /* KPI strip is the only product launcher on the hub (description cards removed). */
@@ -280,7 +282,19 @@ main.hub { flex: 1; width: var(--content-w); max-width: var(--content-max); marg
   transform: translateY(-4px); box-shadow: var(--elevate);
 }
 .kpi-cell:hover::before { opacity: 1; }
-.kpi-cell .kpi-label { font-size: 12.5px; font-weight: 600; color: var(--text); letter-spacing: -.01em; }
+.kpi-cell .kpi-label { font-size: 13px; font-weight: 600; color: var(--text); letter-spacing: -.01em;
+  display: flex; align-items: baseline; gap: 6px; }
+/* Wayfinding affordance: KPI cells are links that open dashboards. The arrow
+   slides in on hover/focus so the cards read as launchers, not stat widgets. */
+.kpi-cell .kpi-label::after {
+  content: "\\2192"; color: var(--accent); font-weight: 400; font-size: 12px;
+  opacity: 0; transform: translateX(-4px);
+  transition: opacity .25s ease, transform .25s ease;
+}
+.kpi-cell:hover .kpi-label::after, .kpi-cell:focus-visible .kpi-label::after {
+  opacity: 1; transform: none;
+}
+[data-theme="dark"] .kpi-cell .kpi-label::after { color: var(--brz-yellow); }
 .kpi-cell .kpi-role { font-size: 11px; font-weight: 300; color: var(--muted); line-height: 1.3; }
 .kpi-cell .kpi-val { font-size: 12px; font-weight: 400; color: var(--muted2);
   line-height: 1.35; min-height: 1.1em; margin-top: 2px; font-variant-numeric: tabular-nums; }
@@ -345,7 +359,23 @@ main.hub { flex: 1; width: var(--content-w); max-width: var(--content-max); marg
   border-color: rgba(255, 223, 0, .35);
   box-shadow: var(--elevate), 0 0 0 1px rgba(255, 223, 0, .12);
 }
-footer.site { padding: 18px 24px; color: var(--muted); font-weight: 300; font-size: 12px; text-align: center; }
+footer.site { padding: 20px 24px; color: var(--muted); font-weight: 300; font-size: 13px; text-align: center; line-height: 1.7; }
+/* Keyboard users: every hub link and control gets a visible focus ring. */
+.kpi-cell:focus-visible, .card:focus-visible,
+.sources-block a:focus-visible, .hub-controls button:focus-visible,
+footer.site a:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px;
+}
+[data-theme="dark"] .kpi-cell:focus-visible, [data-theme="dark"] .card:focus-visible,
+[data-theme="dark"] .sources-block a:focus-visible,
+[data-theme="dark"] .hub-controls button:focus-visible,
+[data-theme="dark"] footer.site a:focus-visible {
+  outline-color: var(--brz-yellow);
+}
+@media (max-width: 480px) {
+  .kpi-cell { padding: 12px 14px; }
+  .sources-block a { padding: 9px 14px; }
+}
 footer.site a {
   color: var(--accent); text-decoration: none;
   border-bottom: 1px solid transparent;
@@ -414,6 +444,7 @@ HOME_TEMPLATE = """__HEAD__
     </div>
   </div>
   <p class="tagline" data-i18n="tagline">Analytical Firepower for Brazil's Energy Markets</p>
+  <p class="hub-hint" data-i18n="hubHint">Every card below opens a live dashboard — pick a product to explore.</p>
   <div class="flagbar" aria-hidden="true"></div>
   <div class="kpi-strip">
     <a class="kpi-cell" href="desk/" data-slug="desk">
