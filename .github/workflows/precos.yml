@@ -24,7 +24,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
       R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
       R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
       R2_ENDPOINT_URL: ${{ secrets.R2_ENDPOINT_URL }}
@@ -36,22 +35,22 @@ jobs:
       run:
         working-directory: precos
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
 
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5.4.2
         with:
           enable-cache: true
           python-version: "3.12"
           cache-dependency-glob: "precos/requirements.txt"
 
-      - run: uv pip install --system -r requirements.txt
+      - run: uv pip install --system -r requirements.txt -c ../shared/constraints.txt
 
       - name: Cache key for this month
         id: ym
         run: echo "ym=$(date -u +%Y-%m)" >> "$GITHUB_OUTPUT"
 
       - name: Restore raw ANP PPG files
-        uses: actions/cache@v4
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
         with:
           path: precos/raw
           key: precos-raw-${{ steps.ym.outputs.ym }}
@@ -85,7 +84,7 @@ jobs:
         working-directory: .
         run: |
           if [ -f shared/publish_teasers.py ]; then
-            python shared/publish_teasers.py || true
+            python shared/publish_teasers.py
           fi
 
       - name: Commit refreshed dashboard
@@ -99,8 +98,4 @@ jobs:
             exit 0
           fi
           git commit -m "precos: automated refresh $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          for i in 1 2 3 4 5; do
-            if git push; then break; fi
-            echo "Push rejected (another workflow likely pushed first) -- rebasing and retrying ($i)..."
-            git pull --rebase origin main
-          done
+          bash .github/scripts/push-with-rebase.sh

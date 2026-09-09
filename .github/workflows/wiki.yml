@@ -25,15 +25,15 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
 
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5.4.2
         with:
           enable-cache: true
           python-version: "3.12"
 
       - name: Install (markdown rendering)
-        run: uv pip install --system markdown
+        run: uv pip install --system -r wiki/requirements.txt -c shared/constraints.txt
 
       - name: Build wiki
         run: python build_wiki.py
@@ -48,8 +48,4 @@ jobs:
             exit 0
           fi
           git commit -m "wiki: rebuild $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          for i in 1 2 3 4 5; do
-            if git push; then break; fi
-            echo "Push rejected (another workflow likely pushed first) -- rebasing and retrying ($i)..."
-            git pull --rebase origin main
-          done
+          bash .github/scripts/push-with-rebase.sh
