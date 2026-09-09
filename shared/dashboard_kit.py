@@ -230,14 +230,18 @@ function escapeHtml(s) {
 JS_BOOT = r"""
 (function(){
   try {
-    if (localStorage.getItem("gasbrazil-theme") === "dark")
+    /* Dark is the site default; only "light" opts out. */
+    var theme = localStorage.getItem("gasbrazil-theme");
+    if (theme !== "light")
       document.documentElement.setAttribute("data-theme", "dark");
     var lang = localStorage.getItem("gasbrazil-lang");
     if (!lang)
       lang = ((navigator.language || "en").toLowerCase().indexOf("pt") === 0) ? "pt" : "en";
     document.documentElement.setAttribute("data-lang", lang);
     document.documentElement.setAttribute("lang", lang === "pt" ? "pt-BR" : "en");
-  } catch (e) {}
+  } catch (e) {
+    document.documentElement.setAttribute("data-theme", "dark");
+  }
 })();
 """
 

@@ -443,9 +443,17 @@ main.hub { flex: 1; width: var(--content-w); max-width: var(--content-max); marg
   font-size: 12px; font-weight: 400; color: var(--muted2); text-decoration: none;
   border: 1px solid var(--ring); border-radius: var(--radius-sm); padding: 5px 12px;
   white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;
-  transition: background .15s ease, color .15s ease, border-color .15s ease;
+  background: var(--panel-grad);
+  transition: border-color .3s ease, transform .3s ease, background .3s ease, box-shadow .3s ease, color .3s ease;
 }
-.sources-block a:hover { background: var(--accent-soft); color: var(--text); border-color: var(--border-strong); }
+.sources-block a:hover {
+  background: var(--panel-grad-hover); color: var(--text); border-color: var(--border-strong);
+  transform: translateY(-2px); box-shadow: var(--elevate);
+}
+[data-theme="dark"] .sources-block a:hover {
+  border-color: rgba(255, 223, 0, .35);
+  box-shadow: var(--elevate), 0 0 0 1px rgba(255, 223, 0, .12);
+}
 .sources-block .ext-icon { width: 10px; height: 10px; display: inline-block; flex: none; opacity: .75; }
 .prose { margin-top: 8px; max-width: 42em; }
 .prose h2 { font-size: 16px; font-weight: 400; margin: 22px 0 6px; }
@@ -462,7 +470,13 @@ main.hub { flex: 1; width: var(--content-w); max-width: var(--content-max); marg
   box-shadow: var(--elevate), 0 0 0 1px rgba(255, 223, 0, .12);
 }
 footer.site { padding: 18px 24px; color: var(--muted); font-weight: 300; font-size: 12px; text-align: center; }
-footer.site a { color: var(--muted2); }
+footer.site a {
+  color: var(--accent); text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color .25s ease, border-color .25s ease;
+}
+footer.site a:hover { color: var(--text); border-bottom-color: var(--brz-yellow); }
+[data-theme="dark"] footer.site a:hover { color: var(--brz-yellow); border-bottom-color: var(--brz-yellow); }
 """
 
 

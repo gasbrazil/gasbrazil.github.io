@@ -361,11 +361,75 @@ footer .asof-strip,
   border: 1px solid var(--ring); border-radius: 5px; padding: 3px 10px;
   white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;
   font-weight: 400;
+  background: var(--panel-grad);
+  transition: border-color .3s ease, transform .3s ease, background .3s ease, box-shadow .3s ease, color .3s ease;
 }
 .sources a:hover {
-  background: var(--accent-soft); color: var(--text); border-color: var(--border-strong);
+  background: var(--panel-grad-hover); color: var(--text); border-color: var(--border-strong);
+  transform: translateY(-2px); box-shadow: var(--elevate);
 }
 .ext-icon { width: 10px; height: 10px; display: inline-block; flex: none; opacity: .75; }
+
+/* Shared chip / pill / series-button lift — same language as hub KPI cards. */
+.pill,
+.series-btn,
+.tso-chip,
+.tso-toggle,
+.chip {
+  transition: border-color .3s ease, transform .3s ease, background .3s ease, box-shadow .3s ease, color .3s ease;
+}
+.pill:hover,
+.series-btn:hover:not(:disabled),
+.tso-chip:hover:not(.selected),
+.tso-toggle:hover:not(.active),
+.chip:hover:not(.selected):not(.active) {
+  transform: translateY(-2px);
+  box-shadow: var(--elevate);
+  border-color: var(--border-strong);
+  background: var(--panel-grad-hover);
+  color: var(--text);
+}
+/* Generic dashboard chrome buttons (filters, CSV, refresh) — not infodots/nav. */
+.wrap button:not(.infodot):not(.dd-trigger):not(.langBtn):not(#theme-toggle):not(#lang-toggle):not(:disabled),
+header button:not(.infodot):not(.dd-trigger):not(.langBtn):not(#theme-toggle):not(#lang-toggle):not(:disabled) {
+  transition: border-color .3s ease, transform .3s ease, background .3s ease, box-shadow .3s ease, color .3s ease;
+}
+.wrap button:not(.infodot):not(.dd-trigger):not(.langBtn):not(#theme-toggle):not(#lang-toggle):not(:disabled):hover,
+header button:not(.infodot):not(.dd-trigger):not(.langBtn):not(#theme-toggle):not(#lang-toggle):not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: var(--elevate);
+}
+[data-theme="dark"] .sources a:hover,
+[data-theme="dark"] .pill:hover,
+[data-theme="dark"] .series-btn:hover:not(:disabled),
+[data-theme="dark"] .tso-chip:hover:not(.selected),
+[data-theme="dark"] .tso-toggle:hover:not(.active),
+[data-theme="dark"] .chip:hover:not(.selected):not(.active) {
+  border-color: rgba(255, 223, 0, .35);
+  box-shadow: var(--elevate), 0 0 0 1px rgba(255, 223, 0, .12);
+}
+
+/* Footer links — quiet until hover. */
+footer a,
+footer.site a,
+.foot a {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color .25s ease, border-color .25s ease, opacity .25s ease;
+}
+footer a:hover,
+footer.site a:hover,
+.foot a:hover {
+  color: var(--text);
+  border-bottom-color: var(--brz-yellow);
+}
+[data-theme="dark"] footer a:hover,
+[data-theme="dark"] footer.site a:hover,
+[data-theme="dark"] .foot a:hover {
+  color: var(--brz-yellow);
+  border-bottom-color: var(--brz-yellow);
+}
 
 /* Selected TSO chips / toggles use identity colors when data-tso is set. */
 .tso-chip.selected[data-tso="NTS"],
@@ -522,6 +586,14 @@ header.top #theme-toggle,
   }
   .filters-drawer-toggle { display: inline-flex !important; }
   .filters-collapsible.is-collapsed { display: none; }
+  header.dash-head #lang-toggle,
+  header.top #lang-toggle,
+  .site-header #lang-toggle { right: 52px; }
+}
+  header.dash-head #lang-toggle,
+  header.top #lang-toggle,
+  .site-header #lang-toggle { right: 52px; }
+}
   header.dash-head #lang-toggle,
   header.top #lang-toggle,
   .site-header #lang-toggle { right: 52px; }
