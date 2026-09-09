@@ -311,9 +311,23 @@ footer .asof-strip,
   padding: 0 0 10px;
 }
 
-/* Text nav (not pill clusters): underline active page. */
+/* Text nav (not pill clusters): underline active page.
+   Home + Products stay left; Wiki/About (.nav-trail) pin right.
+   padding-right clears the fixed PT/theme buttons. */
+.header-right {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  width: 100%;
+}
 .navlinks, .header-links {
   display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px;
+  width: 100%;
+  padding-right: 92px;
+  box-sizing: border-box;
+}
+.nav-home { margin-inline-end: 10px; }
+.nav-trail {
+  display: inline-flex; align-items: center; gap: 6px 16px;
+  margin-left: auto;
 }
 .navlink {
   font-size: 14.5px;
@@ -622,7 +636,9 @@ header.top #theme-toggle,
 }
 
 @media (max-width: 720px) {
-  .navlinks, .header-links { gap: 4px 12px; }
+  .navlinks, .header-links { gap: 4px 12px; padding-right: 88px; }
+  .nav-home { margin-inline-end: 6px; }
+  .nav-trail { gap: 4px 12px; }
   .navlink, .dd-trigger { font-size: 13px; }
   .site-header .header-row, header.top .header-row {
     flex-wrap: wrap;

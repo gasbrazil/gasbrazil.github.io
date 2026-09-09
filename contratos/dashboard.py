@@ -1,4 +1,4 @@
-"""
+﻿"""
 Builds the single-file POC Contratos (gas transport contracts) dashboard from
 data/contratos.parquet.
 
@@ -115,8 +115,7 @@ body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--
    GasBrazil.com dashboard, not just whichever happens to wrap). */
 header.dash-head { display: flex; flex-direction: column; gap: 10px; margin-bottom: 0; }
 h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
-.header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.header-links { display: flex; gap: 8px; flex-wrap: wrap; }
+.header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; width: 100%; }
 .sources { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0 0 var(--gap); }
 .sources-label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 200; margin-right: 2px; }
 .pill { font-size: 11.5px; color: var(--muted2); text-decoration: none; border: 1px solid var(--border); border-radius: 5px; padding: 3px 10px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; }

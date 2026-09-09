@@ -936,11 +936,11 @@ def nav_links_html(
     home = _SITES["home"]
     if self_id == "home":
         parts.append(
-            f'<span class="navlink is-active" aria-current="page"{i18n_attr("home")}>{home["label"]}</span>'
+            f'<span class="navlink nav-home is-active" aria-current="page"{i18n_attr("home")}>{home["label"]}</span>'
         )
     else:
         parts.append(
-            f'<a class="navlink" id="link-home" href="{home["custom"]}"{i18n_attr("home")}>{home["label"]}</a>'
+            f'<a class="navlink nav-home" id="link-home" href="{home["custom"]}"{i18n_attr("home")}>{home["label"]}</a>'
         )
 
     menu_items: list[str] = []
@@ -972,8 +972,14 @@ def nav_links_html(
 
     if extra_links_html:
         parts.append(extra_links_html)
-    parts.append(f'<a class="navlink" href="{wiki_href}" data-i18n="navWiki">Wiki</a>')
-    parts.append(f'<a class="navlink" href="{about_href}" data-i18n="navAbout">About</a>')
+    # Wiki + About sit in .nav-trail so theme.css can push them to the
+    # right edge of the header row (margin-left: auto), away from Home/Products.
+    parts.append(
+        '<div class="nav-trail">'
+        f'<a class="navlink" href="{wiki_href}" data-i18n="navWiki">Wiki</a>'
+        f'<a class="navlink" href="{about_href}" data-i18n="navAbout">About</a>'
+        "</div>"
+    )
     parts.append(_PRODUCTS_DROPDOWN_JS)
     return "\n      ".join(parts)
 

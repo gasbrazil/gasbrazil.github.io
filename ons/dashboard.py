@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """Generate the ONS Balances dashboard from the daily store.
 
 ADR-002 Track B: the large series payload is written to payload.json.gz
@@ -431,8 +431,7 @@ body{margin:0;background:var(--bg);color:var(--text);
    viewport width or pill count (see ADR-001: same layout on every
    GasBrazil.com dashboard, not just whichever happens to wrap). */
 header.dash-head{display:flex;flex-direction:column;gap:10px;margin-bottom:0}
-.header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.header-links{display:flex;gap:8px;flex-wrap:wrap}
+.header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;width:100%}
 h1{font-size:25px;margin:0;letter-spacing:-.01em}
 /* Green/yellow/blue band under the header -- the one place the flag appears
    as itself rather than as an accent on something else. Proportions echo the
