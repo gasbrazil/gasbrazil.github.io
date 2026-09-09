@@ -10,8 +10,10 @@ from __future__ import annotations
 
 import os
 import shutil
+import time
 from pathlib import Path
-from typing import Iterable
+from typing import Callable, Iterable
+from urllib.parse import quote
 
 import pandas as pd
 
@@ -60,8 +62,41 @@ def _r2_client():
         aws_access_key_id=os.environ["R2_ACCESS_KEY_ID"],
         aws_secret_access_key=os.environ["R2_SECRET_ACCESS_KEY"],
         region_name="auto",
-        config=Config(signature_version="s3v4"),
+        config=Config(
+            signature_version="s3v4",
+            retries={"max_attempts": 8, "mode": "standard"},
+        ),
     )
+
+
+def _retry(fn: Callable, *, attempts: int = 4, label: str = "r2"):
+    """Retry transient failures; last exception is re-raised."""
+    delay = 0.6
+    last: BaseException | None = None
+    for i in range(attempts):
+        try:
+            return fn()
+        except Exception as exc:  # noqa: BLE001 — network/SDK surface is broad
+            last = exc
+            if i == attempts - 1:
+                break
+            print(f"  {label} retry {i + 1}/{attempts - 1}: {exc}")
+            time.sleep(delay)
+            delay *= 2
+    assert last is not None
+    raise last
+
+
+def _atomic_replace(tmp: Path, dest: Path) -> None:
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    os.replace(tmp, dest)
+
+
+def _unlink_quiet(path: Path) -> None:
+    try:
+        path.unlink()
+    except FileNotFoundError:
+        pass
 
 
 def upload_to_r2(
@@ -76,14 +111,13 @@ def upload_to_r2(
     local_path = Path(local_path)
     if not local_path.exists():
         raise FileNotFoundError(local_path)
-    client = _r2_client()
     extra = {"ContentType": content_type, "CacheControl": cache_control}
-    client.upload_file(
-        str(local_path),
-        bucket,
-        key,
-        ExtraArgs=extra,
-    )
+
+    def _do():
+        client = _r2_client()
+        client.upload_file(str(local_path), bucket, key, ExtraArgs=extra)
+
+    _retry(_do, label=f"upload {key}")
     return f"s3://{bucket}/{key}"
 
 
@@ -93,20 +127,35 @@ def download_from_r2(
     key: str,
     dest: Path | str,
 ) -> Path | None:
-    """Download an R2 object to dest. Returns dest on success, None if missing."""
+    """Download an R2 object to dest. Returns dest on success, None if missing.
+
+    Writes to a sibling ``.tmp`` then ``os.replace`` so a truncated object
+    never occupies the canonical path.
+    """
     from botocore.exceptions import ClientError
 
     dest = Path(dest)
     dest.parent.mkdir(parents=True, exist_ok=True)
-    client = _r2_client()
+    tmp = dest.with_name(dest.name + ".tmp")
+
+    def _do():
+        _unlink_quiet(tmp)
+        client = _r2_client()
+        client.download_file(bucket, key, str(tmp))
+
     try:
-        client.download_file(bucket, key, str(dest))
+        _retry(_do, label=f"download {key}")
     except ClientError as exc:
+        _unlink_quiet(tmp)
         code = (exc.response or {}).get("Error", {}).get("Code", "")
         status = (exc.response or {}).get("ResponseMetadata", {}).get("HTTPStatusCode")
         if code in ("404", "NoSuchKey", "NotFound", "404 Not Found") or status == 404:
             return None
         raise
+    except Exception:
+        _unlink_quiet(tmp)
+        raise
+    _atomic_replace(tmp, dest)
     return dest
 
 
@@ -117,8 +166,9 @@ def ensure_lake(
 ) -> dict[str, Path | None]:
     """Ensure lake parquet files exist locally; pull from R2 when missing.
 
-    Returns {name: local Path or None if unavailable}. Does not raise for
-    missing remote objects — callers degrade with empty frames.
+    Returns {name: local Path or None if unavailable}. Missing remote
+    objects (404) degrade to None; auth/5xx errors are re-raised so CI
+    does not silently ship an empty Desk.
     """
     lake_bucket = os.environ.get("GASBRAZIL_LAKE_BUCKET", "").strip()
     out: dict[str, Path | None] = {}
@@ -131,11 +181,7 @@ def ensure_lake(
             out[name] = dest if dest.exists() else None
             continue
         rel = dest.relative_to(LAKE_ROOT).as_posix()
-        try:
-            got = download_from_r2(bucket=lake_bucket, key=rel, dest=dest)
-        except Exception as exc:
-            print(f"  lake pull {name}: skipped ({exc})")
-            got = None
+        got = download_from_r2(bucket=lake_bucket, key=rel, dest=dest)
         if got is not None:
             print(f"  lake pull {name}: {got} ({got.stat().st_size:,} bytes)")
         else:
@@ -145,16 +191,26 @@ def ensure_lake(
 
 
 def publish(name: str, src: Path | pd.DataFrame) -> Path:
-    """Copy or write a parquet into the canonical lake path; mirror to R2 when configured."""
+    """Copy or write a parquet into the canonical lake path; mirror to R2 when configured.
+
+    Local write is atomic (tmp + replace) so a crash cannot leave a truncated
+    parquet that ``ensure_lake`` would then treat as present.
+    """
     dest = lake_path(name)
     dest.parent.mkdir(parents=True, exist_ok=True)
-    if isinstance(src, pd.DataFrame):
-        src.to_parquet(dest, index=False)
-    else:
-        src = Path(src)
-        if not src.exists():
-            raise FileNotFoundError(src)
-        shutil.copy2(src, dest)
+    tmp = dest.with_name(dest.name + ".tmp")
+    try:
+        if isinstance(src, pd.DataFrame):
+            src.to_parquet(tmp, index=False)
+        else:
+            src = Path(src)
+            if not src.exists():
+                raise FileNotFoundError(src)
+            shutil.copy2(src, tmp)
+        _atomic_replace(tmp, dest)
+    except Exception:
+        _unlink_quiet(tmp)
+        raise
 
     lake_bucket = os.environ.get("GASBRAZIL_LAKE_BUCKET", "").strip()
     if r2_configured() and lake_bucket:
@@ -193,22 +249,63 @@ def write_json_gzip(payload: dict, path: Path, *, compresslevel: int = 9) -> Pat
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     raw = json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
-    path.write_bytes(gzip.compress(raw, compresslevel=compresslevel, mtime=0))
+    blob = gzip.compress(raw, compresslevel=compresslevel, mtime=0)
+    tmp = path.with_name(path.name + ".tmp")
+    try:
+        tmp.write_bytes(blob)
+        _atomic_replace(tmp, path)
+    except Exception:
+        _unlink_quiet(tmp)
+        raise
     return path
+
+
+def _public_url(remote_key: str, *, local: str) -> str:
+    """Public URL for an artifacts-bucket object, or ``local`` for offline."""
+    base = os.environ.get("GASBRAZIL_DATA_BASE_URL", "").strip().rstrip("/")
+    bust = os.environ.get("GASBRAZIL_DATA_CACHE_BUST", "").strip()
+    if not base:
+        return local
+    url = f"{base}/{remote_key}"
+    if bust:
+        url += "?v=" + quote(str(bust), safe="")
+    return url
 
 
 def payload_url(domain: str) -> str:
     """Public URL for a dashboard artifact, or sibling-relative for local/dev."""
     if domain not in ARTIFACT_DOMAINS:
         raise KeyError(f"Unknown artifact domain {domain!r}; known: {ARTIFACT_DOMAINS}")
-    base = os.environ.get("GASBRAZIL_DATA_BASE_URL", "").strip().rstrip("/")
-    bust = os.environ.get("GASBRAZIL_DATA_CACHE_BUST", "").strip()
-    if not base:
-        return "payload.json.gz"
-    url = f"{base}/{domain}/payload.json.gz"
-    if bust:
-        url += f"?v={bust}"
-    return url
+    return _public_url(f"{domain}/payload.json.gz", local="payload.json.gz")
+
+
+def _upload_public_artifact(
+    local: Path,
+    key: str,
+    *,
+    content_type: str,
+    cache_control: str,
+    log_label: str,
+) -> None:
+    """Upload a public artifact, or fail loudly if HTML will point at R2."""
+    art_bucket = os.environ.get("GASBRAZIL_ARTIFACTS_BUCKET", "").strip()
+    want_remote = bool(os.environ.get("GASBRAZIL_DATA_BASE_URL", "").strip())
+    if r2_configured() and art_bucket:
+        uri = upload_to_r2(
+            local,
+            bucket=art_bucket,
+            key=key,
+            content_type=content_type,
+            cache_control=cache_control,
+        )
+        print(f"  {log_label}: {uri}")
+        return
+    if want_remote:
+        raise RuntimeError(
+            "GASBRAZIL_DATA_BASE_URL is set but R2 credentials / "
+            "GASBRAZIL_ARTIFACTS_BUCKET are missing; refusing to emit HTML "
+            "that points at an unuploaded artifact"
+        )
 
 
 def write_and_publish_artifact(
@@ -227,36 +324,19 @@ def write_and_publish_artifact(
         raise KeyError(f"Unknown artifact domain {domain!r}; known: {ARTIFACT_DOMAINS}")
     local_dir = Path(local_dir)
     path = write_json_gzip(payload, local_dir / "payload.json.gz", compresslevel=compresslevel)
-
-    art_bucket = os.environ.get("GASBRAZIL_ARTIFACTS_BUCKET", "").strip()
-    if r2_configured() and art_bucket:
-        uri = upload_to_r2(
-            path,
-            bucket=art_bucket,
-            key=f"{domain}/payload.json.gz",
-            content_type="application/gzip",
-            cache_control="public, max-age=300",
-        )
-        print(f"  R2 artifact: {uri}")
-    elif os.environ.get("GASBRAZIL_DATA_BASE_URL", "").strip() and not r2_configured():
-        print(
-            "  warning: GASBRAZIL_DATA_BASE_URL is set but R2 credentials are missing; "
-            "HTML will point at R2 while the local payload was not uploaded"
-        )
-
+    _upload_public_artifact(
+        path,
+        f"{domain}/payload.json.gz",
+        content_type="application/gzip",
+        cache_control="public, max-age=300",
+        log_label="R2 artifact",
+    )
     return path, payload_url(domain)
 
 
 def teaser_url() -> str:
     """Public URL for hub teasers aggregate, or local sibling for offline."""
-    base = os.environ.get("GASBRAZIL_DATA_BASE_URL", "").strip().rstrip("/")
-    bust = os.environ.get("GASBRAZIL_DATA_CACHE_BUST", "").strip()
-    if not base:
-        return "hub/teasers.json.gz"
-    url = f"{base}/hub/teasers.json.gz"
-    if bust:
-        url += f"?v={bust}"
-    return url
+    return _public_url("hub/teasers.json.gz", local="hub/teasers.json.gz")
 
 
 def write_and_publish_teasers(
@@ -269,14 +349,11 @@ def write_and_publish_teasers(
     local_dir = Path(local_dir) if local_dir else (REPO_ROOT / "hub")
     local_dir.mkdir(parents=True, exist_ok=True)
     path = write_json_gzip(teasers, local_dir / "teasers.json.gz", compresslevel=compresslevel)
-    art_bucket = os.environ.get("GASBRAZIL_ARTIFACTS_BUCKET", "").strip()
-    if r2_configured() and art_bucket:
-        uri = upload_to_r2(
-            path,
-            bucket=art_bucket,
-            key="hub/teasers.json.gz",
-            content_type="application/gzip",
-            cache_control="public, max-age=120",
-        )
-        print(f"  R2 hub teasers: {uri}")
+    _upload_public_artifact(
+        path,
+        "hub/teasers.json.gz",
+        content_type="application/gzip",
+        cache_control="public, max-age=120",
+        log_label="R2 hub teasers",
+    )
     return path, teaser_url()
