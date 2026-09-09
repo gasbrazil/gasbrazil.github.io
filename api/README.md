@@ -6,7 +6,7 @@ dashboard's pipeline (or CI), then query here.
 
 ```bash
 # from repo root, after at least one pipeline build:
-pip install -r api/requirements.txt
+uv pip install -r api/requirements.txt
 python pld/pld_pipeline.py build          # example
 python supply/supply_pipeline.py build
 uvicorn api.main:app --reload --port 8000

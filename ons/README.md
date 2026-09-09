@@ -47,7 +47,7 @@ Run from inside this `ons/` directory (CI does the same — see
 `.github/workflows/ons.yml`):
 
 ```bash
-pip install -r requirements.txt
+uv pip install -r requirements.txt
 python ons_pipeline.py verify      # confirm every source URL is reachable — run this first
 python ons_pipeline.py refresh     # fetch + build + dashboard (the normal daily run)
 open index.html

@@ -5,7 +5,7 @@ Reads canonical lake parquet when present, else falls back to each
 dashboard's data/*.parquet. Does not proxy ANP/ONS/CCEE live.
 
 Run locally:
-  pip install -r api/requirements.txt
+  uv pip install -r api/requirements.txt
   uvicorn api.main:app --reload --port 8000
 
 OpenAPI: http://127.0.0.1:8000/docs

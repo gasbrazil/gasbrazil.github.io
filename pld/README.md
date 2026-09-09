@@ -33,7 +33,7 @@ JSON payload inflated client-side into a single static HTML file.
 ## Local dev
 
 ```bash
-pip install -r requirements.txt
+uv pip install -r requirements.txt
 python make_mock.py             # or: python pld_pipeline.py all
 python pld_pipeline.py build    # if you only fetched / used mock raw
 python dashboard.py

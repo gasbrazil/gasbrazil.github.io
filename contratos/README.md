@@ -59,7 +59,7 @@ file — no server, no database).
 Run from inside this `contratos/` directory:
 
 ```bash
-pip install -r requirements.txt
+uv pip install -r requirements.txt
 python make_mock.py                  # or: python contratos_pipeline.py fetch (needs network access to the source)
 python contratos_pipeline.py build
 python dashboard.py

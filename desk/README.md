@@ -7,7 +7,7 @@ calculator.
 ## Build
 
 ```bash
-pip install -r requirements.txt
+uv pip install -r requirements.txt
 python dashboard.py          # writes index.html + payload.json.gz
 python build_payload.py      # print KPI / source summary only
 ```

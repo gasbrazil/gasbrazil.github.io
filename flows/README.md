@@ -108,7 +108,7 @@ the repo for anyone who wants it.
 Run from inside this `flows/` directory:
 
 ```bash
-pip install -r requirements.txt
+uv pip install -r requirements.txt
 python make_mock.py             # or: python flows_pipeline.py fetch (needs network access to the source)
 python flows_pipeline.py build
 python dashboard.py

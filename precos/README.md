@@ -37,7 +37,7 @@ ANP typically publishes with ~2–3 months of lag.
 
 ```bash
 cd precos
-pip install -r requirements.txt
+uv pip install -r requirements.txt
 python make_mock.py             # or: python precos_pipeline.py fetch
 python precos_pipeline.py build
 python dashboard.py

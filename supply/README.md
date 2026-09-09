@@ -52,7 +52,7 @@ ANP typically publishes with ~2 months of lag.
 
 ```bash
 cd supply
-pip install -r requirements.txt
+uv pip install -r requirements.txt
 python make_mock.py             # or: python supply_pipeline.py fetch
 python supply_pipeline.py build
 python dashboard.py

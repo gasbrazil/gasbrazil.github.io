@@ -40,7 +40,7 @@ file — no server, no database).
 Run from inside this `poc/` directory:
 
 ```bash
-pip install -r requirements.txt
+uv pip install -r requirements.txt
 python make_mock.py            # or: python poc_pipeline.py fetch (needs network access to the source)
 python poc_pipeline.py build
 python dashboard.py

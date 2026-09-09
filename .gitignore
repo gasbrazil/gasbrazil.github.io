@@ -1,6 +1,8 @@
 __pycache__/
 *.pyc
 .DS_Store
+.venv/
+venv/
 
 # Personal-machine trigger scripts / local secrets -- these can embed a
 # GitHub PAT, never commit them.

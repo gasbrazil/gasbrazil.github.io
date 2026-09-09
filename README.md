@@ -77,6 +77,20 @@ index.html              built landing page (committed -- served at /)
   desk.yml                desk rebuild from lake/sibling parquet
 ```
 
+## Local Python
+
+Install [uv](https://docs.astral.sh/uv/), then per app (or `api/`):
+
+```bash
+uv venv                  # creates .venv/ (gitignored)
+# Windows: .venv\Scripts\activate
+# macOS/Linux: source .venv/bin/activate
+uv pip install -r requirements.txt
+```
+
+CI uses the same `requirements.txt` files via `astral-sh/setup-uv` and
+`uv pip install --system`.
+
 ## Making a visual change
 
 Edit `shared/theme.css` (a color, the font, the `.flagbar` gradient) or
