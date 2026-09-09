@@ -289,7 +289,7 @@ const GB_I18N = {
     navAbout: "About",
     navWiki: "Wiki",
     contact: "Contact",
-    tagline: "Public data for Brazil's natural gas and power markets.",
+    tagline: "Analytical Firepower for Brazil's Energy Markets",
     aboutLead: "Independent public-data dashboards. Not an official ONS, ANP, CCEE, or transportadora product.",
     aboutBody: "GasBrazil.com republishes open Brazilian gas and power data as filterable dashboards. Caveats are on each page and on About.",
     cardOns: "ONS Balances",
@@ -374,7 +374,7 @@ const GB_I18N = {
     navAbout: "Sobre",
     navWiki: "Wiki",
     contact: "Contato",
-    tagline: "Dados públicos do mercado de gás e energia do Brasil.",
+    tagline: "Potência analítica para os mercados de energia do Brasil",
     aboutLead: "Painéis independentes com dados públicos. Não é produto oficial da ONS, ANP, CCEE ou transportadoras.",
     aboutBody: "O GasBrazil.com republica dados abertos de gás e energia em painéis filtráveis. Ressalvas em cada página e em Sobre.",
     cardOns: "Balanços ONS",
@@ -723,11 +723,24 @@ _SITES = {
         "caissonpoint": "https://caissonpoint.github.io/gasbrazil-com/",
         "hub": "https://gasbrazil.github.io/",
     },
+    # Product order matches the hub KPI strip (desk → power → POC → supply).
+    "desk": {
+        "label": "The Desk",
+        "custom": "https://gasbrazil.com/desk/",
+        "caissonpoint": "https://gasbrazil.com/desk/",
+        "hub": "https://gasbrazil.github.io/desk/",
+    },
     "ons": {
         "label": "ONS Balances",
         "custom": "https://gasbrazil.com/ons/",
         "caissonpoint": "https://caissonpoint.github.io/ons-dashboard/",
         "hub": "https://gasbrazil.github.io/ons/",
+    },
+    "pld": {
+        "label": "PLD Prices",
+        "custom": "https://gasbrazil.com/pld/",
+        "caissonpoint": "https://gasbrazil.com/pld/",
+        "hub": "https://gasbrazil.github.io/pld/",
     },
     "poc": {
         "label": "POC Results",
@@ -753,23 +766,11 @@ _SITES = {
         "caissonpoint": "https://gasbrazil.com/supply/",
         "hub": "https://gasbrazil.github.io/supply/",
     },
-    "pld": {
-        "label": "PLD Prices",
-        "custom": "https://gasbrazil.com/pld/",
-        "caissonpoint": "https://gasbrazil.com/pld/",
-        "hub": "https://gasbrazil.github.io/pld/",
-    },
     "precos": {
         "label": "ANP Prices",
         "custom": "https://gasbrazil.com/precos/",
         "caissonpoint": "https://gasbrazil.com/precos/",
         "hub": "https://gasbrazil.github.io/precos/",
-    },
-    "desk": {
-        "label": "The Desk",
-        "custom": "https://gasbrazil.com/desk/",
-        "caissonpoint": "https://gasbrazil.com/desk/",
-        "hub": "https://gasbrazil.github.io/desk/",
     },
 }
 
@@ -849,8 +850,8 @@ def nav_links_html(
     extra_links_html: str = "",
 ) -> str:
     """Standard header text nav: Home stays a top-level link; every other
-    site in _SITES (fixed order: ons, poc, contratos, flows, supply, pld,
-    precos, desk) collapses into one "Products" dropdown menu, with the
+    site in _SITES (hub order: desk, ons, pld, poc, contratos, flows, supply,
+    precos) collapses into one "Products" dropdown menu, with the
     current page marked inside it as a non-clickable current item
     (checkmark, not a link) the same way the old flat nav marked the
     current page with aria-current=page / is-active. Then any page-specific

@@ -130,6 +130,9 @@ def collect_status() -> dict:
         "precos_kpi": None,
         "precos_kpi_pt": None,
         "precos_when": None,
+        "desk_kpi": None,
+        "desk_kpi_pt": None,
+        "desk_when": None,
         "supply_spark": "",
         "pld_spark": "",
         "poc_spark": "",
@@ -251,6 +254,30 @@ def collect_status() -> dict:
         except Exception:
             pass
 
+    desk_html = ROOT / "desk" / "index.html"
+    if desk_html.exists():
+        text = desk_html.read_text(encoding="utf-8", errors="ignore")
+        m = re.search(r"generated:\s*(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}\s+UTC)", text)
+        if m:
+            status["desk_when"] = m.group(1)
+        se = re.search(r"kpi_pld_se:\s*([0-9.]+)", text)
+        gas = re.search(r"kpi_gen_gas:\s*([0-9.]+)", text)
+        through = re.search(r"data_through:\s*(\S+)", text)
+        if through and through.group(1) and through.group(1) not in ("", "__DATA_THROUGH__"):
+            status["desk_when"] = status["desk_when"] or through.group(1)
+        parts_en, parts_pt = [], []
+        if gas and gas.group(1):
+            g = float(gas.group(1))
+            parts_en.append(f"{g:.0f} MWmed gas")
+            parts_pt.append(f"{g:.0f} MWmed a gás")
+        if se and se.group(1):
+            s = float(se.group(1))
+            parts_en.append(f"PLD SE {s:.2f}")
+            parts_pt.append(f"PLD SE {s:.2f}")
+        if parts_en:
+            status["desk_kpi"] = " · ".join(parts_en)
+            status["desk_kpi_pt"] = " · ".join(parts_pt)
+
     try:
         import pandas as pd
 
@@ -319,7 +346,8 @@ SHARED_PAGE_CSS = """
 * { box-sizing: border-box; }
 html, body { height: 100%; }
 body {
-  margin: 0; background: var(--bg); color: var(--text); font-family: var(--font);
+  margin: 0; background-color: var(--bg); background-image: var(--bg-grad);
+  background-attachment: fixed; color: var(--text); font-family: var(--font);
   font-weight: 300; display: flex; flex-direction: column; min-height: 100vh;
 }
 .topbar {
@@ -327,81 +355,95 @@ body {
   display: flex; gap: 6px;
 }
 #theme-toggle {
-  background: var(--panel); border: 1px solid var(--border);
-  border-radius: 5px; width: 34px; height: 34px; cursor: pointer; color: var(--muted2);
+  background: var(--panel); border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm); width: 34px; height: 34px; cursor: pointer; color: var(--text);
   display: flex; align-items: center; justify-content: center;
 }
 #theme-toggle svg { width: 17px; height: 17px; }
 /* Match dashboard .wrap: shared --content-w / --content-max (~1280px). */
 main.hub { flex: 1; width: var(--content-w); max-width: var(--content-max); margin: 0 auto;
-  padding: 48px 0 40px; }
-@media (max-width: 900px) { main.hub { width: auto; padding: 36px 16px 40px; } }
+  padding: 40px 0 48px; }
+@media (max-width: 900px) { main.hub { width: auto; padding: 28px 16px 40px; } }
 /* Home's own header row -- wordmark left, PT/theme controls right, same
    idea as the header every dashboard uses, just without a redundant nav
    row here since the product cards below already link to every page. */
 .hub-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .hub-controls { display: flex; gap: 6px; flex: none; }
 .hub-controls #theme-toggle { position: static; }
-.wordmark { font-size: 26px; font-weight: 600; letter-spacing: -.01em; }
+.wordmark { font-size: 30px; font-weight: 600; letter-spacing: -.02em; line-height: 1.1; }
 .wordmark .dot { color: var(--accent); }
 .wordmark a { color: inherit; text-decoration: none; }
-.tagline { color: var(--muted); font-weight: 200; font-size: 14.5px; margin-top: 8px;
-  max-width: 46em; line-height: 1.5; }
+.tagline { color: var(--text); font-weight: 600; font-size: 15px; margin: 10px 0 0;
+  max-width: 36em; line-height: 1.45; }
 /* Full-width flagband — do not override shared .flagbar width. */
-.flagbar { margin: 16px 0 0; }
-.hub .asof-strip { margin-top: 12px; }
-/*  KPI strip is the only product launcher on the hub (description cards removed). */
+.flagbar { margin: 18px 0 0; }
+/* KPI strip is the only product launcher on the hub (description cards removed). */
 .kpi-strip {
   display: grid; grid-template-columns: repeat(3, 1fr);
-  gap: 8px; margin-top: 14px;
+  gap: 8px; margin-top: 16px;
 }
 @media (max-width: 900px) { .kpi-strip { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 480px) { .kpi-strip { grid-template-columns: 1fr; } }
 .kpi-cell {
-  background: var(--panel); border: 1px solid var(--border); border-radius: 5px;
-  padding: 10px 12px; text-decoration: none; color: var(--text);
-  display: flex; flex-direction: column; gap: 3px; min-width: 0;
-  transition: border-color .15s ease;
+  position: relative; overflow: hidden;
+  background: var(--panel-grad); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 8px 10px; text-decoration: none; color: var(--text);
+  display: flex; flex-direction: column; gap: 2px; min-width: 0;
+  box-shadow: 0 1px 0 rgba(255,255,255,.55) inset, 0 1px 3px rgba(0,39,118,.04);
+  transition: border-color .2s ease, transform .2s ease, background .2s ease, box-shadow .2s ease;
 }
-.kpi-cell:hover { border-color: var(--accent); }
-.kpi-cell .kpi-label { font-size: 11px; font-weight: 400; color: var(--muted2); }
-.kpi-cell .kpi-role { font-size: 10.5px; font-weight: 200; color: var(--muted); line-height: 1.3; }
-.kpi-cell .kpi-val { font-size: 13px; font-weight: 400; color: var(--text);
-  line-height: 1.35; min-height: 1.2em; }
-.kpi-cell .kpi-when { font-size: 10.5px; font-weight: 200; color: var(--muted); min-height: 1em; }
-.kpi-spark { display: block; width: 100%; height: 28px; margin-top: 2px; color: var(--accent); }
+.kpi-cell::before {
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: var(--brz-blue); opacity: 0; transition: opacity .2s ease;
+}
+.kpi-cell:nth-child(3n+1)::before { background: var(--brz-green); }
+.kpi-cell:nth-child(3n+2)::before { background: var(--brz-yellow); }
+.kpi-cell:nth-child(3n+3)::before { background: var(--brz-blue); }
+.kpi-cell:hover {
+  border-color: var(--border-strong); background: var(--panel-grad-hover);
+  transform: translateY(-2px); box-shadow: var(--elevate);
+}
+.kpi-cell:hover::before { opacity: 1; }
+.kpi-cell .kpi-label { font-size: 12.5px; font-weight: 600; color: var(--text); letter-spacing: -.01em; }
+.kpi-cell .kpi-role { font-size: 11px; font-weight: 300; color: var(--muted); line-height: 1.3; }
+.kpi-cell .kpi-val { font-size: 12px; font-weight: 400; color: var(--muted2);
+  line-height: 1.35; min-height: 1.1em; margin-top: 2px; font-variant-numeric: tabular-nums; }
+.kpi-cell .kpi-when { font-size: 10px; font-weight: 300; color: var(--muted); min-height: 1em; margin-top: auto; padding-top: 4px; }
+.kpi-spark { display: block; width: 100%; height: 20px; margin-top: 2px; color: var(--accent); }
 .kpi-spark polyline { fill: none; stroke: currentColor; stroke-width: 1.5;
   stroke-linejoin: round; stroke-linecap: round; }
-.desk-link {
-  display: inline-flex; align-items: center; gap: 6px; margin-top: 14px;
-  font-size: 13px; font-weight: 400; color: var(--accent); text-decoration: none;
-}
-.desk-link:hover { text-decoration: underline; }
 .cards { display: grid; grid-template-columns: repeat(3, 1fr);
-  gap: 8px; margin-top: 16px; }
+  gap: 12px; margin-top: 20px; }
 @media (max-width: 720px) { .cards { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 480px) { .cards { grid-template-columns: 1fr; } }
 .card {
-  background: var(--panel); border: 1px solid var(--border); border-radius: 5px;
-  padding: var(--card-pad, 10px 12px);
+  position: relative; overflow: hidden;
+  background: var(--panel-grad); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: var(--card-pad);
   text-align: left; text-decoration: none; color: var(--text);
-  transition: border-color .15s ease;
+  box-shadow: 0 1px 0 rgba(255,255,255,.55) inset, 0 1px 3px rgba(0,39,118,.04);
+  transition: border-color .2s ease, transform .2s ease, background .2s ease, box-shadow .2s ease;
   display: flex; flex-direction: column;
 }
-.card:hover { border-color: var(--accent); }
-.card .name { font-size: 13.5px; font-weight: 400; display: flex; align-items: center;
-  gap: 7px; }
+.card:hover {
+  border-color: var(--border-strong); background: var(--panel-grad-hover);
+  transform: translateY(-2px); box-shadow: var(--elevate);
+}
+.card .name { font-size: 14px; font-weight: 400; display: flex; align-items: center;
+  gap: 8px; }
 .card .name .dot { width: 6px; height: 6px; border-radius: 50%; flex: none; background: var(--accent); }
-.card .desc { color: var(--muted); font-weight: 200; font-size: 12px; margin-top: 5px;
-  line-height: 1.4; flex: 1; }
-.sources-block { margin-top: 24px; }
+.card .desc { color: var(--muted); font-weight: 300; font-size: 12.5px; margin-top: 6px;
+  line-height: 1.45; flex: 1; }
+.hub-page-title { font-size: 22px; font-weight: 600; margin: 20px 0 0; letter-spacing: -.01em; }
+.sources-block { margin-top: 28px; }
 .sources-block .label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em;
-  color: var(--muted); font-weight: 200; margin-bottom: 8px; }
-.sources-block .row { display: flex; flex-wrap: wrap; gap: 6px; }
+  color: var(--muted); font-weight: 300; margin-bottom: 10px; }
+.sources-block .row { display: flex; flex-wrap: wrap; gap: 8px; }
 .sources-block a {
-  font-size: 11.5px; font-weight: 400; color: var(--muted2); text-decoration: none;
-  border: 1px solid var(--ring); border-radius: 5px; padding: 3px 10px;
+  font-size: 12px; font-weight: 400; color: var(--muted2); text-decoration: none;
+  border: 1px solid var(--ring); border-radius: var(--radius-sm); padding: 5px 12px;
   white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;
+  transition: background .15s ease, color .15s ease, border-color .15s ease;
 }
 .sources-block a:hover { background: var(--accent-soft); color: var(--text); border-color: var(--border-strong); }
 .sources-block .ext-icon { width: 10px; height: 10px; display: inline-block; flex: none; opacity: .75; }
@@ -409,8 +451,12 @@ main.hub { flex: 1; width: var(--content-w); max-width: var(--content-max); marg
 .prose h2 { font-size: 16px; font-weight: 400; margin: 22px 0 6px; }
 .prose p, .prose li { font-size: 14px; font-weight: 300; line-height: 1.6; color: var(--muted2); }
 .prose ul { padding-left: 1.2em; }
-footer.site { padding: 14px 24px; color: var(--muted); font-weight: 200; font-size: 11.5px; text-align: center; }
-footer.site a { color: var(--muted); }
+[data-theme="dark"] .kpi-cell,
+[data-theme="dark"] .card {
+  box-shadow: 0 1px 0 rgba(255,255,255,.04) inset, 0 1px 3px rgba(0,0,0,.25);
+}
+footer.site { padding: 18px 24px; color: var(--muted); font-weight: 300; font-size: 12px; text-align: center; }
+footer.site a { color: var(--muted2); }
 """
 
 
@@ -471,19 +517,27 @@ HOME_TEMPLATE = """__HEAD__
       <button id="theme-toggle" title="Toggle theme" aria-label="Toggle theme"></button>
     </div>
   </div>
-  <p class="tagline" data-i18n="tagline">Public data for Brazil's natural gas and power markets.</p>
+  <p class="tagline" data-i18n="tagline">Analytical Firepower for Brazil's Energy Markets</p>
   <div class="flagbar" aria-hidden="true"></div>
-  <a class="desk-link" href="desk/" data-i18n="cardDesk">The Desk</a>
-  <div class="asof-strip" id="asof-strip" hidden>
-    <span class="asof-label" data-i18n="kpiRefresh">Last refreshed</span>
-    <span class="asof-val"></span>
-  </div>
   <div class="kpi-strip">
+    <a class="kpi-cell" href="desk/" data-slug="desk">
+      <div class="kpi-label" data-i18n="cardDesk">The Desk</div>
+      <div class="kpi-role">Cross-product snapshot</div>
+      <div class="kpi-val" data-en="__DESK_KPI__" data-pt="__DESK_KPI_PT__">__DESK_KPI__</div>
+      <div class="kpi-when" data-refresh="__DESK_WHEN__"></div>
+    </a>
     <a class="kpi-cell" href="ons/" data-slug="ons">
       <div class="kpi-label" data-i18n="cardOns">ONS Balances</div>
       <div class="kpi-role">Grid &amp; gas dispatch</div>
       <div class="kpi-val" data-en="__ONS_KPI__" data-pt="__ONS_KPI_PT__">__ONS_KPI__</div>
       <div class="kpi-when" data-refresh="__ONS_WHEN__"></div>
+    </a>
+    <a class="kpi-cell" href="pld/" data-slug="pld">
+      <div class="kpi-label" data-i18n="cardPld">PLD Prices</div>
+      <div class="kpi-role">Power settlement</div>
+      <div class="kpi-val" data-en="__PLD_KPI__" data-pt="__PLD_KPI_PT__">__PLD_KPI__</div>
+      <div class="kpi-when" data-refresh="__PLD_WHEN__"></div>
+      __PLD_SPARK__
     </a>
     <a class="kpi-cell" href="poc/" data-slug="poc">
       <div class="kpi-label" data-i18n="cardPoc">POC Results</div>
@@ -517,13 +571,6 @@ HOME_TEMPLATE = """__HEAD__
       <div class="kpi-val" data-en="__PRECOS_KPI__" data-pt="__PRECOS_KPI_PT__">__PRECOS_KPI__</div>
       <div class="kpi-when" data-refresh="__PRECOS_WHEN__"></div>
     </a>
-    <a class="kpi-cell" href="pld/" data-slug="pld">
-      <div class="kpi-label" data-i18n="cardPld">PLD Prices</div>
-      <div class="kpi-role">Power settlement</div>
-      <div class="kpi-val" data-en="__PLD_KPI__" data-pt="__PLD_KPI_PT__">__PLD_KPI__</div>
-      <div class="kpi-when" data-refresh="__PLD_WHEN__"></div>
-      __PLD_SPARK__
-    </a>
   </div>
   <div class="sources-block">
     <div class="label" data-i18n="sources">Sources</div>
@@ -550,20 +597,6 @@ function paintRefreshLabels() {
     el.textContent = val || "";
     el.hidden = !val;
   });
-  const strip = document.getElementById("asof-strip");
-  if (strip) {
-    const parts = [];
-    document.querySelectorAll(".kpi-cell").forEach(cell => {
-      const whenEl = cell.querySelector(".kpi-when[data-refresh]");
-      const when = whenEl && whenEl.getAttribute("data-refresh");
-      const labelEl = cell.querySelector(".kpi-label");
-      const label = labelEl ? labelEl.textContent.trim() : "";
-      if (when) parts.push(label ? (label + " " + when) : when);
-    });
-    const dates = strip.querySelector(".asof-val");
-    if (dates) dates.textContent = parts.join(" · ");
-    strip.hidden = parts.length === 0;
-  }
 }
 async function loadLiveTeasers() {
   if (!TEASERS_URL || TEASERS_URL.indexOf("teasers") < 0) return;
@@ -600,10 +633,16 @@ loadLiveTeasers();
 
 ABOUT_TEMPLATE = """__HEAD__
 <body>
-__TOPBAR__
+<a class="skip-link" href="#main" data-i18n="skip">Skip to content</a>
 <main class="hub" id="main">
-  <div class="wordmark"><a href="../">GasBrazil<span class="dot">.</span>com</a></div>
-  <h1 style="font-size:22px;font-weight:400;margin:18px 0 0" data-i18n="aboutH1">About GasBrazil</h1>
+  <div class="hub-header">
+    <div class="wordmark"><a href="../">GasBrazil<span class="dot">.</span>com</a></div>
+    <div class="hub-controls">
+      <button type="button" id="lang-toggle" class="langBtn" aria-label="Português">PT</button>
+      <button id="theme-toggle" title="Toggle theme" aria-label="Toggle theme"></button>
+    </div>
+  </div>
+  <h1 class="hub-page-title" data-i18n="aboutH1">About GasBrazil</h1>
   <div class="flagbar" aria-hidden="true"></div>
   <div class="prose">
     <h2 data-i18n="aboutWho">What this is</h2>
@@ -637,13 +676,19 @@ __FOOTER__
 
 NOTFOUND_TEMPLATE = """__HEAD__
 <body>
-__TOPBAR__
+<a class="skip-link" href="#main" data-i18n="skip">Skip to content</a>
 <main class="hub" id="main">
-  <div class="wordmark"><a href="./">GasBrazil<span class="dot">.</span>com</a></div>
-  <h1 style="font-size:22px;font-weight:400;margin:18px 0 0" data-i18n="notFound">This page is not here.</h1>
+  <div class="hub-header">
+    <div class="wordmark"><a href="./">GasBrazil<span class="dot">.</span>com</a></div>
+    <div class="hub-controls">
+      <button type="button" id="lang-toggle" class="langBtn" aria-label="Português">PT</button>
+      <button id="theme-toggle" title="Toggle theme" aria-label="Toggle theme"></button>
+    </div>
+  </div>
+  <h1 class="hub-page-title" data-i18n="notFound">This page is not here.</h1>
   <p class="tagline" data-i18n="notFoundBody">The hub and dashboards are linked below.</p>
   <div class="flagbar" aria-hidden="true"></div>
-  <div class="cards" style="margin-top:22px">
+  <div class="cards">
     <a class="card" href="./" style="grid-column: 1 / -1"><div class="name"><span class="dot" aria-hidden="true"></span><span data-i18n="backHome">Back to GasBrazil.com</span></div></a>
     <a class="card" href="ons/"><div class="name"><span class="dot" aria-hidden="true"></span><span data-i18n="cardOns">ONS Balances</span></div></a>
     <a class="card" href="poc/"><div class="name"><span class="dot" aria-hidden="true"></span><span data-i18n="cardPoc">POC Results</span></div></a>
@@ -702,6 +747,9 @@ def write_home(out_path: Path | str = DEFAULT_OUT) -> Path:
     html = html.replace("__PRECOS_KPI__", st.get("precos_kpi") or "")
     html = html.replace("__PRECOS_KPI_PT__", st.get("precos_kpi_pt") or st.get("precos_kpi") or "")
     html = html.replace("__PRECOS_WHEN__", st.get("precos_when") or "")
+    html = html.replace("__DESK_KPI__", st.get("desk_kpi") or "")
+    html = html.replace("__DESK_KPI_PT__", st.get("desk_kpi_pt") or st.get("desk_kpi") or "")
+    html = html.replace("__DESK_WHEN__", st.get("desk_when") or "")
     html = html.replace("__POC_SPARK__", st.get("poc_spark") or "")
     html = html.replace("__SUPPLY_SPARK__", st.get("supply_spark") or "")
     html = html.replace("__PLD_SPARK__", st.get("pld_spark") or "")
@@ -721,7 +769,6 @@ def write_about(out_path: Path | None = None) -> Path:
         "How GasBrazil.com is built, what the data covers, and a short glossary of PEG and ONS terms.",
         "/about/",
     ))
-    html = html.replace("__TOPBAR__", _topbar())
     html = html.replace("__FOOTER__", _footer("../"))
     # About lives in /about/, so home-relative links in the footer need ../
     html = html.replace('href="./about/"', 'href="./"')
@@ -740,7 +787,6 @@ def write_404(out_path: Path | None = None) -> Path:
         "This page is not on GasBrazil.com.",
         "/",
     ))
-    html = html.replace("__TOPBAR__", _topbar())
     html = html.replace("__FOOTER__", _footer("./"))
     html = _kit_render(html)
     out_path.write_text(html, encoding="utf-8")

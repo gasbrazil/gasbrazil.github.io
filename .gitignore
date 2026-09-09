@@ -56,3 +56,6 @@ lake/**
 !lake/README.md
 
 tag_excel/
+
+# Local design prototypes (not production).
+gemini_redesign/

@@ -48,27 +48,48 @@
      rendering light (dark text on a dark --bg, unreadable) just because we
      never told the browser the page itself went dark. */
   color-scheme: light;
-  /* Cooler paper than warm cream -- closer to a desk terminal. */
-  --bg: #eef0f2;
-  --panel: #f7f8f9;
-  --border: #d5d8dc;
-  --border-strong: #b8bcc2;
+  /* Cooler paper than warm cream -- closer to a desk terminal.
+     Nudged a hair dimmer than pure paper (same cool gray, less bright). */
+  --bg: #eaecf0;
+  --panel: #f4f5f7;
+  --panel-hover: #fafbfc;
+  --border: #d2d5da;
+  --border-strong: #b4b8be;
   --text: #0b0b0b;
-  --muted: #7a7e85;
-  --muted2: #4a4e55;
+  --muted: #6a6e75;
+  --muted2: #3a3e45;
   --ring: rgba(11,11,11,.10);
   --shadow: none;
+  --elevate: 0 8px 24px rgba(11, 11, 11, .07), 0 2px 6px rgba(0, 39, 118, .04);
+  --header-bg: color-mix(in srgb, var(--bg) 88%, transparent);
+  /* Soft page wash + panel sheen — flag hues at low opacity for light depth. */
+  --bg-grad:
+    radial-gradient(ellipse 90% 55% at 0% -5%, rgba(0, 156, 59, .08), transparent 55%),
+    radial-gradient(ellipse 70% 45% at 100% 0%, rgba(0, 39, 118, .07), transparent 52%),
+    radial-gradient(ellipse 55% 35% at 70% 100%, rgba(255, 223, 0, .06), transparent 50%),
+    linear-gradient(180deg, #eef0f3 0%, var(--bg) 42%, #e4e7eb 100%);
+  --panel-grad: linear-gradient(
+    160deg,
+    #fafbfc 0%,
+    var(--panel) 48%,
+    color-mix(in srgb, var(--panel) 94%, var(--brz-blue)) 100%
+  );
+  --panel-grad-hover: linear-gradient(
+    160deg,
+    #ffffff 0%,
+    color-mix(in srgb, var(--panel-hover) 96%, var(--brz-green)) 100%
+  );
   --font: "Pacaembu", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --radius: 5px;
-  --radius-sm: 4px;
+  --radius: 8px;
+  --radius-sm: 5px;
 
   /* Shared layout + density tokens (2026-09-05). Every page's .wrap uses
      these, so the site-wide content width and breathing room are a one-line
      edit here rather than four separate template edits. */
   --content-w: 80%;
   --content-max: 1280px;
-  --card-pad: 10px 12px;
-  --gap: 10px;
+  --card-pad: 14px 16px;
+  --gap: 12px;
 
   /* Data-table body text. Was 12.5px across dashboards; dialed down for
      denser grids (POC Results especially). Pages use var(--table-font-size). */
@@ -127,12 +148,31 @@
   color-scheme: dark;
   --bg: #0d0d0d;
   --panel: #1a1a19;
+  --panel-hover: #242422;
   --border: #2c2c2a;
-  --border-strong: #383835;
+  --border-strong: #454540;
   --text: #ffffff;
-  --muted: #898781;
-  --muted2: #c3c2b7;
+  --muted: #9a9890;
+  --muted2: #d0cfc6;
   --ring: rgba(255,255,255,.10);
+  --elevate: 0 12px 32px rgba(0, 0, 0, .5), 0 0 40px rgba(0, 39, 118, .08);
+  --header-bg: color-mix(in srgb, var(--bg) 86%, transparent);
+  --bg-grad:
+    radial-gradient(ellipse 90% 50% at 5% -10%, rgba(0, 156, 59, .12), transparent 50%),
+    radial-gradient(ellipse 70% 45% at 100% 0%, rgba(63, 116, 217, .14), transparent 52%),
+    radial-gradient(ellipse 50% 30% at 60% 110%, rgba(255, 223, 0, .05), transparent 48%),
+    linear-gradient(180deg, #121212 0%, var(--bg) 40%, #0a0a0a 100%);
+  --panel-grad: linear-gradient(
+    160deg,
+    #222220 0%,
+    var(--panel) 50%,
+    color-mix(in srgb, var(--panel) 90%, var(--brz-blue)) 100%
+  );
+  --panel-grad-hover: linear-gradient(
+    160deg,
+    #2a2a28 0%,
+    color-mix(in srgb, var(--panel-hover) 92%, var(--brz-green)) 100%
+  );
 
   /* The flag blue itself is too dark to read as a link/button label against
      a near-black background, so dark mode lightens it while keeping the
@@ -183,9 +223,11 @@ html, body {
   font-family: var(--font);
   font-weight: 300;
   color: var(--text);
-  background: var(--bg);
+  background-color: var(--bg);
+  background-image: var(--bg-grad);
+  background-attachment: fixed;
 }
-.muted, .when, .sources-label, .asof, .meta-muted { font-weight: 200; color: var(--muted); }
+.muted, .when, .sources-label, .asof, .meta-muted { font-weight: 300; color: var(--muted); }
 .wordmark, h1 { font-weight: 600; }
 .emph, .navlink, .kpi-title, .card .name, .panel-title, th, b, strong {
   font-weight: 400;
@@ -194,14 +236,18 @@ html, body {
 /* Green/yellow/blue band, proportioned like the flag itself (green field,
    yellow lozenge, blue disc) rather than three equal thirds -- the one place
    the flag appears as itself rather than as an accent on something else.
-   Every dashboard's header markup includes
+   Uses --brz-blue (not --accent) so dark mode keeps true flag blue rather
+   than the lightened link accent. Every dashboard's header markup includes
    <div class="flagbar" aria-hidden="true"></div> right after </header>. */
 .flagbar {
   height: 4px;
   border-radius: 2px;
-  margin: 0 0 12px;
+  margin: 0 0 14px;
   background: linear-gradient(90deg,
-    var(--brz-green) 0 46%, var(--brz-yellow) 46% 73%, var(--accent) 73% 100%);
+    var(--brz-green) 0 46%, var(--brz-yellow) 46% 73%, var(--brz-blue) 73% 100%);
+  box-shadow:
+    0 2px 10px rgba(0, 156, 59, .18),
+    0 1px 6px rgba(0, 39, 118, .12);
 }
 
 /* Shared content column. 80% of the viewport, capped so it doesn't sprawl on
@@ -223,15 +269,17 @@ html, body {
   position: sticky;
   top: 0;
   z-index: 40;
-  background: color-mix(in srgb, var(--bg) 92%, transparent);
-  backdrop-filter: blur(8px);
-  padding-top: 10px;
-  margin: 0 0 0;
+  background: var(--header-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding-top: 12px;
+  padding-bottom: 2px;
+  margin: 0;
 }
 .asof-strip {
   display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 14px;
-  font-size: 11.5px; font-weight: 200; color: var(--muted);
-  margin: 0 0 10px; padding: 4px 0;
+  font-size: 11.5px; font-weight: 300; color: var(--muted);
+  margin: 0 0 12px; padding: 6px 0;
   border-bottom: 1px solid var(--border);
 }
 .asof-strip .asof-label {
@@ -242,21 +290,22 @@ html, body {
 
 /* Text nav (not pill clusters): underline active page. */
 .navlinks, .header-links {
-  display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px;
 }
 .navlink {
-  font-size: 12px;
+  font-size: 14.5px;
   color: var(--muted2);
   text-decoration: none;
   font-weight: 400;
   border: none;
   border-bottom: 2px solid transparent;
   border-radius: 0;
-  padding: 4px 0;
+  padding: 5px 0;
   white-space: nowrap;
   background: transparent;
+  transition: color .15s ease, border-color .15s ease;
 }
-.navlink:hover { color: var(--accent); border-bottom-color: var(--accent-soft); }
+.navlink:hover { color: var(--accent); border-bottom-color: var(--accent); }
 
 /* "Products" dropdown nav_links_html() builds (Option A of the 2026-09-08
    nav mockups): collapses every dashboard but Home into one menu instead
@@ -265,18 +314,19 @@ html, body {
    markup. */
 .products-dd { position: relative; display: inline-flex; }
 .dd-trigger {
-  font: 400 12px var(--font);
+  font: 400 14.5px var(--font);
   color: var(--muted2);
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
-  padding: 4px 0;
+  padding: 5px 0;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 3px;
+  transition: color .15s ease, border-color .15s ease;
 }
-.dd-trigger:hover, .dd-trigger[aria-expanded="true"] { color: var(--accent); border-bottom-color: var(--accent-soft); }
+.dd-trigger:hover, .dd-trigger[aria-expanded="true"] { color: var(--accent); border-bottom-color: var(--accent); }
 .dd-caret { font-size: 10px; transform: translateY(1px); }
 .dd-menu {
   display: none;
@@ -284,10 +334,10 @@ html, body {
   top: calc(100% + 10px);
   left: -8px;
   min-width: 180px;
-  background: var(--panel);
+  background: var(--panel-grad);
   border: 1px solid var(--border-strong);
-  border-radius: 8px;
-  box-shadow: 0 10px 30px rgba(0,0,0,.18);
+  border-radius: var(--radius);
+  box-shadow: var(--elevate);
   padding: 6px;
   z-index: 50;
 }
@@ -296,7 +346,7 @@ html, body {
   display: flex;
   align-items: center;
   gap: 8px;
-  font: 400 12.5px var(--font);
+  font: 400 13.5px var(--font);
   color: var(--text);
   text-decoration: none;
   padding: 7px 8px;
@@ -313,7 +363,7 @@ html, body {
 }
 .sources-label {
   font-size: 11px; text-transform: uppercase; letter-spacing: .06em;
-  color: var(--muted); font-weight: 200; margin-right: 2px;
+  color: var(--muted); font-weight: 300; margin-right: 2px;
 }
 .sources a {
   font-size: 11.5px; color: var(--muted2); text-decoration: none;
@@ -345,7 +395,7 @@ html, body {
 .navlink.is-active, .navlink[aria-current="page"] {
   color: var(--accent);
   border-bottom-color: var(--accent);
-  font-weight: 400;
+  font-weight: 600;
 }
 
 /* Inline "i" affordance. Replaces the paragraphs of explanatory copy that
@@ -432,6 +482,7 @@ th.num .th-filter { text-align: right; }
   background: var(--panel); border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm); color: var(--text); cursor: pointer;
   font: 400 11.5px/1 var(--font); letter-spacing: .04em;
+  width: auto; flex: none; box-sizing: border-box;
 }
 .langBtn:hover, #lang-toggle:hover { background: var(--accent-soft); }
 #theme-toggle {
@@ -439,20 +490,56 @@ th.num .th-filter { text-align: right; }
   min-width: 34px; height: 34px; padding: 5px 9px; line-height: 0;
   background: var(--panel); border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm); color: var(--text); cursor: pointer;
+  width: auto; flex: none; box-sizing: border-box;
 }
 #theme-toggle:hover { background: var(--accent-soft); }
 #theme-toggle svg { width: 16px; height: 16px; display: block; flex: none; }
 .chrome-tools { display: flex; align-items: center; gap: 6px; }
 
+/* Pin language + theme to the viewport's top-right on every surface. */
+.hub-controls,
+.topbar.chrome-tools {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 60;
+  display: flex;
+  gap: 6px;
+}
+header.dash-head #lang-toggle,
+header.top #lang-toggle,
+.site-header #lang-toggle {
+  position: fixed;
+  top: 14px;
+  right: 54px;
+  z-index: 60;
+}
+header.dash-head #theme-toggle,
+header.top #theme-toggle,
+.site-header #theme-toggle {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 60;
+}
+
 @media (max-width: 720px) {
-  .navlinks, .header-links { gap: 2px 10px; }
-  .navlink, .dd-trigger { font-size: 11.5px; }
+  .navlinks, .header-links { gap: 4px 12px; }
+  .navlink, .dd-trigger { font-size: 13px; }
   .site-header .header-row, header.top .header-row {
     flex-wrap: wrap;
   }
   .filters-drawer-toggle { display: inline-flex !important; }
   .filters-collapsible.is-collapsed { display: none; }
+  header.dash-head #lang-toggle,
+  header.top #lang-toggle,
+  .site-header #lang-toggle { right: 52px; }
 }
+
+
+
+
+
 
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
@@ -522,7 +609,7 @@ footer a { color: var(--accent); }
   <div class="header-right">
     <div class="header-links">
       <a class="navlink" id="link-home" href="https://gasbrazil.com" data-i18n="navHome">GasBrazil.com</a>
-      <div class="products-dd"><button type="button" class="dd-trigger" aria-haspopup="true" aria-expanded="false"><span data-i18n="navProducts">Products</span><span class="dd-caret">▾</span></button><div class="dd-menu"><a id="link-ons" href="https://gasbrazil.com/ons/" data-i18n="navOns"><span class="chk"></span>ONS Balances</a><a id="link-poc" href="https://gasbrazil.com/poc/" data-i18n="navPoc"><span class="chk"></span>POC Results</a><a id="link-contratos" href="https://gasbrazil.com/contratos/" data-i18n="navContratos"><span class="chk"></span>POC Contracts</a><a id="link-flows" href="https://gasbrazil.com/flows/" data-i18n="navFlows"><span class="chk"></span>Pipeline Flows</a><a id="link-supply" href="https://gasbrazil.com/supply/" data-i18n="navSupply"><span class="chk"></span>Gas Supply</a><span class="is-current" aria-current="page" data-i18n="navPld"><span class="chk">✓</span>PLD Prices</span><a id="link-precos" href="https://gasbrazil.com/precos/" data-i18n="navPrecos"><span class="chk"></span>ANP Prices</a><a id="link-desk" href="https://gasbrazil.com/desk/" data-i18n="navDesk"><span class="chk"></span>The Desk</a></div></div>
+      <div class="products-dd"><button type="button" class="dd-trigger" aria-haspopup="true" aria-expanded="false"><span data-i18n="navProducts">Products</span><span class="dd-caret">▾</span></button><div class="dd-menu"><a id="link-desk" href="https://gasbrazil.com/desk/" data-i18n="navDesk"><span class="chk"></span>The Desk</a><a id="link-ons" href="https://gasbrazil.com/ons/" data-i18n="navOns"><span class="chk"></span>ONS Balances</a><span class="is-current" aria-current="page" data-i18n="navPld"><span class="chk">✓</span>PLD Prices</span><a id="link-poc" href="https://gasbrazil.com/poc/" data-i18n="navPoc"><span class="chk"></span>POC Results</a><a id="link-contratos" href="https://gasbrazil.com/contratos/" data-i18n="navContratos"><span class="chk"></span>POC Contracts</a><a id="link-flows" href="https://gasbrazil.com/flows/" data-i18n="navFlows"><span class="chk"></span>Pipeline Flows</a><a id="link-supply" href="https://gasbrazil.com/supply/" data-i18n="navSupply"><span class="chk"></span>Gas Supply</a><a id="link-precos" href="https://gasbrazil.com/precos/" data-i18n="navPrecos"><span class="chk"></span>ANP Prices</a></div></div>
       <a class="navlink" href="../wiki/" data-i18n="navWiki">Wiki</a>
       <a class="navlink" href="../about/" data-i18n="navAbout">About</a>
       <script>
@@ -551,6 +638,8 @@ footer a { color: var(--accent); }
   });
 })();
 </script>
+    
+    
     </div>
     <button type="button" id="lang-toggle" class="langBtn" aria-label="Português">PT</button>
     <button id="theme-toggle" title="Toggle theme" aria-label="Toggle theme"></button>
@@ -876,6 +965,11 @@ const SITE_LINKS = {
     "caissonpoint": "https://caissonpoint.github.io/gasbrazil-com/",
     "hub": "https://gasbrazil.github.io/"
   },
+  "desk": {
+    "custom": "https://gasbrazil.com/desk/",
+    "caissonpoint": "https://gasbrazil.com/desk/",
+    "hub": "https://gasbrazil.github.io/desk/"
+  },
   "ons": {
     "custom": "https://gasbrazil.com/ons/",
     "caissonpoint": "https://caissonpoint.github.io/ons-dashboard/",
@@ -905,11 +999,6 @@ const SITE_LINKS = {
     "custom": "https://gasbrazil.com/precos/",
     "caissonpoint": "https://gasbrazil.com/precos/",
     "hub": "https://gasbrazil.github.io/precos/"
-  },
-  "desk": {
-    "custom": "https://gasbrazil.com/desk/",
-    "caissonpoint": "https://gasbrazil.com/desk/",
-    "hub": "https://gasbrazil.github.io/desk/"
   }
 };
 function siteFlavor() {
@@ -921,14 +1010,16 @@ function siteFlavor() {
 function initCrossLinks() {
   const flavor = siteFlavor();
   { const el = document.getElementById("link-home"); if (el) el.href = SITE_LINKS.home[flavor]; }
+  { const el = document.getElementById("link-desk"); if (el) el.href = SITE_LINKS.desk[flavor]; }
   { const el = document.getElementById("link-ons"); if (el) el.href = SITE_LINKS.ons[flavor]; }
   { const el = document.getElementById("link-poc"); if (el) el.href = SITE_LINKS.poc[flavor]; }
   { const el = document.getElementById("link-contratos"); if (el) el.href = SITE_LINKS.contratos[flavor]; }
   { const el = document.getElementById("link-flows"); if (el) el.href = SITE_LINKS.flows[flavor]; }
   { const el = document.getElementById("link-supply"); if (el) el.href = SITE_LINKS.supply[flavor]; }
   { const el = document.getElementById("link-precos"); if (el) el.href = SITE_LINKS.precos[flavor]; }
-  { const el = document.getElementById("link-desk"); if (el) el.href = SITE_LINKS.desk[flavor]; }
 }
+
+
 
 
 let DATA = null;
