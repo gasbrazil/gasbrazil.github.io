@@ -246,12 +246,6 @@ footer a { color: var(--accent); }
     <button id="theme-toggle" title="Toggle theme" aria-label="Toggle theme"></button>
   </div>
 </header>
-<div class="asof-strip" id="asof-strip">
-  <span class="asof-label" data-i18n="kpiRefresh">Last refreshed</span>
-  <span class="asof-val" id="asof-refreshed">&mdash;</span>
-  <span class="asof-label" data-i18n="dataThrough">Data through</span>
-  <span class="asof-val" id="asof-through">&mdash;</span>
-</div>
 <div class="flagbar" aria-hidden="true"></div>
 <div class="sources">
   <span class="sources-label" data-i18n="sources">Sources</span>
@@ -283,6 +277,12 @@ footer a { color: var(--accent); }
   <div id="chart-host"></div>
 </div>
 <footer>
+  <div class="asof-strip asof-footer" id="asof-strip">
+    <span class="asof-label" data-i18n="kpiRefresh">Last refreshed</span>
+    <span class="asof-val" id="asof-refreshed">&mdash;</span>
+    <span class="asof-label" data-i18n="dataThrough">Data through</span>
+    <span class="asof-val" id="asof-through">&mdash;</span>
+  </div>
   &copy; <span id="year"></span> GasBrazil.com &middot; Data: Portal de Oferta de Capacidade (public API) &middot; Contact: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
   <br><span id="coverage-note">Active Transport &amp; Master contracts</span><button class="infodot" type="button" aria-label="About contract coverage" data-info="Covers the &quot;Transport Contract&quot; and &quot;Master Contract&quot; contract types. &quot;Legacy Transport Contract&quot; and &quot;Access Connection&quot; are small, separately-sourced categories on the source site and are not yet included. Concluded contracts are excluded from the view.">i</button>
 </footer>

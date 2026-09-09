@@ -110,10 +110,10 @@ UNIT_PANELS = [
     ("R$/MWh", "R$/MWh"),
 ]
 
-PALETTE_LIGHT = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100",
-                 "#e87ba4", "#008300", "#4a3aa7", "#e34948"]
-PALETTE_DARK = ["#3987e5", "#d95926", "#199e70", "#c98500",
-                "#d55181", "#008300", "#9085e9", "#e66767"]
+PALETTE_LIGHT = ["#009C3B", "#C9A400", "#002776", "#eb6834",
+                 "#4a3aa7", "#e34948", "#e87ba4", "#0f766e"]
+PALETTE_DARK = ["#22c55e", "#FFDF00", "#6b9aff", "#d95926",
+                "#9085e9", "#e66767", "#d55181", "#2dd4bf"]
 
 
 def add_sin(df: pd.DataFrame) -> pd.DataFrame:
@@ -377,6 +377,7 @@ def write_dashboard(df: pd.DataFrame, dest: Path,
         SHARED_JS_DECODE=kit.JS_DECODE,
         SHARED_JS_XLSX=kit.JS_XLSX_ENGINE,
         SHARED_JS_THEME_TOGGLE=kit.JS_THEME_TOGGLE,
+        SHARED_JS_CHART_PALETTE=kit.chart_palette_js(),
         SHARED_JS_BOOT=kit.JS_BOOT,
         SHARED_JS_I18N=kit.JS_I18N,
         SHARED_JS_ASOF=kit.refreshed_local_js(),
@@ -615,13 +616,6 @@ table.data thead th.sortable:hover{background:var(--accent-soft)}
   </div>
 </header>
 
-<div class="asof-strip" id="asof-strip">
-  <span class="asof-label" data-i18n="kpiRefresh">Last refreshed</span>
-  <span class="asof-val" id="asof-refreshed">Loading&hellip;</span>
-  <span class="asof-label" data-i18n="dataThrough">Data through</span>
-  <span class="asof-val" id="asof-through">&mdash;</span>
-</div>
-
 <div class="flagbar" aria-hidden="true"></div>
 
 <div class="sources">
@@ -668,6 +662,12 @@ table.data thead th.sortable:hover{background:var(--accent-soft)}
 </div>
 </div>
 
+<div class="asof-strip asof-footer" id="asof-strip">
+  <span class="asof-label" data-i18n="kpiRefresh">Last refreshed</span>
+  <span class="asof-val" id="asof-refreshed">Loading&hellip;</span>
+  <span class="asof-label" data-i18n="dataThrough">Data through</span>
+  <span class="asof-val" id="asof-through">&mdash;</span>
+</div>
 <div class="foot" id="foot"></div>
 </div>
 
@@ -800,15 +800,23 @@ function isDark(){
 // Total SIN and Total North (claimed 1st and 9th) ended up the same color.
 // Fixing the color to the subsystem itself (rather than claim order) also
 // keeps a subsystem's two chart panels (MWmed, gas consumption) matched.
-const TOTAL_COLOR_LIGHT = {SIN:"#2a78d6", SE:"#1baf7a", S:"#eda100", NE:"#4a3aa7", N:"#e34948"};
-const TOTAL_COLOR_DARK  = {SIN:"#3987e5", SE:"#199e70", S:"#c98500", NE:"#9085e9", N:"#e66767"};
+const TOTAL_COLOR_LIGHT = {SIN:"#002776", SE:"#009C3B", S:"#C9A400", NE:"#7c3aed", N:"#be123c"};
+const TOTAL_COLOR_DARK  = {SIN:"#6b9aff", SE:"#22c55e", S:"#FFDF00", NE:"#c084fc", N:"#fb7185"};
+const seriesPalette = () => {
+  const pal = (typeof chartPalette === "function") ? chartPalette() : [];
+  if (pal.length) return pal;
+  return isDark()
+    ? (DATA && DATA.paletteDark) || []
+    : (DATA && DATA.paletteLight) || [];
+};
 const colorOf = (k, v) => {
   const [,s,e] = k.split("|");
   if(e!==undefined && isVirtualTotal(s,e)){
     const pal = isDark()?TOTAL_COLOR_DARK:TOTAL_COLOR_LIGHT;
     if(pal[s]) return pal[s];
   }
-  return (isDark()?DATA.paletteDark:DATA.paletteLight)[claimSlot(k, v)];
+  const pal = seriesPalette();
+  return pal[claimSlot(k, v) % Math.max(pal.length, 1)] || "var(--accent)";
 };
 
 /* ---------- theme toggle icon (sun/moon rather than a text label) ----------
@@ -819,6 +827,7 @@ const colorOf = (k, v) => {
    isDarkTheme() -- the two do the same check; no need for both names live
    at once. initThemeToggle is wired to the #theme-toggle button down in boot(). */
 __SHARED_JS_THEME_TOGGLE__
+__SHARED_JS_CHART_PALETTE__
 __SHARED_JS_I18N__
 __SHARED_JS_ASOF__
 /* ONS-local chrome strings (tabs, control labels, view blurbs). Shared kit
@@ -2026,7 +2035,7 @@ function renderCount(){
 
 /* ---------- KPI strip: latest-data snapshot, gas-market lens ------------- */
 function mixColor(which){
-  const pal = isDark()?DATA.paletteDark:DATA.paletteLight;
+  const pal = seriesPalette();
   // fixed assignment, one fuel per palette slot, so colors stay stable
   // across subsystems and don't depend on picker selection state
   return {wind:pal[0], gas:pal[1], hydro:pal[2], solar:pal[3],

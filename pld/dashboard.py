@@ -244,12 +244,6 @@ footer a { color: var(--accent); }
     <button id="theme-toggle" title="Toggle theme" aria-label="Toggle theme"></button>
   </div>
 </header>
-<div class="asof-strip" id="asof-strip">
-  <span class="asof-label" data-i18n="kpiRefresh">Last refreshed</span>
-  <span class="asof-val" id="asof-refreshed">&mdash;</span>
-  <span class="asof-label" data-i18n="dataThrough">Data through</span>
-  <span class="asof-val" id="asof-through">&mdash;</span>
-</div>
 <div class="flagbar" aria-hidden="true"></div>
 <div class="sources">
   <span class="sources-label" data-i18n="sources">Sources</span>
@@ -297,6 +291,12 @@ footer a { color: var(--accent); }
   </table>
 </div>
 <footer>
+  <div class="asof-strip asof-footer" id="asof-strip">
+    <span class="asof-label" data-i18n="kpiRefresh">Last refreshed</span>
+    <span class="asof-val" id="asof-refreshed">&mdash;</span>
+    <span class="asof-label" data-i18n="dataThrough">Data through</span>
+    <span class="asof-val" id="asof-through">&mdash;</span>
+  </div>
   &copy; <span id="year"></span> GasBrazil.com &middot;
   <span data-i18n="pldFooter">Data: CCEE (PLD média diária). Not an official CCEE product.</span>
   &middot; <span data-i18n="contact">Contact</span>: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
