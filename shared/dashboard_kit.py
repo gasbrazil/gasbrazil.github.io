@@ -27,7 +27,9 @@ from __future__ import annotations
 
 import base64
 import gzip
+import html
 import json
+import re
 from pathlib import Path
 
 HERE = Path(__file__).parent
@@ -107,14 +109,12 @@ def embed_favicon(favicon_path: Path | str = DEFAULT_FAVICON_PATH,
     if favicon_path.exists():
         favicon_b64 = base64.b64encode(favicon_path.read_bytes()).decode("ascii")
         return "data:image/png;base64," + favicon_b64
+    hex_color = fallback_hex.lstrip("#").upper()
     return (
         "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' "
         "viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' "
-        f"fill='%{fallback_hex.lstrip('#').upper()}'%3E%3C/rect%3E%3C/svg%3E"
-        # Note: kept for byte-compatibility with the original three
-        # dashboards' fallback marker; a valid data URI regardless of the
-        # exact fallback_hex format passed in.
-    ).replace("%%", "%")
+        f"fill='%23{hex_color}'%3E%3C/rect%3E%3C/svg%3E"
+    )
 
 
 def encode_payload_b64(payload: dict, *, compresslevel: int = 9) -> str:
@@ -135,17 +135,25 @@ def render_theme_css(font_path: Path | str = DEFAULT_FONT_PATH) -> str:
 
 
 def render(template: str, **replacements: str) -> str:
-    """Small .replace() chain helper: render(TEMPLATE, PAYLOAD=b64,
-    FAVICON_DATA_URI=uri) does the same thing as chaining
-    .replace("__PAYLOAD__", b64).replace("{{FAVICON_DATA_URI}}", uri) but
-    without every dashboard.py re-deciding its own placeholder spelling.
-    Keys are matched against both __KEY__ and {{KEY}} spellings so existing
-    templates don't need to be touched just to adopt this helper.
+    """Single-pass placeholder substitution.
+
+    Keys match both __KEY__ and {{KEY}} spellings. Values are substituted
+    in one pass so a payload that happens to contain another placeholder
+    marker is not mutated by a later replacement.
     """
-    out = template
-    for key, value in replacements.items():
-        out = out.replace(f"__{key}__", value).replace(f"{{{{{key}}}}}", value)
-    return out
+    if not replacements:
+        return template
+    keys = {str(k): str(v) for k, v in replacements.items()}
+    pattern = re.compile(
+        r"__(?P<a>" + "|".join(re.escape(k) for k in keys) + r")__"
+        r"|\{\{(?P<b>" + "|".join(re.escape(k) for k in keys) + r")\}\}"
+    )
+
+    def _sub(match: re.Match[str]) -> str:
+        key = match.group("a") or match.group("b")
+        return keys[key]
+
+    return pattern.sub(_sub, template)
 
 
 def seo_head(*, title: str, description: str, path: str = "/") -> str:
@@ -157,25 +165,28 @@ def seo_head(*, title: str, description: str, path: str = "/") -> str:
     alt = "https://gasbrazil.github.io" + ("" if path == "/" else path.rstrip("/"))
     if path != "/" and not alt.endswith("/"):
         alt = alt + "/"
-    desc = description.replace('"', "&quot;")
+    title_esc = html.escape(title, quote=True)
+    desc = html.escape(description, quote=True)
+    canonical_esc = html.escape(canonical, quote=True)
+    alt_esc = html.escape(alt, quote=True)
     preload = font_preload_html()
     preload_line = (preload + "\n") if preload else ""
+    # Language is client-side (localStorage); hreflang points at the same
+    # URL with x-default rather than inventing locale-specific paths.
     return (
-        f"<title>{title}</title>\n"
+        f"<title>{title_esc}</title>\n"
         f'<meta name="description" content="{desc}">\n'
-        f'<link rel="canonical" href="{canonical}">\n'
+        f'<link rel="canonical" href="{canonical_esc}">\n'
         f'{preload_line}'
         f'<meta property="og:type" content="website">\n'
         f'<meta property="og:site_name" content="GasBrazil.com">\n'
-        f'<meta property="og:title" content="{title}">\n'
+        f'<meta property="og:title" content="{title_esc}">\n'
         f'<meta property="og:description" content="{desc}">\n'
-        f'<meta property="og:url" content="{canonical}">\n'
+        f'<meta property="og:url" content="{canonical_esc}">\n'
         f'<meta property="og:locale" content="en_US">\n'
         f'<meta property="og:locale:alternate" content="pt_BR">\n'
-        f'<link rel="alternate" hreflang="en" href="{canonical}">\n'
-        f'<link rel="alternate" hreflang="pt-BR" href="{canonical}">\n'
-        f'<link rel="alternate" hreflang="x-default" href="{canonical}">\n'
-        f'<link rel="alternate" href="{alt}">'
+        f'<link rel="alternate" hreflang="x-default" href="{canonical_esc}">\n'
+        f'<link rel="alternate" href="{alt_esc}">'
     )
 
 
@@ -241,6 +252,8 @@ JS_BOOT = r"""
     document.documentElement.setAttribute("lang", lang === "pt" ? "pt-BR" : "en");
   } catch (e) {
     document.documentElement.setAttribute("data-theme", "dark");
+    document.documentElement.setAttribute("data-lang", "en");
+    document.documentElement.setAttribute("lang", "en");
   }
 })();
 """
@@ -292,6 +305,7 @@ const GB_I18N = {
     navProducts: "Products",
     navAbout: "About",
     navWiki: "Wiki",
+    filterPlaceholder: "Filter…",
     contact: "Contact",
     tagline: "Analytical Firepower for Brazil's Energy Markets",
     aboutLead: "Independent public-data dashboards. Not an official ONS, ANP, CCEE, or transportadora product.",
@@ -377,6 +391,7 @@ const GB_I18N = {
     navProducts: "Produtos",
     navAbout: "Sobre",
     navWiki: "Wiki",
+    filterPlaceholder: "Filtrar…",
     contact: "Contato",
     tagline: "Potência analítica para os mercados de energia do Brasil",
     aboutLead: "Painéis independentes com dados públicos. Não é produto oficial da ONS, ANP, CCEE ou transportadoras.",
@@ -541,7 +556,7 @@ function withFocusPreserved(host, rebuild) {
   const caret = col ? active.selectionStart : null;
   rebuild();
   if (col) {
-    const input = host.querySelector('.th-filter[data-col="' + col + '"]');
+    const input = Array.from(host.querySelectorAll(".th-filter")).find(el => el.dataset.col === col);
     if (input) { input.focus(); if (caret != null) input.setSelectionRange(caret, caret); }
   }
 }
@@ -563,7 +578,8 @@ function buildSortFilterTh(col, sortState, defaultSort, filters, onChange, extra
   filterInput.type = "search";
   filterInput.className = "th-filter";
   filterInput.dataset.col = col.key;
-  filterInput.placeholder = "Filter…";
+  filterInput.setAttribute("data-i18n-placeholder", "filterPlaceholder");
+  filterInput.placeholder = (typeof t === "function") ? t("filterPlaceholder") : "Filter…";
   filterInput.value = filters[col.key] || "";
   filterInput.addEventListener("input", () => {
     filters[col.key] = filterInput.value.toLowerCase();
@@ -822,6 +838,9 @@ _PRODUCTS_DROPDOWN_JS = r"""<script>
   var openTimer = null;
   var closeTimer = null;
 
+  function menuLinks(dd) {
+    return Array.prototype.slice.call(dd.querySelectorAll(".dd-menu a"));
+  }
   function setOpen(dd, open) {
     if (!dd) return;
     var menu = dd.querySelector(".dd-menu");
@@ -849,6 +868,12 @@ _PRODUCTS_DROPDOWN_JS = r"""<script>
     closeTimer = setTimeout(function () {
       setOpen(dd, false);
     }, CLOSE_MS);
+  }
+  function focusLink(dd, idx) {
+    var items = menuLinks(dd);
+    if (!items.length) return;
+    var i = ((idx % items.length) + items.length) % items.length;
+    items[i].focus();
   }
   function bind(dd) {
     if (dd.getAttribute("data-dd-bound") === "1") return;
@@ -879,7 +904,31 @@ _PRODUCTS_DROPDOWN_JS = r"""<script>
     if (!e.target.closest(".products-dd")) closeAll(null);
   });
   document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") closeAll(null);
+    if (e.key === "Escape") {
+      var openDd = document.querySelector(".products-dd .dd-menu.is-open");
+      var dd = openDd && openDd.closest(".products-dd");
+      closeAll(null);
+      if (dd) {
+        var btn = dd.querySelector(".dd-trigger");
+        if (btn) btn.focus();
+      }
+      return;
+    }
+    var inTrigger = e.target.closest && e.target.closest(".dd-trigger");
+    var inMenu = e.target.closest && e.target.closest(".dd-menu");
+    var dd = (inTrigger && inTrigger.closest(".products-dd")) ||
+             (inMenu && e.target.closest(".products-dd"));
+    if (!dd) return;
+    var items = menuLinks(dd);
+    if (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Home" || e.key === "End") {
+      e.preventDefault();
+      setOpen(dd, true);
+      var idx = items.indexOf(document.activeElement);
+      if (e.key === "Home") focusLink(dd, 0);
+      else if (e.key === "End") focusLink(dd, items.length - 1);
+      else if (e.key === "ArrowDown") focusLink(dd, idx < 0 ? 0 : idx + 1);
+      else focusLink(dd, idx < 0 ? items.length - 1 : idx - 1);
+    }
   });
 })();
 </script>"""
@@ -949,24 +998,28 @@ def nav_links_html(
             continue
         if k == self_id:
             menu_items.append(
-                f'<span class="is-current" aria-current="page"{i18n_attr(k)}>'
-                f'<span class="chk">✓</span>{v["label"]}</span>'
+                f'<span class="is-current" role="menuitem" aria-current="page"{i18n_attr(k)}>'
+                f'<span class="chk">✓</span>{html.escape(v["label"])}</span>'
             )
         else:
             menu_items.append(
-                f'<a id="link-{k}" href="{v["custom"]}"{i18n_attr(k)}>'
-                f'<span class="chk"></span>{v["label"]}</a>'
+                f'<a id="link-{k}" href="{html.escape(v["custom"], quote=True)}" role="menuitem"{i18n_attr(k)}>'
+                f'<span class="chk"></span>{html.escape(v["label"])}</a>'
             )
     # data-i18n goes on the inner span, not the <button> itself: applyI18n()
     # sets el.textContent, which would silently delete the nested caret span
     # every time the language toggles (the same bug the site's un-translated
     # pill link text has been carrying for lack of exactly this treatment --
     # not repeating it here).
+    wiki_href_esc = html.escape(wiki_href, quote=True)
+    about_href_esc = html.escape(about_href, quote=True)
     parts.append(
         '<div class="products-dd">'
-        '<button type="button" class="dd-trigger" aria-haspopup="true" aria-expanded="false">'
+        '<button type="button" class="dd-trigger" aria-haspopup="menu" '
+        'aria-expanded="false" aria-controls="gb-products-menu" id="gb-products-trigger">'
         f'<span data-i18n="navProducts">Products</span><span class="dd-caret">▾</span></button>'
-        '<div class="dd-menu">' + "".join(menu_items) + "</div>"
+        '<div class="dd-menu" id="gb-products-menu" role="menu" aria-labelledby="gb-products-trigger">'
+        + "".join(menu_items) + "</div>"
         "</div>"
     )
 
@@ -976,8 +1029,8 @@ def nav_links_html(
     # fixed top-right row as the PT / theme toggles.
     parts.append(
         '<div class="nav-trail">'
-        f'<a class="navlink" href="{wiki_href}" data-i18n="navWiki">Wiki</a>'
-        f'<a class="navlink" href="{about_href}" data-i18n="navAbout">About</a>'
+        f'<a class="navlink" href="{wiki_href_esc}" data-i18n="navWiki">Wiki</a>'
+        f'<a class="navlink" href="{about_href_esc}" data-i18n="navAbout">About</a>'
         "</div>"
     )
     parts.append(_PRODUCTS_DROPDOWN_JS)

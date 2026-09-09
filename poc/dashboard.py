@@ -12,17 +12,14 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "shared"))
 import dashboard_kit as kit  # noqa: E402  (must follow sys.path.insert)
+import transforms as xf  # noqa: E402
 
 HERE = Path(__file__).parent
 PARQUET_PATH = HERE / "data" / "poc_results.parquet"
 DEFAULT_OUT = HERE / "index.html"
 
-# Price in the source data is R$/MMBtu. 28.8081 is the MMBtu-per-1000m3 factor
-# implied by the dataset's PCR (poder calorifico de referencia) convention --
-# since it's MMBtu per 1000 m3 (not per single m3, despite the variable's
-# name), converting R$/MMBtu -> R$/m3 means multiplying by it and dividing
-# by 1000, not dividing by it directly.
-MMBTU_PER_M3 = 28.8081
+# Price in the source data is R$/MMBtu. PCR convention: MMBtu per 1000 m³.
+MMBTU_PER_M3 = xf.MMBTU_PER_1000_M3
 
 COLUMNS = [
     "Transporter (TSO)", "codigoProcesso", "Trade Date", "Flow Date Start", "Flow Date End",
@@ -347,7 +344,7 @@ const QUICK_FILTERS = [
    like ons-dashboard's, so points are plotted on a true elapsed-time axis
    and connected date-to-date rather than against a dense calendar grid.
 ------------------------------------------------------------------------- */
-const MMBTU_PER_M3 = 28.8081;
+const MMBTU_PER_M3 = __MMBTU_PER_M3__;
 __SHARED_JS_CHART_PALETTE__
 // Fixed chip order within a pipeline group -- GUS/Residual first since
 // those are the two Eric most often looks at together; anything not listed
@@ -1129,10 +1126,10 @@ function renderTsoRow() {
         ? (vol / 1e6).toLocaleString("en-US", { maximumFractionDigits: 1 }) + "M m³"
         : vol.toLocaleString("en-US", { maximumFractionDigits: 0 }) + " m³";
       chip.className = "tso-chip";
-      chip.innerHTML = `<b>${tso}</b> &middot; ${avg !== null ? avg.toFixed(2) : "—"} R$/m³ avg &middot; ${volLabel} &middot; ${rows.length} trade${rows.length === 1 ? "" : "s"} <span class="muted">(7d)</span>`;
+      chip.innerHTML = `<b>${escapeHtml(tso)}</b> &middot; ${avg !== null ? avg.toFixed(2) : "—"} R$/m³ avg &middot; ${volLabel} &middot; ${rows.length} trade${rows.length === 1 ? "" : "s"} <span class="muted">(7d)</span>`;
     } else {
       chip.className = "tso-chip empty";
-      chip.innerHTML = `<b>${tso}</b> &middot; no trades <span class="muted">(7d)</span>`;
+      chip.innerHTML = `<b>${escapeHtml(tso)}</b> &middot; no trades <span class="muted">(7d)</span>`;
     }
     chip.addEventListener("click", () => toggleChartPipeline(tso));
     el.appendChild(chip);
@@ -1428,6 +1425,7 @@ def write_dashboard(out_path=DEFAULT_OUT):
         SHARED_NAV_LINKS=kit.nav_links_html("poc"),
         FAVICON_DATA_URI=kit.embed_favicon(),
         FONT_PRELOAD=kit.font_preload_html(),
+        MMBTU_PER_M3=str(MMBTU_PER_M3),
     )
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
