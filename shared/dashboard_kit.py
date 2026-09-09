@@ -972,8 +972,8 @@ def nav_links_html(
 
     if extra_links_html:
         parts.append(extra_links_html)
-    # Wiki + About sit in .nav-trail so theme.css can push them to the
-    # right edge of the header row (margin-left: auto), away from Home/Products.
+    # Wiki + About sit in .nav-trail; theme.css parks that group on the same
+    # fixed top-right row as the PT / theme toggles.
     parts.append(
         '<div class="nav-trail">'
         f'<a class="navlink" href="{wiki_href}" data-i18n="navWiki">Wiki</a>'

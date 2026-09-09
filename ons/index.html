@@ -303,9 +303,8 @@ footer .asof-strip,
   padding: 0 0 10px;
 }
 
-/* Text nav (not pill clusters): underline active page.
-   Home + Products stay left; Wiki/About (.nav-trail) pin right.
-   padding-right clears the fixed PT/theme buttons. */
+/* Text nav: Home + Products stay under the title.
+   Wiki/About join the fixed top-right chrome with PT + theme. */
 .header-right {
   display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
   width: 100%;
@@ -313,14 +312,32 @@ footer .asof-strip,
 .navlinks, .header-links {
   display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px;
   width: 100%;
-  padding-right: 92px;
   box-sizing: border-box;
 }
 .nav-home { margin-inline-end: 10px; }
+/* Sit on the same row as the fixed PT / theme controls. */
 .nav-trail {
-  display: inline-flex; align-items: center; gap: 6px 16px;
-  margin-left: auto;
+  position: fixed;
+  top: 14px;
+  right: 100px;
+  z-index: 60;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px 14px;
+  margin-left: 0;
+  pointer-events: auto;
 }
+.nav-trail .navlink {
+  font-size: 13px;
+  line-height: 34px;
+  padding: 0;
+  border-bottom-width: 0;
+}
+.nav-trail .navlink:hover {
+  border-bottom-color: transparent;
+  color: var(--accent);
+}
+[data-theme="dark"] .nav-trail .navlink:hover { color: var(--brz-yellow); }
 .navlink {
   font-size: 14.5px;
   color: var(--muted2);
@@ -458,6 +475,107 @@ header button:not(.infodot):not(.dd-trigger):not(.langBtn):not(#theme-toggle):no
   box-shadow: var(--elevate), 0 0 0 1px rgba(255, 223, 0, .12);
 }
 
+/* Selected filters / chips / tabs — gold edge (stronger than hover), never
+   solid accent fill. Page-local rules that painted selected states blue are
+   overridden here so dark mode stays calm site-wide. */
+.series-btn.active,
+.sm-btn.active,
+.chip.selected,
+.chip.active,
+.pill.active,
+.qf-btn.active,
+.level-btn.active,
+.tso-chip.selected,
+.tso-toggle.active,
+.flowtype-toggle.active,
+.wrap button[aria-pressed="true"],
+.tabs button[aria-pressed="true"],
+.kpi-card.active,
+.kpi-cell.active {
+  background: var(--panel-grad) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border-strong) !important;
+  box-shadow: var(--elevate);
+  font-weight: 400;
+}
+.series-btn.active .sw,
+.sm-btn.active .sw { opacity: 1; }
+.tso-chip.selected .muted,
+.tso-chip.selected[data-tso] .muted { color: var(--muted) !important; }
+.tabs button[aria-pressed="true"] {
+  border-radius: 6px 6px 0 0 !important;
+  border-bottom-width: 2px !important;
+}
+[data-theme="dark"] .series-btn.active,
+[data-theme="dark"] .sm-btn.active,
+[data-theme="dark"] .chip.selected,
+[data-theme="dark"] .chip.active,
+[data-theme="dark"] .pill.active,
+[data-theme="dark"] .qf-btn.active,
+[data-theme="dark"] .level-btn.active,
+[data-theme="dark"] .tso-chip.selected,
+[data-theme="dark"] .tso-toggle.active,
+[data-theme="dark"] .flowtype-toggle.active,
+[data-theme="dark"] .wrap button[aria-pressed="true"],
+[data-theme="dark"] .tabs button[aria-pressed="true"],
+[data-theme="dark"] .kpi-card.active,
+[data-theme="dark"] .kpi-cell.active {
+  background: var(--panel) !important;
+  border-color: rgba(255, 223, 0, .58) !important;
+  box-shadow: var(--elevate), 0 0 0 1px rgba(255, 223, 0, .28);
+  color: var(--text) !important;
+}
+/* Light mode selected: cool ink edge instead of gold-on-paper. */
+:root:not([data-theme="dark"]) .series-btn.active,
+:root:not([data-theme="dark"]) .sm-btn.active,
+:root:not([data-theme="dark"]) .chip.selected,
+:root:not([data-theme="dark"]) .chip.active,
+:root:not([data-theme="dark"]) .pill.active,
+:root:not([data-theme="dark"]) .qf-btn.active,
+:root:not([data-theme="dark"]) .level-btn.active,
+:root:not([data-theme="dark"]) .tso-chip.selected,
+:root:not([data-theme="dark"]) .tso-toggle.active,
+:root:not([data-theme="dark"]) .flowtype-toggle.active,
+:root:not([data-theme="dark"]) .wrap button[aria-pressed="true"],
+:root:not([data-theme="dark"]) .tabs button[aria-pressed="true"],
+:root:not([data-theme="dark"]) .kpi-card.active,
+:root:not([data-theme="dark"]) .kpi-cell.active {
+  border-color: color-mix(in srgb, var(--brz-blue) 55%, var(--border-strong)) !important;
+  box-shadow: var(--elevate), 0 0 0 1px color-mix(in srgb, var(--brz-blue) 18%, transparent);
+}
+
+/* Keep TSO identity as a left accent stripe when selected, not a blue fill. */
+.tso-chip.selected[data-tso],
+.tso-toggle.active[data-tso] {
+  background: var(--panel) !important;
+  color: var(--text) !important;
+  box-shadow: var(--elevate);
+}
+.tso-chip.selected[data-tso="NTS"],
+.tso-toggle.active[data-tso="NTS"] {
+  border-color: var(--tso-nts) !important;
+  box-shadow: var(--elevate), inset 3px 0 0 var(--tso-nts);
+}
+.tso-chip.selected[data-tso="TAG"],
+.tso-toggle.active[data-tso="TAG"] {
+  border-color: var(--tso-tag) !important;
+  box-shadow: var(--elevate), inset 3px 0 0 var(--tso-tag);
+}
+.tso-chip.selected[data-tso="TBG"],
+.tso-toggle.active[data-tso="TBG"] {
+  border-color: var(--tso-tbg) !important;
+  box-shadow: var(--elevate), inset 3px 0 0 var(--tso-tbg);
+}
+[data-theme="dark"] .tso-chip.selected[data-tso="NTS"],
+[data-theme="dark"] .tso-toggle.active[data-tso="NTS"],
+[data-theme="dark"] .tso-chip.selected[data-tso="TAG"],
+[data-theme="dark"] .tso-toggle.active[data-tso="TAG"],
+[data-theme="dark"] .tso-chip.selected[data-tso="TBG"],
+[data-theme="dark"] .tso-toggle.active[data-tso="TBG"] {
+  background: var(--panel) !important;
+  color: var(--text) !important;
+}
+
 /* Footer links — quiet until hover. */
 footer a,
 footer.site a,
@@ -480,21 +598,8 @@ footer.site a:hover,
   border-bottom-color: var(--brz-yellow);
 }
 
-/* Selected TSO chips / toggles use identity colors when data-tso is set. */
-.tso-chip.selected[data-tso="NTS"],
-.tso-toggle.active[data-tso="NTS"] {
-  background: var(--tso-nts); border-color: var(--tso-nts); color: #fff;
-}
-.tso-chip.selected[data-tso="TAG"],
-.tso-toggle.active[data-tso="TAG"] {
-  background: var(--tso-tag); border-color: var(--tso-tag); color: #fff;
-}
-.tso-chip.selected[data-tso="TBG"],
-.tso-toggle.active[data-tso="TBG"] {
-  background: var(--tso-tbg); border-color: var(--tso-tbg); color: #fff;
-}
-.tso-chip.selected .muted,
-.tso-chip.selected[data-tso] .muted { color: rgba(255,255,255,.72); }
+/* Selected TSO identity colors: left stripe only (see selected-chip block above).
+   Legacy solid-fill rules removed so dark mode stays gold-edged. */
 
 .navlink.is-active, .navlink[aria-current="page"] {
   color: var(--accent);
@@ -685,15 +790,24 @@ header.top #theme-toggle,
 }
 
 @media (max-width: 720px) {
-  .navlinks, .header-links { gap: 4px 12px; padding-right: 88px; }
+  .navlinks, .header-links { gap: 4px 12px; }
   .nav-home { margin-inline-end: 6px; }
-  .nav-trail { gap: 4px 12px; }
+  .nav-trail {
+    top: 12px;
+    right: 96px;
+    gap: 4px 10px;
+  }
+  .nav-trail .navlink { font-size: 12px; line-height: 32px; }
   .navlink, .dd-trigger { font-size: 13px; }
   .site-header .header-row, header.top .header-row {
     flex-wrap: wrap;
   }
   .filters-drawer-toggle { display: inline-flex !important; }
   .filters-collapsible.is-collapsed { display: none; }
+  header.dash-head #lang-toggle,
+  header.top #lang-toggle,
+  .site-header #lang-toggle { right: 52px; }
+}
   header.dash-head #lang-toggle,
   header.top #lang-toggle,
   .site-header #lang-toggle { right: 52px; }
@@ -1028,9 +1142,8 @@ footer .asof-strip,
   padding: 0 0 10px;
 }
 
-/* Text nav (not pill clusters): underline active page.
-   Home + Products stay left; Wiki/About (.nav-trail) pin right.
-   padding-right clears the fixed PT/theme buttons. */
+/* Text nav: Home + Products stay under the title.
+   Wiki/About join the fixed top-right chrome with PT + theme. */
 .header-right {
   display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
   width: 100%;
@@ -1038,14 +1151,32 @@ footer .asof-strip,
 .navlinks, .header-links {
   display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px;
   width: 100%;
-  padding-right: 92px;
   box-sizing: border-box;
 }
 .nav-home { margin-inline-end: 10px; }
+/* Sit on the same row as the fixed PT / theme controls. */
 .nav-trail {
-  display: inline-flex; align-items: center; gap: 6px 16px;
-  margin-left: auto;
+  position: fixed;
+  top: 14px;
+  right: 100px;
+  z-index: 60;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px 14px;
+  margin-left: 0;
+  pointer-events: auto;
 }
+.nav-trail .navlink {
+  font-size: 13px;
+  line-height: 34px;
+  padding: 0;
+  border-bottom-width: 0;
+}
+.nav-trail .navlink:hover {
+  border-bottom-color: transparent;
+  color: var(--accent);
+}
+[data-theme="dark"] .nav-trail .navlink:hover { color: var(--brz-yellow); }
 .navlink {
   font-size: 14.5px;
   color: var(--muted2);
@@ -1183,6 +1314,107 @@ header button:not(.infodot):not(.dd-trigger):not(.langBtn):not(#theme-toggle):no
   box-shadow: var(--elevate), 0 0 0 1px rgba(255, 223, 0, .12);
 }
 
+/* Selected filters / chips / tabs — gold edge (stronger than hover), never
+   solid accent fill. Page-local rules that painted selected states blue are
+   overridden here so dark mode stays calm site-wide. */
+.series-btn.active,
+.sm-btn.active,
+.chip.selected,
+.chip.active,
+.pill.active,
+.qf-btn.active,
+.level-btn.active,
+.tso-chip.selected,
+.tso-toggle.active,
+.flowtype-toggle.active,
+.wrap button[aria-pressed="true"],
+.tabs button[aria-pressed="true"],
+.kpi-card.active,
+.kpi-cell.active {
+  background: var(--panel-grad) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border-strong) !important;
+  box-shadow: var(--elevate);
+  font-weight: 400;
+}
+.series-btn.active .sw,
+.sm-btn.active .sw { opacity: 1; }
+.tso-chip.selected .muted,
+.tso-chip.selected[data-tso] .muted { color: var(--muted) !important; }
+.tabs button[aria-pressed="true"] {
+  border-radius: 6px 6px 0 0 !important;
+  border-bottom-width: 2px !important;
+}
+[data-theme="dark"] .series-btn.active,
+[data-theme="dark"] .sm-btn.active,
+[data-theme="dark"] .chip.selected,
+[data-theme="dark"] .chip.active,
+[data-theme="dark"] .pill.active,
+[data-theme="dark"] .qf-btn.active,
+[data-theme="dark"] .level-btn.active,
+[data-theme="dark"] .tso-chip.selected,
+[data-theme="dark"] .tso-toggle.active,
+[data-theme="dark"] .flowtype-toggle.active,
+[data-theme="dark"] .wrap button[aria-pressed="true"],
+[data-theme="dark"] .tabs button[aria-pressed="true"],
+[data-theme="dark"] .kpi-card.active,
+[data-theme="dark"] .kpi-cell.active {
+  background: var(--panel) !important;
+  border-color: rgba(255, 223, 0, .58) !important;
+  box-shadow: var(--elevate), 0 0 0 1px rgba(255, 223, 0, .28);
+  color: var(--text) !important;
+}
+/* Light mode selected: cool ink edge instead of gold-on-paper. */
+:root:not([data-theme="dark"]) .series-btn.active,
+:root:not([data-theme="dark"]) .sm-btn.active,
+:root:not([data-theme="dark"]) .chip.selected,
+:root:not([data-theme="dark"]) .chip.active,
+:root:not([data-theme="dark"]) .pill.active,
+:root:not([data-theme="dark"]) .qf-btn.active,
+:root:not([data-theme="dark"]) .level-btn.active,
+:root:not([data-theme="dark"]) .tso-chip.selected,
+:root:not([data-theme="dark"]) .tso-toggle.active,
+:root:not([data-theme="dark"]) .flowtype-toggle.active,
+:root:not([data-theme="dark"]) .wrap button[aria-pressed="true"],
+:root:not([data-theme="dark"]) .tabs button[aria-pressed="true"],
+:root:not([data-theme="dark"]) .kpi-card.active,
+:root:not([data-theme="dark"]) .kpi-cell.active {
+  border-color: color-mix(in srgb, var(--brz-blue) 55%, var(--border-strong)) !important;
+  box-shadow: var(--elevate), 0 0 0 1px color-mix(in srgb, var(--brz-blue) 18%, transparent);
+}
+
+/* Keep TSO identity as a left accent stripe when selected, not a blue fill. */
+.tso-chip.selected[data-tso],
+.tso-toggle.active[data-tso] {
+  background: var(--panel) !important;
+  color: var(--text) !important;
+  box-shadow: var(--elevate);
+}
+.tso-chip.selected[data-tso="NTS"],
+.tso-toggle.active[data-tso="NTS"] {
+  border-color: var(--tso-nts) !important;
+  box-shadow: var(--elevate), inset 3px 0 0 var(--tso-nts);
+}
+.tso-chip.selected[data-tso="TAG"],
+.tso-toggle.active[data-tso="TAG"] {
+  border-color: var(--tso-tag) !important;
+  box-shadow: var(--elevate), inset 3px 0 0 var(--tso-tag);
+}
+.tso-chip.selected[data-tso="TBG"],
+.tso-toggle.active[data-tso="TBG"] {
+  border-color: var(--tso-tbg) !important;
+  box-shadow: var(--elevate), inset 3px 0 0 var(--tso-tbg);
+}
+[data-theme="dark"] .tso-chip.selected[data-tso="NTS"],
+[data-theme="dark"] .tso-toggle.active[data-tso="NTS"],
+[data-theme="dark"] .tso-chip.selected[data-tso="TAG"],
+[data-theme="dark"] .tso-toggle.active[data-tso="TAG"],
+[data-theme="dark"] .tso-chip.selected[data-tso="TBG"],
+[data-theme="dark"] .tso-toggle.active[data-tso="TBG"] {
+  background: var(--panel) !important;
+  color: var(--text) !important;
+}
+
 /* Footer links — quiet until hover. */
 footer a,
 footer.site a,
@@ -1205,21 +1437,8 @@ footer.site a:hover,
   border-bottom-color: var(--brz-yellow);
 }
 
-/* Selected TSO chips / toggles use identity colors when data-tso is set. */
-.tso-chip.selected[data-tso="NTS"],
-.tso-toggle.active[data-tso="NTS"] {
-  background: var(--tso-nts); border-color: var(--tso-nts); color: #fff;
-}
-.tso-chip.selected[data-tso="TAG"],
-.tso-toggle.active[data-tso="TAG"] {
-  background: var(--tso-tag); border-color: var(--tso-tag); color: #fff;
-}
-.tso-chip.selected[data-tso="TBG"],
-.tso-toggle.active[data-tso="TBG"] {
-  background: var(--tso-tbg); border-color: var(--tso-tbg); color: #fff;
-}
-.tso-chip.selected .muted,
-.tso-chip.selected[data-tso] .muted { color: rgba(255,255,255,.72); }
+/* Selected TSO identity colors: left stripe only (see selected-chip block above).
+   Legacy solid-fill rules removed so dark mode stays gold-edged. */
 
 .navlink.is-active, .navlink[aria-current="page"] {
   color: var(--accent);
@@ -1410,15 +1629,24 @@ header.top #theme-toggle,
 }
 
 @media (max-width: 720px) {
-  .navlinks, .header-links { gap: 4px 12px; padding-right: 88px; }
+  .navlinks, .header-links { gap: 4px 12px; }
   .nav-home { margin-inline-end: 6px; }
-  .nav-trail { gap: 4px 12px; }
+  .nav-trail {
+    top: 12px;
+    right: 96px;
+    gap: 4px 10px;
+  }
+  .nav-trail .navlink { font-size: 12px; line-height: 32px; }
   .navlink, .dd-trigger { font-size: 13px; }
   .site-header .header-row, header.top .header-row {
     flex-wrap: wrap;
   }
   .filters-drawer-toggle { display: inline-flex !important; }
   .filters-collapsible.is-collapsed { display: none; }
+  header.dash-head #lang-toggle,
+  header.top #lang-toggle,
+  .site-header #lang-toggle { right: 52px; }
+}
   header.dash-head #lang-toggle,
   header.top #lang-toggle,
   .site-header #lang-toggle { right: 52px; }
@@ -1501,10 +1729,10 @@ h1{font-size:25px;margin:0;letter-spacing:-.01em}
 .tabs{display:flex;gap:4px}
 .tabs button{border:0;border-bottom:2px solid transparent;background:none;
   border-radius:0;padding:6px 12px;color:var(--muted2);font-weight:300;font-size:12px}
-.tabs button[aria-pressed=true]{color:#fff;background:var(--accent);
-  border-bottom-color:var(--accent);border-radius:6px 6px 0 0}
+.tabs button[aria-pressed=true]{color:var(--text);background:var(--panel);
+  border:1px solid var(--border-strong);border-radius:6px 6px 0 0}
 .tabs button:hover{background:var(--accent-soft)}
-.tabs button[aria-pressed=true]:hover{background:var(--accent)}
+.tabs button[aria-pressed=true]:hover{background:var(--panel-grad-hover)}
 .controls{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end}
 .ctl{display:flex;flex-direction:column;gap:5px}
 .ctl > label{font-size:11px;text-transform:uppercase;letter-spacing:.06em;
@@ -1519,7 +1747,7 @@ button,select,input{font-family:var(--font);font-size:12.5px;color:var(--text);
 button,select{cursor:pointer}
 button:hover,select:hover{background:var(--accent-soft)}
 button:disabled{opacity:.45;cursor:not-allowed;background:var(--panel)}
-button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#fff}
+button[aria-pressed=true]{background:var(--panel);border-color:var(--border-strong);color:var(--text)}
 .pickers{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
 .pick h3{font-size:11px;text-transform:uppercase;letter-spacing:.06em;
   color:var(--muted);margin:0 0 6px;font-weight:200}

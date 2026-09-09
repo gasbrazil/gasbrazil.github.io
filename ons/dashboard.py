@@ -468,10 +468,10 @@ h1{font-size:25px;margin:0;letter-spacing:-.01em}
 .tabs{display:flex;gap:4px}
 .tabs button{border:0;border-bottom:2px solid transparent;background:none;
   border-radius:0;padding:6px 12px;color:var(--muted2);font-weight:300;font-size:12px}
-.tabs button[aria-pressed=true]{color:#fff;background:var(--accent);
-  border-bottom-color:var(--accent);border-radius:6px 6px 0 0}
+.tabs button[aria-pressed=true]{color:var(--text);background:var(--panel);
+  border:1px solid var(--border-strong);border-radius:6px 6px 0 0}
 .tabs button:hover{background:var(--accent-soft)}
-.tabs button[aria-pressed=true]:hover{background:var(--accent)}
+.tabs button[aria-pressed=true]:hover{background:var(--panel-grad-hover)}
 .controls{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end}
 .ctl{display:flex;flex-direction:column;gap:5px}
 .ctl > label{font-size:11px;text-transform:uppercase;letter-spacing:.06em;
@@ -486,7 +486,7 @@ button,select,input{font-family:var(--font);font-size:12.5px;color:var(--text);
 button,select{cursor:pointer}
 button:hover,select:hover{background:var(--accent-soft)}
 button:disabled{opacity:.45;cursor:not-allowed;background:var(--panel)}
-button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#fff}
+button[aria-pressed=true]{background:var(--panel);border-color:var(--border-strong);color:var(--text)}
 .pickers{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
 .pick h3{font-size:11px;text-transform:uppercase;letter-spacing:.06em;
   color:var(--muted);margin:0 0 6px;font-weight:200}

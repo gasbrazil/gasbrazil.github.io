@@ -128,8 +128,8 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .tso-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: var(--gap); }
 .tso-chip { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 4px 12px; font-size: 12px; box-shadow: var(--shadow); white-space: nowrap; cursor: pointer; color: var(--text); font-family: var(--font); }
 .tso-chip:hover { background: var(--accent-soft); }
-.tso-chip.selected { background: var(--accent); color: #fff; border-color: var(--accent); }
-.tso-chip.selected .muted { color: rgba(255,255,255,.72); }
+.tso-chip.selected { background: var(--panel); color: var(--text); border-color: var(--border-strong); }
+.tso-chip.selected .muted { color: var(--muted); }
 .tso-chip.empty { cursor: default; color: var(--muted); }
 .tso-chip.empty:hover { background: var(--panel); }
 .tso-chip b { font-weight: 400; }
@@ -163,7 +163,7 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .drill-more { background: none; border: none; color: var(--accent); font-size: 12px; cursor: pointer; padding: 8px 0 0; font-family: var(--font); }
 .qf-btn { background: var(--panel); border: 1px solid var(--border); border-radius: 5px; padding: 4px 12px; font-size: 12px; cursor: pointer; color: var(--text); font-family: var(--font); }
 .qf-btn:hover { background: var(--accent-soft); }
-.qf-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.qf-btn.active { background: var(--panel); color: var(--text); border-color: var(--border-strong); }
 .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: var(--gap); }
 .toolbar select, .toolbar input { background: var(--panel); border: 1px solid var(--border-strong); border-radius: 5px; padding: 5px 10px; color: var(--text); font-size: 12.5px; font-family: var(--font); }
 .toolbar select:hover { background: var(--accent-soft); }

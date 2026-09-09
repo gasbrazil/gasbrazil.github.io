@@ -218,7 +218,7 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .level-toggle, .view-toggle { display: flex; gap: 6px; margin-bottom: var(--gap); flex-wrap: wrap; }
 .level-btn { background: var(--panel); border: 1px solid var(--border-strong); border-radius: 8px; padding: 7px 16px; font-size: 13px; font-weight: 400; cursor: pointer; color: var(--text); font-family: var(--font); }
 .level-btn:hover { background: var(--accent-soft); }
-.level-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.level-btn.active { background: var(--panel); color: var(--text); border-color: var(--border-strong); }
 .view-toggle .level-btn { padding: 6px 14px; font-size: 12.5px; }
 :root { --flow-recv: #1baf7a; --flow-del: #eb6834; }
 [data-theme="dark"] { --flow-recv: #199e70; --flow-del: #d95926; }
@@ -246,13 +246,13 @@ select:hover, input:hover { background: var(--accent-soft); }
 .tso-toggle-row { display: flex; gap: 6px; flex-wrap: wrap; }
 .tso-toggle { background: var(--bg); border: 1px solid var(--border-strong); border-radius: 999px; padding: 4px 12px; font-size: 12px; cursor: pointer; color: var(--text); font-family: var(--font); font-weight: 400; }
 .tso-toggle:hover { background: var(--accent-soft); }
-.tso-toggle.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.tso-toggle.active { background: var(--panel); color: var(--text); border-color: var(--border-strong); }
 .kpi-card.active[data-tso="NTS"] { border-color: var(--tso-nts); }
 .kpi-card.active[data-tso="TAG"] { border-color: var(--tso-tag); }
 .kpi-card.active[data-tso="TBG"] { border-color: var(--tso-tbg); }
 .flowtype-toggle { background: var(--bg); border: 1px solid var(--border-strong); border-radius: 999px; padding: 4px 12px; font-size: 12px; cursor: pointer; color: var(--text); font-family: var(--font); font-weight: 400; }
 .flowtype-toggle:hover { background: var(--accent-soft); }
-.flowtype-toggle.active { background: var(--text); color: var(--panel); border-color: var(--text); }
+.flowtype-toggle.active { background: var(--panel); color: var(--text); border-color: var(--border-strong); }
 .filter-label { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 200; margin-right: 2px; }
 .reset-btn { margin-left: auto; background: transparent; border: 1px solid var(--border-strong); border-radius: 6px; padding: 5px 10px; font-size: 12px; cursor: pointer; color: var(--muted2); font-family: var(--font); }
 .reset-btn:hover { background: var(--accent-soft); color: var(--text); }
