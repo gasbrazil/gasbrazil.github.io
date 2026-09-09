@@ -785,4 +785,43 @@ header.top #theme-toggle,
   header.dash-head #lang-toggle,
   header.top #lang-toggle,
   .site-header #lang-toggle { right: 52px; }
+  /* Thumb-friendly source pills on small screens. */
+  .sources a { padding: 8px 14px; }
+}
+
+/* Keyboard focus visibility site-wide. Buttons and links previously had no
+   focus ring (only .infodot and .skip-link did), so keyboard navigation was
+   invisible. :where() keeps specificity at zero so page rules still win. */
+:where(a, button, input, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+[data-theme="dark"] :where(a, button, input, select, [tabindex]):focus-visible {
+  outline-color: var(--brz-yellow);
+}
+
+/* Clickable affordance: buttons and selectable chips/pills show the pointer
+   cursor (previously the default arrow, which read as non-interactive). */
+.wrap button:not(:disabled),
+header button:not(:disabled),
+.pill, .chip, .series-btn, .tso-chip, .tso-toggle {
+  cursor: pointer;
+}
+
+/* Sort-direction arrows (see JS_TABLE_SORT) were easy to miss at muted
+   body color -- accent + weight makes the active sort column scannable. */
+.th-label .arrow {
+  color: var(--accent);
+  font-weight: 600;
+  margin-left: 4px;
+}
+[data-theme="dark"] .th-label .arrow { color: var(--brz-yellow); }
+
+/* Filter checkboxes get a usable minimum size and the site accent instead
+   of the browser default blue square. */
+input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  accent-color: var(--accent);
 }
