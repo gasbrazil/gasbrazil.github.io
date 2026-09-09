@@ -561,6 +561,10 @@ def cmd_build(args) -> None:
     print(f"Wrote {len(ledger_df):,} rows ({ledger_df['pipeline_code'].nunique() if len(ledger_df) else 0} pipelines) to {LEDGER_PARQUET}")
 
     # Health gate -- fail loudly rather than silently publish a broken/empty dashboard.
+    sys.path.insert(0, str(HERE.parent / "shared"))
+    import data_kit as dk  # noqa: E402
+    import schemas  # noqa: E402
+    import transforms as xf  # noqa: E402
     problems = []
     if len(points_df) == 0:
         problems.append("zero point-level rows produced")
@@ -572,8 +576,8 @@ def cmd_build(args) -> None:
         # Monthly publication with a multi-week lag (see README) -- flag if
         # the newest data we have is implausibly old, not just "not today".
         # TSO overlays often close that gap; use merged latest.
-        staleness_days = (pd.Timestamp.today().normalize() - latest).days
-        if staleness_days > 75:
+        staleness_days = (pd.Timestamp.now("UTC").normalize() - latest).days
+        if staleness_days > xf.FLOWS_MAX_STALENESS_DAYS:
             problems.append(f"latest point data is {staleness_days} days old ({latest.date()})")
         if points_df["point_code"].isna().any():
             problems.append("some rows missing point_code")
@@ -583,9 +587,6 @@ def cmd_build(args) -> None:
 
     # ADR-002 Track A: validate canonical columns and mirror into lake/
     # only after the health gate passes.
-    sys.path.insert(0, str(HERE.parent / "shared"))
-    import data_kit as dk  # noqa: E402
-    import schemas  # noqa: E402
     schemas.validate_flows_points(points_df)
     if len(ledger_df):
         schemas.validate_flows_ledger(ledger_df)

@@ -309,9 +309,9 @@ def cmd_build(_args) -> None:
     sys.path.insert(0, str(HERE.parent / "shared"))
     import data_kit as dk  # noqa: E402
     import schemas  # noqa: E402
+    import transforms as xf  # noqa: E402
 
     schemas.validate_anp_prices(df)
-    dk.publish("anp_prices", PRICES_PARQUET)
 
     problems = []
     if len(df) == 0:
@@ -321,9 +321,9 @@ def cmd_build(_args) -> None:
         if last:
             y, m = map(int, str(last).split("-")[:2])
             last_dt = dt.date(y, m, 1)
-            today = dt.date.today().replace(day=1)
+            today = dt.datetime.now(dt.timezone.utc).date().replace(day=1)
             lag = (today.year - last_dt.year) * 12 + (today.month - last_dt.month)
-            if lag > 6:
+            if lag > xf.PRECOS_MAX_LAG_MONTHS:
                 problems.append(f"latest month {last} is {lag} months behind (expected ANP lag ~2–3)")
         priced = df["price_brl_mmbtu"].notna().sum()
         if priced == 0:
@@ -336,6 +336,8 @@ def cmd_build(_args) -> None:
             print(f"HEALTH FAIL: {p}", file=sys.stderr)
         raise SystemExit(1)
     print(f"Health OK — months {df['month'].iloc[0]} … {df['month'].iloc[-1]} ({len(df):,} rows)")
+
+    dk.publish("anp_prices", PRICES_PARQUET)
 
 
 def cmd_all(args) -> None:

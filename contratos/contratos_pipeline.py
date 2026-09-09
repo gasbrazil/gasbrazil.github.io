@@ -308,24 +308,27 @@ def cmd_build(args):
     import data_kit as dk  # noqa: E402
     import schemas  # noqa: E402
     schemas.validate_contratos(df)
-    dk.publish("contratos", PARQUET_PATH)
 
     # Basic integrity tripwires -- fail loudly rather than silently publish garbage.
     problems = []
     if len(df) == 0:
         problems.append("zero rows produced")
-    elif df["Contract Number"].isna().any():
+    if len(df) and df["Contract Number"].isna().any():
         problems.append("some rows missing Contract Number")
-    elif df["Start Date"].isna().all():
+    if len(df) and df["Start Date"].isna().all():
         problems.append("Start Date entirely null")
-    else:
+    if len(df) and "Contract Category" in df.columns:
         categories = set(df["Contract Category"].unique())
         expected = {"Transport Contract", "Master Contract"}
         if not expected <= categories:
-            problems.append(f"expected categories missing: {sorted(expected - categories)}, got: {sorted(categories)}")
+            problems.append(
+                f"expected categories missing: {sorted(expected - categories)}, got: {sorted(categories)}"
+            )
     if problems:
         print("HEALTH GATE FAILED: " + "; ".join(problems), file=sys.stderr)
         sys.exit(2)
+
+    dk.publish("contratos", PARQUET_PATH)
 
 
 def main():

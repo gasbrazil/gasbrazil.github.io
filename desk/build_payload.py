@@ -6,6 +6,7 @@ Pulls lake parquet from R2 via data_kit.ensure_lake when local files are absent.
 from __future__ import annotations
 
 import datetime as dt
+import os
 import sys
 from pathlib import Path
 from typing import Any, Optional
@@ -23,7 +24,7 @@ import transforms as xf  # noqa: E402
 # multiplying by the MMBtu content of one m3 (MMBTU_PER_1000_M3 / 1000), not
 # dividing by the per-1000-m3 factor directly.
 # R$/m³ = R$/MMBtu × MMBTU_PER_1000_M3 / 1000.
-MMBTU_PER_1000_M3 = 28.8081
+MMBTU_PER_1000_M3 = xf.MMBTU_PER_1000_M3
 COMPARE_DAYS = 90
 SPARK_FALLBACK_GAS_M3 = 1.2  # illustrative R$/m³ when no GUS trade exists
 
@@ -589,6 +590,16 @@ def build_payload() -> dict:
         if d
     ]
     data_through = max(through_candidates) if through_candidates else None
+
+    in_ci = bool(os.environ.get("CI") or os.environ.get("GASBRAZIL_LAKE_BUCKET"))
+    if in_ci and xf.HEALTH.get("desk_require_pld_se"):
+        problems = []
+        if pld is None or pld.empty:
+            problems.append("pld_daily missing")
+        elif pld_se is None:
+            problems.append("PLD SE missing")
+        if problems:
+            raise SystemExit("DESK HEALTH GATE FAILED: " + "; ".join(problems))
 
     _now = dt.datetime.now(dt.timezone.utc)
     return {

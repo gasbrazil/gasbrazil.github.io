@@ -329,22 +329,21 @@ def cmd_build(_args) -> None:
     sys.path.insert(0, str(HERE.parent / "shared"))
     import data_kit as dk  # noqa: E402
     import schemas  # noqa: E402
+    import transforms as xf  # noqa: E402
     schemas.validate_supply_monthly(df)
-    dk.publish("supply_monthly", MONTHLY_PARQUET)
 
     problems = []
     if len(df) == 0:
         problems.append("zero rows in supply_monthly.parquet")
     else:
-        # ANP typically lags ~2 months; allow up to ~5 months stale before failing CI
+        # ANP typically lags ~2 months; allow up to HEALTH.supply_max_lag_months.
         last = df["month"].dropna().max()
         if last:
             y, m = map(int, str(last).split("-")[:2])
             last_dt = dt.date(y, m, 1)
-            today = dt.date.today().replace(day=1)
-            # months between
+            today = dt.datetime.now(dt.timezone.utc).date().replace(day=1)
             lag = (today.year - last_dt.year) * 12 + (today.month - last_dt.month)
-            if lag > 5:
+            if lag > xf.SUPPLY_MAX_LAG_MONTHS:
                 problems.append(f"latest month {last} is {lag} months behind (expected ANP lag ~2)")
         for col in ("production", "available"):
             if col in df.columns and df[col].notna().sum() == 0:
@@ -354,6 +353,8 @@ def cmd_build(_args) -> None:
             print(f"HEALTH FAIL: {p}", file=sys.stderr)
         raise SystemExit(1)
     print(f"Health OK — months {df['month'].iloc[0]} … {df['month'].iloc[-1]}")
+
+    dk.publish("supply_monthly", MONTHLY_PARQUET)
 
 
 def cmd_all(args) -> None:
