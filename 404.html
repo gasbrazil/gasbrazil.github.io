@@ -120,16 +120,18 @@
   --pos: #002776;
   --neg: #b3441e;
 
-  /* Shared chart series palette: accent first, then muted neutrals.
-     Semantic recv/del stay page-local (--flow-recv / --flow-del). */
-  --chart-1: #002776;
-  --chart-2: #4a5568;
-  --chart-3: #2f6fed;
-  --chart-4: #6b7280;
-  --chart-5: #0e7490;
-  --chart-6: #64748b;
-  --chart-7: #1d4ed8;
-  --chart-8: #475569;
+  /* Shared chart series palette: Brazil flag green → yellow → blue first,
+     then high-contrast hues that are NOT more blues (desk charts were a
+     wall of blue-on-blue). Light-mode yellow is slightly darkened so thin
+     lines stay readable on paper; dark mode uses true flag yellow. */
+  --chart-1: #009C3B;
+  --chart-2: #C9A400;
+  --chart-3: #002776;
+  --chart-4: #c2410c;
+  --chart-5: #7c3aed;
+  --chart-6: #0f766e;
+  --chart-7: #be123c;
+  --chart-8: #57534e;
 
   /* Pipeline (TSO) identity colors — TAG blue, NTS orange, TBG green.
      Shade -1 is the base; -2..-4 differentiate secondary series (types,
@@ -196,14 +198,14 @@
   --pos: #3f74d9;
   --neg: #e08a5f;
 
-  --chart-1: #3f74d9;
-  --chart-2: #94a3b8;
-  --chart-3: #60a5fa;
-  --chart-4: #64748b;
-  --chart-5: #22d3ee;
-  --chart-6: #788396;
-  --chart-7: #93c5fd;
-  --chart-8: #475569;
+  --chart-1: #22c55e;
+  --chart-2: #FFDF00;
+  --chart-3: #6b9aff;
+  --chart-4: #fb923c;
+  --chart-5: #c084fc;
+  --chart-6: #2dd4bf;
+  --chart-7: #fb7185;
+  --chart-8: #a8a29e;
 
   --tso-nts: #f59e0b;
   --tso-nts-1: #f59e0b;
@@ -284,16 +286,23 @@ html, body {
   margin: 0;
 }
 .asof-strip {
-  display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 14px;
-  font-size: 11.5px; font-weight: 300; color: var(--muted);
-  margin: 0 0 12px; padding: 6px 0;
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px;
+  font-size: 11px; font-weight: 300; color: var(--muted);
+  margin: 0 0 10px; padding: 0 0 10px;
   border-bottom: 1px solid var(--border);
 }
 .asof-strip .asof-label {
   text-transform: uppercase; letter-spacing: .06em; font-weight: 400;
-  color: var(--muted2); font-size: 10.5px;
+  color: var(--muted); font-size: 10px;
 }
 .asof-strip .asof-val { font-weight: 300; color: var(--muted2); font-variant-numeric: tabular-nums; }
+/* When parked in the page footer, keep it quiet — no top-of-page shout. */
+footer .asof-strip,
+.foot .asof-strip,
+.asof-strip.asof-footer {
+  margin: 0 0 10px;
+  padding: 0 0 10px;
+}
 
 /* Text nav (not pill clusters): underline active page. */
 .navlinks, .header-links {

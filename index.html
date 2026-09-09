@@ -120,16 +120,18 @@
   --pos: #002776;
   --neg: #b3441e;
 
-  /* Shared chart series palette: accent first, then muted neutrals.
-     Semantic recv/del stay page-local (--flow-recv / --flow-del). */
-  --chart-1: #002776;
-  --chart-2: #4a5568;
-  --chart-3: #2f6fed;
-  --chart-4: #6b7280;
-  --chart-5: #0e7490;
-  --chart-6: #64748b;
-  --chart-7: #1d4ed8;
-  --chart-8: #475569;
+  /* Shared chart series palette: Brazil flag green → yellow → blue first,
+     then high-contrast hues that are NOT more blues (desk charts were a
+     wall of blue-on-blue). Light-mode yellow is slightly darkened so thin
+     lines stay readable on paper; dark mode uses true flag yellow. */
+  --chart-1: #009C3B;
+  --chart-2: #C9A400;
+  --chart-3: #002776;
+  --chart-4: #c2410c;
+  --chart-5: #7c3aed;
+  --chart-6: #0f766e;
+  --chart-7: #be123c;
+  --chart-8: #57534e;
 
   /* Pipeline (TSO) identity colors — TAG blue, NTS orange, TBG green.
      Shade -1 is the base; -2..-4 differentiate secondary series (types,
@@ -196,14 +198,14 @@
   --pos: #3f74d9;
   --neg: #e08a5f;
 
-  --chart-1: #3f74d9;
-  --chart-2: #94a3b8;
-  --chart-3: #60a5fa;
-  --chart-4: #64748b;
-  --chart-5: #22d3ee;
-  --chart-6: #788396;
-  --chart-7: #93c5fd;
-  --chart-8: #475569;
+  --chart-1: #22c55e;
+  --chart-2: #FFDF00;
+  --chart-3: #6b9aff;
+  --chart-4: #fb923c;
+  --chart-5: #c084fc;
+  --chart-6: #2dd4bf;
+  --chart-7: #fb7185;
+  --chart-8: #a8a29e;
 
   --tso-nts: #f59e0b;
   --tso-nts-1: #f59e0b;
@@ -284,16 +286,23 @@ html, body {
   margin: 0;
 }
 .asof-strip {
-  display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 14px;
-  font-size: 11.5px; font-weight: 300; color: var(--muted);
-  margin: 0 0 12px; padding: 6px 0;
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px;
+  font-size: 11px; font-weight: 300; color: var(--muted);
+  margin: 0 0 10px; padding: 0 0 10px;
   border-bottom: 1px solid var(--border);
 }
 .asof-strip .asof-label {
   text-transform: uppercase; letter-spacing: .06em; font-weight: 400;
-  color: var(--muted2); font-size: 10.5px;
+  color: var(--muted); font-size: 10px;
 }
 .asof-strip .asof-val { font-weight: 300; color: var(--muted2); font-variant-numeric: tabular-nums; }
+/* When parked in the page footer, keep it quiet — no top-of-page shout. */
+footer .asof-strip,
+.foot .asof-strip,
+.asof-strip.asof-footer {
+  margin: 0 0 10px;
+  padding: 0 0 10px;
+}
 
 /* Text nav (not pill clusters): underline active page. */
 .navlinks, .header-links {
@@ -678,8 +687,8 @@ footer.site a { color: var(--muted2); }
     <a class="kpi-cell" href="desk/" data-slug="desk">
       <div class="kpi-label" data-i18n="cardDesk">The Desk</div>
       <div class="kpi-role">Cross-product snapshot</div>
-      <div class="kpi-val" data-en="3181 MWmed gas · PLD SE 114.11" data-pt="3181 MWmed a gás · PLD SE 114.11">3181 MWmed gas · PLD SE 114.11</div>
-      <div class="kpi-when" data-refresh="2026-09-08 23:04 UTC"></div>
+      <div class="kpi-val" data-en="PLD SE 122.33" data-pt="PLD SE 122.33">PLD SE 122.33</div>
+      <div class="kpi-when" data-refresh="2026-09-09 03:47 UTC"></div>
     </a>
     <a class="kpi-cell" href="ons/" data-slug="ons">
       <div class="kpi-label" data-i18n="cardOns">ONS Balances</div>
@@ -690,8 +699,8 @@ footer.site a { color: var(--muted2); }
     <a class="kpi-cell" href="pld/" data-slug="pld">
       <div class="kpi-label" data-i18n="cardPld">PLD Prices</div>
       <div class="kpi-role">Power settlement</div>
-      <div class="kpi-val" data-en="SE 114.11 R$/MWh · 2026-09-09" data-pt="SE 114.11 R$/MWh · 2026-09-09">SE 114.11 R$/MWh · 2026-09-09</div>
-      <div class="kpi-when" data-refresh="2026-09-08 23:04 UTC"></div>
+      <div class="kpi-val" data-en="SE 122.33 R$/MWh · 2026-09-06" data-pt="SE 122.33 R$/MWh · 2026-09-06">SE 122.33 R$/MWh · 2026-09-06</div>
+      <div class="kpi-when" data-refresh="2026-09-09 03:48 UTC"></div>
       <svg class="kpi-spark" viewBox="0 0 120 28" width="120" height="28" aria-hidden="true"><polyline points="2.0,26.0 4.6,22.0 7.3,18.0 9.9,14.0 12.5,10.0 15.2,6.0 17.8,2.0 20.5,26.0 23.1,22.0 25.7,18.0 28.4,14.0 31.0,10.0 33.6,6.0 36.3,2.0 38.9,26.0 41.5,22.0 44.2,18.0 46.8,14.0 49.5,10.0 52.1,6.0 54.7,2.0 57.4,26.0 60.0,22.0 62.6,18.0 65.3,14.0 67.9,10.0 70.5,6.0 73.2,2.0 75.8,26.0 78.5,22.0 81.1,18.0 83.7,14.0 86.4,10.0 89.0,6.0 91.6,2.0 94.3,26.0 96.9,22.0 99.5,18.0 102.2,14.0 104.8,10.0 107.5,6.0 110.1,2.0 112.7,26.0 115.4,22.0 118.0,18.0"/></svg>
     </a>
     <a class="kpi-cell" href="poc/" data-slug="poc">
@@ -710,21 +719,21 @@ footer.site a { color: var(--muted2); }
     <a class="kpi-cell" href="flows/" data-slug="flows">
       <div class="kpi-label" data-i18n="cardFlows">Pipeline Flows</div>
       <div class="kpi-role">Physical movement</div>
-      <div class="kpi-val" data-en="1358.6M m³ realized (7d) · 270 points" data-pt="1358.6M m³ realizados (7d) · 270 points">1358.6M m³ realized (7d) · 270 points</div>
-      <div class="kpi-when" data-refresh="2026-09-08 23:05 UTC"></div>
+      <div class="kpi-val" data-en="370.5M m³ realized (7d) · 123 points" data-pt="370.5M m³ realizados (7d) · 123 points">370.5M m³ realized (7d) · 123 points</div>
+      <div class="kpi-when" data-refresh="2026-09-09 03:50 UTC"></div>
     </a>
     <a class="kpi-cell" href="supply/" data-slug="supply">
       <div class="kpi-label" data-i18n="cardSupply">Gas Supply</div>
       <div class="kpi-role">National balance</div>
       <div class="kpi-val" data-en="6.7M thousand m³ produced · 2026-07" data-pt="6.7M mil m³ produzidos · 2026-07">6.7M thousand m³ produced · 2026-07</div>
-      <div class="kpi-when" data-refresh="2026-09-08 23:04 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-09 03:47 UTC"></div>
       <svg class="kpi-spark" viewBox="0 0 120 28" width="120" height="28" aria-hidden="true"><polyline points="2.0,20.5 7.0,18.9 12.1,20.8 17.1,22.9 22.2,20.1 27.2,20.2 32.3,26.0 37.3,18.6 42.3,19.6 47.4,16.3 52.4,15.1 57.5,10.1 62.5,10.7 67.6,12.2 72.6,8.8 77.7,14.8 82.7,8.9 87.7,9.3 92.8,14.2 97.8,5.6 102.9,7.0 107.9,5.0 113.0,3.6 118.0,2.0"/></svg>
     </a>
     <a class="kpi-cell" href="precos/" data-slug="precos">
       <div class="kpi-label" data-i18n="cardPrecos">ANP Prices</div>
       <div class="kpi-role">Disclosed R$/MMBtu</div>
-      <div class="kpi-val" data-en="Santos 18.2 R$/MMBtu · 2026-06" data-pt="Santos 18.2 R$/MMBtu · 2026-06">Santos 18.2 R$/MMBtu · 2026-06</div>
-      <div class="kpi-when" data-refresh="2026-09-08 23:04 UTC"></div>
+      <div class="kpi-val" data-en="Santos 12.8 R$/MMBtu · 2026-06" data-pt="Santos 12.8 R$/MMBtu · 2026-06">Santos 12.8 R$/MMBtu · 2026-06</div>
+      <div class="kpi-when" data-refresh="2026-09-09 03:48 UTC"></div>
     </a>
   </div>
   <div class="sources-block">
