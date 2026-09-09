@@ -325,9 +325,8 @@ footer .asof-strip,
 
 /* "Products" dropdown nav_links_html() builds (Option A of the 2026-09-08
    nav mockups): collapses every dashboard but Home into one menu instead
-   of a growing row of top-level links. Toggle behavior lives in
-   dashboard_kit.py's _PRODUCTS_DROPDOWN_JS, spliced in right after this
-   markup. */
+   of a growing row of top-level links. Hover (with delay) + click toggle
+   live in dashboard_kit.py's _PRODUCTS_DROPDOWN_JS. */
 .products-dd { position: relative; display: inline-flex; }
 .dd-trigger {
   font: 400 14.5px var(--font);
@@ -345,9 +344,10 @@ footer .asof-strip,
 .dd-trigger:hover, .dd-trigger[aria-expanded="true"] { color: var(--accent); border-bottom-color: var(--accent); }
 .dd-caret { font-size: 10px; transform: translateY(1px); }
 .dd-menu {
-  display: none;
+  /* Kept in-flow for opacity fade (display:none can't animate). Closed
+     state is invisible + non-interactive; .is-open reveals with a quick fade. */
   position: absolute;
-  top: calc(100% + 10px);
+  top: calc(100% + 4px);
   left: -8px;
   min-width: 180px;
   background: var(--panel-grad);
@@ -356,8 +356,19 @@ footer .asof-strip,
   box-shadow: var(--elevate);
   padding: 6px;
   z-index: 50;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition: opacity .14s ease, transform .14s ease, visibility 0s linear .14s;
 }
-.dd-menu.is-open { display: block; }
+.dd-menu.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0);
+  transition: opacity .14s ease, transform .14s ease, visibility 0s;
+}
 .dd-menu a, .dd-menu .is-current {
   display: flex;
   align-items: center;
@@ -623,6 +634,14 @@ header.top #theme-toggle,
   header.top #lang-toggle,
   .site-header #lang-toggle { right: 52px; }
 }
+  header.dash-head #lang-toggle,
+  header.top #lang-toggle,
+  .site-header #lang-toggle { right: 52px; }
+}
+  header.dash-head #lang-toggle,
+  header.top #lang-toggle,
+  .site-header #lang-toggle { right: 52px; }
+}
 
 /* Everything below is this dashboard's own layout/components -- the palette
    (neutral tokens + the shared Brazilian-flag accent) now lives entirely in
@@ -769,27 +788,69 @@ footer a { color: var(--accent); }
       <a class="navlink" href="../about/" data-i18n="navAbout">About</a>
       <script>
 (function () {
-  function closeOpenMenus() {
-    document.querySelectorAll(".dd-menu.is-open").forEach(function (menu) {
-      menu.classList.remove("is-open");
-      var btn = menu.previousElementSibling;
-      if (btn && btn.classList.contains("dd-trigger")) btn.setAttribute("aria-expanded", "false");
+  var OPEN_MS = 120;
+  var CLOSE_MS = 220;
+  var openTimer = null;
+  var closeTimer = null;
+
+  function setOpen(dd, open) {
+    if (!dd) return;
+    var menu = dd.querySelector(".dd-menu");
+    var btn = dd.querySelector(".dd-trigger");
+    if (!menu || !btn) return;
+    menu.classList.toggle("is-open", !!open);
+    btn.setAttribute("aria-expanded", open ? "true" : "false");
+  }
+  function closeAll(except) {
+    document.querySelectorAll(".products-dd").forEach(function (dd) {
+      if (dd !== except) setOpen(dd, false);
     });
   }
+  function scheduleOpen(dd) {
+    clearTimeout(closeTimer);
+    clearTimeout(openTimer);
+    openTimer = setTimeout(function () {
+      closeAll(dd);
+      setOpen(dd, true);
+    }, OPEN_MS);
+  }
+  function scheduleClose(dd) {
+    clearTimeout(openTimer);
+    clearTimeout(closeTimer);
+    closeTimer = setTimeout(function () {
+      setOpen(dd, false);
+    }, CLOSE_MS);
+  }
+  function bind(dd) {
+    if (dd.getAttribute("data-dd-bound") === "1") return;
+    dd.setAttribute("data-dd-bound", "1");
+    dd.addEventListener("mouseenter", function () { scheduleOpen(dd); });
+    dd.addEventListener("mouseleave", function () { scheduleClose(dd); });
+  }
+  function bindAll() {
+    document.querySelectorAll(".products-dd").forEach(bind);
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bindAll);
+  else bindAll();
+
   document.addEventListener("click", function (e) {
     var trigger = e.target.closest(".dd-trigger");
     if (trigger) {
-      var menu = trigger.nextElementSibling;
-      if (menu && menu.classList.contains("dd-menu")) {
-        var open = menu.classList.toggle("is-open");
-        trigger.setAttribute("aria-expanded", open ? "true" : "false");
+      var dd = trigger.closest(".products-dd");
+      var menu = dd && dd.querySelector(".dd-menu");
+      if (dd && menu) {
+        clearTimeout(openTimer);
+        clearTimeout(closeTimer);
+        var open = !menu.classList.contains("is-open");
+        closeAll(open ? dd : null);
+        setOpen(dd, open);
       }
       return;
     }
-    closeOpenMenus();
+    if (!e.target.closest(".products-dd")) closeAll(null);
   });
   document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") closeOpenMenus();
+    if (e.key === "Escape") closeAll(null);
   });
 })();
 </script>
@@ -841,7 +902,7 @@ footer a { color: var(--accent); }
 </div>
 <div class="tt" id="chart-tt"></div>
 <script>
-const PAYLOAD_URL = "payload.json.gz";
+const PAYLOAD_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/contratos/payload.json.gz";
 
 
 function b64ToBytes(b64) {

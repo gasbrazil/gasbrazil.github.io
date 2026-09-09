@@ -812,36 +812,74 @@ def site_links_js(self_id: str) -> str:
     )
 
 
-# Toggle behavior for the "Products" dropdown nav_links_html() builds --
-# delegated on document (not per-trigger listeners) so it works regardless
-# of how many times a page's header markup gets re-rendered, and needs no
-# per-page init call threaded into each dashboard's own boot() function.
-# Locates its paired menu/trigger via DOM adjacency (.dd-trigger's next
-# sibling / .dd-menu's previous sibling), matching the markup
-# nav_links_html() emits below, so no IDs are needed either.
+# Products dropdown: open on hover (short delay + CSS fade) for pointer
+# devices; click still toggles for touch / keyboard. Scoped to .products-dd
+# so the gap between trigger and menu doesn't immediately dismiss.
 _PRODUCTS_DROPDOWN_JS = r"""<script>
 (function () {
-  function closeOpenMenus() {
-    document.querySelectorAll(".dd-menu.is-open").forEach(function (menu) {
-      menu.classList.remove("is-open");
-      var btn = menu.previousElementSibling;
-      if (btn && btn.classList.contains("dd-trigger")) btn.setAttribute("aria-expanded", "false");
+  var OPEN_MS = 120;
+  var CLOSE_MS = 220;
+  var openTimer = null;
+  var closeTimer = null;
+
+  function setOpen(dd, open) {
+    if (!dd) return;
+    var menu = dd.querySelector(".dd-menu");
+    var btn = dd.querySelector(".dd-trigger");
+    if (!menu || !btn) return;
+    menu.classList.toggle("is-open", !!open);
+    btn.setAttribute("aria-expanded", open ? "true" : "false");
+  }
+  function closeAll(except) {
+    document.querySelectorAll(".products-dd").forEach(function (dd) {
+      if (dd !== except) setOpen(dd, false);
     });
   }
+  function scheduleOpen(dd) {
+    clearTimeout(closeTimer);
+    clearTimeout(openTimer);
+    openTimer = setTimeout(function () {
+      closeAll(dd);
+      setOpen(dd, true);
+    }, OPEN_MS);
+  }
+  function scheduleClose(dd) {
+    clearTimeout(openTimer);
+    clearTimeout(closeTimer);
+    closeTimer = setTimeout(function () {
+      setOpen(dd, false);
+    }, CLOSE_MS);
+  }
+  function bind(dd) {
+    if (dd.getAttribute("data-dd-bound") === "1") return;
+    dd.setAttribute("data-dd-bound", "1");
+    dd.addEventListener("mouseenter", function () { scheduleOpen(dd); });
+    dd.addEventListener("mouseleave", function () { scheduleClose(dd); });
+  }
+  function bindAll() {
+    document.querySelectorAll(".products-dd").forEach(bind);
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bindAll);
+  else bindAll();
+
   document.addEventListener("click", function (e) {
     var trigger = e.target.closest(".dd-trigger");
     if (trigger) {
-      var menu = trigger.nextElementSibling;
-      if (menu && menu.classList.contains("dd-menu")) {
-        var open = menu.classList.toggle("is-open");
-        trigger.setAttribute("aria-expanded", open ? "true" : "false");
+      var dd = trigger.closest(".products-dd");
+      var menu = dd && dd.querySelector(".dd-menu");
+      if (dd && menu) {
+        clearTimeout(openTimer);
+        clearTimeout(closeTimer);
+        var open = !menu.classList.contains("is-open");
+        closeAll(open ? dd : null);
+        setOpen(dd, open);
       }
       return;
     }
-    closeOpenMenus();
+    if (!e.target.closest(".products-dd")) closeAll(null);
   });
   document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") closeOpenMenus();
+    if (e.key === "Escape") closeAll(null);
   });
 })();
 </script>"""

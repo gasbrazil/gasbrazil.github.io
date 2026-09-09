@@ -300,9 +300,8 @@ footer .asof-strip,
 
 /* "Products" dropdown nav_links_html() builds (Option A of the 2026-09-08
    nav mockups): collapses every dashboard but Home into one menu instead
-   of a growing row of top-level links. Toggle behavior lives in
-   dashboard_kit.py's _PRODUCTS_DROPDOWN_JS, spliced in right after this
-   markup. */
+   of a growing row of top-level links. Hover (with delay) + click toggle
+   live in dashboard_kit.py's _PRODUCTS_DROPDOWN_JS. */
 .products-dd { position: relative; display: inline-flex; }
 .dd-trigger {
   font: 400 14.5px var(--font);
@@ -320,9 +319,10 @@ footer .asof-strip,
 .dd-trigger:hover, .dd-trigger[aria-expanded="true"] { color: var(--accent); border-bottom-color: var(--accent); }
 .dd-caret { font-size: 10px; transform: translateY(1px); }
 .dd-menu {
-  display: none;
+  /* Kept in-flow for opacity fade (display:none can't animate). Closed
+     state is invisible + non-interactive; .is-open reveals with a quick fade. */
   position: absolute;
-  top: calc(100% + 10px);
+  top: calc(100% + 4px);
   left: -8px;
   min-width: 180px;
   background: var(--panel-grad);
@@ -331,8 +331,19 @@ footer .asof-strip,
   box-shadow: var(--elevate);
   padding: 6px;
   z-index: 50;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition: opacity .14s ease, transform .14s ease, visibility 0s linear .14s;
 }
-.dd-menu.is-open { display: block; }
+.dd-menu.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0);
+  transition: opacity .14s ease, transform .14s ease, visibility 0s;
+}
 .dd-menu a, .dd-menu .is-current {
   display: flex;
   align-items: center;
@@ -586,6 +597,14 @@ header.top #theme-toggle,
   }
   .filters-drawer-toggle { display: inline-flex !important; }
   .filters-collapsible.is-collapsed { display: none; }
+  header.dash-head #lang-toggle,
+  header.top #lang-toggle,
+  .site-header #lang-toggle { right: 52px; }
+}
+  header.dash-head #lang-toggle,
+  header.top #lang-toggle,
+  .site-header #lang-toggle { right: 52px; }
+}
   header.dash-head #lang-toggle,
   header.top #lang-toggle,
   .site-header #lang-toggle { right: 52px; }
