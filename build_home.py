@@ -108,6 +108,9 @@ def _sparkline_svg(values: list[float], *, width: int = 120, height: int = 28) -
 
 def collect_status() -> dict:
     """Headline numbers for the hub cards. Missing stores degrade to None."""
+    import data_kit as dk  # noqa: E402
+    import publish_teasers as pt  # noqa: E402
+
     status: dict = {
         "ons_kpi": None,
         "ons_kpi_pt": None,
@@ -136,147 +139,20 @@ def collect_status() -> dict:
         "supply_spark": "",
         "pld_spark": "",
         "poc_spark": "",
-        "teasers_url": "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/hub/teasers.json.gz",
+        "teasers_url": dk.teaser_url(),
     }
+    for key, val in pt.status_from_teasers().items():
+        if val:
+            status[key] = val
 
-    ons_html = ROOT / "ons" / "index.html"
-    if ons_html.exists():
-        text = ons_html.read_text(encoding="utf-8", errors="ignore")
-        kpi, kpi_pt, when = _ons_teaser_from_html(text)
-        status["ons_kpi"] = kpi
-        status["ons_kpi_pt"] = kpi_pt
-        status["ons_when"] = when
-
-    flows_html = ROOT / "flows" / "index.html"
-    if flows_html.exists():
-        text = flows_html.read_text(encoding="utf-8", errors="ignore")
-        m = re.search(r"generated:\s*(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}\s+UTC)", text)
-        if m:
-            status["flows_when"] = m.group(1)
-        kpi = re.search(r"kpi_total_7d:\s*([0-9.]+)", text)
-        npts = re.search(r"n_points:\s*(\d+)", text)
-        if kpi and kpi.group(1):
-            total = float(kpi.group(1))
-            vol_label = f"{total / 1000:.1f}M" if total >= 1000 else f"{total:.0f}"
-            n_label = f" · {npts.group(1)} points" if npts and npts.group(1) else ""
-            status["flows_kpi"] = f"{vol_label} m³ realized (7d){n_label}"
-            status["flows_kpi_pt"] = f"{vol_label} m³ realizados (7d){n_label}"
-
-    poc_html = ROOT / "poc" / "index.html"
-    if poc_html.exists():
-        text = poc_html.read_text(encoding="utf-8", errors="ignore")
-        m = re.search(r"generated:\s*(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}\s+UTC)", text)
-        if m:
-            status["poc_when"] = m.group(1)
-        price = re.search(r"kpi_price_7d:\s*([0-9.]+)", text)
-        trades = re.search(r"kpi_trades_7d:\s*(\d+)", text)
-        when = re.search(r"kpi_when:\s*(\d{4}-\d{2}-\d{2})", text)
-        if price and price.group(1):
-            n = trades.group(1) if trades else "?"
-            status["poc_kpi"] = f"{float(price.group(1)):.2f} R$/MMBtu · {n} trades (7d)"
-            status["poc_kpi_pt"] = f"{float(price.group(1)):.2f} R$/MMBtu · {n} negócios (7d)"
-        if when and when.group(1):
-            status["poc_when"] = when.group(1)
-
-    con_html = ROOT / "contratos" / "index.html"
-    if con_html.exists():
-        text = con_html.read_text(encoding="utf-8", errors="ignore")
-        m = re.search(r"generated:\s*(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}\s+UTC)", text)
-        if m:
-            status["contratos_when"] = m.group(1)
-        n = re.search(r"kpi_contracts:\s*(\d+)", text)
-        cap = re.search(r"kpi_capacity:\s*([0-9.]+)", text)
-        if n and n.group(1):
-            cap_s = _fmt_num(float(cap.group(1)), 0) if cap and cap.group(1) else "—"
-            status["contratos_kpi"] = f"{int(n.group(1)):,} contracts · {cap_s} thousand m³/d"
-            status["contratos_kpi_pt"] = f"{int(n.group(1)):,} contratos · {cap_s} mil m³/d"
-
-    precos_html = ROOT / "precos" / "index.html"
-    if precos_html.exists():
-        text = precos_html.read_text(encoding="utf-8", errors="ignore")
-        m = re.search(r"generated:\s*(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}\s+UTC)", text)
-        if m:
-            status["precos_when"] = m.group(1)
-        kpi = re.search(r"kpi_santos:\s*([0-9.]+)", text)
-        through = re.search(r"data_through:\s*(\d{4}-\d{2})", text)
-        if kpi and kpi.group(1):
-            month = through.group(1) if through else ""
-            bit = f" · {month}" if month else ""
-            status["precos_kpi"] = f"Santos {float(kpi.group(1)):.1f} R$/MMBtu{bit}"
-            status["precos_kpi_pt"] = status["precos_kpi"]
-
-    supply_html = ROOT / "supply" / "index.html"
-    if supply_html.exists():
-        text = supply_html.read_text(encoding="utf-8", errors="ignore")
-        m = re.search(r"generated:\s*(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}\s+UTC)", text)
-        if m:
-            status["supply_when"] = m.group(1)
-        kpi = re.search(r"kpi_production:\s*([0-9.]+)", text)
-        through = re.search(r"data_through:\s*(\d{4}-\d{2})", text)
-        if kpi and kpi.group(1):
-            prod = float(kpi.group(1))
-            if prod >= 1_000_000:
-                vol = f"{prod / 1_000_000:.1f}M"
-            elif prod >= 1000:
-                vol = f"{prod / 1000:.0f}k"
-            else:
-                vol = f"{prod:.0f}"
-            month = through.group(1) if through else ""
-            month_bit = f" · {month}" if month else ""
-            status["supply_kpi"] = f"{vol} thousand m³ produced{month_bit}"
-            status["supply_kpi_pt"] = f"{vol} mil m³ produzidos{month_bit}"
-
-    pld_html = ROOT / "pld" / "index.html"
-    if pld_html.exists():
-        text = pld_html.read_text(encoding="utf-8", errors="ignore")
-        m = re.search(r"generated:\s*(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}\s+UTC)", text)
-        if m:
-            status["pld_when"] = m.group(1)
-        kpi = re.search(r"kpi_se:\s*([0-9.]+)", text)
-        latest = re.search(r"latest_date:\s*(\d{4}-\d{2}-\d{2})", text)
-        if kpi and kpi.group(1):
-            se = float(kpi.group(1))
-            day = latest.group(1) if latest else ""
-            day_bit = f" · {day}" if day else ""
-            status["pld_kpi"] = f"SE {se:.2f} R$/MWh{day_bit}"
-            status["pld_kpi_pt"] = f"SE {se:.2f} R$/MWh{day_bit}"
-    elif (ROOT / "pld" / "data" / "pld_daily.parquet").exists():
-        try:
-            import pandas as pd
-            df = pd.read_parquet(ROOT / "pld" / "data" / "pld_daily.parquet")
-            df["date"] = pd.to_datetime(df["date"], errors="coerce")
-            se = df[df["submarket"].astype(str).str.upper() == "SE"].dropna(subset=["date", "pld"])
-            if len(se):
-                last = se.loc[se["date"].idxmax()]
-                status["pld_when"] = last["date"].strftime("%Y-%m-%d")
-                status["pld_kpi"] = f"SE {float(last['pld']):.2f} R$/MWh · {status['pld_when']}"
-                status["pld_kpi_pt"] = status["pld_kpi"]
-        except Exception:
-            pass
-
-    desk_html = ROOT / "desk" / "index.html"
-    if desk_html.exists():
-        text = desk_html.read_text(encoding="utf-8", errors="ignore")
-        m = re.search(r"generated:\s*(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}\s+UTC)", text)
-        if m:
-            status["desk_when"] = m.group(1)
-        se = re.search(r"kpi_pld_se:\s*([0-9.]+)", text)
-        gas = re.search(r"kpi_gen_gas:\s*([0-9.]+)", text)
-        through = re.search(r"data_through:\s*(\S+)", text)
-        if through and through.group(1) and through.group(1) not in ("", "__DATA_THROUGH__"):
-            status["desk_when"] = status["desk_when"] or through.group(1)
-        parts_en, parts_pt = [], []
-        if gas and gas.group(1):
-            g = float(gas.group(1))
-            parts_en.append(f"{g:.0f} MWmed gas")
-            parts_pt.append(f"{g:.0f} MWmed a gás")
-        if se and se.group(1):
-            s = float(se.group(1))
-            parts_en.append(f"PLD SE {s:.2f}")
-            parts_pt.append(f"PLD SE {s:.2f}")
-        if parts_en:
-            status["desk_kpi"] = " · ".join(parts_en)
-            status["desk_kpi_pt"] = " · ".join(parts_pt)
+    # Legacy ONS embed fallback when the committed shell has no KPI marker.
+    if not status["ons_kpi"]:
+        ons_html = ROOT / "ons" / "index.html"
+        if ons_html.exists():
+            kpi, kpi_pt, when = _ons_teaser_from_html(ons_html.read_text(encoding="utf-8"))
+            status["ons_kpi"] = kpi
+            status["ons_kpi_pt"] = kpi_pt
+            status["ons_when"] = when or status["ons_when"]
 
     try:
         import pandas as pd

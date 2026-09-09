@@ -13,7 +13,7 @@ uvicorn api.main:app --reload --port 8000
 ```
 
 - Docs: http://127.0.0.1:8000/docs  
-- Health: http://127.0.0.1:8000/health  
+- Health: http://127.0.0.1:8000/health (`ok` is false / HTTP 503 when critical datasets are missing)
 
 ### Endpoints
 
@@ -22,11 +22,14 @@ uvicorn api.main:app --reload --port 8000
 | GET | `/v1/flows/points` | `tso`, `point_code`, `variable`, `source` (`anp`/`tag`/`tbg`/`nts`), `from`, `to`, `limit` |
 | GET | `/v1/pld/daily` | `submarket`, `from`, `to`, `limit` |
 | GET | `/v1/supply/monthly` | `from`, `to`, `limit` |
+| GET | `/v1/precos/prices` | ANP Resolution 52 prices; `segment`, `from`, `to`, `limit` |
 | GET | `/v1/ons/balances` | `subsystem`, `series`, `from`, `to`, `limit` |
 | GET | `/v1/power/pld-cmo` | PLD vs ONS CMO join; `submarket`, `from`, `to`, `limit` |
 
-`/health` also lists dataset presence and transform registry versions.
+`/health` lists dataset presence and transform registry versions. Critical datasets for `ok` are `pld_daily`, `ons_daily`, and `flows_points`.
+
+Parquet is cached in-process by file mtime. Set `GASBRAZIL_API_ALLOW_NULL=1` to allow the `null` CORS origin for local `file://` checks.
 
 Deploy anywhere that runs ASGI (Fly.io, Railway, a small VM). Point
-`CORS` allow-list in `api/main.py` at your front-end origins. GitHub Pages
+the CORS allow-list in `api/main.py` at your front-end origins. GitHub Pages
 continues to host the static UI; the API is a separate service.
