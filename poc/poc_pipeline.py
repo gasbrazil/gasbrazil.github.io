@@ -180,10 +180,10 @@ def transform(raw_content):
                 "Service Type": service_type_raw,
                 "Price": p.get("preco"),
                 "Avg Process Price": rec.get("precoMedioProcesso"),
-                "Volume Accepted": p.get("volumeAceito") or 0,
-                "Total Value": p.get("valor") or 0,
-                "Volume Offered": p.get("volumeGas") or 0,
-                "Total Volume": rec.get("volumeTotal") or 0,
+                "Volume Accepted": p.get("volumeAceito"),
+                "Total Value": p.get("valor"),
+                "Volume Offered": p.get("volumeGas"),
+                "Total Volume": rec.get("volumeTotal"),
                 "pcr": rec.get("pcr"),
                 "_periodo": rec.get("periodoAtendimentoTotal"),
             })
@@ -239,7 +239,6 @@ def cmd_build(args):
     import data_kit as dk  # noqa: E402
     import schemas  # noqa: E402
     schemas.validate_poc_results(df)
-    dk.publish("poc_results", PARQUET_PATH)
 
     # Basic integrity tripwires -- fail loudly rather than silently publish garbage.
     problems = []
@@ -252,6 +251,8 @@ def cmd_build(args):
     if problems:
         print("HEALTH GATE FAILED: " + "; ".join(problems), file=sys.stderr)
         sys.exit(2)
+
+    dk.publish("poc_results", PARQUET_PATH)
 
 
 def main():

@@ -12,6 +12,7 @@ OpenAPI: http://127.0.0.1:8000/docs
 """
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 from typing import Any, Optional
@@ -19,6 +20,7 @@ from typing import Any, Optional
 import pandas as pd
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "shared"))
@@ -34,41 +36,66 @@ app = FastAPI(
         "Ingest remains CI-side; this service only queries parquet."
     ),
 )
+
+_origins = [
+    "https://gasbrazil.com",
+    "https://gasbrazil.github.io",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
+if os.environ.get("GASBRAZIL_API_ALLOW_NULL") == "1":
+    _origins.append("null")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://gasbrazil.com",
-        "https://gasbrazil.github.io",
-        "http://localhost:8000",
-        "http://127.0.0.1:8000",
-        "null",  # file:// during local HTML checks
-    ],
+    allow_origins=_origins,
     allow_methods=["GET"],
     allow_headers=["*"],
 )
 
-# Fallback paths when lake/ has not been published yet.
+# Fallback paths when lake/ has not been published yet. Keep in lockstep with
+# data_kit.LAKE_PATHS.
 _FALLBACKS = {
     "flows_points": ROOT / "flows" / "data" / "flows_points.parquet",
     "flows_ledger": ROOT / "flows" / "data" / "flows_ledger.parquet",
     "pld_daily": ROOT / "pld" / "data" / "pld_daily.parquet",
     "supply_monthly": ROOT / "supply" / "data" / "supply_monthly.parquet",
+    "anp_prices": ROOT / "precos" / "data" / "anp_prices.parquet",
     "poc_results": ROOT / "poc" / "data" / "poc_results.parquet",
     "contratos": ROOT / "contratos" / "data" / "contratos.parquet",
     "ons_daily": ROOT / "ons" / "data" / "daily.parquet",
     "ons_entities": ROOT / "ons" / "data" / "entities.parquet",
 }
 
+_CACHE: dict[str, tuple[float, int, pd.DataFrame]] = {}
+_CRITICAL = ("pld_daily", "ons_daily", "flows_points")
+
+
+def _resolve_path(name: str) -> Path | None:
+    lake = dk.lake_path(name)
+    if lake.exists():
+        return lake
+    fallback = _FALLBACKS.get(name)
+    if fallback is not None and Path(fallback).exists():
+        return Path(fallback)
+    return None
+
 
 def _load(name: str) -> pd.DataFrame:
-    lake = dk.lake_path(name)
-    path = lake if lake.exists() else _FALLBACKS.get(name)
-    if path is None or not Path(path).exists():
+    path = _resolve_path(name)
+    if path is None:
         raise HTTPException(
             status_code=503,
             detail=f"Dataset {name!r} not built yet (no lake/ or project parquet).",
         )
-    return pd.read_parquet(path)
+    mtime = path.stat().st_mtime
+    size = path.stat().st_size
+    hit = _CACHE.get(name)
+    if hit and hit[0] == mtime and hit[1] == size:
+        return hit[2]
+    df = pd.read_parquet(path)
+    _CACHE[name] = (mtime, size, df)
+    return df
 
 
 def _parse_day(s: Optional[str]) -> Optional[pd.Timestamp]:
@@ -91,16 +118,16 @@ def _records(df: pd.DataFrame, limit: int) -> list[dict[str, Any]]:
 
 
 @app.get("/health")
-def health() -> dict[str, Any]:
-    present = {
-        name: (dk.lake_path(name).exists() or _FALLBACKS[name].exists())
-        for name in _FALLBACKS
-    }
-    return {
-        "ok": True,
+def health() -> JSONResponse:
+    present = {name: _resolve_path(name) is not None for name in dk.LAKE_PATHS}
+    ok = all(present.get(n) for n in _CRITICAL)
+    body: dict[str, Any] = {
+        "ok": ok,
         "datasets": present,
+        "critical": list(_CRITICAL),
         "transforms": xf.registry_summary(),
     }
+    return JSONResponse(body, status_code=200 if ok else 503)
 
 
 @app.get("/v1/flows/points")
@@ -167,6 +194,25 @@ def supply_monthly(
     return {"count": int(len(df)), "limit": limit, "rows": _records(df, limit)}
 
 
+@app.get("/v1/precos/prices")
+def precos_prices(
+    segment: Optional[str] = None,
+    date_from: Optional[str] = Query(None, alias="from"),
+    date_to: Optional[str] = Query(None, alias="to"),
+    limit: int = Query(5000, ge=1, le=50000),
+) -> dict[str, Any]:
+    df = _load("anp_prices")
+    if date_from:
+        df = df[df["month"].astype(str) >= date_from[:7]]
+    if date_to:
+        df = df[df["month"].astype(str) <= date_to[:7]]
+    if segment:
+        df = df[df["segment"].astype(str).str.casefold() == segment.casefold()]
+    sort_cols = [c for c in ("month", "segment", "category", "region") if c in df.columns]
+    df = df.sort_values(sort_cols)
+    return {"count": int(len(df)), "limit": limit, "rows": _records(df, limit)}
+
+
 @app.get("/v1/ons/balances")
 def ons_balances(
     subsystem: Optional[str] = None,
@@ -189,7 +235,8 @@ def ons_balances(
         df = df[df["series"].astype(str) == series]
     # Prefer subsystem-level rows (empty entity) when present
     if "entity" in df.columns:
-        sub = df[df["entity"].astype(str) == ""]
+        entity = df["entity"].fillna("").astype(str).str.strip()
+        sub = df[entity.eq("") | entity.str.casefold().isin(("nan", "none", "<na>"))]
         if len(sub):
             df = sub
     sort_cols = [c for c in ("date", "subsystem", "series") if c in df.columns]

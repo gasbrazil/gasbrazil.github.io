@@ -2,10 +2,8 @@ name: Refresh POC dashboard
 
 on:
   schedule:
-    # Daily at 11:00 UTC (08:00 America/Sao_Paulo). Full-history rebuild each
-    # run -- the source API currently holds a few hundred records total, so
-    # this is cheap. Tighten the cadence if the source updates faster than
-    # daily.
+    # Every 6 hours. Full-history rebuild each run -- the source API currently
+    # holds a few hundred records total, so this is cheap.
     - cron: "0 */6 * * *"
   workflow_dispatch: {}
   push:
@@ -26,7 +24,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
       R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
       R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
       R2_ENDPOINT_URL: ${{ secrets.R2_ENDPOINT_URL }}
@@ -38,16 +35,16 @@ jobs:
       run:
         working-directory: poc
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
 
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5.4.2
         with:
           enable-cache: true
           python-version: "3.12"
           cache-dependency-glob: "poc/requirements.txt"
 
       - name: Install dependencies
-        run: uv pip install --system -r requirements.txt
+        run: uv pip install --system -r requirements.txt -c ../shared/constraints.txt
 
       - name: Fetch + build data
         run: python poc_pipeline.py all
@@ -66,8 +63,4 @@ jobs:
             exit 0
           fi
           git commit -m "poc: automated refresh $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          for i in 1 2 3 4 5; do
-            if git push; then break; fi
-            echo "Push rejected (another workflow likely pushed first) -- rebasing and retrying ($i)..."
-            git pull --rebase origin main
-          done
+          bash .github/scripts/push-with-rebase.sh

@@ -42,10 +42,11 @@ often that dashboard's source actually publishes new data — plus
 `workflow_dispatch` for a manual run and a `push` trigger scoped to that
 dashboard's own folder and `shared/**` (so a shared-kit change rebuilds
 every dashboard, but a change to one dashboard's own code only rebuilds
-that one). Most dashboards also run a **health gate** before publishing —
-a sanity check on row counts, data age, and series coverage — so a broken
-or stale fetch doesn't overwrite a working deploy; the previous build stays
-live if the gate fails.
+that one). Dashboards run a **health gate before lake publish** — a sanity
+check on row counts, data age, and series coverage — so a broken or stale
+fetch doesn't overwrite a working deploy or the R2 lake; the previous
+build stays live if the gate fails. Push retries rebase on a race, then
+fail the job if the push never lands.
 
 Every workflow commits straight to its own subfolder on `main` and retries
 with `git pull --rebase origin main` on a push race, rather than using a
@@ -56,17 +57,20 @@ workflows run and redeploy concurrently without stepping on each other.
 
 Two tracks, by dashboard:
 
-- **Small/checked-in stores** (poc, contratos): the tidy Parquet store is
-  small enough to commit directly to git, so history lives in the repo
-  itself.
-- **Large/gitignored stores with a private lake mirror** (ons, flows,
-  supply, pld, precos): `raw/` and `data/` are gitignored (too large or
-  fully rebuildable from source) and instead mirrored to a private
+- **Gitignored stores with a private lake mirror** (ons, flows, supply,
+  pld, precos, poc, contratos): `raw/` and `data/` are gitignored (too large
+  or fully rebuildable from source) and instead mirrored to a private
   Cloudflare R2 bucket via `shared/data_kit.py`, so a CI run that doesn't
   have local history can still `ensure_lake()` a copy when it needs one —
   this is how **The Desk** (which reads across several dashboards' data at
   once) gets its inputs without vendoring every sibling's Parquet file
   into its own workflow.
+
+Health gates run **before** lake publish. ONS has a dedicated `health`
+command in CI. Flows, supply, precos, poc, contratos, and pld fail the
+build on empty/stale/incomplete data, then publish. The Desk fails in CI
+when PLD SE is missing. A failed gate leaves the previous HTML live and
+does not overwrite lake parquet.
 
 Every dashboard's public `payload.json.gz` is also published to a public R2
 artifacts bucket, independent of the committed `index.html` — this is what

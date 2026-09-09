@@ -16,6 +16,7 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "shared"))
 import dashboard_kit as kit  # noqa: E402  (must follow sys.path.insert)
+import transforms as xf  # noqa: E402
 
 SUBSYSTEM_ORDER = ["SIN", "SE", "S", "NE", "N"]
 
@@ -243,7 +244,8 @@ def add_capacity_metrics(df: pd.DataFrame, ent: pd.DataFrame) -> pd.DataFrame:
     # (kcal/m3, Brazil's standard PCS for natural gas) -> m3/day. See
     # HEAT_RATE_COMBINED_CYCLE / HEAT_RATE_SIMPLE_CYCLE / NATGAS_KCAL_PER_M3
     # in ons_pipeline.py for the assumption itself and its caveats.
-    m["gas_m3"] = m["value"] * 24 * 1000 * m["heat_rate_kcal_per_kwh"] / 9400.0
+    pcs = float(xf.NATGAS_KCAL_PER_M3)
+    m["gas_m3"] = m["value"] * 24 * 1000 * m["heat_rate_kcal_per_kwh"] / pcs
 
     def rollup(frame: pd.DataFrame, subsystem_label: str | None) -> pd.DataFrame:
         g = frame.groupby("date", observed=True).agg(
@@ -340,6 +342,7 @@ def build_payload(df: pd.DataFrame, ent: pd.DataFrame) -> dict:
         "unitPanels": [{"unit": u, "title": t} for u, t in UNIT_PANELS],
         "paletteLight": PALETTE_LIGHT,
         "paletteDark": PALETTE_DARK,
+        "natgasKcalPerM3": float(xf.NATGAS_KCAL_PER_M3),
     }
 
 
@@ -367,6 +370,16 @@ def write_dashboard(df: pd.DataFrame, dest: Path,
     import data_kit as dk  # noqa: E402
     here = Path(__file__).resolve().parent
     payload_path, payload_href = dk.write_and_publish_artifact("ons", payload, here)
+    data_dir = Path(__file__).resolve().parent / "data"
+    daily_pq = data_dir / "daily.parquet"
+    ent_pq = data_dir / "entities.parquet"
+    import schemas  # noqa: E402
+    if daily_pq.exists():
+        schemas.validate_ons_daily(pd.read_parquet(daily_pq))
+        dk.publish("ons_daily", daily_pq)
+    if ent_pq.exists():
+        schemas.validate_ons_entities(pd.read_parquet(ent_pq))
+        dk.publish("ons_entities", ent_pq)
 
     html = kit.render(
         TEMPLATE,
@@ -375,6 +388,7 @@ def write_dashboard(df: pd.DataFrame, dest: Path,
         KPI_GAS_MWMED=_hub_kpi_gas_mwmed(payload),
         SHARED_THEME_CSS=kit.render_theme_css(),
         SHARED_JS_DECODE=kit.JS_DECODE,
+        SHARED_JS_ESCAPE_HTML=kit.JS_ESCAPE_HTML,
         SHARED_JS_XLSX=kit.JS_XLSX_ENGINE,
         SHARED_JS_THEME_TOGGLE=kit.JS_THEME_TOGGLE,
         SHARED_JS_CHART_PALETTE=kit.chart_palette_js(),
@@ -669,7 +683,12 @@ table.data thead th.sortable:hover{background:var(--accent-soft)}
 <script>
 const PAYLOAD_URL = "__PAYLOAD_URL__";
 __SHARED_JS_DECODE__
+__SHARED_JS_ESCAPE_HTML__
 let DATA = null;
+function natgasKcalPerM3(){
+  const v = DATA && DATA.natgasKcalPerM3;
+  return (typeof v === "number" && v > 0) ? v : 9400;
+}
 const PALETTE_SIZE = 8;   // colour palette length -- selection itself is unlimited
 const CHART_MAX = 40;     // beyond this many picks, charts/tiles defer to the table
 // Explanatory copy lives in an "i" affordance beside the thing it explains
@@ -1000,7 +1019,7 @@ function fullSeries(key){
     if(m==="plant_capacity_mw") out=v.map(x=>(x==null||cap==null)?null:cap);
     else if(m==="plant_utilization_pct")
       out=v.map(x=>(x==null||cap==null||cap<=0)?null:100*x/cap);
-    else out=v.map(x=>(x==null||hr==null)?null:x*24*1000*hr/9400);
+    else out=v.map(x=>(x==null||hr==null)?null:x*24*1000*hr/natgasKcalPerM3());
   } else {
     out=smoothed(DATA.series[key]||[]);
   }
@@ -1625,7 +1644,7 @@ function buildTileEls(keys){
     const v=raw.filter(x=>x!=null);
     const t=el("div","tile"), unit=unitOf(k), dec=decOf(k);
     if(lastIdx<0){
-      t.innerHTML='<div class="nm">'+labelOf(k)+'</div><div class="big">–</div>';
+      t.innerHTML='<div class="nm">'+escapeHtml(labelOf(k))+'</div><div class="big">–</div>';
       return t;
     }
     const last=raw[lastIdx], lastDate=dates[lastIdx], first=v[0];
@@ -1637,7 +1656,7 @@ function buildTileEls(keys){
         : ' · '+chg.toFixed(1)+'% under '+dates.length+'-day range');
     t.innerHTML =
       '<div class="nm"><span class="sw" style="background:'+colorOf(k)+
-        ';border-color:'+colorOf(k)+'"></span>'+labelOf(k)+'</div>'+
+        ';border-color:'+colorOf(k)+'"></span>'+escapeHtml(labelOf(k))+'</div>'+
       '<div class="big">'+fmtNum(last,dec)+' <span style="font-size:12px;'+
         'color:var(--muted2);font-weight:400">'+unit+'</span></div>'+
       '<div class="meta">as of '+lastDate+' · avg '+fmtNum(avg,dec)+' · min '+
@@ -1785,7 +1804,7 @@ function drawPanel(unit,title,keys,W){
       dots.appendChild(svgEl("circle",{cx:x(i),cy:y(v),r:4,fill:c.color,
         stroke:"var(--panel)","stroke-width":2}));
       rows+='<tr><td><span class="sw" style="display:inline-block;background:'+
-        c.color+';border-color:'+c.color+'"></span> '+labelOf(c.key)+
+        c.color+';border-color:'+c.color+'"></span> '+escapeHtml(labelOf(c.key))+
         '</td><td class="v">'+fmtNum(v,decs)+'</td></tr>';
     });
     tt.innerHTML='<div class="d">'+dates[i]+'</div><table>'+rows+'</table>';
@@ -1823,7 +1842,7 @@ function drawPanel(unit,title,keys,W){
     cols.forEach(c=>{
       const s=el("span");
       s.innerHTML='<span class="sw" style="background:'+c.color+';border-color:'+
-        c.color+'"></span>'+labelOf(c.key);
+        c.color+'"></span>'+escapeHtml(labelOf(c.key));
       lg.appendChild(s);
     });
     card.appendChild(lg);
@@ -1872,7 +1891,7 @@ function renderTable(){
   if(!state.table) return;
   const {dates,cols}=tableData();
   let h="<thead><tr><th>Date</th>"+
-    cols.map(c=>"<th>"+labelOf(c.key)+"</th>").join("")+"</tr></thead><tbody>";
+    cols.map(c=>"<th>"+escapeHtml(labelOf(c.key))+"</th>").join("")+"</tr></thead><tbody>";
   for(let i=dates.length-1;i>=0;i--)
     h+="<tr><td>"+dates[i]+"</td>"+
       cols.map(c=>"<td>"+fmtNum(c.vals[i],decOf(c.key))+"</td>").join("")+"</tr>";
@@ -1950,7 +1969,7 @@ function buildAllDataSheets(){
       const p=progArr?progArr[i]:null;
       const desvio=(p==null||Math.abs(p)<1e-6)?null:r2(100*(v-p)/p);
       const util=(cap==null||cap<=0)?null:r2(100*v/cap);
-      const gas=hr==null?null:r2(v*24*1000*hr/9400);
+      const gas=hr==null?null:r2(v*24*1000*hr/natgasKcalPerM3());
       plantRows.push([d,name,subShort(sub),ent.group||"",cap,p,v,desvio,util,gas]);
     });
   });
@@ -2057,10 +2076,10 @@ function fuelMix(sub){
 function kpiTile(label,big,unit,meta,color,tooltip){
   const t=el("div","tile");
   t.innerHTML='<div class="nm">'+(color?'<span class="sw" style="background:'+
-      color+';border-color:'+color+'"></span>':'')+label+'</div>'+
-    '<div class="big">'+big+(unit?' <span style="font-size:12px;'+
-      'color:var(--muted2);font-weight:400">'+unit+'</span>':'')+'</div>'+
-    (meta?'<div class="meta">'+meta+'</div>':'');
+      color+';border-color:'+color+'"></span>':'')+escapeHtml(label)+'</div>'+
+    '<div class="big">'+escapeHtml(String(big))+(unit?' <span style="font-size:12px;'+
+      'color:var(--muted2);font-weight:400">'+escapeHtml(unit)+'</span>':'')+'</div>'+
+    (meta?'<div class="meta">'+escapeHtml(meta)+'</div>':'');
   if(tooltip) t.title=tooltip;
   return t;
 }
@@ -2540,7 +2559,7 @@ function renderPlantsKpis(host){
     if(v==null) return;
     const cap=numOrNull(e.capacity_mw), hr=numOrNull(e.heat_rate_kcal_per_kwh);
     if(cap!=null){ gasCapSum+=cap; gasCapVerif+=v; nCapMatched++; }
-    if(hr!=null) gasM3Sum += v*24*1000*hr/9400;
+    if(hr!=null) gasM3Sum += v*24*1000*hr/natgasKcalPerM3();
   });
   if(nCapMatched){
     host.appendChild(kpiTile("Gas fleet utilization", fmtNum(100*gasCapVerif/gasCapSum,1),
@@ -3051,13 +3070,24 @@ __SHARED_SITE_LINKS_JS__
    is deployed -- the button stays hidden until it's set, so an unconfigured
    copy of this page (e.g. a fresh checkout) doesn't ship a broken button. */
 const REFRESH_WORKER_URL = "https://ons-refresh.eaabrooks.workers.dev/";
+const REFRESH_COOLDOWN_MS = 30 * 60 * 1000;
+const REFRESH_COOLDOWN_KEY = "ons-refresh-cooldown";
 async function triggerRefresh(){
   const btn=document.getElementById("refreshBtn");
   const prevLabel=btn.textContent;
   btn.disabled=true; btn.textContent="Triggering…";
   try{
+    try{
+      const last=Number(localStorage.getItem(REFRESH_COOLDOWN_KEY)||0);
+      if(last && (Date.now()-last)<REFRESH_COOLDOWN_MS){
+        btn.textContent="Wait — recently triggered";
+        setTimeout(()=>{ btn.disabled=false; btn.textContent=prevLabel; }, 8000);
+        return;
+      }
+    }catch(e){}
     const res=await fetch(REFRESH_WORKER_URL,{method:"POST"});
     if(!res.ok) throw new Error("HTTP "+res.status);
+    try{ localStorage.setItem(REFRESH_COOLDOWN_KEY, String(Date.now())); }catch(e){}
     btn.textContent="Triggered ✓";
   }catch(err){
     btn.textContent="Failed — try again";
@@ -3076,7 +3106,7 @@ async function boot(){
     DATA = JSON.parse(text);
   }catch(err){
     document.getElementById("boot").innerHTML =
-      "Could not load dashboard data.<br>"+err.message;
+      "Could not load dashboard data.<br>"+escapeHtml(String(err && err.message || err));
     return;
   }
   document.getElementById("boot").hidden=true;

@@ -161,26 +161,26 @@ def parse_wide_prog_real_workbook(
       7: UF
       8+: daily values in m³/dia (converted to thousand m3)
     """
-    xl = pd.ExcelFile(path, engine="openpyxl")
-    frames: list[pd.DataFrame] = []
-    for sheet_name in xl.sheet_names:
-        variable = _variable_from_sheet_name(sheet_name)
-        if variable is None:
-            continue
-        # header=None keeps the TAG multi-row header intact
-        raw = pd.read_excel(xl, sheet_name=sheet_name, header=None, engine="openpyxl")
-        rows = raw.values.tolist()
-        frame = _melt_wide_sheet(
-            rows,
-            source=source,
-            tso=tso,
-            subsystem=subsystem or _subsystem_from_filename(path.name),
-            pipeline_name=pipeline_name or subsystem or path.stem,
-            variable=variable,
-            crosswalk=crosswalk,
-        )
-        if frame is not None and not frame.empty:
-            frames.append(frame)
+    with pd.ExcelFile(path, engine="openpyxl") as xl:
+        frames: list[pd.DataFrame] = []
+        for sheet_name in xl.sheet_names:
+            variable = _variable_from_sheet_name(sheet_name)
+            if variable is None:
+                continue
+            # header=None keeps the TAG multi-row header intact
+            raw = pd.read_excel(xl, sheet_name=sheet_name, header=None, engine="openpyxl")
+            rows = raw.values.tolist()
+            frame = _melt_wide_sheet(
+                rows,
+                source=source,
+                tso=tso,
+                subsystem=subsystem or _subsystem_from_filename(path.name),
+                pipeline_name=pipeline_name or subsystem or path.stem,
+                variable=variable,
+                crosswalk=crosswalk,
+            )
+            if frame is not None and not frame.empty:
+                frames.append(frame)
 
     if not frames:
         return empty_points_frame()

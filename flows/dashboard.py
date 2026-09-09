@@ -49,6 +49,9 @@ LEDGER_VAR_ORDER = [
 TSO_ORDER = ["NTS", "TAG", "TBG"]
 MINOR_TSOS = ["TSB", "GOM"]
 
+# Keep the dense daily grid lean: last N months (UI defaults to 12 months).
+EMBED_MONTHS = 24
+
 
 def _short_label(full_label: str) -> str:
     """'Actual Volume (thousand m3)' -> 'Actual Volume'."""
@@ -90,6 +93,17 @@ def load_payload() -> dict:
     ])
     if all_dates.empty:
         raise RuntimeError("No data in either parquet store -- run flows_pipeline.py first")
+    cutoff = all_dates.max() - pd.DateOffset(months=EMBED_MONTHS)
+    if len(points_df):
+        points_df = points_df[points_df["date"] >= cutoff]
+    if len(ledger_df):
+        ledger_df = ledger_df[ledger_df["date"] >= cutoff]
+    all_dates = pd.concat([
+        points_df["date"] if len(points_df) else pd.Series(dtype="datetime64[ns]"),
+        ledger_df["date"] if len(ledger_df) else pd.Series(dtype="datetime64[ns]"),
+    ])
+    if all_dates.empty:
+        raise RuntimeError("No data in the embed window -- widen EMBED_MONTHS or rebuild stores")
     date_index = pd.date_range(all_dates.min(), all_dates.max(), freq="D")
     dates = [d.strftime("%Y-%m-%d") for d in date_index]
 

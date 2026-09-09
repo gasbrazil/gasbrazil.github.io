@@ -233,23 +233,28 @@ def build() -> pd.DataFrame:
     df = df.sort_values(["date", "submarket"]).reset_index(drop=True)
     if df.empty:
         raise SystemExit("Build produced zero rows")
-    # Health: expect all four submarkets; data shouldn't be older than ~14 days
-    # for the current year file (CCEE publishes daily with a short lag).
+    sys.path.insert(0, str(HERE.parent / "shared"))
+    import data_kit as dk  # noqa: E402
+    import schemas  # noqa: E402
+    import transforms as xf  # noqa: E402
+    problems = []
     missing_sm = set(SUBMARKET_MAP.values()) - set(df["submarket"].unique())
     if missing_sm:
-        print(f"  WARN missing submarkets: {sorted(missing_sm)}")
+        problems.append(f"missing submarkets: {sorted(missing_sm)}")
     last = df["date"].max()
     lag_days = (pd.Timestamp.now("UTC").date() - pd.Timestamp(last).date()).days
-    if lag_days > 21:
-        print(f"  WARN latest date {pd.Timestamp(last).date()} is {lag_days} days behind UTC today")
+    if lag_days > xf.PLD_MAX_LAG_DAYS:
+        problems.append(
+            f"latest date {pd.Timestamp(last).date()} is {lag_days} days behind UTC today"
+        )
+    if problems:
+        print("HEALTH GATE FAILED: " + "; ".join(problems), file=sys.stderr)
+        sys.exit(2)
     df.to_parquet(PARQUET_PATH, index=False)
     print(
         f"Wrote {PARQUET_PATH} ({len(df):,} rows, "
         f"{pd.Timestamp(df['date'].min()).date()} -> {pd.Timestamp(df['date'].max()).date()})"
     )
-    sys.path.insert(0, str(HERE.parent / "shared"))
-    import data_kit as dk  # noqa: E402
-    import schemas  # noqa: E402
     schemas.validate_pld_daily(df)
     dk.publish("pld_daily", PARQUET_PATH)
     return df

@@ -22,6 +22,15 @@ ONS_GAS_HEAT: dict[str, Any] = {
     "owners": ("ons/ons_pipeline.py", "ons/dashboard.py"),
 }
 
+# POC / Desk: PCR convention. 28.8081 is MMBtu per 1000 m³ (not per m³).
+# R$/m³ = R$/MMBtu × MMBTU_PER_1000_M3 / 1000.
+POC_ENERGY: dict[str, Any] = {
+    "version": 1,
+    "mmbtu_per_1000_m3": 28.8081,
+    "notes": "POC PCR factor: MMBtu content of 1000 m³, not of 1 m³.",
+    "owners": ("poc/dashboard.py", "desk/build_payload.py"),
+}
+
 # CCEE PLD submarkets ↔ ONS subsystem codes used for cross-product joins.
 PLD_ONS_SUBMARKET_MAP: dict[str, str] = {
     "N": "N",
@@ -30,13 +39,35 @@ PLD_ONS_SUBMARKET_MAP: dict[str, str] = {
     "S": "S",
 }
 
+# Health-gate thresholds. Pipelines should fail (not WARN) past these.
+HEALTH: dict[str, Any] = {
+    "version": 1,
+    "pld_max_lag_days": 21,
+    "flows_max_staleness_days": 75,
+    "supply_max_lag_months": 5,
+    "precos_max_lag_months": 6,
+    "capacity_flow_window_days": 29,
+    "desk_require_pld_se": True,
+}
+
+# Convenience aliases used at call sites.
+MMBTU_PER_1000_M3 = float(POC_ENERGY["mmbtu_per_1000_m3"])
+NATGAS_KCAL_PER_M3 = float(ONS_GAS_HEAT["natgas_kcal_per_m3"])
+PLD_MAX_LAG_DAYS = int(HEALTH["pld_max_lag_days"])
+FLOWS_MAX_STALENESS_DAYS = int(HEALTH["flows_max_staleness_days"])
+SUPPLY_MAX_LAG_MONTHS = int(HEALTH["supply_max_lag_months"])
+PRECOS_MAX_LAG_MONTHS = int(HEALTH["precos_max_lag_months"])
+CAPACITY_FLOW_WINDOW_DAYS = int(HEALTH["capacity_flow_window_days"])
+
 TRANSFORM_REGISTRY: dict[str, dict[str, Any]] = {
     "ons_gas_heat": ONS_GAS_HEAT,
+    "poc_energy": POC_ENERGY,
     "pld_ons_submarket_map": {
         "version": 1,
         "map": PLD_ONS_SUBMARKET_MAP,
         "notes": "SIN has no PLD; join is submarket-level only.",
     },
+    "health": HEALTH,
 }
 
 

@@ -758,6 +758,15 @@ header.top #theme-toggle,
   z-index: 60;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 @media (max-width: 720px) {
   .navlinks, .header-links { gap: 4px 12px; }
   .nav-home { margin-inline-end: 6px; }

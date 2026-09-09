@@ -4,8 +4,10 @@ __pycache__/
 .venv/
 venv/
 
-# Personal-machine trigger scripts / local secrets -- these can embed a
-# GitHub PAT, never commit them.
+# Local secrets / env files
+.env
+.env.*
+*.pem
 run_refresh.local.bat
 *.local.bat
 gh_pat.local

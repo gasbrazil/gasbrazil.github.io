@@ -27,6 +27,7 @@ one of those. All-lowercase names for both sidesteps the problem entirely.
 
 Usage: python3 build_wiki.py   (run from the repo root; no arguments)
 """
+import html
 import pathlib
 import sys
 
@@ -163,20 +164,22 @@ THEME_JS = """
   var b=document.getElementById('theme-toggle');
   var sun='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
   var moon='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+  var THEME_KEY='gasbrazil-theme';
   function paint(){
     var dark=document.documentElement.getAttribute('data-theme')==='dark';
     b.innerHTML = dark ? sun : moon;
     b.title = dark ? 'Switch to light mode' : 'Switch to dark mode';
   }
   var saved=null;
-  try{ saved=localStorage.getItem('gb-wiki-theme'); }catch(e){}
-  if(saved==='dark') document.documentElement.setAttribute('data-theme','dark');
+  try{ saved=localStorage.getItem(THEME_KEY); }catch(e){}
+  if(saved!=='light') document.documentElement.setAttribute('data-theme','dark');
+  else document.documentElement.removeAttribute('data-theme');
   paint();
   b.addEventListener('click', function(){
     var dark=document.documentElement.getAttribute('data-theme')==='dark';
     if(dark){ document.documentElement.removeAttribute('data-theme'); }
     else{ document.documentElement.setAttribute('data-theme','dark'); }
-    try{ localStorage.setItem('gb-wiki-theme', dark ? 'light' : 'dark'); }catch(e){}
+    try{ localStorage.setItem(THEME_KEY, dark ? 'light' : 'dark'); }catch(e){}
     paint();
   });
 })();
@@ -216,8 +219,18 @@ def page_template(title: str, body_html: str, current_out: str, slug: str | None
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{title} &mdash; GasBrazil.com Wiki</title>
+<title>{html.escape(title)} &mdash; GasBrazil.com Wiki</title>
 {kit.font_preload_html()}
+<script>
+(function(){{
+  try {{
+    var theme = localStorage.getItem("gasbrazil-theme");
+    if (theme !== "light") document.documentElement.setAttribute("data-theme", "dark");
+  }} catch (e) {{
+    document.documentElement.setAttribute("data-theme", "dark");
+  }}
+}})();
+</script>
 <style>{CSS}</style>
 </head>
 <body>

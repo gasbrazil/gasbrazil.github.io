@@ -7,9 +7,22 @@ from __future__ import annotations
 
 from typing import Optional
 
+import numpy as np
 import pandas as pd
 
 import transforms as xf
+
+
+def _subsystem_rows(ons: pd.DataFrame) -> pd.DataFrame:
+    """Keep subsystem-level ONS rows (empty entity). NaN-safe across pandas 2/3."""
+    if "entity" not in ons.columns:
+        return ons
+    entity = ons["entity"].fillna("").astype(str).str.strip()
+    # fillna before astype so pandas 2.x does not turn NA into the literal
+    # "nan" and drop every subsystem CMO row.
+    lowered = entity.str.casefold()
+    empty = entity.eq("") | lowered.isin(("nan", "none", "<na>"))
+    return ons[empty]
 
 
 def join_pld_cmo(
@@ -36,26 +49,18 @@ def join_pld_cmo(
     p["date"] = pd.to_datetime(p["date"]).dt.normalize()
     p["submarket"] = p["submarket"].astype(str).str.upper()
 
-    o = ons.copy()
-    o["date"] = pd.to_datetime(o["date"]).dt.normalize()
-    o = o[o["series"].astype(str) == "cmo"]
-    if "entity" in o.columns:
-        o = o[o["entity"].astype(str).fillna("") == ""]
-    o["subsystem"] = o["subsystem"].astype(str).str.upper()
-    # Map ONS subsystem → PLD submarket (identity for N/NE/SE/S).
-    inv = {v: k for k, v in xf.PLD_ONS_SUBMARKET_MAP.items()}
-    o["submarket"] = o["subsystem"].map(inv)
-    o = o.dropna(subset=["submarket"])
-    o = o.rename(columns={"value": "cmo"})[["date", "submarket", "cmo"]]
-
     if date_from is not None:
         p = p[p["date"] >= date_from]
-        o = o[o["date"] >= date_from]
     if date_to is not None:
         p = p[p["date"] <= date_to]
-        o = o[o["date"] <= date_to]
 
-    out = p.merge(o, on=["date", "submarket"], how="inner")
+    cmo = _ons_series_by_submarket(ons, "cmo", value_name="cmo")
+    if date_from is not None:
+        cmo = cmo[cmo["date"] >= date_from]
+    if date_to is not None:
+        cmo = cmo[cmo["date"] <= date_to]
+
+    out = p.merge(cmo, on=["date", "submarket"], how="inner")
     out["spread_pld_minus_cmo"] = out["pld"].astype(float) - out["cmo"].astype(float)
     return out.sort_values(["date", "submarket"]).reset_index(drop=True)
 
@@ -73,8 +78,7 @@ def _ons_series_by_submarket(
     o = ons.copy()
     o["date"] = pd.to_datetime(o["date"]).dt.normalize()
     o = o[o["series"].astype(str) == series]
-    if "entity" in o.columns:
-        o = o[o["entity"].astype(str).fillna("") == ""]
+    o = _subsystem_rows(o)
     o["subsystem"] = o["subsystem"].astype(str).str.upper()
     inv = {v: k for k, v in xf.PLD_ONS_SUBMARKET_MAP.items()}
     o["submarket"] = o["subsystem"].map(inv)
@@ -96,6 +100,9 @@ def join_pld_cmo_cvu(
     CVU columns are ONS planning variable unit costs for gas-fired plants
     (R$/MWh), not market prices. Default ``cvu_gas_med`` is the median.
     """
+    need_pld = {"date", "submarket", "pld"}
+    if not need_pld.issubset(pld.columns):
+        raise ValueError(f"pld missing {need_pld - set(pld.columns)}")
     p = pld.copy()
     p["date"] = pd.to_datetime(p["date"]).dt.normalize()
     p["submarket"] = p["submarket"].astype(str).str.upper()
@@ -218,7 +225,7 @@ def join_capacity_vs_flows(
         f = f.drop(columns=["_src"])
     # Average daily realized over the last 30 days of data per TSO.
     last = f["date"].max()
-    window = f[f["date"] >= (last - pd.Timedelta(days=29))]
+    window = f[f["date"] >= (last - pd.Timedelta(days=xf.CAPACITY_FLOW_WINDOW_DAYS))]
     flow = (
         window.groupby("tso", as_index=False)["value"]
         .mean()
@@ -226,8 +233,13 @@ def join_capacity_vs_flows(
     )
 
     out = cap.merge(flow, on="tso", how="outer")
-    out["utilization"] = (
-        out["realized_avg_thousand_m3_d"] / out["contracted_thousand_m3_d"]
+    contracted = out["contracted_thousand_m3_d"].astype(float)
+    realized = out["realized_avg_thousand_m3_d"].astype(float)
+    out["utilization"] = np.divide(
+        realized,
+        contracted,
+        out=np.full(len(out), np.nan, dtype=float),
+        where=contracted > 0,
     )
     out["as_of"] = last.strftime("%Y-%m-%d") if pd.notna(last) else None
     return out.sort_values("tso").reset_index(drop=True)

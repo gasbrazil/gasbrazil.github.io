@@ -89,7 +89,14 @@ uv pip install -r requirements.txt
 ```
 
 CI uses the same `requirements.txt` files via `astral-sh/setup-uv` and
-`uv pip install --system`.
+`uv pip install --system -c shared/constraints.txt`.
+
+Unit tests (no network, no secrets):
+
+```bash
+uv pip install -r tests/requirements.txt -c shared/constraints.txt
+python -m pytest -q
+```
 
 ## Making a visual change
 
@@ -114,9 +121,8 @@ page) coexists without stepping on the others.
 
 Each workflow ends with a commit-and-push step that retries with
 `git pull --rebase` if the push is rejected (i.e. another workflow pushed
-first) — expected occasionally with several independently-scheduled
-workflows sharing one branch, and harmless since they never touch the
-same files.
+first). If the push still fails after five attempts the job fails — a
+successful rebase after a rejected push is not treated as success.
 
 ## URL scheme
 
