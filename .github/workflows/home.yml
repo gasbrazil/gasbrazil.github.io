@@ -33,7 +33,7 @@ jobs:
           cache-dependency-glob: "shared/constraints.txt"
 
       - name: Install (for hub KPI teasers)
-        run: uv pip install --system -r poc/requirements.txt -c shared/constraints.txt
+        run: uv pip install --system --break-system-packages -r poc/requirements.txt -c shared/constraints.txt
 
       - name: Build home page
         env:

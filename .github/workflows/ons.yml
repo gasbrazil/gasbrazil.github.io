@@ -55,7 +55,7 @@ jobs:
           python-version: "3.12"
           cache-dependency-glob: "ons/requirements.txt"
 
-      - run: uv pip install --system -r requirements.txt -c ../shared/constraints.txt
+      - run: uv pip install --system --break-system-packages -r requirements.txt -c ../shared/constraints.txt
 
       # Raw ONS files are cached per calendar month. Within a month the key
       # hits and nothing is re-saved; only the current month's file is
