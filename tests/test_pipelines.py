@@ -34,3 +34,12 @@ def test_flows_clean_numeric():
     assert fp._clean_numeric("-") is None
     assert fp._clean_numeric("") is None
     assert fp._clean_numeric("12.5") == 12.5
+
+
+def test_flows_staleness_days_accepts_naive_and_aware():
+    # Regression: tz-naive parquet dates vs tz-aware "now" raised TypeError.
+    today = pd.Timestamp.now("UTC").normalize()
+    assert fp._staleness_days(today.tz_localize(None)) == 0
+    assert fp._staleness_days(today) == 0
+    assert fp._staleness_days((today - pd.Timedelta(days=10)).tz_localize(None)) == 10
+    assert fp._staleness_days(today.strftime("%Y-%m-%d")) == 0
