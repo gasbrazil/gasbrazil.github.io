@@ -398,8 +398,7 @@ def write_dashboard(df: pd.DataFrame, dest: Path,
         SHARED_JS_QUERY_STATE=kit.JS_QUERY_STATE,
         SHARED_SHARE_BUTTON=kit.share_link_button_html(),
         SHARED_SITE_LINKS_JS=kit.site_links_js("ons"),
-        SHARED_NAV_LINKS=kit.nav_links_html("ons"),
-        SHARED_PAGE_INTRO=kit.page_intro_html("ons"),
+        SHARED_MASTHEAD=kit.masthead_html("ons"),
         SHARED_METHODOLOGY=kit.methodology_html("ons"),
         FAVICON_DATA_URI=kit.embed_favicon(),
         FONT_PRELOAD=kit.font_preload_html(),
@@ -614,11 +613,8 @@ table.data thead th.sortable:hover{background:var(--accent-soft)}
 <a class="skip-link" href="#app" data-i18n="skip">Skip to content</a>
 <div class="wrap">
 <header class="dash-head">
-  __SHARED_PAGE_INTRO__
+  __SHARED_MASTHEAD__
   <div class="header-right">
-    <div class="header-links">
-      __SHARED_NAV_LINKS__
-    </div>
     <button id="refreshBtn" hidden>&#8635; Refresh data</button>
     <button type="button" id="lang-toggle" class="langBtn" aria-label="Português">PT</button>
     <button id="theme-toggle" class="iconBtn" title="Toggle light/dark" aria-label="Toggle light/dark"></button>

@@ -332,11 +332,8 @@ footer a { color: var(--accent); }
 <a class="skip-link" href="#chart-host" data-i18n="skip">Skip to content</a>
 <div class="wrap">
 <header class="dash-head">
-  __SHARED_PAGE_INTRO__
+  __SHARED_MASTHEAD__
   <div class="header-right">
-    <div class="header-links">
-      __SHARED_NAV_LINKS__
-    </div>
     <button type="button" id="lang-toggle" class="langBtn" aria-label="Português">PT</button>
     <button id="theme-toggle" title="Toggle theme" aria-label="Toggle theme"></button>
   </div>
@@ -1648,8 +1645,7 @@ def write_dashboard(out_path=DEFAULT_OUT):
         SHARED_JS_QUERY_STATE=kit.JS_QUERY_STATE,
         SHARED_SHARE_BUTTON=kit.share_link_button_html(),
         SHARED_SITE_LINKS_JS=kit.site_links_js("flows"),
-        SHARED_NAV_LINKS=kit.nav_links_html("flows"),
-        SHARED_PAGE_INTRO=kit.page_intro_html("flows"),
+        SHARED_MASTHEAD=kit.masthead_html("flows"),
         SHARED_METHODOLOGY=kit.methodology_html("flows"),
         FAVICON_DATA_URI=kit.embed_favicon(),
         FONT_PRELOAD=kit.font_preload_html(),
