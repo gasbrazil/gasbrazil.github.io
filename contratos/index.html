@@ -988,8 +988,8 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .toolbar button.secondary { background: var(--panel); color: var(--text); border: 1px solid var(--border-strong); }
 .count { color: var(--muted); font-size: 12px; margin-left: auto; }
 .table-wrap { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; overflow: auto; box-shadow: var(--shadow); max-height: 65vh; }
-table { border-collapse: collapse; width: 100%; font-size: var(--table-font-size); }
-.table-wrap table { table-layout: fixed; }
+table { border-collapse: collapse; font-size: var(--table-font-size); }
+.table-wrap table { table-layout: fixed; width: max-content; min-width: 100%; }
 th, td { padding: 4px 8px; text-align: left; border-bottom: 1px solid var(--border); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 th { position: sticky; top: 0; background: var(--panel); cursor: pointer; user-select: none; color: var(--muted2); font-weight: 400; z-index: 2; }
 th:hover { background: var(--accent-soft); }
@@ -1244,7 +1244,11 @@ function csvEscape(v) {
   return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
 }
 function downloadTextFile(text, mime, filename) {
-  const blob = new Blob([text], { type: mime });
+  // UTF-8 BOM so Excel on Windows opens Portuguese characters (Ó, Ç, ³)
+  // instead of mojibake (Ã“, Â³). Non-CSV downloads stay unchanged.
+  const isCsv = /csv/i.test(String(mime || "")) || /\.csv$/i.test(String(filename || ""));
+  const payload = isCsv ? "\uFEFF" + text : text;
+  const blob = new Blob([payload], { type: mime || "text/plain;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url; a.download = filename;
@@ -1514,14 +1518,53 @@ function gbCopyLink(buttonId) {
 }
 
 
-const NUMERIC_COLS = new Set(["Contracted Capacity (000 m3/d)", "Allocated Tariff (R$/MMBtu)", "Tariff Multiplier", "Transporter Ownership %"]);
-const DEFAULT_COL_WIDTH = { "Shipper": 180, "Contract Number": 140, "Point/Zone": 120 };
-const FALLBACK_COL_WIDTH = 100;
-// Columns hidden by default so the table fits most screens without horizontal
-// scrolling. Users can re-enable any of these (or hide more) from the Columns
-// menu; the choice is remembered in localStorage.
+const M3_PER_MMBTU = 26.8081;
+function brlPerM3(mmbtu, nd) {
+  if (mmbtu == null || mmbtu === "" || !isFinite(Number(mmbtu))) return null;
+  const d = nd == null ? 2 : nd;
+  const f = Math.pow(10, d);
+  return Math.round(Number(mmbtu) / M3_PER_MMBTU * f) / f;
+}
+function ensureM3TariffColumn(data) {
+  const src = "Allocated Tariff (R$/MMBtu)";
+  const dst = "Allocated Tariff (R$/m3)";
+  data.displayNames = Object.assign({}, data.displayNames || {}, { [dst]: "Allocated Tariff (R$/m³)" });
+  const cols = data.columns.slice();
+  if (!cols.includes(dst)) {
+    const i = cols.indexOf(src);
+    if (i >= 0) cols.splice(i + 1, 0, dst);
+    else cols.push(dst);
+    data.columns = cols;
+  }
+  for (const row of data.rows) row[dst] = brlPerM3(row[src]);
+}
+
+const NUMERIC_COLS = new Set(["Contracted Capacity (000 m3/d)", "Allocated Tariff (R$/MMBtu)", "Allocated Tariff (R$/m3)", "Tariff Multiplier", "Transporter Ownership %"]);
+const DEFAULT_COL_WIDTH = {
+  "Transporter (TSO)": 52,
+  "Contract Number": 108,
+  "Contract Category": 92,
+  "Status": 88,
+  "Shipper": 160,
+  "Product Type": 88,
+  "Point/Zone": 108,
+  "Flow": 48,
+  "Quality": 64,
+  "Start Date": 88,
+  "End Date": 88,
+  "Contracted Capacity (000 m3/d)": 88,
+  "Allocated Tariff (R$/MMBtu)": 96,
+  "Allocated Tariff (R$/m3)": 88,
+  "Tariff Multiplier": 72,
+  "Transporter Ownership %": 80,
+  "Amendment": 72,
+};
+const FALLBACK_COL_WIDTH = 80;
+// Columns hidden by default so the first screenful stays scannable; the rest
+// (including the calculated R$/m³ tariff) is a horizontal scroll away.
+// Users can re-enable any of these (or hide more) from the Columns menu.
 const DEFAULT_HIDDEN_COLS = ["Amendment", "Tariff Multiplier", "Transporter Ownership %", "Quality"];
-const COL_PREFS_KEY = "pocContratosDashboard.columnPrefs.v1";
+const COL_PREFS_KEY = "pocContratosDashboard.columnPrefs.v2";
 // Every column gets an Excel-style header filter menu: a date-range picker for
 // the date columns, a searchable checkbox list for everything else.
 const DATE_FILTER_COLS = new Set(["Start Date", "End Date"]);
@@ -2078,6 +2121,7 @@ function populateSelect(sel, values) {
 
 function applyColWidth(el, px) {
   el.style.width = px + "px";
+  el.style.minWidth = px + "px";
   el.style.maxWidth = px + "px";
   el.classList.add("truncate");
 }
@@ -2924,7 +2968,7 @@ const GB_I18N = {
     methodAssump: "Key assumption",
     methodLimits: "Limits",
     methodAssump_ons: "Gas burn is estimated from verified generation (9,400 kcal/m³; CCGT 1,800 / OCGT 2,500 kcal/kWh; assumptions v1).",
-    methodAssump_poc: "Prices use the POC PCR factor of 28.8081 MMBtu per 1,000 m³ (assumptions v1).",
+    methodAssump_poc: "R$/m³ is R$/MMBtu divided by 26.8081 m³ per MMBtu (assumptions v2).",
     methodAssump_contratos: "Master rows enable later nominations; they are not firm capacity bookings.",
     methodAssump_flows: "Where ANP and TSO overlap, TSO Actual/Scheduled volumes win.",
     methodAssump_supply: "Monthly aggregation of ANP PPGN-EL national series plus imports.",
@@ -3029,7 +3073,7 @@ const GB_I18N = {
     methodAssump: "Premissa-chave",
     methodLimits: "Limites",
     methodAssump_ons: "Queima de gás estimada da geração verificada (9.400 kcal/m³; CC 1.800 / CA 2.500 kcal/kWh; premissas v1).",
-    methodAssump_poc: "Preços usam o fator PCR de 28,8081 MMBtu por 1.000 m³ (premissas v1).",
+    methodAssump_poc: "R$/m³ é R$/MMBtu dividido por 26,8081 m³ por MMBtu (premissas v2).",
     methodAssump_contratos: "Linhas master viabilizam nomeações futuras; não são reservas firmes.",
     methodAssump_flows: "Onde ANP e TSO se sobrepõem, valem os volumes Programado/Realizado das TSO.",
     methodAssump_supply: "Agregação mensal das séries nacionais PPGN-EL da ANP mais importações.",
@@ -3158,6 +3202,7 @@ async function init() {
   document.getElementById("year").textContent = new Date().getFullYear();
   const text = await inflateGzipUrl(PAYLOAD_URL);
   DATA = JSON.parse(text);
+  ensureM3TariffColumn(DATA);
   columnOrder = DATA.columns.slice();
   hiddenCols = new Set(DEFAULT_HIDDEN_COLS);
   const savedPrefs = loadColumnPrefs();

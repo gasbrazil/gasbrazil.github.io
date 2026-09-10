@@ -747,6 +747,26 @@ async function init() {
   try {
     const json = await inflateGzipUrl(PAYLOAD_URL);
     DATA = JSON.parse(json);
+    // Payloads built before poc_energy v2 stored R$/m³ as MMBtu × 28.8081 / 1000.
+    // Rescale those fields so this shell is correct against the still-published
+    // artifact; v2+ payloads set spark.energyVersion and skip this.
+    (function migrateLegacyM3Prices(data) {
+      if (!data || ((data.spark || {}).energyVersion >= 2)) return;
+      const rescale = v => {
+        if (v == null || v === "" || !isFinite(Number(v))) return v;
+        return Math.round(Number(v) * 1000 / (28.8081 * 26.8081) * 1000) / 1000;
+      };
+      const kpi = data.kpi || {};
+      ["gusLast", "anpSantos", "anpNonThermalSe", "pocAvg7d"].forEach(k => {
+        if (kpi[k] != null) kpi[k] = rescale(kpi[k]);
+      });
+      if (data.spark && data.spark.defaultGasPrice != null)
+        data.spark.defaultGasPrice = rescale(data.spark.defaultGasPrice);
+      const monthly = data.pocAnpMonthly || {};
+      ["poc", "anpSantos", "anpNonThermalSe"].forEach(k => {
+        if (Array.isArray(monthly[k])) monthly[k] = monthly[k].map(v => v == null ? v : rescale(v));
+      });
+    })(DATA);
     COMPARE_META.forEach(m => { pickedCompare.add(m.key); colorOf(compareSlots, m.key); });
     POC_ANP_META.forEach(m => { pickedPocAnp.add(m.key); colorOf(pocAnpSlots, m.key); });
     const smSel = document.getElementById("compare-sm");
@@ -786,20 +806,42 @@ init();
 
 
 def write_dashboard(out_path: Path | str = DEFAULT_OUT) -> Path:
-    payload = build_payload()
     sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "shared"))
     import data_kit as dk  # noqa: E402
 
     here = Path(__file__).resolve().parent
-    payload_path, payload_href = dk.write_and_publish_artifact("desk", payload, here)
-    kpi = payload.get("kpi") or {}
+    out_path = Path(out_path)
+    lake_root = here.parent / "lake"
+    sibling_poc = here.parent / "poc" / "data" / "poc_results.parquet"
+    can_rebuild = sibling_poc.exists() or any(lake_root.glob("**/*.parquet"))
+    if can_rebuild:
+        payload = build_payload()
+        payload_path, payload_href = dk.write_and_publish_artifact("desk", payload, here)
+        kpi = payload.get("kpi") or {}
+        generated = payload["generated"]
+        kpi_pld = "" if kpi.get("pldSe") is None else str(kpi["pldSe"])
+        kpi_gas = "" if kpi.get("genGasSin") is None else str(kpi["genGasSin"])
+        data_through = payload.get("dataThrough") or ""
+        notes = payload.get("notes") or []
+        size_note = f"{payload_path.name} ({payload_path.stat().st_size:,} bytes)"
+    else:
+        shell = out_path if out_path.exists() else DEFAULT_OUT
+        payload_href = dk.published_payload_url(shell)
+        markers = dk.published_teaser_markers(shell)
+        generated = markers.get("generated") or ""
+        kpi_pld = markers.get("kpi_pld_se") or ""
+        kpi_gas = markers.get("kpi_gen_gas") or ""
+        data_through = markers.get("data_through") or ""
+        notes = []
+        size_note = "reused published payload (no local lake)"
+        print("No desk lake/parquet; rebuilding HTML shell against the published payload.")
     html = kit.render(
         TEMPLATE,
         PAYLOAD_URL=payload_href,
-        GENERATED=payload["generated"],
-        KPI_PLD_SE="" if kpi.get("pldSe") is None else str(kpi["pldSe"]),
-        KPI_GEN_GAS="" if kpi.get("genGasSin") is None else str(kpi["genGasSin"]),
-        DATA_THROUGH=payload.get("dataThrough") or "",
+        GENERATED=generated,
+        KPI_PLD_SE=kpi_pld,
+        KPI_GEN_GAS=kpi_gas,
+        DATA_THROUGH=data_through,
         SHARED_THEME_CSS=kit.render_theme_css(),
         SHARED_JS_DECODE=kit.JS_DECODE,
         SHARED_JS_ESCAPE_HTML=kit.JS_ESCAPE_HTML,
@@ -817,15 +859,11 @@ def write_dashboard(out_path: Path | str = DEFAULT_OUT) -> Path:
         FAVICON_DATA_URI=kit.embed_favicon(),
         FONT_PRELOAD=kit.font_preload_html(),
     )
-    out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(html, encoding="utf-8")
-    print(
-        f"Wrote dashboard shell ({len(html):,} bytes) + {payload_path.name} "
-        f"({payload_path.stat().st_size:,} bytes) -> {payload_href}"
-    )
-    if payload.get("notes"):
-        print("  notes:", "; ".join(payload["notes"]).encode("ascii", "replace").decode("ascii"))
+    print(f"Wrote dashboard shell ({len(html):,} bytes) + {size_note} -> {payload_href}")
+    if notes:
+        print("  notes:", "; ".join(notes).encode("ascii", "replace").decode("ascii"))
     return out_path
 
 

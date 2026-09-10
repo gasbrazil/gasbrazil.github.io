@@ -22,13 +22,13 @@ ONS_GAS_HEAT: dict[str, Any] = {
     "owners": ("ons/ons_pipeline.py", "ons/dashboard.py"),
 }
 
-# POC / Desk: PCR convention. 28.8081 is MMBtu per 1000 m³ (not per m³).
-# R$/m³ = R$/MMBtu × MMBTU_PER_1000_M3 / 1000.
+# POC / Desk / Contracts: R$/m³ = R$/MMBtu ÷ m³ per MMBtu.
+# 26.8081 m³/MMBtu is 252,000 kcal/MMBtu ÷ 9,400 kcal/m³ (Brazil PCR).
 POC_ENERGY: dict[str, Any] = {
-    "version": 1,
-    "mmbtu_per_1000_m3": 28.8081,
-    "notes": "POC PCR factor: MMBtu content of 1000 m³, not of 1 m³.",
-    "owners": ("poc/dashboard.py", "desk/build_payload.py"),
+    "version": 2,
+    "m3_per_mmbtu": 26.8081,
+    "notes": "R$/m³ = R$/MMBtu / 26.8081 (m³ per MMBtu).",
+    "owners": ("poc/dashboard.py", "desk/build_payload.py", "contratos/dashboard.py"),
 }
 
 # CCEE PLD submarkets ↔ ONS subsystem codes used for cross-product joins.
@@ -51,7 +51,7 @@ HEALTH: dict[str, Any] = {
 }
 
 # Convenience aliases used at call sites.
-MMBTU_PER_1000_M3 = float(POC_ENERGY["mmbtu_per_1000_m3"])
+M3_PER_MMBTU = float(POC_ENERGY["m3_per_mmbtu"])
 NATGAS_KCAL_PER_M3 = float(ONS_GAS_HEAT["natgas_kcal_per_m3"])
 PLD_MAX_LAG_DAYS = int(HEALTH["pld_max_lag_days"])
 FLOWS_MAX_STALENESS_DAYS = int(HEALTH["flows_max_staleness_days"])
@@ -69,6 +69,19 @@ TRANSFORM_REGISTRY: dict[str, dict[str, Any]] = {
     },
     "health": HEALTH,
 }
+
+
+def brl_per_m3(price_mmbtu: Any, nd: int = 2) -> float | None:
+    """Convert a R$/MMBtu price to R$/m³ by dividing by ``M3_PER_MMBTU``."""
+    if price_mmbtu is None:
+        return None
+    try:
+        value = float(price_mmbtu)
+    except (TypeError, ValueError):
+        return None
+    if value != value:  # NaN
+        return None
+    return round(value / M3_PER_MMBTU, nd)
 
 
 def registry_summary() -> list[dict[str, Any]]:

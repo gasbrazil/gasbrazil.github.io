@@ -146,3 +146,10 @@ def test_query_state_helper_degrades_to_defaults():
     assert "gbValidList" in js and "gbValidEnum" in js and "gbValidDate" in js
     # Clipboard with a non-clipboard fallback (non-secure contexts).
     assert "navigator.clipboard" in js and "execCommand" in js
+
+
+def test_csv_download_prepends_utf8_bom():
+    js = kit.JS_CSV_HELPERS
+    assert "downloadTextFile" in js
+    assert "\\uFEFF" in js
+    assert "isCsv" in js

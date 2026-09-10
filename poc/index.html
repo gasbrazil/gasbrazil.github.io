@@ -975,7 +975,8 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
    overflow, sticky header), just taller since here the table is the page's
    primary content rather than a small secondary widget. */
 .table-wrap { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; overflow: auto; box-shadow: var(--shadow); max-height: 65vh; }
-table { border-collapse: collapse; width: 100%; font-size: var(--table-font-size); table-layout: fixed; }
+table { border-collapse: collapse; font-size: var(--table-font-size); }
+.table-wrap table { table-layout: fixed; width: max-content; min-width: 100%; }
 th, td { padding: 4px 8px; text-align: left; border-bottom: 1px solid var(--border); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 th { position: sticky; top: 0; background: var(--panel); cursor: pointer; user-select: none; color: var(--muted2); font-weight: 400; z-index: 2; }
 th:hover { background: var(--accent-soft); }
@@ -1183,7 +1184,7 @@ footer a { color: var(--accent); }
   <details class="method">
 <summary data-i18n="methodTitle">How this is built</summary>
 <div class="method-row"><span class="method-label" data-i18n="methodSources">Sources</span><span><span data-i18n="sourcePoc">POC</span></span></div>
-<div class="method-row"><span class="method-label" data-i18n="methodAssump">Key assumption</span><span data-i18n="methodAssump_poc">Prices use the POC PCR factor of 28.8081 MMBtu per 1,000 m³ (assumptions v1).</span></div>
+<div class="method-row"><span class="method-label" data-i18n="methodAssump">Key assumption</span><span data-i18n="methodAssump_poc">R$/m³ is R$/MMBtu divided by 26.8081 m³ per MMBtu (assumptions v2).</span></div>
 <div class="method-row"><span class="method-label" data-i18n="methodLimits">Limits</span><span data-i18n="methodLimits_poc">A few hundred records total; full-history rebuild each run.</span></div>
 </details>
   &copy; <span id="year"></span> GasBrazil.com &middot; Data: Portal de Oferta de Capacidade (public API) &middot; Contact: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
@@ -1226,7 +1227,11 @@ function csvEscape(v) {
   return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
 }
 function downloadTextFile(text, mime, filename) {
-  const blob = new Blob([text], { type: mime });
+  // UTF-8 BOM so Excel on Windows opens Portuguese characters (Ó, Ç, ³)
+  // instead of mojibake (Ã“, Â³). Non-CSV downloads stay unchanged.
+  const isCsv = /csv/i.test(String(mime || "")) || /\.csv$/i.test(String(filename || ""));
+  const payload = isCsv ? "\uFEFF" + text : text;
+  const blob = new Blob([payload], { type: mime || "text/plain;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url; a.download = filename;
@@ -1537,7 +1542,7 @@ const QUICK_FILTERS = [
    A single combined SVG line chart: pick any Pipeline + Transaction Type
    combination as a toggle chip below, each becomes its own colored line.
    Left axis is R$/MMBtu (the source unit); the right axis mirrors the same
-   gridlines rescaled to R$/m3 (R$/m3 = R$/MMBtu * MMBTU_PER_M3 / 1000, a
+   gridlines rescaled to R$/m3 (R$/m3 = R$/MMBtu / M3_PER_MMBTU, a
    fixed linear factor -- same constant used for the table's R$/m3 column), so
    both units read off one chart instead of duplicating panels. The chart
    plots against the table's `filtered` rows, so the existing toolbar /
@@ -1548,7 +1553,13 @@ const QUICK_FILTERS = [
    like ons-dashboard's, so points are plotted on a true elapsed-time axis
    and connected date-to-date rather than against a dense calendar grid.
 ------------------------------------------------------------------------- */
-const MMBTU_PER_M3 = 28.8081;
+const M3_PER_MMBTU = 26.8081;
+function brlPerM3(mmbtu, nd) {
+  if (mmbtu == null || mmbtu === "" || !isFinite(Number(mmbtu))) return null;
+  const d = nd == null ? 2 : nd;
+  const f = Math.pow(10, d);
+  return Math.round(Number(mmbtu) / M3_PER_MMBTU * f) / f;
+}
 function chartPalette() {
   const s = getComputedStyle(document.documentElement);
   return [1,2,3,4,5,6,7,8].map(i => (s.getPropertyValue('--chart-' + i) || '').trim()).filter(Boolean);
@@ -1799,7 +1810,7 @@ function renderChart() {
     const lb = chartSvgEl("text", { x: ML - 9, y: y(t) + 4, "text-anchor": "end", fill: "var(--muted)", "font-size": 11.5 });
     lb.textContent = fmtAxisNum(t, 2); lb.style.fontVariantNumeric = "tabular-nums"; svg.appendChild(lb);
     const rb = chartSvgEl("text", { x: W - MR + 9, y: y(t) + 4, "text-anchor": "start", fill: "var(--muted)", "font-size": 11.5 });
-    rb.textContent = fmtAxisNum(t * MMBTU_PER_M3 / 1000, 2); rb.style.fontVariantNumeric = "tabular-nums"; svg.appendChild(rb);
+    rb.textContent = fmtAxisNum(brlPerM3(t), 2); rb.style.fontVariantNumeric = "tabular-nums"; svg.appendChild(rb);
   });
   if (lo < 0 && hi > 0) svg.appendChild(chartSvgEl("line", { x1: ML, x2: W - MR, y1: y(0), y2: y(0), stroke: "var(--border-strong)", "stroke-width": 1.5 }));
 
@@ -1870,7 +1881,7 @@ function renderChart() {
       if (!p) return;
       dots.appendChild(chartSvgEl("circle", { cx: x(p.date), cy: y(p.price), r: 4, fill: chartColorOf(s.key), stroke: "var(--panel)", "stroke-width": 2 }));
       rows += '<tr><td><span class="sw" style="display:inline-block;background:' + chartColorOf(s.key) + '"></span> ' + escapeHtml(comboLabel(s.pipeline, s.type)) +
-        '</td><td class="v">' + fmtAxisNum(p.price, 2) + ' MMBtu · ' + fmtAxisNum(p.price * MMBTU_PER_M3 / 1000, 2) + ' m³</td></tr>';
+        '</td><td class="v">' + fmtAxisNum(p.price, 2) + ' MMBtu · ' + fmtAxisNum(brlPerM3(p.price), 2) + ' m³</td></tr>';
     });
     tt.innerHTML = '<div class="d">' + date + '</div><table>' + rows + '</table>';
     placeChartTooltip(tt, clientX, clientY);
@@ -2050,6 +2061,7 @@ function populateSelect(sel, values) {
 
 function applyColWidth(el, px) {
   el.style.width = px + "px";
+  el.style.minWidth = px + "px";
   el.style.maxWidth = px + "px";
   el.classList.add("truncate");
 }
@@ -2704,7 +2716,7 @@ const GB_I18N = {
     methodAssump: "Key assumption",
     methodLimits: "Limits",
     methodAssump_ons: "Gas burn is estimated from verified generation (9,400 kcal/m³; CCGT 1,800 / OCGT 2,500 kcal/kWh; assumptions v1).",
-    methodAssump_poc: "Prices use the POC PCR factor of 28.8081 MMBtu per 1,000 m³ (assumptions v1).",
+    methodAssump_poc: "R$/m³ is R$/MMBtu divided by 26.8081 m³ per MMBtu (assumptions v2).",
     methodAssump_contratos: "Master rows enable later nominations; they are not firm capacity bookings.",
     methodAssump_flows: "Where ANP and TSO overlap, TSO Actual/Scheduled volumes win.",
     methodAssump_supply: "Monthly aggregation of ANP PPGN-EL national series plus imports.",
@@ -2809,7 +2821,7 @@ const GB_I18N = {
     methodAssump: "Premissa-chave",
     methodLimits: "Limites",
     methodAssump_ons: "Queima de gás estimada da geração verificada (9.400 kcal/m³; CC 1.800 / CA 2.500 kcal/kWh; premissas v1).",
-    methodAssump_poc: "Preços usam o fator PCR de 28,8081 MMBtu por 1.000 m³ (premissas v1).",
+    methodAssump_poc: "R$/m³ é R$/MMBtu dividido por 26,8081 m³ por MMBtu (premissas v2).",
     methodAssump_contratos: "Linhas master viabilizam nomeações futuras; não são reservas firmes.",
     methodAssump_flows: "Onde ANP e TSO se sobrepõem, valem os volumes Programado/Realizado das TSO.",
     methodAssump_supply: "Agregação mensal das séries nacionais PPGN-EL da ANP mais importações.",
@@ -2938,6 +2950,7 @@ async function init() {
   document.getElementById("year").textContent = new Date().getFullYear();
   const text = await inflateGzipUrl(PAYLOAD_URL);
   DATA = JSON.parse(text);
+  for (const row of DATA.rows) row["R$/m3"] = brlPerM3(row["Price"]);
   columnOrder = DATA.columns.slice();
   hiddenCols = new Set(DEFAULT_HIDDEN_COLS);
   const savedPrefs = loadColumnPrefs();

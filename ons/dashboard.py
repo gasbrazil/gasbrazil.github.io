@@ -2045,7 +2045,7 @@ function downloadCSV(){
     s+=d+","+cols.map(c=>c.vals[i]==null?"":c.vals[i].toFixed(2)).join(",")+"\n";
   });
   const a=document.createElement("a");
-  a.href=URL.createObjectURL(new Blob([s],{type:"text/csv"}));
+  a.href=URL.createObjectURL(new Blob(["\uFEFF"+s],{type:"text/csv;charset=utf-8"}));
   a.download="ons_"+state.view+"_"+dates[0]+"_"+dates[dates.length-1]+".csv";
   a.click(); URL.revokeObjectURL(a.href);
 }
@@ -3190,7 +3190,7 @@ function downloadTablesCSV(src, cols, rows){
   });
   const stamp = src.static ? "snapshot" : state.tbl.from+"_"+state.tbl.to;
   const a=document.createElement("a");
-  a.href=URL.createObjectURL(new Blob([out],{type:"text/csv"}));
+  a.href=URL.createObjectURL(new Blob(["\uFEFF"+out],{type:"text/csv;charset=utf-8"}));
   a.download="ons_"+src.id+"_"+stamp+".csv";
   a.click(); URL.revokeObjectURL(a.href);
 }

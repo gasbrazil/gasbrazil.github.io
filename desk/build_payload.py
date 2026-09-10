@@ -19,12 +19,8 @@ sys.path.insert(0, str(ROOT / "shared"))
 import joins  # noqa: E402
 import transforms as xf  # noqa: E402
 
-# POC PCR convention: same factor as poc/dashboard.py. MMBTU_PER_1000_M3 is
-# MMBtu per 1000 m3 of gas, so converting a R$/MMBtu price to R$/m3 means
-# multiplying by the MMBtu content of one m3 (MMBTU_PER_1000_M3 / 1000), not
-# dividing by the per-1000-m3 factor directly.
-# R$/m³ = R$/MMBtu × MMBTU_PER_1000_M3 / 1000.
-MMBTU_PER_1000_M3 = xf.MMBTU_PER_1000_M3
+# Price in the source data is R$/MMBtu. R$/m³ = Price / m³ per MMBtu.
+M3_PER_MMBTU = xf.M3_PER_MMBTU
 COMPARE_DAYS = 90
 SPARK_FALLBACK_GAS_M3 = 1.2  # illustrative R$/m³ when no GUS trade exists
 
@@ -32,7 +28,7 @@ SPARK_FALLBACK_GAS_M3 = 1.2  # illustrative R$/m³ when no GUS trade exists
 def _mmbtu_to_m3(price_mmbtu: Optional[float], nd: int = 3) -> Optional[float]:
     if price_mmbtu is None:
         return None
-    return _num(float(price_mmbtu) * MMBTU_PER_1000_M3 / 1000.0, nd)
+    return xf.brl_per_m3(price_mmbtu, nd)
 
 
 def _first_existing(*candidates: Path) -> Optional[Path]:
@@ -637,7 +633,8 @@ def build_payload() -> dict:
             "heatRateCcgt": float(heat["heat_rate_combined_cycle_kcal_per_kwh"]),
             "heatRateOcgt": float(heat["heat_rate_simple_cycle_kcal_per_kwh"]),
             "natgasKcalPerM3": float(heat["natgas_kcal_per_m3"]),
-            "mmbtuPer1000M3": MMBTU_PER_1000_M3,
+            "m3PerMmbtu": xf.M3_PER_MMBTU,
+            "energyVersion": int(xf.POC_ENERGY["version"]),
             "pldSe": pld_se,
             "cmoSe": cmo_se,
             "formulaEn": (

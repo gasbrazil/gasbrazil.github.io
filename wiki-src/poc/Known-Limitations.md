@@ -6,14 +6,14 @@ The source publishes trade price in R$/MMBtu only. The dashboard's R$/m³
 column and the price chart's right-hand axis are computed from it:
 
 ```
-R$/m3 = R$/MMBtu × 28.8081 / 1000
+R$/m3 = R$/MMBtu / 26.8081
 ```
 
-28.8081 is the MMBtu-per-1000-m³ factor implied by the dataset's PCR (poder
-calorífico de referência) convention — it's a fixed linear factor applied
-uniformly to every row, not a per-trade or per-pipeline heating value. This
-is the conversion PEG's own portal and this dashboard use; it isn't a
-site-specific assumption about gas quality on any particular contract.
+26.8081 is m³ per MMBtu (252,000 kcal/MMBtu ÷ 9,400 kcal/m³, Brazil's PCR
+convention) — a fixed linear factor applied uniformly to every row, not a
+per-trade or per-pipeline heating value. This is the conversion PEG's own
+portal and this dashboard use; it isn't a site-specific assumption about
+gas quality on any particular contract.
 
 ## Coverage
 

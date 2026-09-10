@@ -12,15 +12,19 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "shared"))
 import dashboard_kit as kit  # noqa: E402  (must follow sys.path.insert)
+import transforms as xf  # noqa: E402
 
 HERE = Path(__file__).parent
 PARQUET_PATH = HERE / "data" / "contratos.parquet"
 DEFAULT_OUT = HERE / "index.html"
 
+TARIFF_MMBTU_COL = "Allocated Tariff (R$/MMBtu)"
+TARIFF_M3_COL = "Allocated Tariff (R$/m3)"
+
 COLUMNS = [
     "Transporter (TSO)", "Contract Number", "Contract Category", "Status", "Shipper",
     "Product Type", "Point/Zone", "Flow", "Quality", "Start Date", "End Date",
-    "Contracted Capacity (000 m3/d)", "Allocated Tariff (R$/MMBtu)", "Tariff Multiplier",
+    "Contracted Capacity (000 m3/d)", TARIFF_MMBTU_COL, TARIFF_M3_COL, "Tariff Multiplier",
     "Transporter Ownership %", "Amendment",
 ]
 
@@ -29,6 +33,7 @@ COLUMNS = [
 # display label, since contratos_pipeline.py writes English column names).
 DISPLAY_NAMES = {
     "Transporter (TSO)": "Pipeline",
+    TARIFF_M3_COL: "Allocated Tariff (R$/m³)",
 }
 
 DATE_COLS = {"Start Date", "End Date"}
@@ -47,6 +52,7 @@ def load_payload():
     excluded_concluded = int(is_concluded.sum())
     df = df[~is_concluded]
 
+    df[TARIFF_M3_COL] = (df[TARIFF_MMBTU_COL] / xf.M3_PER_MMBTU).round(2)
     df = df[COLUMNS].copy()
     for c in DATE_COLS:
         df[c] = df[c].dt.strftime("%Y-%m-%d").where(df[c].notna(), None)
@@ -172,8 +178,8 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .toolbar button.secondary { background: var(--panel); color: var(--text); border: 1px solid var(--border-strong); }
 .count { color: var(--muted); font-size: 12px; margin-left: auto; }
 .table-wrap { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; overflow: auto; box-shadow: var(--shadow); max-height: 65vh; }
-table { border-collapse: collapse; width: 100%; font-size: var(--table-font-size); }
-.table-wrap table { table-layout: fixed; }
+table { border-collapse: collapse; font-size: var(--table-font-size); }
+.table-wrap table { table-layout: fixed; width: max-content; min-width: 100%; }
 th, td { padding: 4px 8px; text-align: left; border-bottom: 1px solid var(--border); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 th { position: sticky; top: 0; background: var(--panel); cursor: pointer; user-select: none; color: var(--muted2); font-weight: 400; z-index: 2; }
 th:hover { background: var(--accent-soft); }
@@ -293,14 +299,53 @@ __SHARED_JS_XLSX__
 __SHARED_JS_TABLE_SORT__
 __SHARED_JS_QUERY_STATE__
 
-const NUMERIC_COLS = new Set(["Contracted Capacity (000 m3/d)", "Allocated Tariff (R$/MMBtu)", "Tariff Multiplier", "Transporter Ownership %"]);
-const DEFAULT_COL_WIDTH = { "Shipper": 180, "Contract Number": 140, "Point/Zone": 120 };
-const FALLBACK_COL_WIDTH = 100;
-// Columns hidden by default so the table fits most screens without horizontal
-// scrolling. Users can re-enable any of these (or hide more) from the Columns
-// menu; the choice is remembered in localStorage.
+const M3_PER_MMBTU = __M3_PER_MMBTU__;
+function brlPerM3(mmbtu, nd) {
+  if (mmbtu == null || mmbtu === "" || !isFinite(Number(mmbtu))) return null;
+  const d = nd == null ? 2 : nd;
+  const f = Math.pow(10, d);
+  return Math.round(Number(mmbtu) / M3_PER_MMBTU * f) / f;
+}
+function ensureM3TariffColumn(data) {
+  const src = "Allocated Tariff (R$/MMBtu)";
+  const dst = "Allocated Tariff (R$/m3)";
+  data.displayNames = Object.assign({}, data.displayNames || {}, { [dst]: "Allocated Tariff (R$/m³)" });
+  const cols = data.columns.slice();
+  if (!cols.includes(dst)) {
+    const i = cols.indexOf(src);
+    if (i >= 0) cols.splice(i + 1, 0, dst);
+    else cols.push(dst);
+    data.columns = cols;
+  }
+  for (const row of data.rows) row[dst] = brlPerM3(row[src]);
+}
+
+const NUMERIC_COLS = new Set(["Contracted Capacity (000 m3/d)", "Allocated Tariff (R$/MMBtu)", "Allocated Tariff (R$/m3)", "Tariff Multiplier", "Transporter Ownership %"]);
+const DEFAULT_COL_WIDTH = {
+  "Transporter (TSO)": 52,
+  "Contract Number": 108,
+  "Contract Category": 92,
+  "Status": 88,
+  "Shipper": 160,
+  "Product Type": 88,
+  "Point/Zone": 108,
+  "Flow": 48,
+  "Quality": 64,
+  "Start Date": 88,
+  "End Date": 88,
+  "Contracted Capacity (000 m3/d)": 88,
+  "Allocated Tariff (R$/MMBtu)": 96,
+  "Allocated Tariff (R$/m3)": 88,
+  "Tariff Multiplier": 72,
+  "Transporter Ownership %": 80,
+  "Amendment": 72,
+};
+const FALLBACK_COL_WIDTH = 80;
+// Columns hidden by default so the first screenful stays scannable; the rest
+// (including the calculated R$/m³ tariff) is a horizontal scroll away.
+// Users can re-enable any of these (or hide more) from the Columns menu.
 const DEFAULT_HIDDEN_COLS = ["Amendment", "Tariff Multiplier", "Transporter Ownership %", "Quality"];
-const COL_PREFS_KEY = "pocContratosDashboard.columnPrefs.v1";
+const COL_PREFS_KEY = "pocContratosDashboard.columnPrefs.v2";
 // Every column gets an Excel-style header filter menu: a date-range picker for
 // the date columns, a searchable checkbox list for everything else.
 const DATE_FILTER_COLS = new Set(["Start Date", "End Date"]);
@@ -753,6 +798,7 @@ function populateSelect(sel, values) {
 
 function applyColWidth(el, px) {
   el.style.width = px + "px";
+  el.style.minWidth = px + "px";
   el.style.maxWidth = px + "px";
   el.classList.add("truncate");
 }
@@ -1523,6 +1569,7 @@ async function init() {
   document.getElementById("year").textContent = new Date().getFullYear();
   const text = await inflateGzipUrl(PAYLOAD_URL);
   DATA = JSON.parse(text);
+  ensureM3TariffColumn(DATA);
   columnOrder = DATA.columns.slice();
   hiddenCols = new Set(DEFAULT_HIDDEN_COLS);
   const savedPrefs = loadColumnPrefs();
@@ -1603,17 +1650,32 @@ init();
 
 
 def write_dashboard(out_path=DEFAULT_OUT):
-    payload = load_payload()
     sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "shared"))
     import data_kit as dk  # noqa: E402
     here = Path(__file__).resolve().parent
-    payload_path, payload_href = dk.write_and_publish_artifact("contratos", payload, here)
+    out_path = Path(out_path)
+    if PARQUET_PATH.exists():
+        payload = load_payload()
+        payload_path, payload_href = dk.write_and_publish_artifact("contratos", payload, here)
+        generated = payload.get("generated") or ""
+        kpi_contracts = str(payload.get("kpiContracts") or "")
+        kpi_capacity = str(payload.get("kpiCapacity") if payload.get("kpiCapacity") is not None else "")
+        size_note = f"{payload_path.stat().st_size:,} bytes, {len(payload['rows'])} rows"
+    else:
+        shell = out_path if out_path.exists() else DEFAULT_OUT
+        payload_href = dk.published_payload_url(shell)
+        markers = dk.published_teaser_markers(shell)
+        generated = markers.get("generated") or ""
+        kpi_contracts = markers.get("kpi_contracts") or ""
+        kpi_capacity = markers.get("kpi_capacity") or ""
+        size_note = "reused published payload (no local parquet)"
+        print("No contratos parquet; rebuilding HTML shell against the published payload.")
     html = kit.render(
         TEMPLATE,
         PAYLOAD_URL=payload_href,
-        GENERATED=payload.get("generated") or "",
-        KPI_CONTRACTS=str(payload.get("kpiContracts") or ""),
-        KPI_CAPACITY=str(payload.get("kpiCapacity") if payload.get("kpiCapacity") is not None else ""),
+        GENERATED=generated,
+        KPI_CONTRACTS=kpi_contracts,
+        KPI_CAPACITY=kpi_capacity,
         SHARED_THEME_CSS=kit.render_theme_css(),
         SHARED_JS_DECODE=kit.JS_DECODE,
         SHARED_JS_ESCAPE_HTML=kit.JS_ESCAPE_HTML,
@@ -1632,14 +1694,11 @@ def write_dashboard(out_path=DEFAULT_OUT):
         SHARED_METHODOLOGY=kit.methodology_html("contratos"),
         FAVICON_DATA_URI=kit.embed_favicon(),
         FONT_PRELOAD=kit.font_preload_html(),
+        M3_PER_MMBTU=str(xf.M3_PER_MMBTU),
     )
-    out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(html, encoding="utf-8")
-    print(
-        f"Wrote dashboard shell ({len(html):,} bytes) + {payload_path.name} "
-        f"({payload_path.stat().st_size:,} bytes, {len(payload['rows'])} rows) → {payload_href}"
-    )
+    print(f"Wrote dashboard shell ({len(html):,} bytes) + {size_note} → {payload_href}")
 
 
 if __name__ == "__main__":

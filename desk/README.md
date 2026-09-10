@@ -19,7 +19,9 @@ pull sibling parquet mirrors from the private R2 lake bucket when local
 ## Spark formula
 
 Implied CVU (R$/MWh) =
-`gas (R$/MMBtu) × heat rate (kcal/kWh) × 1000 / (natgas_kcal_per_m3 × mmbtu_per_1000_m3)`
+`gas (R$/m³) × heat rate (kcal/kWh) × 1000 / natgas_kcal_per_m3`
+
+where `R$/m³ = R$/MMBtu / 26.8081` (m³ per MMBtu).
 
 Defaults come from ANP Santos when available, else POC 7-day average, else
-an illustrative 12 R$/MMBtu so the form never loads blank.
+an illustrative 1.2 R$/m³ so the form never loads blank.

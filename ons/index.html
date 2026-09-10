@@ -1628,7 +1628,7 @@ const GB_I18N = {
     methodAssump: "Key assumption",
     methodLimits: "Limits",
     methodAssump_ons: "Gas burn is estimated from verified generation (9,400 kcal/m³; CCGT 1,800 / OCGT 2,500 kcal/kWh; assumptions v1).",
-    methodAssump_poc: "Prices use the POC PCR factor of 28.8081 MMBtu per 1,000 m³ (assumptions v1).",
+    methodAssump_poc: "R$/m³ is R$/MMBtu divided by 26.8081 m³ per MMBtu (assumptions v2).",
     methodAssump_contratos: "Master rows enable later nominations; they are not firm capacity bookings.",
     methodAssump_flows: "Where ANP and TSO overlap, TSO Actual/Scheduled volumes win.",
     methodAssump_supply: "Monthly aggregation of ANP PPGN-EL national series plus imports.",
@@ -1733,7 +1733,7 @@ const GB_I18N = {
     methodAssump: "Premissa-chave",
     methodLimits: "Limites",
     methodAssump_ons: "Queima de gás estimada da geração verificada (9.400 kcal/m³; CC 1.800 / CA 2.500 kcal/kWh; premissas v1).",
-    methodAssump_poc: "Preços usam o fator PCR de 28,8081 MMBtu por 1.000 m³ (premissas v1).",
+    methodAssump_poc: "R$/m³ é R$/MMBtu dividido por 26,8081 m³ por MMBtu (premissas v2).",
     methodAssump_contratos: "Linhas master viabilizam nomeações futuras; não são reservas firmes.",
     methodAssump_flows: "Onde ANP e TSO se sobrepõem, valem os volumes Programado/Realizado das TSO.",
     methodAssump_supply: "Agregação mensal das séries nacionais PPGN-EL da ANP mais importações.",
@@ -3084,7 +3084,7 @@ function downloadCSV(){
     s+=d+","+cols.map(c=>c.vals[i]==null?"":c.vals[i].toFixed(2)).join(",")+"\n";
   });
   const a=document.createElement("a");
-  a.href=URL.createObjectURL(new Blob([s],{type:"text/csv"}));
+  a.href=URL.createObjectURL(new Blob(["\uFEFF"+s],{type:"text/csv;charset=utf-8"}));
   a.download="ons_"+state.view+"_"+dates[0]+"_"+dates[dates.length-1]+".csv";
   a.click(); URL.revokeObjectURL(a.href);
 }
@@ -4361,7 +4361,7 @@ function downloadTablesCSV(src, cols, rows){
   });
   const stamp = src.static ? "snapshot" : state.tbl.from+"_"+state.tbl.to;
   const a=document.createElement("a");
-  a.href=URL.createObjectURL(new Blob([out],{type:"text/csv"}));
+  a.href=URL.createObjectURL(new Blob(["\uFEFF"+out],{type:"text/csv;charset=utf-8"}));
   a.download="ons_"+src.id+"_"+stamp+".csv";
   a.click(); URL.revokeObjectURL(a.href);
 }
