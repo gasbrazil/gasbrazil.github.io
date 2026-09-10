@@ -419,6 +419,7 @@ footer a { color: var(--accent); }
   <button id="btn-clear-picks" hidden>Clear selection</button>
   <button id="btn-csv">Download CSV</button>
   <button id="btn-xlsx">Export table (Excel)</button>
+  __SHARED_SHARE_BUTTON__
   <span class="count" id="row-count"></span>
 </div>
 <div class="table-wrap">
@@ -447,6 +448,7 @@ __SHARED_JS_CSV__
 __SHARED_JS_XLSX__
 __SHARED_SITE_LINKS_JS__
 __SHARED_JS_ESCAPE_HTML__
+__SHARED_JS_QUERY_STATE__
 
 __SHARED_JS_CHART_PALETTE__
 const MAX_CHIPS_SHOWN = 60;
@@ -1467,22 +1469,29 @@ async function downloadXlsx() {
 }
 
 function applyQueryState() {
-  const sp = new URLSearchParams(location.search);
-  const lv = sp.get("level");
-  if (lv === "points" || lv === "ledger") level = lv;
-  const vw = sp.get("view");
-  if (vw === "aggregate" || vw === "detail") viewMode = vw;
-  const v = sp.get("var");
-  const tso = sp.get("tso");
-  if (tso) tsoFilter = new Set(tso.split(","));
+  const sp = gbQueryParams();
+  level = gbValidEnum(sp.get("level"), ["points", "ledger"]) || level;
+  viewMode = gbValidEnum(sp.get("view"), ["aggregate", "detail"]) || viewMode;
+  // TSO allow-list spans both levels plus the gated minors, so a link that
+  // names TSB/GOM still resolves instead of silently dropping the filter.
+  const allTsos = [...new Set(
+    [...(DATA.points || []), ...(DATA.pipelines || [])].map(e => e.tso).filter(Boolean)
+  ), ...MINOR_TSOS];
+  const tsos = gbValidList(sp.get("tso"), allTsos);
+  if (tsos) {
+    tsoFilter = new Set(tsos);
+    if (tsos.some(t => MINOR_TSOS.includes(t))) {
+      includeMinorTsos = true;
+      const minorCb = document.getElementById("f-include-minor-tsos");
+      if (minorCb) minorCb.checked = true;
+    }
+  }
   const ft = sp.get("flow");
   if (ft === RECEIPT || ft === DELIVERY) flowTypeFilter = ft;
   const pl = sp.get("pipeline");
   if (pl) pipelineFilter = pl;
-  const pt = sp.get("preset");
-  if (pt) datePreset = pt;
-  const sm = sp.get("smooth");
-  if (sm) smoothing = sm;
+  datePreset = gbValidEnum(sp.get("preset"), ["90d", "12m", "3y", "all"]) || datePreset;
+  smoothing = gbValidEnum(sp.get("smooth"), ["raw", "7d", "30d"]) || smoothing;
   const q = sp.get("q");
   if (q) searchText = q.toLowerCase();
   buildLevelToggle();
@@ -1490,32 +1499,34 @@ function applyQueryState() {
   buildTsoToggles();
   buildFlowTypeToggles();
   buildDependentSelects();
-  if (pipelineFilter) document.getElementById("f-pipeline").value = pipelineFilter;
+  // An unknown pipeline degrades to "all" rather than an empty page: only
+  // keep the filter when it matches a known option.
+  const pipeSel = document.getElementById("f-pipeline");
+  if (pipelineFilter && ![...pipeSel.options].some(o => o.value === pipelineFilter)) pipelineFilter = "";
+  if (pipelineFilter) pipeSel.value = pipelineFilter;
   document.getElementById("f-preset").value = datePreset;
   document.getElementById("f-smooth").value = smoothing;
   if (q) document.getElementById("f-search").value = q;
   buildVariableSelect();
+  const v = sp.get("var");
   if (v && currentVarList().includes(v)) { variable = v; document.getElementById("f-variable").value = v; }
-  const picks = sp.get("picks");
-  if (picks) picked = new Set(picks.split(","));
+  const picks = gbValidList(sp.get("picks"), currentEntities().map(e => e.id));
+  if (picks) picked = new Set(picks);
 }
 
 function writeQueryState() {
-  const u = new URL(location.href);
-  const sp = u.searchParams;
-  sp.set("level", level);
-  sp.set("view", viewMode);
-  sp.set("var", variable);
-  if (tsoFilter.size) sp.set("tso", [...tsoFilter].join(",")); else sp.delete("tso");
-  if (flowTypeFilter) sp.set("flow", flowTypeFilter); else sp.delete("flow");
-  if (pipelineFilter) sp.set("pipeline", pipelineFilter); else sp.delete("pipeline");
-  sp.set("preset", datePreset);
-  sp.set("smooth", smoothing);
-  if (searchText) sp.set("q", searchText); else sp.delete("q");
-  if (viewMode === "detail" && picked.size) sp.set("picks", [...picked].join(",")); else sp.delete("picks");
-  const qs = sp.toString();
-  const next = u.pathname + (qs ? "?" + qs : "") + u.hash;
-  if (next !== location.pathname + location.search + location.hash) history.replaceState(null, "", next);
+  gbWriteQuery({
+    level,
+    view: viewMode,
+    var: variable,
+    tso: tsoFilter.size ? [...tsoFilter] : null,
+    flow: flowTypeFilter || null,
+    pipeline: pipelineFilter || null,
+    preset: datePreset,
+    smooth: smoothing,
+    q: searchText || null,
+    picks: (viewMode === "detail" && picked.size) ? [...picked] : null,
+  });
 }
 
 function render() {
@@ -1601,6 +1612,7 @@ async function init() {
   initThemeToggle("theme-toggle", renderChart);
   initLangToggle("lang-toggle");
   initCrossLinks();
+  gbCopyLink("btn-share");
 }
 init();
 </script>
@@ -1633,6 +1645,8 @@ def write_dashboard(out_path=DEFAULT_OUT):
         SHARED_JS_CSV=kit.JS_CSV_HELPERS,
         SHARED_JS_XLSX=kit.JS_XLSX_ENGINE,
         SHARED_JS_CHART_PALETTE=kit.chart_palette_js(),
+        SHARED_JS_QUERY_STATE=kit.JS_QUERY_STATE,
+        SHARED_SHARE_BUTTON=kit.share_link_button_html(),
         SHARED_SITE_LINKS_JS=kit.site_links_js("flows"),
         SHARED_NAV_LINKS=kit.nav_links_html("flows"),
         SHARED_PAGE_INTRO=kit.page_intro_html("flows"),

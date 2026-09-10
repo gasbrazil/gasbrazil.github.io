@@ -395,6 +395,8 @@ def write_dashboard(df: pd.DataFrame, dest: Path,
         SHARED_JS_BOOT=kit.JS_BOOT,
         SHARED_JS_I18N=kit.JS_I18N,
         SHARED_JS_ASOF=kit.refreshed_local_js(),
+        SHARED_JS_QUERY_STATE=kit.JS_QUERY_STATE,
+        SHARED_SHARE_BUTTON=kit.share_link_button_html(),
         SHARED_SITE_LINKS_JS=kit.site_links_js("ons"),
         SHARED_NAV_LINKS=kit.nav_links_html("ons"),
         SHARED_PAGE_INTRO=kit.page_intro_html("ons"),
@@ -638,6 +640,7 @@ table.data thead th.sortable:hover{background:var(--accent-soft)}
   <div class="row">
     <button id="csvBtn">Download CSV</button>
     <button id="csvAllBtn">Export all data (Excel)</button>
+    __SHARED_SHARE_BUTTON__
   </div>
 </div>
 
@@ -740,10 +743,36 @@ function viewFromQuery(){
   return VIEWS.some(v=>v.id===id) ? id : null;
 }
 function writeViewQuery(){
-  const u = new URL(location.href);
-  u.searchParams.set("tab", state.view);
-  history.replaceState(null, "", u.pathname + u.search + u.hash);
+  const subsDefault = state.subs.size === 1 && state.subs.has("SIN");
+  gbWriteQuery({
+    tab: state.view,
+    from: state.from || null,
+    to: state.to || null,
+    smooth: state.smooth === 1 ? null : String(state.smooth),
+    subs: (state.view === "subsystems" && !subsDefault) ? [...state.subs] : null,
+  });
   try { localStorage.setItem("ons-view", state.view); } catch(e){}
+}
+// Deep-linking for the chart tabs' date window, smoothing, and subsystem
+// scope. Runs once at boot after the default window is set; unknown or
+// partial params degrade to those defaults, never a blank page. Entity
+// picks stay local (per-view lists can be long -- same "noisy URL" call as
+// the poc/contratos header-menu Sets).
+function applyQueryDates(){
+  const sp = gbQueryParams();
+  const from = gbValidDate(sp.get("from"));
+  const to = gbValidDate(sp.get("to"));
+  if (from && DATA.dates.includes(from)) state.from = from;
+  if (to && DATA.dates.includes(to)) state.to = to;
+  if (state.from && state.to && state.from > state.to) {
+    const t = state.from; state.from = state.to; state.to = t;
+  }
+  const sm = gbValidEnum(sp.get("smooth"), ["1", "7", "30"]);
+  if (sm) state.smooth = +sm;
+  if (state.view === "subsystems") {
+    const subs = gbValidList(sp.get("subs"), DATA.subsystems || []);
+    if (subs && subs.length) state.subs = new Set(subs);
+  }
 }
 function initialView(){
   const fromUrl = viewFromQuery();
@@ -843,6 +872,7 @@ __SHARED_JS_THEME_TOGGLE__
 __SHARED_JS_CHART_PALETTE__
 __SHARED_JS_I18N__
 __SHARED_JS_ASOF__
+__SHARED_JS_QUERY_STATE__
 /* ONS-local chrome strings (tabs, control labels, view blurbs). Shared kit
    covers site-wide nav; this pack covers what is unique to this dashboard. */
 const ONS_I18N = {
@@ -3024,8 +3054,9 @@ function render(){
     const e=document.getElementById(id); if(e) e.hidden=!isTables; });
   const csvBtn=document.getElementById("csvBtn");
   if(csvBtn) csvBtn.hidden=isTables;
-  if(isTables){ renderTables(); return; }
+  if(isTables){ renderTables(); writeViewQuery(); return; }
   renderKpis(); renderCharts(); renderTable();
+  writeViewQuery();
 }
 
 /* ---------- boot ----------------------------------------------------------- */
@@ -3244,9 +3275,11 @@ async function boot(){
   });
   seedEnts("reservoirs","res_volutil_pct",DATA.defaults.reservoir);
 
+  applyQueryDates();
   buildTabs(); buildPresets(); buildSmooth(); buildSubs(); updateSubsVisibility();
   writeViewQuery();
   syncInputs(); buildPickCard(); render();
+  gbCopyLink("btn-share");
   // Last, defensively: a nav-link wiring issue (e.g. a newly-added sibling
   // site whose #link-<id> anchor hasn't been added to this page's header
   // yet) should never take down the whole dashboard -- everything that
