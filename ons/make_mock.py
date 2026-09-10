@@ -144,11 +144,16 @@ for sub, k in SCALE.items():
             if fuel == "Gás Natural" and i == 0:
                 SPLIT_PLANTS.add((sub, nom))
 
-BASINS = {"SE": ["GRANDE", "PARANA", "TOCANTINS", "DOCE", "AMAZONAS"],
+BASINS = {"SE": ["GRANDE", "PARANA", "PARANAIBA", "TOCANTINS", "DOCE", "AMAZONAS"],
           "S": ["IGUACU", "JACUI", "URUGUAI"], "NE": ["SAO FRANCISCO"],
           "N": ["TOCANTINS", "AMAZONAS"]}
 RESERVOIRS = [(f"{b} RES {i+1}", sub, b)
               for sub, bs in BASINS.items() for b in bs for i in range(6)]
+# ONS occasionally publishes negative usable-volume % for a handful of
+# reservoirs (below min operating level, or a unit glitch). These two exercise
+# the pipeline clip-to-[0, 100] path and the dashboard's "empty reservoir"
+# omission so a mock build still looks like production.
+RESERVOIRS += [("ESTRELA", "SE", "PARANAIBA"), ("TABOCA", "SE", "PARANAIBA")]
 
 for y in YEARS:
     idx = hours(y); s = season(idx)
@@ -180,8 +185,13 @@ for y in YEARS:
     hrows = []
     for nom, sub, bacia in RESERVOIRS:
         base = 200 + abs(hash(nom)) % 700
-        pct = np.clip(58 + 25 * np.sin(2 * math.pi * (days.dayofyear.values - 110) / 365)
-                      + np.random.normal(0, 1.5, len(days)), 2, 100)
+        if nom == "ESTRELA":
+            pct = np.full(len(days), -1916.85)
+        elif nom == "TABOCA":
+            pct = np.full(len(days), -262.91)
+        else:
+            pct = np.clip(58 + 25 * np.sin(2 * math.pi * (days.dayofyear.values - 110) / 365)
+                          + np.random.normal(0, 1.5, len(days)), 2, 100)
         hrows.append(pd.DataFrame({
             "din_instante": days, "id_subsistema": sub, "nom_subsistema": SUBS[sub],
             "tip_reservatorio": "Regularizacao", "nom_bacia": bacia,

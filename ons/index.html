@@ -1054,6 +1054,12 @@ button[aria-pressed=true]{background:var(--panel);border-color:var(--border-stro
 .band-label{font-size:11px;font-weight:300;white-space:nowrap}
 .panel-title{font-size:12.5px;font-weight:300;margin:0 0 2px}
 .panel-note{font-size:11.5px;color:var(--muted);margin:0 0 8px;font-weight:200}
+table.data tbody tr.row-link{cursor:pointer}
+table.data tbody tr.row-link:hover{background:var(--accent-soft)}
+table.data tbody tr.is-filtered{background:var(--accent-soft)}
+.entlist tr.empty-res{opacity:.65}
+.metric-cell{white-space:nowrap}
+.metric-cell .band-label{margin-left:6px}
 .legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:8px;font-size:12px;
   color:var(--muted2)}
 .legend span{display:flex;align-items:center;gap:6px}
@@ -1429,6 +1435,10 @@ const state = {
   // by attach_capacity() in ons_pipeline.py, which is what actually flags a
   // phase entity this way. Toggled via the "Show sub-units" button.
   showSubunits: false,
+  // Off by default: hide reservoirs whose latest usable volume is 0% after
+  // clipping ONS negatives / overflow to [0, 100]. Toggled via "Show empty"
+  // on the Reservoirs picker — same pattern as showSubunits.
+  showEmptyReservoirs: false,
   // Excel-style per-column quick filters on the entity-picker tables, keyed by
   // metric id: {mode:"nonzero"|"zero"|"range", min, max}. Combines (AND) with
   // the region/fuel/search filters above -- see passesColFilters().
@@ -1944,7 +1954,7 @@ const ONS_I18N = {
     smooth30: "30d avg",
     tipSubsystems: "National and per-subsystem balance: load, generation by source, hydrology and CMO, on a daily grid. Toggle SIN/SE/S/NE/N to fan any picked series across subsystems. Net interchange is positive when a subsystem is a net exporter.",
     tipPlants: "One row per dispatched thermal plant, filterable by region and fuel. The five pinned Total rows are synthetic subsystem/national aggregates of the gas-fired fleet, not plants, and are excluded from fleet-wide KPI sums. A combined-cycle block appears both as its individual dispatch phases and as one combined row — don't sum the two together. Installed capacity, utilization and estimated gas consumption are derived, not published by ONS: see Methodology in the footer for the heat-rate assumption behind the gas figures.",
-    tipReservoirs: "Every reservoir ONS tracks, charted as usable volume % or upstream level, with region and basin rollups above the per-reservoir picker. EAR is stored energy rather than raw volume, which is what makes cascades comparable. Reservoirs down usually means more thermal (and gas) later."
+    tipReservoirs: "Individual reservoirs below, with region / REE / basin rollups above. Usable volume is % of each reservoir's useful capacity (0–100), not a raw water volume. Empty or invalid readings (ONS sometimes publishes negatives) are omitted from averages and the picker. EAR is stored energy rather than raw volume, which is what makes cascades comparable. Reservoirs down usually means more thermal (and gas) later."
   },
   pt: {
     viewSubsystems: "Subsistemas",
@@ -1964,7 +1974,7 @@ const ONS_I18N = {
     smooth30: "Média 30d",
     tipSubsystems: "Balanço nacional e por subsistema: carga, geração por fonte, hidrologia e CMO, em grade diária. Alternar SIN/SE/S/NE/N espalha qualquer série escolhida pelos subsistemas. Intercâmbio líquido positivo = subsistema exportador líquido.",
     tipPlants: "Uma linha por usina térmica despachada, filtrável por região e combustível. As cinco linhas Total fixas são agregados sintéticos da frota a gás — não são usinas — e ficam de fora das somas de frota. Um bloco ciclo combinado aparece como fases e como linha combinada: não some as duas. Capacidade, utilização e consumo estimado de gás são derivados, não publicados pela ONS: ver Metodologia no rodapé.",
-    tipReservoirs: "Cada reservatório acompanhado pela ONS, em volume útil % ou nível de montante, com totais por região e bacia. EAR é energia armazenada, não volume bruto — por isso as cascadas são comparáveis. Reservatórios baixos costumam antecipar mais térmica (e gás)."
+    tipReservoirs: "Reservatórios individuais abaixo, com totais por região / REE / bacia acima. Volume útil é % da capacidade útil de cada reservatório (0–100), não um volume bruto. Leituras vazias ou inválidas (a ONS às vezes publica negativos) ficam de fora das médias e da lista. EAR é energia armazenada, não volume bruto — por isso as cascadas são comparáveis. Reservatórios baixos costumam antecipar mais térmica (e gás)."
   }
 };
 function ot(key) {
@@ -1980,6 +1990,44 @@ function applyOnsI18n() {
 
 /* ---------- series keys: "<metric>|<subsystem>|<entity>" -------------------- */
 const skey = (m,s,e="") => m+"|"+s+"|"+e;
+
+function metricLabel(m){
+  const meta=DATA.seriesMeta[m];
+  if(!meta) return m;
+  const u=meta.unit, lab=meta.label;
+  if(!u) return lab;
+  if(lab.includes("("+u+")")) return lab;
+  if(u==="%" && lab.includes("%")) return lab;
+  return lab+" ("+u+")";
+}
+function uniqueByEntity(list){
+  const seen=new Set(), out=[];
+  (list||[]).forEach(e=>{
+    const id=(e.subsystem||"")+"|"+(e.entity||"");
+    if(seen.has(id)) return;
+    seen.add(id); out.push(e);
+  });
+  return out;
+}
+function sanitizeUsableVolume(v){
+  // ONS publishes usable volume as % of useful capacity. Negatives (below
+  // min operating level, or a unit glitch) and readings well over 100 are
+  // not a useful figure — floor at 0, cap at 100.
+  if(v==null || !isFinite(v)) return null;
+  if(v<0) return 0;
+  if(v>100) return 100;
+  return v;
+}
+function latestUsableVolume(e){
+  const arr=DATA.series[skey("res_volutil_pct",e.subsystem,e.entity)]||[];
+  let v=null;
+  for(let k=arr.length-1;k>=0;k--) if(arr[k]!=null){ v=arr[k]; break; }
+  return sanitizeUsableVolume(v);
+}
+function reservoirHasStorage(e){
+  const v=latestUsableVolume(e);
+  return v!=null && v>0;
+}
 
 /* Display form of a bare subsystem code. Only ever used for text a person
    reads -- toggle buttons, table cells, export columns. Every key, lookup and
@@ -2103,6 +2151,7 @@ function fullSeries(key){
     else out=v.map(x=>(x==null||hr==null)?null:x*24*1000*hr/natgasKcalPerM3());
   } else {
     out=smoothed(DATA.series[key]||[]);
+    if(m==="res_volutil_pct") out=out.map(sanitizeUsableVolume);
   }
   memo.set(tag,out); return out;
 }
@@ -2418,7 +2467,7 @@ function entityRows(){
   const kind=view().kind;
   const f=state.filter[state.view];
   const chosen=new Set(picked().map(k=>{const a=k.split("|");return a[1]+"|"+a[2];}));
-  const all=DATA.entities.filter(e=>e.kind===kind);
+  const all=uniqueByEntity(DATA.entities.filter(e=>e.kind===kind));
   // The 5 synthetic subsystem/SIN "Total" rows (Thermal Plants tab only) are
   // pinned at the top of the list and bypass Region/Fuel/Search/column
   // filters entirely -- they're not a "plant" in the filtered sense, and
@@ -2442,6 +2491,7 @@ function entityRows(){
     // The "Show sub-units" button (see buildEntityPicker) lets a visitor
     // bring the phase-level rows back for CEGs that need that granularity.
     .filter(e=> kind!=="plant" || state.showSubunits || !e.rolled_up)
+    .filter(e=> kind!=="reservoir" || state.showEmptyReservoirs || reservoirHasStorage(e))
     .filter(e=>!f.region || e.subsystem===f.region)
     .filter(e=>!f.group || e.group===f.group)
     .filter(e=>!f.q || e.entity.toLowerCase().includes(f.q.toLowerCase()))
@@ -2449,7 +2499,15 @@ function entityRows(){
     .sort((a,b)=>{
       const sa=chosen.has(a.subsystem+"|"+a.entity)?0:1;
       const sb=chosen.has(b.subsystem+"|"+b.entity)?0:1;
-      return sa-sb || a.entity.localeCompare(b.entity);
+      if(sa!==sb) return sa-sb;
+      if(kind==="reservoir"){
+        const va=latestUsableVolume(a), vb=latestUsableVolume(b);
+        if(va==null && vb==null) return a.entity.localeCompare(b.entity);
+        if(va==null) return 1;
+        if(vb==null) return -1;
+        if(va!==vb) return va-vb;   // lowest usable volume first
+      }
+      return a.entity.localeCompare(b.entity);
     });
   return pin.concat(rest);
 }
@@ -2458,12 +2516,23 @@ function buildEntityPicker(card){
   const f=state.filter[state.view];
   const metrics=DATA.seriesOrder.filter(m=>DATA.seriesMeta[m].kind===kind);
 
+  if(kind==="reservoir"){
+    const title=el("p","panel-title");
+    title.appendChild(document.createTextNode("Individual reservoirs"));
+    title.appendChild(infodot(
+      "One row per reservoir ONS tracks. Usable volume is the percentage of that reservoir's own useful capacity (0% = empty, 100% = full), not a volume in hm³ or a share of the national total. Readings ONS publishes below 0 or above 100 are clipped. Reservoirs at 0% are hidden unless you turn on Show empty. Select rows to chart them.",
+      "About individual reservoirs"));
+    card.appendChild(title);
+    card.appendChild(el("p","panel-note",
+      "Latest usable volume (% of useful capacity) · lowest first · click a basin in the table above to scope this list."));
+  }
+
   const bar=el("div","controls");
   const mBox=el("div","ctl");
   mBox.appendChild(el("label",null,"Metrics"));
   const mRow=el("div","row");
   metrics.forEach(m=>{
-    const b=el("button",null,DATA.seriesMeta[m].label);
+    const b=el("button",null,metricLabel(m));
     b.setAttribute("aria-pressed",String(state.metrics[state.view].has(m)));
     b.onclick=()=>{
       const set=state.metrics[state.view];
@@ -2524,6 +2593,17 @@ function buildEntityPicker(card){
       "row individually.";
     subBtn.onclick=()=>{ state.showSubunits=!state.showSubunits; buildPickCard(); render(); };
     selRow.appendChild(subBtn);
+  }
+  if(kind==="reservoir"){
+    const emptyBtn=el("button",null,
+      state.showEmptyReservoirs?"Hide empty":"Show empty");
+    emptyBtn.setAttribute("aria-pressed", String(state.showEmptyReservoirs));
+    emptyBtn.title="Reservoirs at 0% usable volume (including ONS readings that were negative) are hidden by default so they don't pull basin averages down or masquerade as the lowest reservoir.";
+    emptyBtn.onclick=()=>{
+      state.showEmptyReservoirs=!state.showEmptyReservoirs;
+      buildPickCard(); render();
+    };
+    selRow.appendChild(emptyBtn);
   }
   card.appendChild(selRow);
 
@@ -2643,7 +2723,7 @@ function renderEntityList(){
   mset.forEach(m=>{
     const th=document.createElement("th"); th.className="th-metric";
     const inner=el("span","th-metric-inner");
-    inner.appendChild(el("span","th-label",DATA.seriesMeta[m].label));
+    inner.appendChild(el("span","th-label",metricLabel(m)));
     inner.appendChild(makeColFilterBtn(m));
     th.appendChild(inner);
     htr.appendChild(th);
@@ -2674,8 +2754,17 @@ function renderEntityList(){
     mset.forEach(m=>{
       const k=skey(m,e.subsystem,e.entity);
       const last=lastNonNull(fullSeries(k));
-      tr.appendChild(el("td",null,fmtNum(last,decOf(k))));
+      const td=el("td","metric-cell");
+      td.textContent=fmtNum(last,decOf(k));
+      if(kind==="reservoir" && m==="res_volutil_pct" && last!=null){
+        const band=el("span","band-label",bandLabel(last));
+        band.style.color=bandColor(last);
+        td.appendChild(document.createTextNode(" "));
+        td.appendChild(band);
+      }
+      tr.appendChild(td);
     });
+    if(kind==="reservoir" && !reservoirHasStorage(e)) tr.classList.add("empty-res");
     tbody.appendChild(tr);
   });
   table.appendChild(tbody);
@@ -2957,7 +3046,13 @@ function renderCharts(){
     const tilesEl=el("div","tiles"); tilesEl.style.marginBottom="14px";
     buildTileEls(keys).forEach(t=>tilesEl.appendChild(t));
     host.appendChild(tilesEl);
-    const c=drawPanel(p.unit,p.title,keys,W);
+    const title=p.title;
+    let panelTitle=title;
+    if(state.view==="reservoirs"){
+      if(p.unit==="%") panelTitle="Usable volume (% of useful capacity)";
+      else if(p.unit==="m") panelTitle="Upstream level (metres)";
+    }
+    const c=drawPanel(p.unit,panelTitle,keys,W);
     if(c) host.appendChild(c);
   });
   renderCount();
@@ -3191,13 +3286,13 @@ function buildAllDataSheets(){
   // ---- Reservoirs: usable volume % and upstream level, per reservoir ----
   const resRows=[["Date","Reservoir","Subsystem","Basin","Usable volume (%)",
     "Upstream level (m)"]];
-  (DATA.entities||[]).filter(e=>e.kind==="reservoir").forEach(ent=>{
+  uniqueByEntity((DATA.entities||[]).filter(e=>e.kind==="reservoir")).forEach(ent=>{
     const sub=ent.subsystem, name=ent.entity;
     const volArr=DATA.series[skey("res_volutil_pct",sub,name)];
     const lvlArr=DATA.series[skey("res_level_m",sub,name)];
     if(!volArr && !lvlArr) return;
     dates.forEach((d,i)=>{
-      const vol=volArr?volArr[i]:null, lvl=lvlArr?lvlArr[i]:null;
+      const vol=volArr?sanitizeUsableVolume(volArr[i]):null, lvl=lvlArr?lvlArr[i]:null;
       if(vol==null && lvl==null) return;
       resRows.push([d,name,subShort(sub),ent.group||"",vol,lvl]);
     });
@@ -3480,12 +3575,11 @@ function bandLabel(pct){
   return "Healthy";
 }
 function reservoirExtremes(){
-  const ents=(DATA.entities||[]).filter(e=>e.kind==="reservoir");
+  const ents=uniqueByEntity((DATA.entities||[]).filter(e=>e.kind==="reservoir"));
   let lowest=null, below=0, total=0;
   ents.forEach(e=>{
-    const arr=DATA.series[skey("res_volutil_pct",e.subsystem,e.entity)]||[];
-    let v=null; for(let k=arr.length-1;k>=0;k--) if(arr[k]!=null){v=arr[k];break;}
-    if(v==null) return;
+    const v=latestUsableVolume(e);
+    if(v==null || v<=0) return;          // empty / invalid: omit
     total++;
     if(v<20) below++;
     if(!lowest || v<lowest.v) lowest={entity:e.entity, subsystem:e.subsystem, group:e.group, v};
@@ -3525,14 +3619,14 @@ function renderReservoirKpis(host, extra){
   }
   const ext=reservoirExtremes();
   if(ext.lowest){
-    host.appendChild(kpiTile("Lowest individual reservoir", fmtNum(ext.lowest.v,1), "%",
+    host.appendChild(kpiTile("Lowest individual reservoir", fmtNum(ext.lowest.v,1), "% of capacity",
       shorten(ext.lowest.entity,26)+" · "+(ext.lowest.group||"—")+" · "+
       (DATA.subsystemLabels[ext.lowest.subsystem]||ext.lowest.subsystem),
       bandColor(ext.lowest.v)));
   }
   if(ext.total){
     host.appendChild(kpiTile("Reservoirs below 20%", ext.below+" of "+ext.total, "",
-      "usable volume critically low"));
+      "usable volume critically low · empty reservoirs omitted"));
   }
   if(extra){
     renderReservoirRegionTable(extra);
@@ -3551,7 +3645,7 @@ function reeRow(e){
     chg:(pct!=null&&pctPrior!=null)?pct-pctPrior:null};
 }
 function renderReeTable(host){
-  const ents=(DATA.entities||[]).filter(e=>e.kind==="ree");
+  const ents=uniqueByEntity((DATA.entities||[]).filter(e=>e.kind==="ree"));
   if(!ents.length) return;
   const rows=ents.map(reeRow).filter(r=>r && r.pct!=null).sort((a,b)=>a.pct-b.pct);
   if(!rows.length) return;
@@ -3561,7 +3655,7 @@ function renderReeTable(host){
     'data-info="ONS’s own cascade-level storage figures, finer than the 4-region '+
     'view above. The region table is these REEs summed up, so two can be moving in '+
     'opposite directions underneath one steady regional number.">i</button></p>'+
-    '<p class="panel-note">Lowest first.</p>';
+    '<p class="panel-note">Lowest stored-energy % first. Finer than the region table, coarser than a single reservoir.</p>';
   h+='<div class="scroll"><table class="data"><thead><tr>'+
     '<th class="l">Reservoir Equivalent</th><th class="l">Region</th>'+
     '<th class="l">Capacity filled</th><th>Stored / capacity (MWmês)</th>'+
@@ -3587,11 +3681,13 @@ function renderReservoirRegionTable(host){
   const rows=DATA.subsystems.map(s=>earRow(s)).filter(r=>r && r.pct!=null);
   if(!rows.length) return;
   const card=el("div","card"); card.style.marginBottom="14px";
+  const f=state.filter.reservoirs||{};
   let h='<p class="panel-title">Hydro reservoirs by region'+
     '<button class="infodot" type="button" aria-label="About stored energy (EAR)" '+
     'data-info="Stored energy (EAR) is how ONS aggregates reservoir levels across a '+
     'cascade. Raw volume % alone can mislead when reservoirs differ in generating '+
-    'potential per unit of water.">i</button></p>';
+    'potential per unit of water. Click a region (not Total) to list its reservoirs below.">i</button></p>'+
+    '<p class="panel-note">Stored energy (EAR), % of regional capacity · click a region to filter the list below.</p>';
   h+='<div class="scroll"><table class="data"><thead><tr>'+
     '<th class="l">Region</th><th class="l">Capacity filled</th>'+
     '<th>Stored / capacity (MWmês)</th><th>30d change</th>'+
@@ -3599,7 +3695,11 @@ function renderReservoirRegionTable(host){
   rows.forEach(r=>{
     const label=DATA.subsystemLabels[r.sub]||r.sub;
     const w=Math.max(0,Math.min(100,r.pct));
-    h+='<tr><td class="l">'+label+'</td>'+
+    const clickable=r.sub!=="SIN";
+    const active=clickable && f.region===r.sub && !f.group;
+    h+='<tr'+(clickable?' class="row-link'+(active?' is-filtered':'')+'" data-sub="'+
+      escapeHtml(r.sub)+'" title="List reservoirs in this region"':'')+'>'+
+      '<td class="l">'+escapeHtml(label)+'</td>'+
       '<td class="l"><div class="cap-bar" title="'+fmtNum(r.pct,1)+'% full">'+
         '<div style="width:'+w+'%;background:'+bandColor(r.pct)+'"></div></div> '+
         '<span class="band-label" style="color:'+bandColor(r.pct)+'">'+bandLabel(r.pct)+
@@ -3613,15 +3713,26 @@ function renderReservoirRegionTable(host){
   host.appendChild(card);
   makeSortable(card.querySelector("table"), "resRegionTable");
   makeFilterable(card.querySelector("table"), "resRegionTable");
+  card.querySelectorAll("tr.row-link").forEach(tr=>{
+    tr.addEventListener("click", ()=>{
+      const filt=state.filter.reservoirs;
+      filt.region=tr.dataset.sub;
+      filt.group="";
+      onFilterChange();
+      const pick=document.getElementById("pickCard");
+      if(pick) pick.scrollIntoView({behavior:"smooth", block:"start"});
+    });
+  });
 }
 function renderBasinSummary(host){
-  const ents=(DATA.entities||[]).filter(e=>e.kind==="reservoir");
+  const ents=uniqueByEntity((DATA.entities||[]).filter(e=>e.kind==="reservoir"));
   if(!ents.length) return;
   const groups={};
+  let omitted=0;
   ents.forEach(e=>{
-    const arr=DATA.series[skey("res_volutil_pct",e.subsystem,e.entity)]||[];
-    let v=null; for(let k=arr.length-1;k>=0;k--) if(arr[k]!=null){v=arr[k];break;}
+    const v=latestUsableVolume(e);
     if(v==null) return;
+    if(v<=0){ omitted++; return; }
     const key=e.subsystem+"|"+(e.group||"—");
     (groups[key]=groups[key]||{sub:e.subsystem, basin:e.group||"—", vals:[]}).vals.push(v);
   });
@@ -3631,23 +3742,54 @@ function renderBasinSummary(host){
     min:Math.min(...g.vals), max:Math.max(...g.vals)
   })).sort((a,b)=>a.avg-b.avg);
   if(!rows.length) return;
+  const f=state.filter.reservoirs||{};
   const card=el("div","card");
-  let h='<p class="panel-title">Usable volume by basin</p>'+
-    '<p class="panel-note">Latest reading per reservoir, averaged by basin · lowest first.</p>';
+  let h='<p class="panel-title">Usable volume by basin'+
+    '<button class="infodot" type="button" aria-label="About usable volume" '+
+    'data-info="Usable volume is the percentage of each reservoir’s own useful '+
+    'capacity (0% empty – 100% full), then averaged across the reservoirs in that '+
+    'basin. It is not stored energy (EAR) and not a volume in hm³. Empty or invalid '+
+    'ONS readings are omitted so a glitch like −1,900% cannot pull a basin average '+
+    'negative. Click a row to list that basin’s reservoirs below.">i</button></p>'+
+    '<p class="panel-note">Latest usable volume (% of useful capacity) per reservoir, '+
+    'averaged by basin · lowest first · click a row to list those reservoirs.'+
+    (omitted? ' · '+omitted+' empty reservoir'+(omitted===1?'':'s')+' omitted.':'')+
+    '</p>';
   h+='<div class="scroll"><table class="data"><thead><tr>'+
     '<th class="l">Basin</th><th class="l">Region</th><th>Reservoirs</th>'+
-    '<th>Avg</th><th>Min</th><th>Max</th></tr></thead><tbody>';
+    '<th class="l">Capacity filled</th>'+
+    '<th>Avg (%)</th><th>Min (%)</th><th>Max (%)</th></tr></thead><tbody>';
   rows.forEach(r=>{
-    h+='<tr><td class="l">'+r.basin+'</td>'+
-      '<td class="l">'+(DATA.subsystemLabels[r.sub]||r.sub)+'</td>'+
-      '<td>'+r.n+'</td><td>'+fmtNum(r.avg,1)+'%</td>'+
-      '<td>'+fmtNum(r.min,1)+'%</td><td>'+fmtNum(r.max,1)+'%</td></tr>';
+    const w=Math.max(0,Math.min(100,r.avg));
+    const active=f.region===r.sub && f.group===r.basin;
+    h+='<tr class="row-link'+(active?' is-filtered':'')+'" data-sub="'+
+      escapeHtml(r.sub)+'" data-basin="'+escapeHtml(r.basin)+
+      '" title="List reservoirs in this basin">'+
+      '<td class="l">'+escapeHtml(r.basin)+'</td>'+
+      '<td class="l">'+escapeHtml(DATA.subsystemLabels[r.sub]||r.sub)+'</td>'+
+      '<td>'+r.n+'</td>'+
+      '<td class="l"><div class="cap-bar" title="'+fmtNum(r.avg,1)+'% full">'+
+        '<div style="width:'+w+'%;background:'+bandColor(r.avg)+'"></div></div> '+
+        '<span class="band-label" style="color:'+bandColor(r.avg)+'">'+bandLabel(r.avg)+
+        '</span></td>'+
+      '<td>'+fmtNum(r.avg,1)+'</td>'+
+      '<td>'+fmtNum(r.min,1)+'</td><td>'+fmtNum(r.max,1)+'</td></tr>';
   });
   h+='</tbody></table></div>';
   card.innerHTML=h;
   host.appendChild(card);
   makeSortable(card.querySelector("table"), "basinTable");
   makeFilterable(card.querySelector("table"), "basinTable");
+  card.querySelectorAll("tr.row-link").forEach(tr=>{
+    tr.addEventListener("click", ()=>{
+      const filt=state.filter.reservoirs;
+      filt.region=tr.dataset.sub;
+      filt.group=tr.dataset.basin==="—" ? "" : tr.dataset.basin;
+      onFilterChange();
+      const pick=document.getElementById("pickCard");
+      if(pick) pick.scrollIntoView({behavior:"smooth", block:"start"});
+    });
+  });
 }
 
 /* ---------- Thermal Plants tab: gas KPI strip ---------------------------- */
@@ -4420,6 +4562,12 @@ async function boot(){
     'ENA %MLT are rebuilt from their components, CMO is an unweighted subsystem '+
     'mean. Net interchange is positive when the subsystem is a net exporter, '+
     'matching the bulletin. ONS revises recent days after publication.<br><br>'+
+    '<b>Reservoir usable volume.</b> The hydraulic file\u2019s '+
+    '<code>val_volumeutilcon</code> is a percentage of each reservoir\u2019s useful '+
+    'capacity, not a volume in hm\u00b3. Readings below 0 (below the minimum operating '+
+    'level, or a data glitch) and above 100 are clipped to that range. Reservoirs '+
+    'whose latest reading is 0% are omitted from basin averages, the lowest-reservoir '+
+    'KPI, and the picker (toggle Show empty to include them).<br><br>'+
     '<b>CVU.</b> Published weekly per plant (one figure per PMO operative week) '+
     'and held flat across that week\u2019s days rather than interpolated. The '+
     'subsystem figures are the cheapest, median and priciest CVU among gas-fired '+
@@ -4503,9 +4651,8 @@ async function boot(){
   // as before.
   //
   // No default sortState is seeded here any more. entityRows() already
-  // returns its rows selected-first then alphabetically by name, which is
-  // both the order this seed was producing at boot (nothing is selected
-  // among the real plants at that point) and a more useful one once the
+  // returns its rows selected-first then (plants) alphabetically by name
+  // or (reservoirs) lowest usable volume first.
   // visitor has picked some. Seeding an ascending sort on top of it made the
   // first click on the Name header *clear* that sort rather than reverse it
   // -- correct per the three-state cycle, but it looked like a dead click,
