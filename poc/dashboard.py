@@ -230,9 +230,7 @@ footer a { color: var(--accent); }
 <a class="skip-link" href="#data-table" data-i18n="skip">Skip to content</a>
 <div class="wrap">
 <header class="dash-head">
-  <div>
-    <h1 data-i18n="navPoc">POC Results</h1>
-  </div>
+  __SHARED_PAGE_INTRO__
   <div class="header-right">
     <div class="header-links">
       __SHARED_NAV_LINKS__
@@ -1423,6 +1421,7 @@ def write_dashboard(out_path=DEFAULT_OUT):
         SHARED_JS_CHART_PALETTE=kit.chart_palette_js(),
         SHARED_SITE_LINKS_JS=kit.site_links_js("poc"),
         SHARED_NAV_LINKS=kit.nav_links_html("poc"),
+        SHARED_PAGE_INTRO=kit.page_intro_html("poc"),
         FAVICON_DATA_URI=kit.embed_favicon(),
         FONT_PRELOAD=kit.font_preload_html(),
         MMBTU_PER_M3=str(MMBTU_PER_M3),

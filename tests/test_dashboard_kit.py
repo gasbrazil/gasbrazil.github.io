@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import html
 
+import pytest
+
 import dashboard_kit as kit
 
 
@@ -34,3 +36,33 @@ def test_nav_products_aria():
     assert 'aria-haspopup="menu"' in html_nav
     assert 'id="gb-products-menu"' in html_nav
     assert 'role="menu"' in html_nav
+
+
+def test_page_intro_has_breadcrumb_and_title():
+    out = kit.page_intro_html("ons")
+    assert 'class="crumbs"' in out
+    assert 'aria-label="Breadcrumb"' in out
+    assert 'href="../"' in out
+    assert 'aria-current="page"' in out
+    assert '<h1 data-i18n="navOns">ONS Balances</h1>' in out
+    # Streamlined by design: no visible description paragraph.
+    assert "page-sub" not in out
+
+
+def test_page_intro_covers_every_dashboard():
+    for site in ("desk", "ons", "pld", "poc", "contratos", "flows", "supply", "precos"):
+        out = kit.page_intro_html(site)
+        assert "<nav " in out and "<h1" in out
+
+
+def test_page_intro_rejects_unknown_site():
+    with pytest.raises(KeyError):
+        kit.page_intro_html("nope")
+
+
+def test_staleness_helper_ships_with_asof_js():
+    js = kit.refreshed_local_js()
+    assert "initStalenessBadgeFor" in js
+    assert "STALE_MAX_LAG_DAYS" in js
+    for site in ("ons", "pld", "contratos", "flows", "supply", "precos", "desk"):
+        assert f'"{site}"' in js

@@ -230,9 +230,7 @@ footer a { color: var(--accent); }
 <a class="skip-link" href="#data-table" data-i18n="skip">Skip to content</a>
 <div class="wrap">
 <header class="dash-head">
-  <div>
-    <h1 data-i18n="navContratos">POC Contracts</h1>
-  </div>
+  __SHARED_PAGE_INTRO__
   <div class="header-right">
     <div class="header-links">
       __SHARED_NAV_LINKS__
@@ -1549,6 +1547,7 @@ async function init() {
     if (d && (!through || d > through)) through = d;
   }
   document.getElementById("asof-through").textContent = through || "—";
+  initStalenessBadgeFor("contratos", through);
   if (DATA.excludedConcluded) {
     document.getElementById("coverage-note").textContent =
       `Active Transport & Master contracts \u00b7 ${DATA.excludedConcluded.toLocaleString("en-US")} concluded excluded`;
@@ -1630,6 +1629,7 @@ def write_dashboard(out_path=DEFAULT_OUT):
         SHARED_JS_CHART_PALETTE=kit.chart_palette_js(),
         SHARED_SITE_LINKS_JS=kit.site_links_js("contratos"),
         SHARED_NAV_LINKS=kit.nav_links_html("contratos"),
+        SHARED_PAGE_INTRO=kit.page_intro_html("contratos"),
         FAVICON_DATA_URI=kit.embed_favicon(),
         FONT_PRELOAD=kit.font_preload_html(),
     )
