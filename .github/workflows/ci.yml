@@ -32,6 +32,6 @@ jobs:
           python-version: "3.12"
           cache-dependency-glob: "tests/requirements.txt"
       - name: Install
-        run: uv pip install --system --break-system-packages -r tests/requirements.txt -c shared/constraints.txt
+        run: uv pip install -r tests/requirements.txt -c shared/constraints.txt
       - name: Run tests
         run: python -m pytest -q
