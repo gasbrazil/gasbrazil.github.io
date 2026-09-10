@@ -209,6 +209,7 @@ footer a { color: var(--accent); }
 <div class="toolbar">
   <button type="button" id="btn-csv" data-i18n="precosCsv">Download CSV</button>
   <button type="button" id="btn-xlsx" data-i18n="precosXlsx">Export Excel</button>
+  __SHARED_SHARE_BUTTON__
   <span class="count" id="row-count"></span>
 </div>
 <div class="table-wrap">
@@ -241,6 +242,7 @@ __SHARED_SITE_LINKS_JS__
 __SHARED_JS_THEME_TOGGLE__
 __SHARED_JS_I18N__
 __SHARED_JS_ASOF__
+__SHARED_JS_QUERY_STATE__
 
 GB_I18N.en.precosProdTitle = "Producer sales by basin";
 GB_I18N.en.precosDistTitle = "Sales to distributors & free consumers";
@@ -630,12 +632,32 @@ async function downloadXlsx() {
   document.body.appendChild(a); a.click(); a.remove();
   URL.revokeObjectURL(url);
 }
-function refreshProd() { buildPicker("picker-producers", PROD_META, pickedProd, prodSlots, refreshProd); renderCharts(); }
-function refreshDist() { buildPicker("picker-distributors", DIST_META, pickedDist, distSlots, refreshDist); renderCharts(); }
+function refreshProd() { buildPicker("picker-producers", PROD_META, pickedProd, prodSlots, refreshProd); renderCharts(); writePrecosQuery(); }
+function refreshDist() { buildPicker("picker-distributors", DIST_META, pickedDist, distSlots, refreshDist); renderCharts(); writePrecosQuery(); }
 function refreshPickersAndCharts() {
   buildPicker("picker-producers", PROD_META, pickedProd, prodSlots, refreshProd);
   buildPicker("picker-distributors", DIST_META, pickedDist, distSlots, refreshDist);
   renderCharts();
+  writePrecosQuery();
+}
+
+// Shareable view state: the two picked series sets. Unknown keys degrade
+// to the defaults via the shared gb* query helpers
+// (see shared/dashboard_kit.py JS_QUERY_STATE).
+function applyPrecosQuery() {
+  const sp = gbQueryParams();
+  const prod = gbValidList(sp.get("prod"), PROD_META.map(m => m.key));
+  const dist = gbValidList(sp.get("dist"), DIST_META.map(m => m.key));
+  if (prod || dist) {
+    if (prod) { pickedProd = new Set(prod); prodSlots = new Map(); prod.forEach(k => colorOf(prodSlots, k)); }
+    if (dist) { pickedDist = new Set(dist); distSlots = new Map(); dist.forEach(k => colorOf(distSlots, k)); }
+  }
+}
+function writePrecosQuery() {
+  gbWriteQuery({
+    prod: [...pickedProd],
+    dist: [...pickedDist],
+  });
 }
 async function init() {
   document.getElementById("year").textContent = new Date().getFullYear();
@@ -645,12 +667,14 @@ async function init() {
     paintAsof(); renderKpis(); refreshPickersAndCharts(); renderTable(); applyI18n();
   });
   initCrossLinks();
+  gbCopyLink("btn-share");
   applyI18n();
   try {
     const json = await inflateGzipUrl(PAYLOAD_URL);
     DATA = JSON.parse(json);
     PROD_META.forEach(m => { pickedProd.add(m.key); colorOf(prodSlots, m.key); });
     DIST_META.forEach(m => { pickedDist.add(m.key); colorOf(distSlots, m.key); });
+    applyPrecosQuery();
     paintAsof();
     renderKpis();
     refreshPickersAndCharts();
@@ -693,6 +717,8 @@ def write_dashboard(out_path=DEFAULT_OUT):
         SHARED_JS_CSV=kit.JS_CSV_HELPERS,
         SHARED_JS_XLSX=kit.JS_XLSX_ENGINE,
         SHARED_JS_TABLE_SORT=kit.JS_TABLE_SORT,
+        SHARED_JS_QUERY_STATE=kit.JS_QUERY_STATE,
+        SHARED_SHARE_BUTTON=kit.share_link_button_html(),
         SHARED_JS_CHART_PALETTE=kit.chart_palette_js(),
         SHARED_SITE_LINKS_JS=kit.site_links_js("precos"),
         SHARED_NAV_LINKS=kit.nav_links_html("precos"),

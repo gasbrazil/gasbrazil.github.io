@@ -255,6 +255,7 @@ footer a { color: var(--accent); }
   <button class="secondary" id="btn-columns" title="Show or hide columns">Columns</button>
   <button id="btn-csv">Download CSV</button>
   <button id="btn-xlsx">Export all data (Excel)</button>
+  __SHARED_SHARE_BUTTON__
   <span class="count" id="row-count"></span>
 </div>
 <div class="table-wrap">
@@ -293,6 +294,7 @@ __SHARED_JS_XLSX__
    Excel-style popup filters, column drag/reorder, resize, and hide prefs.
    cycleSort is adopted below for the 3-click header sort cycle. */
 __SHARED_JS_TABLE_SORT__
+__SHARED_JS_QUERY_STATE__
 
 const NUMERIC_COLS = new Set(["Contracted Capacity (000 m3/d)", "Allocated Tariff (R$/MMBtu)", "Tariff Multiplier", "Transporter Ownership %"]);
 const DEFAULT_COL_WIDTH = { "Shipper": 180, "Contract Number": 140, "Point/Zone": 120 };
@@ -1421,8 +1423,10 @@ function updateArrows() {
 // Shareable view state in the URL. Toolbar + quick chips + TSO/shipper drill
 // + the expired/future validity toggles. Header-menu column Sets stay local.
 // `refreshed` is a cache-bust token and is stripped from shared links.
+// Unknown params degrade to defaults via the shared gb* query helpers
+// (see shared/dashboard_kit.py JS_QUERY_STATE).
 function applyQueryFilters() {
-  const sp = new URLSearchParams(location.search);
+  const sp = gbQueryParams();
   const category = sp.get("category");
   if (category) {
     const sel = document.getElementById("f-category");
@@ -1430,17 +1434,17 @@ function applyQueryFilters() {
   }
   const q = sp.get("q");
   if (q) document.getElementById("f-search").value = q;
-  const qfRaw = sp.get("qf");
-  if (qfRaw) {
-    for (const key of qfRaw.split(",").map(s => s.trim()).filter(Boolean)) {
+  const keys = gbValidList(sp.get("qf"), QUICK_FILTERS.map(x => x.key));
+  if (keys) {
+    for (const key of keys) {
       const qf = QUICK_FILTERS.find(x => x.key === key);
       if (!qf) continue;
       if (qf.type === "set") columnFilters[qf.col] = new Set(qf.values);
       else columnFilters[qf.col] = daysAgoRange(qf.days);
     }
   }
-  const tso = sp.get("tso");
-  if (tso && orderedTsos().includes(tso)) {
+  const tso = gbValidEnum(sp.get("tso"), orderedTsos());
+  if (tso) {
     drillTso = tso;
     columnFilters["Transporter (TSO)"] = new Set([tso]);
   }
@@ -1451,25 +1455,20 @@ function applyQueryFilters() {
 }
 
 function writeQueryFilters() {
-  const u = new URL(location.href);
-  const sp = u.searchParams;
-  sp.delete("refreshed");
   const category = document.getElementById("f-category").value;
-  if (category) sp.set("category", category); else sp.delete("category");
   const q = document.getElementById("f-search").value.trim();
-  if (q) sp.set("q", q); else sp.delete("q");
   const activeQf = QUICK_FILTERS.filter(quickFilterActive).map(qf => qf.key);
-  if (activeQf.length) sp.set("qf", activeQf.join(",")); else sp.delete("qf");
-  if (drillTso) sp.set("tso", drillTso); else sp.delete("tso");
   const shipper = columnFilters["Shipper"] && columnFilters["Shipper"].size === 1
     ? [...columnFilters["Shipper"]][0] : null;
-  if (shipper) sp.set("shipper", shipper); else sp.delete("shipper");
-  if (showExpired) sp.set("expired", "1"); else sp.delete("expired");
-  if (showFuture) sp.set("future", "1"); else sp.delete("future");
-  const qs = sp.toString();
-  const next = u.pathname + (qs ? "?" + qs : "") + u.hash;
-  if (next !== location.pathname + location.search + location.hash)
-    history.replaceState(null, "", next);
+  gbWriteQuery({
+    category: category || null,
+    q: q || null,
+    qf: activeQf.length ? activeQf : null,
+    tso: drillTso || null,
+    shipper: shipper || null,
+    expired: showExpired ? "1" : null,
+    future: showFuture ? "1" : null,
+  });
 }
 
 function render() {
@@ -1597,6 +1596,7 @@ async function init() {
   initThemeToggle("theme-toggle", () => { renderChart(); updateChartPickerButtons(); });
   initLangToggle("lang-toggle");
   initCrossLinks();
+  gbCopyLink("btn-share");
 }
 init();
 </script>
@@ -1627,6 +1627,8 @@ def write_dashboard(out_path=DEFAULT_OUT):
         SHARED_JS_CSV=kit.JS_CSV_HELPERS,
         SHARED_JS_XLSX=kit.JS_XLSX_ENGINE,
         SHARED_JS_TABLE_SORT=kit.JS_TABLE_SORT,
+        SHARED_JS_QUERY_STATE=kit.JS_QUERY_STATE,
+        SHARED_SHARE_BUTTON=kit.share_link_button_html(),
         SHARED_JS_CHART_PALETTE=kit.chart_palette_js(),
         SHARED_SITE_LINKS_JS=kit.site_links_js("contratos"),
         SHARED_NAV_LINKS=kit.nav_links_html("contratos"),

@@ -307,6 +307,8 @@ const GB_I18N = {
     navWiki: "Wiki",
     filterPlaceholder: "Filter…",
     contact: "Contact",
+    copyLink: "Copy link",
+    linkCopied: "Copied",
     tagline: "Analytical Firepower for Brazil's Energy Markets",
     hubHint: "Every card below opens a live dashboard — pick a product to explore.",
     aboutLead: "Independent public-data dashboards. Not an official ONS, ANP, CCEE, or transportadora product.",
@@ -409,6 +411,8 @@ const GB_I18N = {
     navWiki: "Wiki",
     filterPlaceholder: "Filtrar…",
     contact: "Contato",
+    copyLink: "Copiar link",
+    linkCopied: "Copiado",
     tagline: "Potência analítica para os mercados de energia do Brasil",
     hubHint: "Cada cartão abaixo abre um painel ao vivo — escolha um produto para explorar.",
     aboutLead: "Painéis independentes com dados públicos. Não é produto oficial da ONS, ANP, CCEE ou transportadoras.",
@@ -621,6 +625,109 @@ function buildSortFilterTh(col, sortState, defaultSort, filters, onChange, extra
   return th;
 }
 """
+
+# Shareable view state in the URL (deep-linking). One mechanism for all
+# eight dashboards: each page reads its own toolbar-level params on boot
+# (dates, selected series, presets) and rewrites them with
+# history.replaceState on every repaint, so a copied URL reopens the same
+# view. Header-menu column Sets stay local-only (encoding arbitrary Sets
+# gets noisy fast -- the poc/contratos precedent). `refreshed` is a
+# cache-bust token and is always stripped so shared links stay clean.
+#
+# Robustness contract: every reader validates and degrades to defaults --
+# unknown or partial params never blank the page. gbValidDate accepts only
+# real calendar days (YYYY-MM-DD); gbValidEnum allows only a listed value;
+# gbValidList keeps only allow-listed comma entries (unknown entries are
+# dropped, and an all-unknown list reads as absent).
+JS_QUERY_STATE = r"""
+function gbQueryParams() {
+  try { return new URLSearchParams(location.search); }
+  catch (e) { return new URLSearchParams(); }
+}
+function gbWriteQuery(pairs) {
+  try {
+    const u = new URL(location.href);
+    const sp = u.searchParams;
+    sp.delete("refreshed");
+    for (const k of Object.keys(pairs || {})) {
+      const v = pairs[k];
+      if (v === null || v === undefined || v === "" || (Array.isArray(v) && !v.length)) sp.delete(k);
+      else sp.set(k, Array.isArray(v) ? v.join(",") : String(v));
+    }
+    const qs = sp.toString();
+    const next = u.pathname + (qs ? "?" + qs : "") + u.hash;
+    if (next !== location.pathname + location.search + location.hash) history.replaceState(null, "", next);
+  } catch (e) {}
+}
+function gbValidDate(s) {
+  if (typeof s !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return null;
+  const d = new Date(s + "T00:00:00Z");
+  if (isNaN(d.getTime())) return null;
+  const parts = s.split("-");
+  if (d.getUTCFullYear() !== +parts[0] || d.getUTCMonth() + 1 !== +parts[1] || d.getUTCDate() !== +parts[2]) return null;
+  return s;
+}
+function gbValidEnum(v, allowed) {
+  if (!v || !Array.isArray(allowed)) return null;
+  return allowed.indexOf(v) >= 0 ? v : null;
+}
+function gbValidList(raw, allowed) {
+  if (!raw || !Array.isArray(allowed)) return null;
+  const allow = {};
+  allowed.forEach(a => { allow[a] = 1; });
+  const seen = {};
+  const out = [];
+  String(raw).split(",").forEach(s => {
+    const t = s.trim();
+    if (t && allow[t] && !seen[t]) { seen[t] = 1; out.push(t); }
+  });
+  return out.length ? out : null;
+}
+function gbCopyLink(buttonId) {
+  const btn = document.getElementById(buttonId || "btn-share");
+  if (!btn || btn.dataset.gbShareBound === "1") return;
+  btn.dataset.gbShareBound = "1";
+  btn.addEventListener("click", async () => {
+    const url = location.href;
+    let ok = false;
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(url);
+        ok = true;
+      }
+    } catch (e) {}
+    if (!ok) {
+      try {
+        const ta = document.createElement("textarea");
+        ta.value = url;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        ok = document.execCommand("copy");
+        ta.remove();
+      } catch (e) {}
+    }
+    btn.textContent = (typeof t === "function") ? t(ok ? "linkCopied" : "copyLink") : (ok ? "Copied" : "Copy link");
+    setTimeout(() => {
+      btn.textContent = (typeof t === "function") ? t("copyLink") : "Copy link";
+    }, 1600);
+  });
+}
+"""
+
+
+def share_link_button_html(button_id: str = "btn-share", css_class: str = "") -> str:
+    """Copy-link button for a dashboard toolbar. Plain toolbar-button look
+    (no new CSS, no new prose): the label is the shared copyLink i18n key
+    so PT toggles translate it like every other chrome string. css_class
+    covers pages with no generic button rule (desk reuses series-btn)."""
+    safe = html.escape(button_id, quote=True)
+    cls = f' class="{html.escape(css_class, quote=True)}"' if css_class else ""
+    return (
+        f'<button type="button" id="{safe}"{cls} '
+        'data-i18n="copyLink">Copy link</button>'
+    )
 
 # Dependency-free XLSX writer (store-only-adjacent ZIP via the browser's
 # native CompressionStream("deflate-raw"), plus the minimal OOXML parts Excel

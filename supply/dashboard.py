@@ -204,6 +204,7 @@ footer a { color: var(--accent); }
   <div class="toolbar">
     <button type="button" id="btn-csv" data-i18n="supplyCsv">Download CSV</button>
     <button type="button" id="btn-xlsx" data-i18n="supplyXlsx">Export Excel</button>
+    __SHARED_SHARE_BUTTON__
     <span class="count" id="row-count"></span>
   </div>
   <div class="table-wrap">
@@ -239,6 +240,7 @@ __SHARED_SITE_LINKS_JS__
 __SHARED_JS_THEME_TOGGLE__
 __SHARED_JS_I18N__
 __SHARED_JS_ASOF__
+__SHARED_JS_QUERY_STATE__
 
 // Page-local i18n keys merged into the shared pack.
 GB_I18N.en.navSupply = "Gas Supply";
@@ -310,9 +312,26 @@ function buildPicker() {
       else { picked.add(m.key); colorOf(m.key); }
       buildPicker();
       renderChart();
+      writeSupplyQuery();
     });
     host.appendChild(btn);
   });
+}
+
+// Shareable view state: the selected series set. Unknown keys degrade to
+// the builder defaults via the shared gb* query helpers
+// (see shared/dashboard_kit.py JS_QUERY_STATE).
+function supplySeriesKeys() { return (DATA.metrics || []).map(m => m.key); }
+function applySupplyQuery() {
+  const keys = gbValidList(gbQueryParams().get("series"), supplySeriesKeys());
+  if (keys) {
+    picked = new Set(keys);
+    chartSlots = new Map();
+    keys.forEach(k => colorOf(k));
+  }
+}
+function writeSupplyQuery() {
+  gbWriteQuery({ series: [...picked] });
 }
 
 function renderKpis() {
@@ -555,11 +574,13 @@ async function init() {
   DATA = JSON.parse(json);
   document.getElementById("import-gap").hidden = !DATA.importGap;
   DATA.metrics.forEach(m => { if (m.defaultOn) { picked.add(m.key); colorOf(m.key); } });
+  applySupplyQuery();
   paintAsof();
   renderKpis();
   buildPicker();
   renderChart();
   renderTable();
+  writeSupplyQuery();
   document.getElementById("btn-csv").addEventListener("click", downloadCsv);
   document.getElementById("btn-xlsx").addEventListener("click", downloadXlsx);
   window.addEventListener("resize", () => {
@@ -571,6 +592,7 @@ async function init() {
     renderKpis(); buildPicker(); renderChart(); renderTable(); applyI18n();
   });
   initCrossLinks();
+  gbCopyLink("btn-share");
   applyI18n();
 }
 init();
@@ -603,6 +625,8 @@ def write_dashboard(out_path: Path | str = DEFAULT_OUT) -> Path:
         SHARED_JS_CSV=kit.JS_CSV_HELPERS,
         SHARED_JS_XLSX=kit.JS_XLSX_ENGINE,
         SHARED_JS_TABLE_SORT=kit.JS_TABLE_SORT,
+        SHARED_JS_QUERY_STATE=kit.JS_QUERY_STATE,
+        SHARED_SHARE_BUTTON=kit.share_link_button_html(),
         SHARED_JS_CHART_PALETTE=kit.chart_palette_js(),
         SHARED_SITE_LINKS_JS=kit.site_links_js("supply"),
         SHARED_NAV_LINKS=kit.nav_links_html("supply"),
