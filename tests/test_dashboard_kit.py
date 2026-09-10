@@ -31,20 +31,40 @@ def test_favicon_fallback_encodes_hash():
     assert "fill='%2303183D'" in uri
 
 
-def test_nav_products_aria():
-    html_nav = kit.nav_links_html("ons")
-    assert 'aria-haspopup="menu"' in html_nav
-    assert 'id="gb-products-menu"' in html_nav
-    assert 'role="menu"' in html_nav
+def test_masthead_menu_aria():
+    mast = kit.masthead_html("ons")
+    assert 'aria-haspopup="menu"' in mast
+    assert 'id="gb-products-menu"' in mast
+    assert 'role="menu"' in mast
+    assert "\u2630" in mast  # hamburger glyph on the Menu trigger
+    assert 'data-i18n="navMenu"' in mast
+    assert "navProducts" not in mast
 
 
-def test_page_intro_has_breadcrumb_and_title():
+def test_masthead_merges_brand_and_title():
+    mast = kit.masthead_html("ons")
+    assert mast.count("GasBrazil") == 1  # brand once; no repeated wordmark
+    assert 'id="link-home"' in mast
+    assert '<h1 data-i18n="navOns">ONS Balances</h1>' in mast
+    assert 'aria-current="page"' in mast
+    # Streamlined by design: no separate breadcrumb nav above the title.
+    assert 'aria-label="Breadcrumb"' not in mast
+
+
+def test_masthead_covers_every_dashboard():
+    for site in ("desk", "ons", "pld", "poc", "contratos", "flows", "supply", "precos"):
+        mast = kit.masthead_html(site)
+        assert 'class="masthead"' in mast and "<h1" in mast
+
+
+def test_masthead_rejects_unknown_site():
+    with pytest.raises(KeyError):
+        kit.masthead_html("nope")
+
+
+def test_page_intro_is_title_only():
     out = kit.page_intro_html("ons")
-    assert 'class="crumbs"' in out
-    assert 'aria-label="Breadcrumb"' in out
-    assert 'href="../"' in out
-    assert 'aria-current="page"' in out
-    assert '<h1 data-i18n="navOns">ONS Balances</h1>' in out
+    assert out == '<h1 data-i18n="navOns">ONS Balances</h1>'
     # Streamlined by design: no visible description paragraph.
     assert "page-sub" not in out
 
@@ -52,7 +72,7 @@ def test_page_intro_has_breadcrumb_and_title():
 def test_page_intro_covers_every_dashboard():
     for site in ("desk", "ons", "pld", "poc", "contratos", "flows", "supply", "precos"):
         out = kit.page_intro_html(site)
-        assert "<nav " in out and "<h1" in out
+        assert out.startswith("<h1") and "<nav " not in out
 
 
 def test_page_intro_rejects_unknown_site():
