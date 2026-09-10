@@ -503,6 +503,19 @@ def _aggregate_ledger(long_df: pd.DataFrame) -> pd.DataFrame:
     return out.sort_values(["pipeline_name", "variable", "date"]).reset_index(drop=True)
 
 
+def _staleness_days(latest) -> int:
+    """Days from the newest data date to today (UTC).
+
+    The parquet date column is tz-naive while "now" is tz-aware; mixing
+    the two raises TypeError, so naive inputs are assumed UTC. Accepts
+    Timestamps, date/datetime objects, and parseable strings.
+    """
+    latest = pd.Timestamp(latest)
+    if latest.tz is None:
+        latest = latest.tz_localize("UTC")
+    return (pd.Timestamp.now("UTC").normalize() - latest).days
+
+
 def cmd_build(args) -> None:
     try:
         anp_points, ledger_df = build_tables()
@@ -576,7 +589,7 @@ def cmd_build(args) -> None:
         # Monthly publication with a multi-week lag (see README) -- flag if
         # the newest data we have is implausibly old, not just "not today".
         # TSO overlays often close that gap; use merged latest.
-        staleness_days = (pd.Timestamp.now("UTC").normalize() - latest).days
+        staleness_days = _staleness_days(latest)
         if staleness_days > xf.FLOWS_MAX_STALENESS_DAYS:
             problems.append(f"latest point data is {staleness_days} days old ({latest.date()})")
         if points_df["point_code"].isna().any():
