@@ -1641,6 +1641,48 @@ def normalize_balance(df: pd.DataFrame) -> pd.DataFrame:
     return pd.concat([df] + add, ignore_index=True)[COLS]
 
 
+def clip_usable_volume(df: pd.DataFrame) -> pd.DataFrame:
+    """Floor/cap `res_volutil_pct` at [0, 100].
+
+    ONS's `val_volumeutilcon` is a percentage of useful capacity, but the
+    open-data file sometimes ships negatives (below the minimum operating
+    level, or a sensor/unit glitch — ESTRELA has been published around
+    −1,900%) and readings well over 100. Neither is a usable figure for
+    the dashboard or for basin averages.
+    """
+    if df.empty or "series" not in df.columns or "value" not in df.columns:
+        return df
+    mask = df["series"] == "res_volutil_pct"
+    if not mask.any():
+        return df
+    out = df.copy()
+    out.loc[mask, "value"] = pd.to_numeric(out.loc[mask, "value"],
+                                           errors="coerce").clip(lower=0, upper=100)
+    return out
+
+
+def normalize_entities(ent: pd.DataFrame) -> pd.DataFrame:
+    """Strip identifiers, then drop duplicate kind/subsystem/entity rows.
+
+    Duplicates previously survived because drop_duplicates ran *before*
+    subsystem/entity were stripped and uppercased, so "S" and "S " (or a
+    mixed-case copy) counted as two reservoirs and inflated basin counts.
+    """
+    if ent is None or ent.empty:
+        return ent if ent is not None else pd.DataFrame(
+            columns=["kind", "entity", "subsystem", "group"])
+    out = ent.copy()
+    for col in ("kind", "subsystem", "entity", "group"):
+        if col in out.columns:
+            out[col] = out[col].fillna("").astype(str).str.strip()
+    if "subsystem" in out.columns:
+        out["subsystem"] = out["subsystem"].str.upper()
+    subset = [c for c in ("kind", "subsystem", "entity") if c in out.columns]
+    if subset:
+        out = out.drop_duplicates(subset=subset, keep="last")
+    return out
+
+
 def build_store(raw: Path, out: Path, keys: list[str]) -> pd.DataFrame:
     parts: list[pd.DataFrame] = []
     entities: list[pd.DataFrame] = []
@@ -1705,12 +1747,10 @@ def build_store(raw: Path, out: Path, keys: list[str]) -> pd.DataFrame:
         df.groupby(["date", "subsystem", "entity", "series"],
                    observed=True, as_index=False)["value"].mean()
     )
+    df = clip_usable_volume(df)
     ent_df = pd.DataFrame(columns=["kind", "entity", "subsystem", "group"])
     if entities:
-        ent_df = pd.concat(entities, ignore_index=True).drop_duplicates(
-            subset=["kind", "subsystem", "entity"], keep="last")
-        ent_df["subsystem"] = ent_df["subsystem"].astype(str).str.strip().str.upper()
-        ent_df["group"] = ent_df["group"].fillna("").astype(str).str.strip()
+        ent_df = normalize_entities(pd.concat(entities, ignore_index=True))
         keep_cols = ["kind", "entity", "subsystem", "group"] + [
             c for c in ("ceg", "cod") if c in ent_df.columns]
         ent_df = ent_df[keep_cols]

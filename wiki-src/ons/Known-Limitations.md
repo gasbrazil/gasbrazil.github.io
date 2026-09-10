@@ -90,6 +90,15 @@ assumption ONS doesn't publish at all.
   hydraulic file carries every reservoir ONS tracks; the bulletin prints
   only the principal ones. A name in the bulletin should always be present
   here, but not the reverse.
+- **Usable volume is clipped to 0–100% of useful capacity.** ONS's
+  `val_volumeutilcon` is a percentage, but the file sometimes ships
+  negatives (below the minimum operating level, or a clear data glitch —
+  ESTRELA has been published around −1,900%) and occasional readings well
+  above 100%. The dashboard floors those at 0% and caps them at 100%.
+  Reservoirs whose latest reading is 0% are omitted from basin averages,
+  the lowest-reservoir KPI, and the picker (toggle **Show empty** to
+  include them), so they cannot pull a basin average negative or show up
+  as the "lowest" reservoir.
 - **A stat tile's "as of" date can differ from the tile next to it** —
   different ONS publications (the balance file vs. the thermal dispatch
   file) don't necessarily finish publishing for a given day at the same

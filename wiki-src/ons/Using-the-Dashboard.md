@@ -73,26 +73,37 @@ Subsystems into Hydro/Gas/Coal/Oil/Nuclear/Biomass/Wind/Solar shares.
 ## Reservoirs
 
 Every reservoir ONS tracks, filterable by Region and Basin, searchable by
-name, charted as usable volume % or upstream level. Above the per-reservoir
-picker sits a three-tier summary, coarsest to finest:
+name, charted as **usable volume (% of that reservoir's useful capacity)**
+or upstream level (metres). The individual-reservoir picker is titled
+**Individual reservoirs** so it is distinct from the summary tables above
+it; metric columns include their unit. Empty reservoirs (latest usable
+volume 0%, including ONS readings that were negative and have been clipped
+to zero) are omitted from the picker, basin averages, and the
+lowest-reservoir KPI — use **Show empty** to bring them back. Click a
+region or basin row to scope the picker to that slice.
+
+Above the per-reservoir picker sits a three-tier summary, coarsest to finest:
 
 1. **Hydro reservoirs by region** — SIN + each subsystem, EAR% with a
    capacity-filled bar, stored/capacity in MWmês, 30-day change, and inflow
-   (ENA %MLT).
+   (ENA %MLT). Click a region to list its reservoirs.
 2. **EAR by Reservoir Equivalent (REE)** — the same storage metric at REE
    granularity (finer than subsystem, coarser than basin) — useful because
    two REEs can move in opposite directions underneath one steady regional
    number.
-3. **Usable volume by basin** — reservoir count and avg/min/max usable
-   volume %, grouped by basin and sorted lowest-first.
+3. **Usable volume by basin** — reservoir count, a capacity-filled bar, and
+   avg/min/max usable volume % of useful capacity, grouped by basin and
+   sorted lowest-first. Empty/invalid reservoirs are omitted so they cannot
+   pull a basin average negative. Click a basin to list its reservoirs.
 
 KPI strip: Latest available data, SIN reservoirs (EAR%, 30-day change),
 National inflow (ENA % of long-term average, plus a plain-language read on
 whether storage is likely recovering or declining), Most-stressed region
-(lowest EAR% among the four subsystems), Lowest individual reservoir, and a
-count of reservoirs currently below 20% usable volume. Region-table capacity
-bars and KPI-tile colors share a red/amber/green banding (with a text label,
-not color alone) at <30% / 30–60% / >60%.
+(lowest EAR% among the four subsystems), Lowest individual reservoir
+(% of useful capacity, empty omitted), and a count of reservoirs currently
+below 20% usable volume. Region-table capacity bars and KPI-tile colors
+share a red/amber/green banding (with a text label, not color alone) at
+<30% / 30–60% / >60%.
 
 ## Reading a stat tile
 
