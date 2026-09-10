@@ -398,6 +398,7 @@ def write_dashboard(df: pd.DataFrame, dest: Path,
         SHARED_SITE_LINKS_JS=kit.site_links_js("ons"),
         SHARED_NAV_LINKS=kit.nav_links_html("ons"),
         SHARED_PAGE_INTRO=kit.page_intro_html("ons"),
+        SHARED_METHODOLOGY=kit.methodology_html("ons"),
         FAVICON_DATA_URI=kit.embed_favicon(),
         FONT_PRELOAD=kit.font_preload_html(),
     )
@@ -674,6 +675,7 @@ table.data thead th.sortable:hover{background:var(--accent-soft)}
   <span class="asof-label" data-i18n="dataThrough">Data through</span>
   <span class="asof-val" id="asof-through">&mdash;</span>
 </div>
+__SHARED_METHODOLOGY__
 <div class="foot" id="foot"></div>
 </div>
 

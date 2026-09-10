@@ -276,6 +276,7 @@ footer a { color: var(--accent); }
     <span class="asof-label" data-i18n="dataThrough">Data through</span>
     <span class="asof-val" id="asof-through">&mdash;</span>
   </div>
+  __SHARED_METHODOLOGY__
   &copy; <span id="year"></span> GasBrazil.com &middot; Data: Portal de Oferta de Capacidade (public API) &middot; Contact: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
   <br><span id="coverage-note">Active Transport &amp; Master contracts</span><button class="infodot" type="button" aria-label="About contract coverage" data-info="Covers the &quot;Transport Contract&quot; and &quot;Master Contract&quot; contract types. &quot;Legacy Transport Contract&quot; and &quot;Access Connection&quot; are small, separately-sourced categories on the source site and are not yet included. Concluded contracts are excluded from the view.">i</button>
 </footer>
@@ -1630,6 +1631,7 @@ def write_dashboard(out_path=DEFAULT_OUT):
         SHARED_SITE_LINKS_JS=kit.site_links_js("contratos"),
         SHARED_NAV_LINKS=kit.nav_links_html("contratos"),
         SHARED_PAGE_INTRO=kit.page_intro_html("contratos"),
+        SHARED_METHODOLOGY=kit.methodology_html("contratos"),
         FAVICON_DATA_URI=kit.embed_favicon(),
         FONT_PRELOAD=kit.font_preload_html(),
     )

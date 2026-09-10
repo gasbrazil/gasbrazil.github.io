@@ -66,3 +66,35 @@ def test_staleness_helper_ships_with_asof_js():
     assert "STALE_MAX_LAG_DAYS" in js
     for site in ("ons", "pld", "contratos", "flows", "supply", "precos", "desk"):
         assert f'"{site}"' in js
+
+
+def test_methodology_has_collapsed_rows():
+    out = kit.methodology_html("pld")
+    assert out.startswith('<details class="method">')
+    assert 'data-i18n="methodTitle"' in out
+    assert 'data-i18n="methodSources"' in out
+    assert 'data-i18n="methodAssump"' in out
+    assert 'data-i18n="methodLimits"' in out
+    assert 'data-i18n="methodAssump_pld"' in out
+    assert 'data-i18n="aboutCoverPld"' in out
+    assert 'data-i18n="sourcePld"' in out
+    assert "<table" not in out
+
+
+def test_methodology_covers_every_dashboard():
+    for site in ("desk", "ons", "pld", "poc", "contratos", "flows", "supply", "precos"):
+        out = kit.methodology_html(site)
+        assert "<details" in out and "<summary" in out
+
+
+def test_methodology_rejects_unknown_site():
+    with pytest.raises(KeyError):
+        kit.methodology_html("nope")
+
+
+def test_methodology_defaults_match_i18n_pack():
+    # Builder defaults show pre-hydration; drift from GB_I18N would flash
+    # mismatched text on every language toggle.
+    for defaults in (kit._METHOD_ASSUMP_DEFAULTS, kit._METHOD_LIMITS_DEFAULTS):
+        for text in defaults.values():
+            assert text in kit.JS_I18N
