@@ -56,7 +56,7 @@ jobs:
           python-version: "3.12"
           cache-dependency-glob: "flows/requirements.txt"
 
-      - run: uv pip install --system --break-system-packages -r requirements.txt -c ../shared/constraints.txt
+      - run: uv pip install -r requirements.txt -c ../shared/constraints.txt
 
       # Raw ANP CSVs + TSO Portaria workbooks under raw/tso/ -- cache the whole
       # raw/ tree keyed by year-month so a normal run only re-downloads recent
