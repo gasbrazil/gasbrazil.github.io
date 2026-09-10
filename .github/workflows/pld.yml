@@ -45,7 +45,7 @@ jobs:
           python-version: "3.12"
           cache-dependency-glob: "pld/requirements.txt"
 
-      - run: uv pip install --system -r requirements.txt -c ../shared/constraints.txt
+      - run: uv pip install --system --break-system-packages -r requirements.txt -c ../shared/constraints.txt
 
       - name: Cache key for this month
         id: ym
