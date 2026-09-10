@@ -397,6 +397,7 @@ def write_dashboard(df: pd.DataFrame, dest: Path,
         SHARED_JS_ASOF=kit.refreshed_local_js(),
         SHARED_SITE_LINKS_JS=kit.site_links_js("ons"),
         SHARED_NAV_LINKS=kit.nav_links_html("ons"),
+        SHARED_PAGE_INTRO=kit.page_intro_html("ons"),
         FAVICON_DATA_URI=kit.embed_favicon(),
         FONT_PRELOAD=kit.font_preload_html(),
     )
@@ -610,9 +611,7 @@ table.data thead th.sortable:hover{background:var(--accent-soft)}
 <a class="skip-link" href="#app" data-i18n="skip">Skip to content</a>
 <div class="wrap">
 <header class="dash-head">
-  <div>
-    <h1 data-i18n="navOns">ONS Balances</h1>
-  </div>
+  __SHARED_PAGE_INTRO__
   <div class="header-right">
     <div class="header-links">
       __SHARED_NAV_LINKS__
@@ -3125,6 +3124,7 @@ async function boot(){
   document.getElementById("asof-refreshed").textContent =
     formatRefreshedLocal(DATA.generatedIso, DATA.generated);
   document.getElementById("asof-through").textContent = last || "—";
+  initStalenessBadgeFor("ons", last);
   // Visible footer is one line: attribution, the single averaging rule that
   // changes how every number reads, and a disclosure. Everything that used to
   // sit here as prose is intact inside the disclosure -- see the sweep

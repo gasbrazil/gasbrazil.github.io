@@ -332,9 +332,7 @@ footer a { color: var(--accent); }
 <a class="skip-link" href="#chart-host" data-i18n="skip">Skip to content</a>
 <div class="wrap">
 <header class="dash-head">
-  <div>
-    <h1 data-i18n="navFlows">Pipeline Flows</h1>
-  </div>
+  __SHARED_PAGE_INTRO__
   <div class="header-right">
     <div class="header-links">
       __SHARED_NAV_LINKS__
@@ -1561,6 +1559,7 @@ async function init() {
 
   const through = DATA.dates.length ? DATA.dates[DATA.dates.length - 1] : "—";
   document.getElementById("asof-through").textContent = through;
+  initStalenessBadgeFor("flows", through);
   document.getElementById("asof-refreshed").textContent =
     formatRefreshedLocal(DATA.generatedIso, DATA.generated);
 
@@ -1635,6 +1634,7 @@ def write_dashboard(out_path=DEFAULT_OUT):
         SHARED_JS_CHART_PALETTE=kit.chart_palette_js(),
         SHARED_SITE_LINKS_JS=kit.site_links_js("flows"),
         SHARED_NAV_LINKS=kit.nav_links_html("flows"),
+        SHARED_PAGE_INTRO=kit.page_intro_html("flows"),
         FAVICON_DATA_URI=kit.embed_favicon(),
         FONT_PRELOAD=kit.font_preload_html(),
     )

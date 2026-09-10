@@ -334,6 +334,7 @@ const GB_I18N = {
     deskLinkFlows: "ANP flows",
     kpiRefresh: "Last refreshed",
     dataThrough: "Data through",
+    staleBadge: "Data may be stale",
     sources: "Sources",
     sourceOns: "ONS",
     sourcePoc: "POC",
@@ -421,6 +422,7 @@ const GB_I18N = {
     deskLinkFlows: "Fluxos ANP",
     kpiRefresh: "Última atualização",
     dataThrough: "Dados até",
+    staleBadge: "Dados possivelmente desatualizados",
     sources: "Fontes",
     sourceOns: "ONS",
     sourcePoc: "POC",
@@ -796,6 +798,58 @@ _SITES = {
     },
 }
 
+# Page-intro trust block: breadcrumb + h1. Maps each dashboard to its
+# existing GB_I18N nav key so both languages keep working with no new
+# translation burden. Deliberately no visible description paragraph -- the
+# pages stay streamlined; the hub cards already describe each product.
+_PAGE_INTRO = {
+    "desk": "navDesk",
+    "ons": "navOns",
+    "pld": "navPld",
+    "poc": "navPoc",
+    "contratos": "navContratos",
+    "flows": "navFlows",
+    "supply": "navSupply",
+    "precos": "navPrecos",
+}
+
+# Freshness thresholds (days) for the staleness badge. Tuned to each
+# product's publication cadence: daily pipelines (ons/pld/contratos) get a
+# week; monthly ANP products get room for their multi-week release lag.
+# POC is intentionally absent -- its "data through" is the latest trade
+# date (event-driven), not build freshness, so a lag badge would mislead.
+STALE_LAG_DAYS = {
+    "ons": 7,
+    "pld": 7,
+    "contratos": 7,
+    "flows": 60,
+    "supply": 100,
+    "precos": 100,
+    "desk": 14,
+}
+
+
+def page_intro_html(self_id: str) -> str:
+    """Breadcrumb + title block for a dashboard header.
+
+    The breadcrumb home link is a plain relative "../" (every dashboard
+    lives one level deep), matching how wiki/about hrefs already avoid
+    the hostname-sensitive cross-link machinery. Raises KeyError on
+    unknown ids so a typo fails the build, not the page.
+    """
+    if self_id not in _PAGE_INTRO:
+        raise KeyError(f"Unknown page {self_id!r}; known: {sorted(_PAGE_INTRO)}")
+    nav_key = _PAGE_INTRO[self_id]
+    title = _SITES[self_id]["label"]
+    return (
+        '<nav class="crumbs" aria-label="Breadcrumb">'
+        '<a href="../" data-i18n="navHome">GasBrazil.com</a>'
+        '<span class="crumb-sep" aria-hidden="true">›</span>'
+        f'<span aria-current="page" data-i18n="{nav_key}">{html.escape(title)}</span>'
+        "</nav>\n"
+        f'<h1 data-i18n="{nav_key}">{html.escape(title)}</h1>'
+    )
+
 
 def site_links_js(self_id: str) -> str:
     """JS block defining SITE_LINKS (every site except self_id), siteFlavor()
@@ -1115,5 +1169,25 @@ def refreshed_local_js() -> str:
         "  } catch (e) {\n"
         "    return fallback || \"\u2014\";\n"
         "  }\n"
+        "}\n"
+        "const STALE_MAX_LAG_DAYS = " + json.dumps(STALE_LAG_DAYS) + ";\n"
+        "function initStalenessBadgeFor(site, through) {\n"
+        "  try {\n"
+        "    var maxLag = STALE_MAX_LAG_DAYS[site];\n"
+        "    if (!through || !maxLag) return;\n"
+        "    var m = String(through).match(/(\\d{4})-(\\d{2})(?:-(\\d{2}))?/);\n"
+        "    if (!m) return;\n"
+        "    var d = m[3] ? new Date(+m[1], +m[2] - 1, +m[3]) : new Date(+m[1], +m[2], 0);\n"
+        "    if (isNaN(d.getTime())) return;\n"
+        "    var days = Math.floor((Date.now() - d.getTime()) / 864e5);\n"
+        "    if (days <= maxLag) return;\n"
+        "    var strip = document.getElementById(\"asof-strip\");\n"
+        "    if (!strip || strip.querySelector(\".stale-badge\")) return;\n"
+        "    var b = document.createElement(\"span\");\n"
+        "    b.className = \"stale-badge\";\n"
+        "    b.textContent = (typeof t === \"function\" ? t(\"staleBadge\") : \"Data may be stale\")"
+        " + \" \\u00b7 \" + days + \"d\";\n"
+        "    strip.appendChild(b);\n"
+        "  } catch (e) {}\n"
         "}\n"
     )

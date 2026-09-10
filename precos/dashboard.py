@@ -176,7 +176,7 @@ footer a { color: var(--accent); }
 <a class="skip-link" href="#chart-producers" data-i18n="skip">Skip to content</a>
 <div class="wrap">
 <header class="dash-head">
-  <div><h1 data-i18n="navPrecos">ANP Prices</h1></div>
+  __SHARED_PAGE_INTRO__
   <div class="header-right">
     <div class="header-links">__SHARED_NAV_LINKS__</div>
     <button type="button" id="lang-toggle" class="langBtn" aria-label="Português">PT</button>
@@ -441,6 +441,7 @@ function paintAsof() {
   document.getElementById("asof-refreshed").textContent =
     formatRefreshedLocal(DATA.generatedIso, DATA.generated, currentLang() === "pt" ? "pt-BR" : undefined);
   document.getElementById("asof-through").textContent = DATA.dataThrough || "—";
+  initStalenessBadgeFor("precos", DATA.dataThrough);
 }
 function latestPoint(arr) {
   if (!arr) return null;
@@ -694,6 +695,7 @@ def write_dashboard(out_path=DEFAULT_OUT):
         SHARED_JS_CHART_PALETTE=kit.chart_palette_js(),
         SHARED_SITE_LINKS_JS=kit.site_links_js("precos"),
         SHARED_NAV_LINKS=kit.nav_links_html("precos"),
+        SHARED_PAGE_INTRO=kit.page_intro_html("precos"),
         FAVICON_DATA_URI=kit.embed_favicon(),
         FONT_PRELOAD=kit.font_preload_html(),
     )
