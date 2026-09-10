@@ -2,7 +2,7 @@
 """Renders wiki-src/*.md into a static, site-wide wiki at wiki/, styled to
 match every dashboard.py's own light/dark palette, so it can be deployed
 alongside every other page at <site>/wiki/ and linked from every
-dashboard's own nav (see nav_links_html()'s wiki_href) and from the home
+dashboard's own nav (see masthead_html()'s wiki_href) and from the home
 page / About footer.
 
 Structure:
@@ -208,7 +208,7 @@ def render_nav(current_out: str) -> str:
 def page_template(title: str, body_html: str, current_out: str, slug: str | None) -> str:
     nav = render_nav(current_out)
     if slug is None:
-        back_href, back_label = "/", "GasBrazil.com"
+        back_href, back_label = "/", "GasBrazil"
         readme_href = "https://github.com/gasbrazil/gasbrazil.github.io/blob/main/README.md"
     else:
         back_href = f"/{slug}/"
@@ -236,7 +236,7 @@ def page_template(title: str, body_html: str, current_out: str, slug: str | None
 <body>
 <header class="top">
   <div class="brand">
-    <h1>GasBrazil.com &mdash; Wiki</h1>
+    <h1>GasBrazil &mdash; Wiki</h1>
     <span class="tag">how to read every dashboard, and how the whole site is built</span>
   </div>
   <div class="row">

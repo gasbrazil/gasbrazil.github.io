@@ -283,7 +283,6 @@ footer .asof-strip,
   width: 100%;
   box-sizing: border-box;
 }
-.nav-home { margin-inline-end: 10px; }
 /* Sit on the same row as the fixed PT / theme controls. */
 .nav-trail {
   position: fixed;
@@ -341,15 +340,30 @@ footer .asof-strip,
   transition: color .15s ease, border-color .15s ease;
 }
 .dd-trigger:hover, .dd-trigger[aria-expanded="true"] { color: var(--accent); border-bottom-color: var(--accent); }
-.dd-caret { font-size: 10px; transform: translateY(1px); }
+.dd-icon { font-size: 13px; transform: translateY(-1px); }
+
+/* Single-row dashboard masthead (masthead_html()): brand › title … menu.
+   Brand, breadcrumb separator, and page title share one baseline; the menu
+   trigger follows on the same row instead of a second nav line. The h1 here
+   is the page's only title -- no separate breadcrumb block above it. */
+.masthead { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.masthead-brand {
+  font-weight: 600; font-size: 19px; letter-spacing: -.01em;
+  color: var(--text); text-decoration: none; white-space: nowrap;
+}
+.masthead-brand:hover { color: var(--accent); }
+.masthead h1 { font-size: 19px; margin: 0; letter-spacing: -.01em; font-weight: 600; }
+.masthead .products-dd { margin-left: 2px; }
 .dd-menu {
   /* Kept in-flow for opacity fade (display:none can't animate). Closed
-     state is invisible + non-interactive; .is-open reveals with a quick fade. */
+     state is invisible + non-interactive; .is-open reveals with a quick fade.
+     Solid panel background, not the gradient: the menu floats over page
+     content and must read near-opaque when open. */
   position: absolute;
   top: calc(100% + 4px);
   left: -8px;
   min-width: 180px;
-  background: var(--panel-grad);
+  background: var(--panel);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius);
   box-shadow: var(--elevate);
@@ -769,7 +783,6 @@ header.top #theme-toggle,
 
 @media (max-width: 720px) {
   .navlinks, .header-links { gap: 4px 12px; }
-  .nav-home { margin-inline-end: 6px; }
   .nav-trail {
     top: 12px;
     right: 96px;
@@ -826,24 +839,10 @@ input[type="checkbox"] {
   accent-color: var(--accent);
 }
 
-/* Trust layer: breadcrumb + staleness badge. Every dashboard renders these
-   from shared/dashboard_kit.py's page_intro_html() and
+/* Trust layer: staleness badge + masthead separator. Every dashboard renders
+   these from shared/dashboard_kit.py's masthead_html() and
    initStalenessBadgeFor(), so wayfinding and freshness read the same on
    all eight products without adding visible prose to the pages. */
-.crumbs {
-  display: flex; align-items: center; gap: 8px;
-  font-size: 12.5px; font-weight: 400; color: var(--muted);
-  margin: 2px 0 6px;
-}
-.crumbs a {
-  color: var(--muted2); text-decoration: none;
-  border-bottom: 1px solid transparent;
-  transition: color .15s ease, border-color .15s ease;
-}
-.crumbs a:hover { color: var(--accent); border-bottom-color: var(--accent); }
-[data-theme="dark"] .crumbs a:hover {
-  color: var(--brz-yellow); border-bottom-color: var(--brz-yellow);
-}
 .crumb-sep { opacity: .55; }
 /* Freshness warning appended to #asof-strip when data-through exceeds the
    product's publication cadence (see STALE_LAG_DAYS). Quiet pill, never

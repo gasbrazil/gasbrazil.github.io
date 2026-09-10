@@ -414,7 +414,7 @@ def _topbar() -> str:
 
 def _footer(home_href: str = "./") -> str:
     return f"""<footer class="site">
-  &copy; <span id="year"></span> GasBrazil.com
+  &copy; <span id="year"></span> GasBrazil
   &middot; <a href="{home_href}wiki/" data-i18n="navWiki">Wiki</a>
   &middot; <a href="{home_href}about/" data-i18n="footerAbout">About &amp; methodology</a>
   &middot; <span data-i18n="contact">Contact</span>: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
@@ -437,7 +437,7 @@ HOME_TEMPLATE = """__HEAD__
 <a class="skip-link" href="#main" data-i18n="skip">Skip to content</a>
 <main class="hub" id="main">
   <div class="hub-header">
-    <div class="wordmark">GasBrazil<span class="dot">.</span>com</div>
+    <div class="wordmark">GasBrazil</div>
     <div class="hub-controls">
       <button type="button" id="lang-toggle" class="langBtn" aria-label="Português">PT</button>
       <button id="theme-toggle" title="Toggle theme" aria-label="Toggle theme"></button>
@@ -563,7 +563,7 @@ ABOUT_TEMPLATE = """__HEAD__
 <a class="skip-link" href="#main" data-i18n="skip">Skip to content</a>
 <main class="hub" id="main">
   <div class="hub-header">
-    <div class="wordmark"><a href="../">GasBrazil<span class="dot">.</span>com</a></div>
+    <div class="wordmark"><a href="../">GasBrazil</a></div>
     <div class="hub-controls">
       <button type="button" id="lang-toggle" class="langBtn" aria-label="Português">PT</button>
       <button id="theme-toggle" title="Toggle theme" aria-label="Toggle theme"></button>
@@ -606,7 +606,7 @@ NOTFOUND_TEMPLATE = """__HEAD__
 <a class="skip-link" href="#main" data-i18n="skip">Skip to content</a>
 <main class="hub" id="main">
   <div class="hub-header">
-    <div class="wordmark"><a href="./">GasBrazil<span class="dot">.</span>com</a></div>
+    <div class="wordmark"><a href="./">GasBrazil</a></div>
     <div class="hub-controls">
       <button type="button" id="lang-toggle" class="langBtn" aria-label="Português">PT</button>
       <button id="theme-toggle" title="Toggle theme" aria-label="Toggle theme"></button>
