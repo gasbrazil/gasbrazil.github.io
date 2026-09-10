@@ -98,3 +98,31 @@ def test_methodology_defaults_match_i18n_pack():
     for defaults in (kit._METHOD_ASSUMP_DEFAULTS, kit._METHOD_LIMITS_DEFAULTS):
         for text in defaults.values():
             assert text in kit.JS_I18N
+
+
+def test_share_link_strings_bilingual():
+    assert 'copyLink: "Copy link"' in kit.JS_I18N
+    assert 'linkCopied: "Copied"' in kit.JS_I18N
+    assert 'copyLink: "Copiar link"' in kit.JS_I18N
+    assert 'linkCopied: "Copiado"' in kit.JS_I18N
+
+
+def test_share_link_button_matches_i18n_pack():
+    out = kit.share_link_button_html()
+    assert 'id="btn-share"' in out
+    assert 'data-i18n="copyLink"' in out
+    assert "Copy link" in out
+    assert "Copy link" in kit.JS_I18N
+
+
+def test_query_state_helper_degrades_to_defaults():
+    js = kit.JS_QUERY_STATE
+    for fn in ("gbQueryParams", "gbWriteQuery", "gbValidDate",
+               "gbValidEnum", "gbValidList", "gbCopyLink"):
+        assert fn in js
+    # Cache-bust token never leaks into shared links.
+    assert 'sp.delete("refreshed")' in js
+    # Unknown/partial params degrade: allow-list filtering, never a throw.
+    assert "gbValidList" in js and "gbValidEnum" in js and "gbValidDate" in js
+    # Clipboard with a non-clipboard fallback (non-secure contexts).
+    assert "navigator.clipboard" in js and "execCommand" in js
