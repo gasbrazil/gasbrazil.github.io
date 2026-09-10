@@ -143,6 +143,7 @@ footer a { color: var(--accent); }
           <option value="N">N</option>
         </select>
       </label>
+      __SHARED_SHARE_BUTTON__
     </div>
     <div class="series-picker" id="picker-compare"></div>
     <div class="chart-host" id="main-chart"></div>
@@ -219,6 +220,7 @@ __SHARED_JS_THEME_TOGGLE__
 __SHARED_JS_I18N__
 __SHARED_JS_ASOF__
 __SHARED_SITE_LINKS_JS__
+__SHARED_JS_QUERY_STATE__
 
 GB_I18N.en.deskCompareTitle = "PLD · CMO · CVU";
 GB_I18N.en.deskSubmarket = "Submarket";
@@ -343,14 +345,48 @@ function buildPicker(hostId, meta, picked, slots, onToggle) {
 function refreshCompare() {
   buildPicker("picker-compare", COMPARE_META, pickedCompare, compareSlots, refreshCompare);
   renderCompareChart();
+  writeDeskQuery();
 }
 function refreshPocAnp() {
   buildPicker("picker-poc-anp", POC_ANP_META, pickedPocAnp, pocAnpSlots, refreshPocAnp);
   renderPocAnpChart();
+  writeDeskQuery();
 }
 function buildPickers() {
   buildPicker("picker-compare", COMPARE_META, pickedCompare, compareSlots, refreshCompare);
   buildPicker("picker-poc-anp", POC_ANP_META, pickedPocAnp, pocAnpSlots, refreshPocAnp);
+}
+
+// Shareable view state: compare submarket + both picked series sets.
+// Unknown params degrade to defaults via the shared gb* query helpers
+// (see shared/dashboard_kit.py JS_QUERY_STATE). Spark inputs and the
+// utilization table stay local.
+function applyDeskQuery() {
+  const sp = gbQueryParams();
+  const by = ((DATA.compareSe || {}).bySubmarket) || {};
+  const smAllow = Object.keys(by).length ? Object.keys(by) : ["SE", "S", "NE", "N"];
+  const sm = gbValidEnum(sp.get("sm"), smAllow);
+  if (sm) compareSm = sm;
+  const series = gbValidList(sp.get("series"), COMPARE_META.map(m => m.key));
+  if (series) {
+    pickedCompare = new Set(series);
+    compareSlots = new Map();
+    series.forEach(k => colorOf(compareSlots, k));
+  }
+  const poc = gbValidList(sp.get("poc"), POC_ANP_META.map(m => m.key));
+  if (poc) {
+    pickedPocAnp = new Set(poc);
+    pocAnpSlots = new Map();
+    poc.forEach(k => colorOf(pocAnpSlots, k));
+  }
+}
+function writeDeskQuery() {
+  if (!DATA) return;
+  gbWriteQuery({
+    sm: compareSm,
+    series: [...pickedCompare],
+    poc: [...pickedPocAnp],
+  });
 }
 
 function paintAsof() {
@@ -709,6 +745,7 @@ async function init() {
     else applyI18n();
   });
   initCrossLinks();
+  gbCopyLink("btn-share");
   applyI18n();
   try {
     const json = await inflateGzipUrl(PAYLOAD_URL);
@@ -718,15 +755,18 @@ async function init() {
     const smSel = document.getElementById("compare-sm");
     const c0 = DATA.compareSe || {};
     compareSm = c0.defaultSubmarket || "SE";
+    applyDeskQuery();
     if (smSel) {
       smSel.value = compareSm;
       smSel.addEventListener("change", () => {
         compareSm = smSel.value;
         renderCompareChart();
+        writeDeskQuery();
       });
     }
     initSparkForm();
     renderAll();
+    writeDeskQuery();
     window.addEventListener("resize", () => {
       clearTimeout(chartResizeTimer);
       chartResizeTimer = setTimeout(() => {
@@ -767,6 +807,8 @@ def write_dashboard(out_path: Path | str = DEFAULT_OUT) -> Path:
         SHARED_JS_DECODE=kit.JS_DECODE,
         SHARED_JS_ESCAPE_HTML=kit.JS_ESCAPE_HTML,
         SHARED_JS_TABLE_SORT=kit.JS_TABLE_SORT,
+        SHARED_JS_QUERY_STATE=kit.JS_QUERY_STATE,
+        SHARED_SHARE_BUTTON=kit.share_link_button_html(css_class="series-btn"),
         SHARED_JS_THEME_TOGGLE=kit.JS_THEME_TOGGLE,
         SHARED_JS_BOOT=kit.JS_BOOT,
         SHARED_JS_I18N=kit.JS_I18N,

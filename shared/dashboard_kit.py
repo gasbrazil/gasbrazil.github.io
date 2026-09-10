@@ -717,13 +717,15 @@ function gbCopyLink(buttonId) {
 """
 
 
-def share_link_button_html(button_id: str = "btn-share") -> str:
+def share_link_button_html(button_id: str = "btn-share", css_class: str = "") -> str:
     """Copy-link button for a dashboard toolbar. Plain toolbar-button look
     (no new CSS, no new prose): the label is the shared copyLink i18n key
-    so PT toggles translate it like every other chrome string."""
+    so PT toggles translate it like every other chrome string. css_class
+    covers pages with no generic button rule (desk reuses series-btn)."""
     safe = html.escape(button_id, quote=True)
+    cls = f' class="{html.escape(css_class, quote=True)}"' if css_class else ""
     return (
-        f'<button type="button" id="{safe}" '
+        f'<button type="button" id="{safe}"{cls} '
         'data-i18n="copyLink">Copy link</button>'
     )
 

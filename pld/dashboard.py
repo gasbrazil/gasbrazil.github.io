@@ -275,6 +275,7 @@ footer a { color: var(--accent); }
 <div class="toolbar">
   <button id="btn-csv" data-i18n="pldCsv">Download CSV</button>
   <button id="btn-xlsx" data-i18n="pldXlsx">Export all data (Excel)</button>
+  __SHARED_SHARE_BUTTON__
   <span class="count" id="row-count"></span>
 </div>
 <div class="table-wrap">
@@ -362,6 +363,7 @@ function buildSmToggles() {
       } else visibleSm.add(sm);
       buildSmToggles();
       renderChart();
+      writePldQuery();
     });
     host.appendChild(btn);
   });
@@ -618,6 +620,31 @@ function paintChrome() {
   renderChart();
   renderCompare();
   renderTable(tableSort, tableFilters);
+  writePldQuery();
+}
+
+// Shareable view state: visible submarkets, date window, compare submarket.
+// Unknown params degrade to defaults via the shared gb* query helpers
+// (see shared/dashboard_kit.py JS_QUERY_STATE). Table sort/filter stays local.
+function applyPldQuery() {
+  const sp = gbQueryParams();
+  const sms = gbValidList(sp.get("sm"), DATA.submarkets || []);
+  if (sms && sms.length) visibleSm = new Set(sms);
+  datePreset = gbValidEnum(sp.get("window"), ["3m", "6m", "12m", "24m", "all"]) || datePreset;
+  const csm = gbValidEnum(sp.get("csm"), DATA.submarkets || []);
+  if (csm) {
+    const sel = document.getElementById("f-compare-sm");
+    if (sel) sel.value = csm;
+  }
+}
+function writePldQuery() {
+  if (!DATA) return;
+  const cmpSm = (document.getElementById("f-compare-sm") || {}).value || null;
+  gbWriteQuery({
+    sm: [...visibleSm],
+    window: datePreset,
+    csm: cmpSm,
+  });
 }
 
 function renderCompare() {
@@ -669,6 +696,7 @@ function renderCompare() {
 __SHARED_JS_THEME_TOGGLE__
 __SHARED_JS_I18N__
 __SHARED_JS_ASOF__
+__SHARED_JS_QUERY_STATE__
 
 async function init() {
   document.getElementById("year").textContent = new Date().getFullYear();
@@ -680,12 +708,15 @@ async function init() {
   document.getElementById("asof-refreshed").textContent =
     formatRefreshedLocal(DATA.generatedIso, DATA.generated);
 
+  applyPldQuery();
+  document.getElementById("f-preset").value = datePreset;
+
   document.getElementById("f-preset").addEventListener("change", e => {
     datePreset = e.target.value;
     paintChrome();
   });
   const cmpSm = document.getElementById("f-compare-sm");
-  if (cmpSm) cmpSm.addEventListener("change", renderCompare);
+  if (cmpSm) cmpSm.addEventListener("change", () => { renderCompare(); writePldQuery(); });
   document.getElementById("btn-csv").addEventListener("click", downloadCsv);
   document.getElementById("btn-xlsx").addEventListener("click", downloadXlsx);
   window.addEventListener("resize", () => {
@@ -695,6 +726,7 @@ async function init() {
   initThemeToggle("theme-toggle", () => { renderChart(); renderCompare(); });
   initLangToggle("lang-toggle", () => { paintChrome(); });
   initCrossLinks();
+  gbCopyLink("btn-share");
   paintChrome();
 }
 init();
@@ -727,6 +759,8 @@ def write_dashboard(out_path: Path | str = DEFAULT_OUT) -> Path:
         SHARED_JS_CSV=kit.JS_CSV_HELPERS,
         SHARED_JS_XLSX=kit.JS_XLSX_ENGINE,
         SHARED_JS_TABLE_SORT=kit.JS_TABLE_SORT,
+        SHARED_JS_QUERY_STATE=kit.JS_QUERY_STATE,
+        SHARED_SHARE_BUTTON=kit.share_link_button_html(),
         SHARED_JS_CHART_PALETTE=kit.chart_palette_js(),
         SHARED_SITE_LINKS_JS=kit.site_links_js("pld"),
         SHARED_NAV_LINKS=kit.nav_links_html("pld"),
