@@ -293,7 +293,7 @@ const GB_I18N = {
     themeLight: "Switch to light mode",
     langSwitch: "Português",
     skip: "Skip to content",
-    navHome: "GasBrazil.com",
+    navHome: "GasBrazil",
     navOns: "ONS Balances",
     navPoc: "POC Results",
     navContratos: "POC Contracts",
@@ -302,7 +302,8 @@ const GB_I18N = {
     navPld: "PLD Prices",
     navPrecos: "ANP Prices",
     navDesk: "The Desk",
-    navProducts: "Products",
+    navProducts: "Products", // retained for previously deployed pages cached in browsers
+    navMenu: "Menu",
     navAbout: "About",
     navWiki: "Wiki",
     filterPlaceholder: "Filter…",
@@ -312,7 +313,7 @@ const GB_I18N = {
     tagline: "Analytical Firepower for Brazil's Energy Markets",
     hubHint: "Every card below opens a live dashboard — pick a product to explore.",
     aboutLead: "Independent public-data dashboards. Not an official ONS, ANP, CCEE, or transportadora product.",
-    aboutBody: "GasBrazil.com republishes open Brazilian gas and power data as filterable dashboards. Caveats are on each page and on About.",
+    aboutBody: "GasBrazil republishes open Brazilian gas and power data as filterable dashboards. Caveats are on each page and on About.",
     cardOns: "ONS Balances",
     cardOnsDesc: "Daily SIN balances and gas-fired dispatch.",
     cardPoc: "POC Results",
@@ -390,14 +391,14 @@ const GB_I18N = {
     aboutCoverDesk: "The Desk: cross-product headline series. Full history and filters live on each product page.",
     notFound: "This page is not here.",
     notFoundBody: "The hub and dashboards are linked below.",
-    backHome: "Back to GasBrazil.com"
+    backHome: "Back to GasBrazil"
   },
   pt: {
     themeDark: "Mudar para o modo escuro",
     themeLight: "Mudar para o modo claro",
     langSwitch: "English",
     skip: "Ir para o conteúdo",
-    navHome: "GasBrazil.com",
+    navHome: "GasBrazil",
     navOns: "Balanços ONS",
     navPoc: "Resultados POC",
     navContratos: "Contratos POC",
@@ -406,7 +407,8 @@ const GB_I18N = {
     navPld: "Preços PLD",
     navPrecos: "Preços ANP",
     navDesk: "The Desk",
-    navProducts: "Produtos",
+    navProducts: "Produtos", // retained for previously deployed pages cached in browsers
+    navMenu: "Menu",
     navAbout: "Sobre",
     navWiki: "Wiki",
     filterPlaceholder: "Filtrar…",
@@ -416,7 +418,7 @@ const GB_I18N = {
     tagline: "Potência analítica para os mercados de energia do Brasil",
     hubHint: "Cada cartão abaixo abre um painel ao vivo — escolha um produto para explorar.",
     aboutLead: "Painéis independentes com dados públicos. Não é produto oficial da ONS, ANP, CCEE ou transportadoras.",
-    aboutBody: "O GasBrazil.com republica dados abertos de gás e energia em painéis filtráveis. Ressalvas em cada página e em Sobre.",
+    aboutBody: "O GasBrazil republica dados abertos de gás e energia em painéis filtráveis. Ressalvas em cada página e em Sobre.",
     cardOns: "Balanços ONS",
     cardOnsDesc: "Balanços diários do SIN e despacho a gás.",
     cardPoc: "Resultados POC",
@@ -494,7 +496,7 @@ const GB_I18N = {
     aboutCoverDesk: "The Desk: séries-resumo entre produtos. Histórico e filtros ficam em cada painel.",
     notFound: "Esta página não existe.",
     notFoundBody: "O hub e os painéis estão nos links abaixo.",
-    backHome: "Voltar ao GasBrazil.com"
+    backHome: "Voltar ao GasBrazil"
   }
 };
 function currentLang() {
@@ -877,7 +879,7 @@ async function buildWorkbookXlsxBlob(sheets) {
 # page from its own link list (a page doesn't link to itself).
 _SITES = {
     "home": {
-        "label": "GasBrazil.com",
+        "label": "GasBrazil",
         "custom": "https://gasbrazil.com",
         "caissonpoint": "https://caissonpoint.github.io/gasbrazil-com/",
         "hub": "https://gasbrazil.github.io/",
@@ -965,25 +967,18 @@ STALE_LAG_DAYS = {
 
 
 def page_intro_html(self_id: str) -> str:
-    """Breadcrumb + title block for a dashboard header.
+    """Title fragment for a dashboard masthead.
 
-    The breadcrumb home link is a plain relative "../" (every dashboard
-    lives one level deep), matching how wiki/about hrefs already avoid
-    the hostname-sensitive cross-link machinery. Raises KeyError on
-    unknown ids so a typo fails the build, not the page.
+    Just the <h1> -- the surrounding masthead_html() row already carries
+    the brand link and the section menu, so a separate breadcrumb line
+    would repeat the page name twice. Raises KeyError on unknown ids so
+    a typo fails the build, not the page.
     """
     if self_id not in _PAGE_INTRO:
         raise KeyError(f"Unknown page {self_id!r}; known: {sorted(_PAGE_INTRO)}")
     nav_key = _PAGE_INTRO[self_id]
     title = _SITES[self_id]["label"]
-    return (
-        '<nav class="crumbs" aria-label="Breadcrumb">'
-        '<a href="../" data-i18n="navHome">GasBrazil.com</a>'
-        '<span class="crumb-sep" aria-hidden="true">›</span>'
-        f'<span aria-current="page" data-i18n="{nav_key}">{html.escape(title)}</span>'
-        "</nav>\n"
-        f'<h1 data-i18n="{nav_key}">{html.escape(title)}</h1>'
-    )
+    return f'<h1 data-i18n="{nav_key}">{html.escape(title)}</h1>'
 
 
 # Methodology disclosure: one collapsed line in each dashboard's footer --
@@ -1208,38 +1203,11 @@ _PRODUCTS_DROPDOWN_JS = r"""<script>
 </script>"""
 
 
-def nav_links_html(
-    self_id: str,
-    about_href: str = "../about/",
-    wiki_href: str = "../wiki/",
-    extra_links_html: str = "",
-) -> str:
-    """Standard header text nav: Home stays a top-level link; every other
-    site in _SITES (hub order: desk, ons, pld, poc, contratos, flows, supply,
-    precos) collapses into one "Products" dropdown menu, with the
-    current page marked inside it as a non-clickable current item
-    (checkmark, not a link) the same way the old flat nav marked the
-    current page with aria-current=page / is-active. Then any page-specific
-    extras, then the site-wide Wiki, then About.
-
-    This is "Option A" of three nav mockups Eric reviewed on 2026-09-08 (a
-    dropdown vs. a two-row header vs. a compact scroll strip) -- chosen so
-    the header doesn't grow a new top-level link every time a dashboard is
-    added.
-
-    href defaults to each site's custom-domain URL; initCrossLinks()
-    rewrites sibling hrefs at view time for hostname/flavor -- the
-    #link-<id> anchors now live inside the dropdown menu instead of flat in
-    the header, but getElementById doesn't care about nesting, so
-    site_links_js() needed no changes. wiki_href/about_href are plain
-    relative paths (not run through initCrossLinks) since the wiki and
-    about page only exist at one location, not mirrored per-flavor.
-
-    Single source of truth so every dashboard's nav stays in the same
-    order with the same labels, and a newly-added site lands everywhere
-    from one edit."""
+def _menu_items_html(self_id: str) -> str:
+    """One menu entry per dashboard site (hub order: desk, ons, pld, poc,
+    contratos, flows, supply, precos); the current page renders as a
+    non-clickable current item (checkmark) with aria-current=page."""
     i18n_keys = {
-        "home": "navHome",
         "ons": "navOns",
         "poc": "navPoc",
         "contratos": "navContratos",
@@ -1249,66 +1217,88 @@ def nav_links_html(
         "precos": "navPrecos",
         "desk": "navDesk",
     }
-
-    def i18n_attr(k: str) -> str:
-        i18n = i18n_keys.get(k)
-        return f' data-i18n="{i18n}"' if i18n else ""
-
-    parts: list[str] = []
-
-    home = _SITES["home"]
-    if self_id == "home":
-        parts.append(
-            f'<span class="navlink nav-home is-active" aria-current="page"{i18n_attr("home")}>{home["label"]}</span>'
-        )
-    else:
-        parts.append(
-            f'<a class="navlink nav-home" id="link-home" href="{home["custom"]}"{i18n_attr("home")}>{home["label"]}</a>'
-        )
-
-    menu_items: list[str] = []
+    items: list[str] = []
     for k, v in _SITES.items():
         if k == "home":
             continue
         if k == self_id:
-            menu_items.append(
-                f'<span class="is-current" role="menuitem" aria-current="page"{i18n_attr(k)}>'
+            items.append(
+                f'<span class="is-current" role="menuitem" aria-current="page" data-i18n="{i18n_keys[k]}">'
                 f'<span class="chk">✓</span>{html.escape(v["label"])}</span>'
             )
         else:
-            menu_items.append(
-                f'<a id="link-{k}" href="{html.escape(v["custom"], quote=True)}" role="menuitem"{i18n_attr(k)}>'
+            items.append(
+                f'<a id="link-{k}" href="{html.escape(v["custom"], quote=True)}" role="menuitem" data-i18n="{i18n_keys[k]}">'
                 f'<span class="chk"></span>{html.escape(v["label"])}</a>'
             )
+    return "".join(items)
+
+
+def masthead_html(
+    self_id: str,
+    about_href: str = "../about/",
+    wiki_href: str = "../wiki/",
+) -> str:
+    """Single-row dashboard masthead: brand › title … menu … Wiki/About.
+
+    This replaces the old three-line stack (breadcrumb line, bare <h1>,
+    then a nav row repeating the brand) with one merged row: the "GasBrazil"
+    wordmark links home, the breadcrumb separator leads straight into the
+    page <h1> (each name appears exactly once), and the section menu sits
+    on the same line as a ☰ "Menu" trigger -- "Menu" reads identically in
+    EN and PT, so no new translation burden. The current page is marked
+    inside the menu with aria-current=page. href defaults to each site's
+    custom-domain URL; initCrossLinks() rewrites sibling hrefs at view time
+    for hostname/flavor -- the #link-<id> anchors getElementById-looked-up,
+    so nesting inside the dropdown needs no site_links_js() changes.
+    wiki_href/about_href are plain relative paths (not run through
+    initCrossLinks) since the wiki and about page only exist at one
+    location, not mirrored per-flavor.
+
+    Single source of truth so every dashboard's header stays in the same
+    order with the same labels, and a newly-added site lands everywhere
+    from one edit."""
+    home = _SITES["home"]
+    brand = (
+        f'<a class="masthead-brand" id="link-home" href="{home["custom"]}" data-i18n="navHome">'
+        f'{html.escape(home["label"])}</a>'
+    )
     # data-i18n goes on the inner span, not the <button> itself: applyI18n()
-    # sets el.textContent, which would silently delete the nested caret span
-    # every time the language toggles (the same bug the site's un-translated
-    # pill link text has been carrying for lack of exactly this treatment --
-    # not repeating it here).
-    wiki_href_esc = html.escape(wiki_href, quote=True)
-    about_href_esc = html.escape(about_href, quote=True)
-    parts.append(
+    # sets el.textContent, which would silently delete the hamburger glyph
+    # every time the language toggles.
+    menu = (
         '<div class="products-dd">'
         '<button type="button" class="dd-trigger" aria-haspopup="menu" '
         'aria-expanded="false" aria-controls="gb-products-menu" id="gb-products-trigger">'
-        f'<span data-i18n="navProducts">Products</span><span class="dd-caret">▾</span></button>'
+        '<span class="dd-icon" aria-hidden="true">☰</span>'
+        '<span data-i18n="navMenu">Menu</span></button>'
         '<div class="dd-menu" id="gb-products-menu" role="menu" aria-labelledby="gb-products-trigger">'
-        + "".join(menu_items) + "</div>"
+        + _menu_items_html(self_id) + "</div>"
         "</div>"
     )
-
-    if extra_links_html:
-        parts.append(extra_links_html)
+    wiki_href_esc = html.escape(wiki_href, quote=True)
+    about_href_esc = html.escape(about_href, quote=True)
     # Wiki + About sit in .nav-trail; theme.css parks that group on the same
     # fixed top-right row as the PT / theme toggles.
-    parts.append(
+    trail = (
         '<div class="nav-trail">'
         f'<a class="navlink" href="{wiki_href_esc}" data-i18n="navWiki">Wiki</a>'
         f'<a class="navlink" href="{about_href_esc}" data-i18n="navAbout">About</a>'
         "</div>"
     )
-    parts.append(_PRODUCTS_DROPDOWN_JS)
-    return "\n      ".join(parts)
+    return (
+        '<div class="masthead">\n      '
+        + brand
+        + '\n      <span class="crumb-sep" aria-hidden="true">›</span>\n      '
+        + page_intro_html(self_id)
+        + "\n      "
+        + menu
+        + "\n      "
+        + trail
+        + "\n      "
+        + _PRODUCTS_DROPDOWN_JS
+        + "\n    </div>"
+    )
 
 
 def chart_palette_js() -> str:
