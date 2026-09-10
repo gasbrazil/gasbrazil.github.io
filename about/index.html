@@ -322,7 +322,6 @@ footer .asof-strip,
   width: 100%;
   box-sizing: border-box;
 }
-.nav-home { margin-inline-end: 10px; }
 /* Sit on the same row as the fixed PT / theme controls. */
 .nav-trail {
   position: fixed;
@@ -380,15 +379,30 @@ footer .asof-strip,
   transition: color .15s ease, border-color .15s ease;
 }
 .dd-trigger:hover, .dd-trigger[aria-expanded="true"] { color: var(--accent); border-bottom-color: var(--accent); }
-.dd-caret { font-size: 10px; transform: translateY(1px); }
+.dd-icon { font-size: 13px; transform: translateY(-1px); }
+
+/* Single-row dashboard masthead (masthead_html()): brand › title … menu.
+   Brand, breadcrumb separator, and page title share one baseline; the menu
+   trigger follows on the same row instead of a second nav line. The h1 here
+   is the page's only title -- no separate breadcrumb block above it. */
+.masthead { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.masthead-brand {
+  font-weight: 600; font-size: 19px; letter-spacing: -.01em;
+  color: var(--text); text-decoration: none; white-space: nowrap;
+}
+.masthead-brand:hover { color: var(--accent); }
+.masthead h1 { font-size: 19px; margin: 0; letter-spacing: -.01em; font-weight: 600; }
+.masthead .products-dd { margin-left: 2px; }
 .dd-menu {
   /* Kept in-flow for opacity fade (display:none can't animate). Closed
-     state is invisible + non-interactive; .is-open reveals with a quick fade. */
+     state is invisible + non-interactive; .is-open reveals with a quick fade.
+     Solid panel background, not the gradient: the menu floats over page
+     content and must read near-opaque when open. */
   position: absolute;
   top: calc(100% + 4px);
   left: -8px;
   min-width: 180px;
-  background: var(--panel-grad);
+  background: var(--panel);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius);
   box-shadow: var(--elevate);
@@ -808,7 +822,6 @@ header.top #theme-toggle,
 
 @media (max-width: 720px) {
   .navlinks, .header-links { gap: 4px 12px; }
-  .nav-home { margin-inline-end: 6px; }
   .nav-trail {
     top: 12px;
     right: 96px;
@@ -865,24 +878,10 @@ input[type="checkbox"] {
   accent-color: var(--accent);
 }
 
-/* Trust layer: breadcrumb + staleness badge. Every dashboard renders these
-   from shared/dashboard_kit.py's page_intro_html() and
+/* Trust layer: staleness badge + masthead separator. Every dashboard renders
+   these from shared/dashboard_kit.py's masthead_html() and
    initStalenessBadgeFor(), so wayfinding and freshness read the same on
    all eight products without adding visible prose to the pages. */
-.crumbs {
-  display: flex; align-items: center; gap: 8px;
-  font-size: 12.5px; font-weight: 400; color: var(--muted);
-  margin: 2px 0 6px;
-}
-.crumbs a {
-  color: var(--muted2); text-decoration: none;
-  border-bottom: 1px solid transparent;
-  transition: color .15s ease, border-color .15s ease;
-}
-.crumbs a:hover { color: var(--accent); border-bottom-color: var(--accent); }
-[data-theme="dark"] .crumbs a:hover {
-  color: var(--brz-yellow); border-bottom-color: var(--brz-yellow);
-}
 .crumb-sep { opacity: .55; }
 /* Freshness warning appended to #asof-strip when data-through exceeds the
    product's publication cadence (see STALE_LAG_DAYS). Quiet pill, never
@@ -1096,7 +1095,7 @@ footer.site a:hover { color: var(--text); border-bottom-color: var(--brz-yellow)
 <a class="skip-link" href="#main" data-i18n="skip">Skip to content</a>
 <main class="hub" id="main">
   <div class="hub-header">
-    <div class="wordmark"><a href="../">GasBrazil<span class="dot">.</span>com</a></div>
+    <div class="wordmark"><a href="../">GasBrazil</a></div>
     <div class="hub-controls">
       <button type="button" id="lang-toggle" class="langBtn" aria-label="Português">PT</button>
       <button id="theme-toggle" title="Toggle theme" aria-label="Toggle theme"></button>
@@ -1131,7 +1130,7 @@ footer.site a:hover { color: var(--text); border-bottom-color: var(--brz-yellow)
   </div>
 </main>
 <footer class="site">
-  &copy; <span id="year"></span> GasBrazil.com
+  &copy; <span id="year"></span> GasBrazil
   &middot; <a href="../wiki/" data-i18n="navWiki">Wiki</a>
   &middot; <a href="../about/" data-i18n="footerAbout">About &amp; methodology</a>
   &middot; <span data-i18n="contact">Contact</span>: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
@@ -1197,7 +1196,7 @@ const GB_I18N = {
     themeLight: "Switch to light mode",
     langSwitch: "Português",
     skip: "Skip to content",
-    navHome: "GasBrazil.com",
+    navHome: "GasBrazil",
     navOns: "ONS Balances",
     navPoc: "POC Results",
     navContratos: "POC Contracts",
@@ -1206,7 +1205,8 @@ const GB_I18N = {
     navPld: "PLD Prices",
     navPrecos: "ANP Prices",
     navDesk: "The Desk",
-    navProducts: "Products",
+    navProducts: "Products", // retained for previously deployed pages cached in browsers
+    navMenu: "Menu",
     navAbout: "About",
     navWiki: "Wiki",
     filterPlaceholder: "Filter…",
@@ -1216,7 +1216,7 @@ const GB_I18N = {
     tagline: "Analytical Firepower for Brazil's Energy Markets",
     hubHint: "Every card below opens a live dashboard — pick a product to explore.",
     aboutLead: "Independent public-data dashboards. Not an official ONS, ANP, CCEE, or transportadora product.",
-    aboutBody: "GasBrazil.com republishes open Brazilian gas and power data as filterable dashboards. Caveats are on each page and on About.",
+    aboutBody: "GasBrazil republishes open Brazilian gas and power data as filterable dashboards. Caveats are on each page and on About.",
     cardOns: "ONS Balances",
     cardOnsDesc: "Daily SIN balances and gas-fired dispatch.",
     cardPoc: "POC Results",
@@ -1294,14 +1294,14 @@ const GB_I18N = {
     aboutCoverDesk: "The Desk: cross-product headline series. Full history and filters live on each product page.",
     notFound: "This page is not here.",
     notFoundBody: "The hub and dashboards are linked below.",
-    backHome: "Back to GasBrazil.com"
+    backHome: "Back to GasBrazil"
   },
   pt: {
     themeDark: "Mudar para o modo escuro",
     themeLight: "Mudar para o modo claro",
     langSwitch: "English",
     skip: "Ir para o conteúdo",
-    navHome: "GasBrazil.com",
+    navHome: "GasBrazil",
     navOns: "Balanços ONS",
     navPoc: "Resultados POC",
     navContratos: "Contratos POC",
@@ -1310,7 +1310,8 @@ const GB_I18N = {
     navPld: "Preços PLD",
     navPrecos: "Preços ANP",
     navDesk: "The Desk",
-    navProducts: "Produtos",
+    navProducts: "Produtos", // retained for previously deployed pages cached in browsers
+    navMenu: "Menu",
     navAbout: "Sobre",
     navWiki: "Wiki",
     filterPlaceholder: "Filtrar…",
@@ -1320,7 +1321,7 @@ const GB_I18N = {
     tagline: "Potência analítica para os mercados de energia do Brasil",
     hubHint: "Cada cartão abaixo abre um painel ao vivo — escolha um produto para explorar.",
     aboutLead: "Painéis independentes com dados públicos. Não é produto oficial da ONS, ANP, CCEE ou transportadoras.",
-    aboutBody: "O GasBrazil.com republica dados abertos de gás e energia em painéis filtráveis. Ressalvas em cada página e em Sobre.",
+    aboutBody: "O GasBrazil republica dados abertos de gás e energia em painéis filtráveis. Ressalvas em cada página e em Sobre.",
     cardOns: "Balanços ONS",
     cardOnsDesc: "Balanços diários do SIN e despacho a gás.",
     cardPoc: "Resultados POC",
@@ -1398,7 +1399,7 @@ const GB_I18N = {
     aboutCoverDesk: "The Desk: séries-resumo entre produtos. Histórico e filtros ficam em cada painel.",
     notFound: "Esta página não existe.",
     notFoundBody: "O hub e os painéis estão nos links abaixo.",
-    backHome: "Voltar ao GasBrazil.com"
+    backHome: "Voltar ao GasBrazil"
   }
 };
 function currentLang() {

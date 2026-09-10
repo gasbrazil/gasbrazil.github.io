@@ -322,7 +322,6 @@ footer .asof-strip,
   width: 100%;
   box-sizing: border-box;
 }
-.nav-home { margin-inline-end: 10px; }
 /* Sit on the same row as the fixed PT / theme controls. */
 .nav-trail {
   position: fixed;
@@ -380,15 +379,30 @@ footer .asof-strip,
   transition: color .15s ease, border-color .15s ease;
 }
 .dd-trigger:hover, .dd-trigger[aria-expanded="true"] { color: var(--accent); border-bottom-color: var(--accent); }
-.dd-caret { font-size: 10px; transform: translateY(1px); }
+.dd-icon { font-size: 13px; transform: translateY(-1px); }
+
+/* Single-row dashboard masthead (masthead_html()): brand › title … menu.
+   Brand, breadcrumb separator, and page title share one baseline; the menu
+   trigger follows on the same row instead of a second nav line. The h1 here
+   is the page's only title -- no separate breadcrumb block above it. */
+.masthead { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.masthead-brand {
+  font-weight: 600; font-size: 19px; letter-spacing: -.01em;
+  color: var(--text); text-decoration: none; white-space: nowrap;
+}
+.masthead-brand:hover { color: var(--accent); }
+.masthead h1 { font-size: 19px; margin: 0; letter-spacing: -.01em; font-weight: 600; }
+.masthead .products-dd { margin-left: 2px; }
 .dd-menu {
   /* Kept in-flow for opacity fade (display:none can't animate). Closed
-     state is invisible + non-interactive; .is-open reveals with a quick fade. */
+     state is invisible + non-interactive; .is-open reveals with a quick fade.
+     Solid panel background, not the gradient: the menu floats over page
+     content and must read near-opaque when open. */
   position: absolute;
   top: calc(100% + 4px);
   left: -8px;
   min-width: 180px;
-  background: var(--panel-grad);
+  background: var(--panel);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius);
   box-shadow: var(--elevate);
@@ -808,7 +822,6 @@ header.top #theme-toggle,
 
 @media (max-width: 720px) {
   .navlinks, .header-links { gap: 4px 12px; }
-  .nav-home { margin-inline-end: 6px; }
   .nav-trail {
     top: 12px;
     right: 96px;
@@ -865,24 +878,10 @@ input[type="checkbox"] {
   accent-color: var(--accent);
 }
 
-/* Trust layer: breadcrumb + staleness badge. Every dashboard renders these
-   from shared/dashboard_kit.py's page_intro_html() and
+/* Trust layer: staleness badge + masthead separator. Every dashboard renders
+   these from shared/dashboard_kit.py's masthead_html() and
    initStalenessBadgeFor(), so wayfinding and freshness read the same on
    all eight products without adding visible prose to the pages. */
-.crumbs {
-  display: flex; align-items: center; gap: 8px;
-  font-size: 12.5px; font-weight: 400; color: var(--muted);
-  margin: 2px 0 6px;
-}
-.crumbs a {
-  color: var(--muted2); text-decoration: none;
-  border-bottom: 1px solid transparent;
-  transition: color .15s ease, border-color .15s ease;
-}
-.crumbs a:hover { color: var(--accent); border-bottom-color: var(--accent); }
-[data-theme="dark"] .crumbs a:hover {
-  color: var(--brz-yellow); border-bottom-color: var(--brz-yellow);
-}
 .crumb-sep { opacity: .55; }
 /* Freshness warning appended to #asof-strip when data-through exceeds the
    product's publication cadence (see STALE_LAG_DAYS). Quiet pill, never
@@ -1096,7 +1095,7 @@ footer.site a:hover { color: var(--text); border-bottom-color: var(--brz-yellow)
 <a class="skip-link" href="#main" data-i18n="skip">Skip to content</a>
 <main class="hub" id="main">
   <div class="hub-header">
-    <div class="wordmark">GasBrazil<span class="dot">.</span>com</div>
+    <div class="wordmark">GasBrazil</div>
     <div class="hub-controls">
       <button type="button" id="lang-toggle" class="langBtn" aria-label="Português">PT</button>
       <button id="theme-toggle" title="Toggle theme" aria-label="Toggle theme"></button>
@@ -1109,20 +1108,20 @@ footer.site a:hover { color: var(--text); border-bottom-color: var(--brz-yellow)
     <a class="kpi-cell" href="desk/" data-slug="desk">
       <div class="kpi-label" data-i18n="cardDesk">The Desk</div>
       <div class="kpi-role">Cross-product snapshot</div>
-      <div class="kpi-val" data-en="3604 MWmed gas · PLD SE 142.68" data-pt="3604 MWmed a gás · PLD SE 142.68">3604 MWmed gas · PLD SE 142.68</div>
-      <div class="kpi-when" data-refresh="2026-09-10 14:55 UTC"></div>
+      <div class="kpi-val" data-en="3499 MWmed gas · PLD SE 142.68" data-pt="3499 MWmed a gás · PLD SE 142.68">3499 MWmed gas · PLD SE 142.68</div>
+      <div class="kpi-when" data-refresh="2026-09-10 16:48 UTC"></div>
     </a>
     <a class="kpi-cell" href="ons/" data-slug="ons">
       <div class="kpi-label" data-i18n="cardOns">ONS Balances</div>
       <div class="kpi-role">Grid &amp; gas dispatch</div>
-      <div class="kpi-val" data-en="3,499 MWmed gas" data-pt="3,499 MWmed a gás">3,499 MWmed gas</div>
-      <div class="kpi-when" data-refresh="2026-09-10 14:55 UTC"></div>
+      <div class="kpi-val" data-en="3,496 MWmed gas" data-pt="3,496 MWmed a gás">3,496 MWmed gas</div>
+      <div class="kpi-when" data-refresh="2026-09-10 16:48 UTC"></div>
     </a>
     <a class="kpi-cell" href="pld/" data-slug="pld">
       <div class="kpi-label" data-i18n="cardPld">PLD Prices</div>
       <div class="kpi-role">Power settlement</div>
       <div class="kpi-val" data-en="SE 142.68 R$/MWh · 2026-09-10" data-pt="SE 142.68 R$/MWh · 2026-09-10">SE 142.68 R$/MWh · 2026-09-10</div>
-      <div class="kpi-when" data-refresh="2026-09-10 14:55 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-10 16:48 UTC"></div>
       
     </a>
     <a class="kpi-cell" href="poc/" data-slug="poc">
@@ -1135,27 +1134,27 @@ footer.site a:hover { color: var(--text); border-bottom-color: var(--brz-yellow)
     <a class="kpi-cell" href="contratos/" data-slug="contratos">
       <div class="kpi-label" data-i18n="cardContratos">POC Contracts</div>
       <div class="kpi-role">Firm transport</div>
-      <div class="kpi-val" data-en="896 contracts · 185041.7 thousand m³/d" data-pt="896 contratos · 185041.7 mil m³/d">896 contracts · 185041.7 thousand m³/d</div>
-      <div class="kpi-when" data-refresh="2026-09-10 14:55 UTC"></div>
+      <div class="kpi-val" data-en="897 contracts · 185041.8 thousand m³/d" data-pt="897 contratos · 185041.8 mil m³/d">897 contracts · 185041.8 thousand m³/d</div>
+      <div class="kpi-when" data-refresh="2026-09-10 16:48 UTC"></div>
     </a>
     <a class="kpi-cell" href="flows/" data-slug="flows">
       <div class="kpi-label" data-i18n="cardFlows">Pipeline Flows</div>
       <div class="kpi-role">Physical movement</div>
       <div class="kpi-val" data-en="1358.6M m³ realized (7d)" data-pt="1358.6M m³ realizados (7d)">1358.6M m³ realized (7d)</div>
-      <div class="kpi-when" data-refresh="2026-09-10 15:46 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-10 16:50 UTC"></div>
     </a>
     <a class="kpi-cell" href="supply/" data-slug="supply">
       <div class="kpi-label" data-i18n="cardSupply">Gas Supply</div>
       <div class="kpi-role">National balance</div>
       <div class="kpi-val" data-en="6.7M thousand m³ produced · 2026-07" data-pt="6.7M mil m³ produzidos · 2026-07">6.7M thousand m³ produced · 2026-07</div>
-      <div class="kpi-when" data-refresh="2026-09-10 14:55 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-10 16:48 UTC"></div>
       
     </a>
     <a class="kpi-cell" href="precos/" data-slug="precos">
       <div class="kpi-label" data-i18n="cardPrecos">ANP Prices</div>
       <div class="kpi-role">Disclosed R$/MMBtu</div>
       <div class="kpi-val" data-en="Santos 18.2 R$/MMBtu · 2026-06" data-pt="Santos 18.2 R$/MMBtu · 2026-06">Santos 18.2 R$/MMBtu · 2026-06</div>
-      <div class="kpi-when" data-refresh="2026-09-10 14:55 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-10 16:48 UTC"></div>
     </a>
   </div>
   <div class="sources-block">
@@ -1169,7 +1168,7 @@ footer.site a:hover { color: var(--text); border-bottom-color: var(--brz-yellow)
   </div>
 </main>
 <footer class="site">
-  &copy; <span id="year"></span> GasBrazil.com
+  &copy; <span id="year"></span> GasBrazil
   &middot; <a href="./wiki/" data-i18n="navWiki">Wiki</a>
   &middot; <a href="./about/" data-i18n="footerAbout">About &amp; methodology</a>
   &middot; <span data-i18n="contact">Contact</span>: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
@@ -1235,7 +1234,7 @@ const GB_I18N = {
     themeLight: "Switch to light mode",
     langSwitch: "Português",
     skip: "Skip to content",
-    navHome: "GasBrazil.com",
+    navHome: "GasBrazil",
     navOns: "ONS Balances",
     navPoc: "POC Results",
     navContratos: "POC Contracts",
@@ -1244,7 +1243,8 @@ const GB_I18N = {
     navPld: "PLD Prices",
     navPrecos: "ANP Prices",
     navDesk: "The Desk",
-    navProducts: "Products",
+    navProducts: "Products", // retained for previously deployed pages cached in browsers
+    navMenu: "Menu",
     navAbout: "About",
     navWiki: "Wiki",
     filterPlaceholder: "Filter…",
@@ -1254,7 +1254,7 @@ const GB_I18N = {
     tagline: "Analytical Firepower for Brazil's Energy Markets",
     hubHint: "Every card below opens a live dashboard — pick a product to explore.",
     aboutLead: "Independent public-data dashboards. Not an official ONS, ANP, CCEE, or transportadora product.",
-    aboutBody: "GasBrazil.com republishes open Brazilian gas and power data as filterable dashboards. Caveats are on each page and on About.",
+    aboutBody: "GasBrazil republishes open Brazilian gas and power data as filterable dashboards. Caveats are on each page and on About.",
     cardOns: "ONS Balances",
     cardOnsDesc: "Daily SIN balances and gas-fired dispatch.",
     cardPoc: "POC Results",
@@ -1332,14 +1332,14 @@ const GB_I18N = {
     aboutCoverDesk: "The Desk: cross-product headline series. Full history and filters live on each product page.",
     notFound: "This page is not here.",
     notFoundBody: "The hub and dashboards are linked below.",
-    backHome: "Back to GasBrazil.com"
+    backHome: "Back to GasBrazil"
   },
   pt: {
     themeDark: "Mudar para o modo escuro",
     themeLight: "Mudar para o modo claro",
     langSwitch: "English",
     skip: "Ir para o conteúdo",
-    navHome: "GasBrazil.com",
+    navHome: "GasBrazil",
     navOns: "Balanços ONS",
     navPoc: "Resultados POC",
     navContratos: "Contratos POC",
@@ -1348,7 +1348,8 @@ const GB_I18N = {
     navPld: "Preços PLD",
     navPrecos: "Preços ANP",
     navDesk: "The Desk",
-    navProducts: "Produtos",
+    navProducts: "Produtos", // retained for previously deployed pages cached in browsers
+    navMenu: "Menu",
     navAbout: "Sobre",
     navWiki: "Wiki",
     filterPlaceholder: "Filtrar…",
@@ -1358,7 +1359,7 @@ const GB_I18N = {
     tagline: "Potência analítica para os mercados de energia do Brasil",
     hubHint: "Cada cartão abaixo abre um painel ao vivo — escolha um produto para explorar.",
     aboutLead: "Painéis independentes com dados públicos. Não é produto oficial da ONS, ANP, CCEE ou transportadoras.",
-    aboutBody: "O GasBrazil.com republica dados abertos de gás e energia em painéis filtráveis. Ressalvas em cada página e em Sobre.",
+    aboutBody: "O GasBrazil republica dados abertos de gás e energia em painéis filtráveis. Ressalvas em cada página e em Sobre.",
     cardOns: "Balanços ONS",
     cardOnsDesc: "Balanços diários do SIN e despacho a gás.",
     cardPoc: "Resultados POC",
@@ -1436,7 +1437,7 @@ const GB_I18N = {
     aboutCoverDesk: "The Desk: séries-resumo entre produtos. Histórico e filtros ficam em cada painel.",
     notFound: "Esta página não existe.",
     notFoundBody: "O hub e os painéis estão nos links abaixo.",
-    backHome: "Voltar ao GasBrazil.com"
+    backHome: "Voltar ao GasBrazil"
   }
 };
 function currentLang() {
@@ -1488,7 +1489,7 @@ initLangToggle("lang-toggle");
 </html>
 
 <script>
-const TEASERS_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/hub/teasers.json.gz?v=34504338142";
+const TEASERS_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/hub/teasers.json.gz?v=34512252521";
 function paintRefreshLabels() {
   document.querySelectorAll(".kpi-when[data-refresh]").forEach(el => {
     const when = el.getAttribute("data-refresh");
