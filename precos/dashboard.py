@@ -221,6 +221,7 @@ footer a { color: var(--accent); }
     <span class="asof-label" data-i18n="dataThrough">Data through</span>
     <span class="asof-val" id="asof-through">&mdash;</span>
   </div>
+  __SHARED_METHODOLOGY__
   &copy; <span id="year"></span> GasBrazil.com &middot;
   <span data-i18n="precosFooter">Data: ANP publicidade dos preços de gás natural. Not an official ANP product.</span>
   &middot; <span data-i18n="contact">Contact</span>: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
@@ -696,6 +697,7 @@ def write_dashboard(out_path=DEFAULT_OUT):
         SHARED_SITE_LINKS_JS=kit.site_links_js("precos"),
         SHARED_NAV_LINKS=kit.nav_links_html("precos"),
         SHARED_PAGE_INTRO=kit.page_intro_html("precos"),
+        SHARED_METHODOLOGY=kit.methodology_html("precos"),
         FAVICON_DATA_URI=kit.embed_favicon(),
         FONT_PRELOAD=kit.font_preload_html(),
     )

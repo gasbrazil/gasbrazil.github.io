@@ -434,6 +434,7 @@ footer a { color: var(--accent); }
     <span class="asof-label" data-i18n="dataThrough">Data through</span>
     <span class="asof-val" id="asof-through">&mdash;</span>
   </div>
+  __SHARED_METHODOLOGY__
   &copy; <span id="year"></span> GasBrazil.com &middot; Data: ANP open data + TAG/TBG/NTS Portaria 1/2003 (Actual/Scheduled prefer TSO when available) &middot; Shipper capacity is on <a href="../contratos/">POC Contracts</a>; this page shows physical flow totals only &middot; Contact: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
 </footer>
 </div>
@@ -1635,6 +1636,7 @@ def write_dashboard(out_path=DEFAULT_OUT):
         SHARED_SITE_LINKS_JS=kit.site_links_js("flows"),
         SHARED_NAV_LINKS=kit.nav_links_html("flows"),
         SHARED_PAGE_INTRO=kit.page_intro_html("flows"),
+        SHARED_METHODOLOGY=kit.methodology_html("flows"),
         FAVICON_DATA_URI=kit.embed_favicon(),
         FONT_PRELOAD=kit.font_preload_html(),
     )

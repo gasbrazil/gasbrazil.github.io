@@ -335,6 +335,20 @@ const GB_I18N = {
     kpiRefresh: "Last refreshed",
     dataThrough: "Data through",
     staleBadge: "Data may be stale",
+    methodTitle: "How this is built",
+    methodSources: "Sources",
+    methodAssump: "Key assumption",
+    methodLimits: "Limits",
+    methodAssump_ons: "Gas burn is estimated from verified generation (9,400 kcal/m³; CCGT 1,800 / OCGT 2,500 kcal/kWh; assumptions v1).",
+    methodAssump_poc: "Prices use the POC PCR factor of 28.8081 MMBtu per 1,000 m³ (assumptions v1).",
+    methodAssump_contratos: "Master rows enable later nominations; they are not firm capacity bookings.",
+    methodAssump_flows: "Where ANP and TSO overlap, TSO Actual/Scheduled volumes win.",
+    methodAssump_supply: "Monthly aggregation of ANP PPGN-EL national series plus imports.",
+    methodAssump_precos: "Tax-inclusive R$/MMBtu monthly disclosures, not spot benchmarks.",
+    methodAssump_pld: "Daily averages by submarket; SIN has no PLD (join map v1).",
+    methodAssump_desk: "Cross-product headlines; full history and filters live on each product page.",
+    methodLimits_ons: "Thermal dispatch updates intraday; subsystem balances finalize in the evening (UTC).",
+    methodLimits_poc: "A few hundred records total; full-history rebuild each run.",
     sources: "Sources",
     sourceOns: "ONS",
     sourcePoc: "POC",
@@ -423,6 +437,20 @@ const GB_I18N = {
     kpiRefresh: "Última atualização",
     dataThrough: "Dados até",
     staleBadge: "Dados possivelmente desatualizados",
+    methodTitle: "Como isto é montado",
+    methodSources: "Fontes",
+    methodAssump: "Premissa-chave",
+    methodLimits: "Limites",
+    methodAssump_ons: "Queima de gás estimada da geração verificada (9.400 kcal/m³; CC 1.800 / CA 2.500 kcal/kWh; premissas v1).",
+    methodAssump_poc: "Preços usam o fator PCR de 28,8081 MMBtu por 1.000 m³ (premissas v1).",
+    methodAssump_contratos: "Linhas master viabilizam nomeações futuras; não são reservas firmes.",
+    methodAssump_flows: "Onde ANP e TSO se sobrepõem, valem os volumes Programado/Realizado das TSO.",
+    methodAssump_supply: "Agregação mensal das séries nacionais PPGN-EL da ANP mais importações.",
+    methodAssump_precos: "Divulgações mensais em R$/MMBtu com impostos, não benchmarks spot.",
+    methodAssump_pld: "Médias diárias por submercado; SIN não tem PLD (mapa de junção v1).",
+    methodAssump_desk: "Resumo entre produtos; histórico e filtros ficam em cada painel.",
+    methodLimits_ons: "Despacho térmico atualiza ao longo do dia; balanços por subsistema fecham à noite (UTC).",
+    methodLimits_poc: "Poucas centenas de registros; rebuild completo a cada rodada.",
     sources: "Fontes",
     sourceOns: "ONS",
     sourcePoc: "POC",
@@ -849,6 +877,89 @@ def page_intro_html(self_id: str) -> str:
         "</nav>\n"
         f'<h1 data-i18n="{nav_key}">{html.escape(title)}</h1>'
     )
+
+
+# Methodology disclosure: one collapsed line in each dashboard's footer --
+# sources, the single assumption that most changes how numbers read, and
+# the coverage limit. Collapsed by default so fresh pages gain zero
+# visible prose; limits reuse the About page's aboutCover* strings where
+# they exist. Assumption sentences mirror shared/transforms.py (bump the
+# version note here when the registry version bumps).
+_METHODOLOGY = {
+    "ons": (("sourceOns",), "methodAssump_ons", "methodLimits_ons"),
+    "poc": (("sourcePoc",), "methodAssump_poc", "methodLimits_poc"),
+    "contratos": (("sourcePoc",), "methodAssump_contratos", "aboutCoverBody"),
+    "flows": (("sourceFlows",), "methodAssump_flows", "aboutCoverFlows"),
+    "supply": (("sourceSupply",), "methodAssump_supply", "aboutCoverSupply"),
+    "precos": (("sourcePrecos",), "methodAssump_precos", "aboutCoverPrecos"),
+    "pld": (("sourcePld",), "methodAssump_pld", "aboutCoverPld"),
+    "desk": (
+        ("sourceOns", "sourcePld", "sourcePoc", "sourceFlows"),
+        "methodAssump_desk",
+        "aboutCoverDesk",
+    ),
+}
+
+# English defaults for the methodology rows (data-i18n swaps in PT at view
+# time). Source defaults reuse the _SITES-adjacent agency names.
+_METHOD_SOURCE_LABELS = {
+    "sourceOns": "ONS",
+    "sourcePoc": "POC",
+    "sourceFlows": "ANP",
+    "sourceSupply": "ANP",
+    "sourcePrecos": "ANP",
+    "sourcePld": "CCEE",
+}
+
+
+def methodology_html(self_id: str) -> str:
+    """Collapsed footer disclosure for a dashboard. Raises KeyError on
+    unknown ids so a typo fails the build, not the page."""
+    if self_id not in _METHODOLOGY:
+        raise KeyError(f"Unknown page {self_id!r}; known: {sorted(_METHODOLOGY)}")
+    source_keys, assump_key, limits_key = _METHODOLOGY[self_id]
+    sources = " · ".join(
+        f'<span data-i18n="{k}">{html.escape(_METHOD_SOURCE_LABELS[k])}</span>'
+        for k in source_keys
+    )
+    assump_default = _METHOD_ASSUMP_DEFAULTS[self_id]
+    limits_default = _METHOD_LIMITS_DEFAULTS[limits_key]
+    return (
+        '<details class="method">\n'
+        '<summary data-i18n="methodTitle">How this is built</summary>\n'
+        '<div class="method-row"><span class="method-label" data-i18n="methodSources">Sources</span>'
+        f"<span>{sources}</span></div>\n"
+        '<div class="method-row"><span class="method-label" data-i18n="methodAssump">Key assumption</span>'
+        f'<span data-i18n="{assump_key}">{html.escape(assump_default)}</span></div>\n'
+        '<div class="method-row"><span class="method-label" data-i18n="methodLimits">Limits</span>'
+        f'<span data-i18n="{limits_key}">{html.escape(limits_default)}</span></div>\n'
+        "</details>"
+    )
+
+
+_METHOD_ASSUMP_DEFAULTS = {
+    "ons": "Gas burn is estimated from verified generation (9,400 kcal/m³; CCGT 1,800 / OCGT 2,500 kcal/kWh; assumptions v1).",
+    "poc": "Prices use the POC PCR factor of 28.8081 MMBtu per 1,000 m³ (assumptions v1).",
+    "contratos": "Master rows enable later nominations; they are not firm capacity bookings.",
+    "flows": "Where ANP and TSO overlap, TSO Actual/Scheduled volumes win.",
+    "supply": "Monthly aggregation of ANP PPGN-EL national series plus imports.",
+    "precos": "Tax-inclusive R$/MMBtu monthly disclosures, not spot benchmarks.",
+    "pld": "Daily averages by submarket; SIN has no PLD (join map v1).",
+    "desk": "Cross-product headlines; full history and filters live on each product page.",
+}
+
+# aboutCover* defaults mirror GB_I18N en (kept here so the builder needs no
+# JS parsing); methodLimits_ons/poc are new with this panel.
+_METHOD_LIMITS_DEFAULTS = {
+    "methodLimits_ons": "Thermal dispatch updates intraday; subsystem balances finalize in the evening (UTC).",
+    "methodLimits_poc": "A few hundred records total; full-history rebuild each run.",
+    "aboutCoverBody": "POC Contracts include Transport and Master rows. Legacy and access-connection contracts are not in the public GraphQL feed yet.",
+    "aboutCoverFlows": "Pipeline Flows merges ANP open data with TAG/TBG/NTS Portaria 1/2003 Actual/Scheduled volumes (TSO preferred when both exist). ANP still has no 2022 files and lags several weeks; TSO pubs often close that gap. TSB/GOM can be toggled.",
+    "aboutCoverSupply": "Gas Supply: ANP PPGN-EL national monthly series plus national imports (no Bolivia vs LNG split in the open CSV).",
+    "aboutCoverPrecos": "ANP Prices: Resolution 52/2011 monthly disclosures (R$/MMBtu, tax-inclusive). Some months are suppressed for confidentiality.",
+    "aboutCoverPld": "PLD: CCEE daily averages by submarket; optional ONS CMO and median gas CVU when lake data is present.",
+    "aboutCoverDesk": "The Desk: cross-product headline series. Full history and filters live on each product page.",
+}
 
 
 def site_links_js(self_id: str) -> str:

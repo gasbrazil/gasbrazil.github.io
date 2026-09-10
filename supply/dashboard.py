@@ -220,6 +220,7 @@ footer a { color: var(--accent); }
     <span class="asof-label" data-i18n="dataThrough">Data through</span>
     <span class="asof-val" id="asof-through">&mdash;</span>
   </div>
+  __SHARED_METHODOLOGY__
   &copy; <span id="year"></span> GasBrazil.com &middot;
   <span data-i18n="supplyFooter">Data: ANP PPGN-EL and importações de gás natural (open data). Not an official ANP product.</span>
   &middot; <span data-i18n="contact">Contact</span>: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
@@ -606,6 +607,7 @@ def write_dashboard(out_path: Path | str = DEFAULT_OUT) -> Path:
         SHARED_SITE_LINKS_JS=kit.site_links_js("supply"),
         SHARED_NAV_LINKS=kit.nav_links_html("supply"),
         SHARED_PAGE_INTRO=kit.page_intro_html("supply"),
+        SHARED_METHODOLOGY=kit.methodology_html("supply"),
         FAVICON_DATA_URI=kit.embed_favicon(),
         FONT_PRELOAD=kit.font_preload_html(),
     )

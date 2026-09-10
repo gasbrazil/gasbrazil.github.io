@@ -857,3 +857,29 @@ input[type="checkbox"] {
 [data-theme="dark"] .stale-badge {
   color: var(--brz-yellow); border-color: rgba(255, 223, 0, .45);
 }
+
+/* Methodology disclosure: one collapsed line in each dashboard's footer
+   (see methodology_html()). Closed it reads as a single quiet link-like
+   row; open it shows three labeled rows. Collapsed by default so fresh
+   pages gain zero visible prose. */
+.method {
+  margin: 2px 0 10px; font-size: 12.5px; color: var(--muted);
+}
+.method summary {
+  display: inline-flex; align-items: center; gap: 6px;
+  cursor: pointer; color: var(--muted2); font-weight: 400;
+  border-bottom: 1px solid transparent;
+  transition: color .15s ease, border-color .15s ease;
+}
+.method summary:hover { color: var(--accent); border-bottom-color: var(--accent); }
+[data-theme="dark"] .method summary:hover { color: var(--brz-yellow); border-bottom-color: var(--brz-yellow); }
+.method summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.method-row {
+  display: flex; gap: 10px; margin-top: 6px; line-height: 1.5;
+  max-width: 72em;
+}
+.method-label {
+  flex: none; width: 108px;
+  font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em;
+}
+.method-row > span:last-child { color: var(--muted2); font-weight: 300; }

@@ -201,6 +201,7 @@ footer a { color: var(--accent); }
     <span class="asof-label" data-i18n="dataThrough">Data through</span>
     <span class="asof-val" id="asof-through">&mdash;</span>
   </div>
+  __SHARED_METHODOLOGY__
   &copy; <span id="year"></span> GasBrazil.com
   &middot; <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
   &middot; <a href="../about/" data-i18n="footerAbout">About</a>
@@ -774,6 +775,7 @@ def write_dashboard(out_path: Path | str = DEFAULT_OUT) -> Path:
         SHARED_SITE_LINKS_JS=kit.site_links_js("desk"),
         SHARED_NAV_LINKS=kit.nav_links_html("desk"),
         SHARED_PAGE_INTRO=kit.page_intro_html("desk"),
+        SHARED_METHODOLOGY=kit.methodology_html("desk"),
         FAVICON_DATA_URI=kit.embed_favicon(),
         FONT_PRELOAD=kit.font_preload_html(),
     )
