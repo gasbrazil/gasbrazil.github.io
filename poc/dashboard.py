@@ -18,8 +18,8 @@ HERE = Path(__file__).parent
 PARQUET_PATH = HERE / "data" / "poc_results.parquet"
 DEFAULT_OUT = HERE / "index.html"
 
-# Price in the source data is R$/MMBtu. PCR convention: MMBtu per 1000 m³.
-MMBTU_PER_M3 = xf.MMBTU_PER_1000_M3
+# Price in the source data is R$/MMBtu. R$/m³ = Price / m³ per MMBtu.
+M3_PER_MMBTU = xf.M3_PER_MMBTU
 
 COLUMNS = [
     "Transporter (TSO)", "codigoProcesso", "Trade Date", "Flow Date Start", "Flow Date End",
@@ -54,7 +54,7 @@ TRANSACTION_TYPE_DISPLAY = {
 
 def load_payload():
     df = pd.read_parquet(PARQUET_PATH)
-    df["R$/m3"] = (df["Price"] * MMBTU_PER_M3 / 1000).round(2)
+    df["R$/m3"] = (df["Price"] / M3_PER_MMBTU).round(2)
     df = df[COLUMNS].copy()
     df["Transaction Type"] = df["Transaction Type"].replace(TRANSACTION_TYPE_DISPLAY)
     for c in DATE_COLS:
@@ -174,7 +174,8 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
    overflow, sticky header), just taller since here the table is the page's
    primary content rather than a small secondary widget. */
 .table-wrap { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; overflow: auto; box-shadow: var(--shadow); max-height: 65vh; }
-table { border-collapse: collapse; width: 100%; font-size: var(--table-font-size); table-layout: fixed; }
+table { border-collapse: collapse; font-size: var(--table-font-size); }
+.table-wrap table { table-layout: fixed; width: max-content; min-width: 100%; }
 th, td { padding: 4px 8px; text-align: left; border-bottom: 1px solid var(--border); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 th { position: sticky; top: 0; background: var(--panel); cursor: pointer; user-select: none; color: var(--muted2); font-weight: 400; z-index: 2; }
 th:hover { background: var(--accent-soft); }
@@ -331,7 +332,7 @@ const QUICK_FILTERS = [
    A single combined SVG line chart: pick any Pipeline + Transaction Type
    combination as a toggle chip below, each becomes its own colored line.
    Left axis is R$/MMBtu (the source unit); the right axis mirrors the same
-   gridlines rescaled to R$/m3 (R$/m3 = R$/MMBtu * MMBTU_PER_M3 / 1000, a
+   gridlines rescaled to R$/m3 (R$/m3 = R$/MMBtu / M3_PER_MMBTU, a
    fixed linear factor -- same constant used for the table's R$/m3 column), so
    both units read off one chart instead of duplicating panels. The chart
    plots against the table's `filtered` rows, so the existing toolbar /
@@ -342,7 +343,13 @@ const QUICK_FILTERS = [
    like ons-dashboard's, so points are plotted on a true elapsed-time axis
    and connected date-to-date rather than against a dense calendar grid.
 ------------------------------------------------------------------------- */
-const MMBTU_PER_M3 = __MMBTU_PER_M3__;
+const M3_PER_MMBTU = __M3_PER_MMBTU__;
+function brlPerM3(mmbtu, nd) {
+  if (mmbtu == null || mmbtu === "" || !isFinite(Number(mmbtu))) return null;
+  const d = nd == null ? 2 : nd;
+  const f = Math.pow(10, d);
+  return Math.round(Number(mmbtu) / M3_PER_MMBTU * f) / f;
+}
 __SHARED_JS_CHART_PALETTE__
 // Fixed chip order within a pipeline group -- GUS/Residual first since
 // those are the two Eric most often looks at together; anything not listed
@@ -552,7 +559,7 @@ function renderChart() {
     const lb = chartSvgEl("text", { x: ML - 9, y: y(t) + 4, "text-anchor": "end", fill: "var(--muted)", "font-size": 11.5 });
     lb.textContent = fmtAxisNum(t, 2); lb.style.fontVariantNumeric = "tabular-nums"; svg.appendChild(lb);
     const rb = chartSvgEl("text", { x: W - MR + 9, y: y(t) + 4, "text-anchor": "start", fill: "var(--muted)", "font-size": 11.5 });
-    rb.textContent = fmtAxisNum(t * MMBTU_PER_M3 / 1000, 2); rb.style.fontVariantNumeric = "tabular-nums"; svg.appendChild(rb);
+    rb.textContent = fmtAxisNum(brlPerM3(t), 2); rb.style.fontVariantNumeric = "tabular-nums"; svg.appendChild(rb);
   });
   if (lo < 0 && hi > 0) svg.appendChild(chartSvgEl("line", { x1: ML, x2: W - MR, y1: y(0), y2: y(0), stroke: "var(--border-strong)", "stroke-width": 1.5 }));
 
@@ -623,7 +630,7 @@ function renderChart() {
       if (!p) return;
       dots.appendChild(chartSvgEl("circle", { cx: x(p.date), cy: y(p.price), r: 4, fill: chartColorOf(s.key), stroke: "var(--panel)", "stroke-width": 2 }));
       rows += '<tr><td><span class="sw" style="display:inline-block;background:' + chartColorOf(s.key) + '"></span> ' + escapeHtml(comboLabel(s.pipeline, s.type)) +
-        '</td><td class="v">' + fmtAxisNum(p.price, 2) + ' MMBtu · ' + fmtAxisNum(p.price * MMBTU_PER_M3 / 1000, 2) + ' m³</td></tr>';
+        '</td><td class="v">' + fmtAxisNum(p.price, 2) + ' MMBtu · ' + fmtAxisNum(brlPerM3(p.price), 2) + ' m³</td></tr>';
     });
     tt.innerHTML = '<div class="d">' + date + '</div><table>' + rows + '</table>';
     placeChartTooltip(tt, clientX, clientY);
@@ -740,6 +747,7 @@ function populateSelect(sel, values) {
 
 function applyColWidth(el, px) {
   el.style.width = px + "px";
+  el.style.minWidth = px + "px";
   el.style.maxWidth = px + "px";
   el.classList.add("truncate");
 }
@@ -1318,6 +1326,7 @@ async function init() {
   document.getElementById("year").textContent = new Date().getFullYear();
   const text = await inflateGzipUrl(PAYLOAD_URL);
   DATA = JSON.parse(text);
+  for (const row of DATA.rows) row["R$/m3"] = brlPerM3(row["Price"]);
   columnOrder = DATA.columns.slice();
   hiddenCols = new Set(DEFAULT_HIDDEN_COLS);
   const savedPrefs = loadColumnPrefs();
@@ -1391,20 +1400,36 @@ init();
 
 
 def write_dashboard(out_path=DEFAULT_OUT):
-    payload = load_payload()
     sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "shared"))
     import data_kit as dk  # noqa: E402
     here = Path(__file__).resolve().parent
-    payload_path, payload_href = dk.write_and_publish_artifact("poc", payload, here)
-    kpi_p = payload.get("kpiPrice7d")
-    kpi_n = payload.get("kpiTrades7d") or 0
+    out_path = Path(out_path)
+    if PARQUET_PATH.exists():
+        payload = load_payload()
+        payload_path, payload_href = dk.write_and_publish_artifact("poc", payload, here)
+        generated = payload.get("generated") or ""
+        kpi_p = payload.get("kpiPrice7d")
+        kpi_n = payload.get("kpiTrades7d") or 0
+        kpi_when = payload.get("kpiWhen") or ""
+        n_rows = len(payload["rows"])
+        size_note = f"{payload_path.stat().st_size:,} bytes, {n_rows} rows"
+    else:
+        shell = out_path if out_path.exists() else DEFAULT_OUT
+        payload_href = dk.published_payload_url(shell)
+        markers = dk.published_teaser_markers(shell)
+        generated = markers.get("generated") or ""
+        kpi_p = markers.get("kpi_price_7d") or None
+        kpi_n = markers.get("kpi_trades_7d") or 0
+        kpi_when = markers.get("kpi_when") or ""
+        size_note = "reused published payload (no local parquet)"
+        print("No poc parquet; rebuilding HTML shell against the published payload.")
     html = kit.render(
         TEMPLATE,
         PAYLOAD_URL=payload_href,
-        GENERATED=payload.get("generated") or "",
-        KPI_PRICE_7D="" if kpi_p is None else str(kpi_p),
+        GENERATED=generated,
+        KPI_PRICE_7D="" if kpi_p in (None, "") else str(kpi_p),
         KPI_TRADES_7D=str(kpi_n),
-        KPI_WHEN=payload.get("kpiWhen") or "",
+        KPI_WHEN=kpi_when,
         SHARED_THEME_CSS=kit.render_theme_css(),
         SHARED_JS_DECODE=kit.JS_DECODE,
         SHARED_JS_ESCAPE_HTML=kit.JS_ESCAPE_HTML,
@@ -1423,15 +1448,11 @@ def write_dashboard(out_path=DEFAULT_OUT):
         SHARED_METHODOLOGY=kit.methodology_html("poc"),
         FAVICON_DATA_URI=kit.embed_favicon(),
         FONT_PRELOAD=kit.font_preload_html(),
-        MMBTU_PER_M3=str(MMBTU_PER_M3),
+        M3_PER_MMBTU=str(M3_PER_MMBTU),
     )
-    out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(html, encoding="utf-8")
-    print(
-        f"Wrote dashboard shell ({len(html):,} bytes) + {payload_path.name} "
-        f"({payload_path.stat().st_size:,} bytes, {len(payload['rows'])} rows) → {payload_href}"
-    )
+    print(f"Wrote dashboard shell ({len(html):,} bytes) + {size_note} → {payload_href}")
 
 
 if __name__ == "__main__":

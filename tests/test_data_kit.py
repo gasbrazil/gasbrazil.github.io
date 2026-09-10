@@ -38,3 +38,18 @@ def test_payload_url_encodes_bust(monkeypatch):
     url = dk.payload_url("pld")
     assert url.startswith("https://example.test/pld/payload.json.gz?v=")
     assert " " not in url.split("?", 1)[1]
+
+
+def test_published_shell_fields(tmp_path):
+    html = tmp_path / "index.html"
+    html.write_text(
+        "<!-- home-page teaser marker, read by ../build_home.py:\n"
+        "     generated: 2026-09-10 12:00 UTC\n"
+        "     kpi_price_7d: 33.51 -->\n"
+        '<script>const PAYLOAD_URL = "https://example.test/poc/payload.json.gz?v=1";</script>\n',
+        encoding="utf-8",
+    )
+    assert dk.published_payload_url(html) == "https://example.test/poc/payload.json.gz?v=1"
+    markers = dk.published_teaser_markers(html)
+    assert markers["generated"] == "2026-09-10 12:00 UTC"
+    assert markers["kpi_price_7d"] == "33.51"

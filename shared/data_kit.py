@@ -9,6 +9,7 @@ call validate_* after build and publish() into the repo-root lake/ tree
 from __future__ import annotations
 
 import os
+import re
 import shutil
 import time
 from pathlib import Path
@@ -277,6 +278,38 @@ def payload_url(domain: str) -> str:
     if domain not in ARTIFACT_DOMAINS:
         raise KeyError(f"Unknown artifact domain {domain!r}; known: {ARTIFACT_DOMAINS}")
     return _public_url(f"{domain}/payload.json.gz", local="payload.json.gz")
+
+
+def published_payload_url(html_path: Path | str) -> str:
+    """Read the PAYLOAD_URL already baked into a dashboard shell."""
+    text = Path(html_path).read_text(encoding="utf-8")
+    match = re.search(r'const PAYLOAD_URL = "([^"]+)"', text)
+    if not match:
+        raise ValueError(f"PAYLOAD_URL not found in {html_path}")
+    return match.group(1)
+
+
+def published_teaser_markers(html_path: Path | str) -> dict[str, str]:
+    """Parse hub teaser ``key: value`` lines from a dashboard HTML comment."""
+    text = Path(html_path).read_text(encoding="utf-8")
+    out: dict[str, str] = {}
+    in_block = False
+    for line in text.splitlines():
+        if "home-page teaser marker" in line:
+            in_block = True
+        if not in_block:
+            continue
+        match = re.match(r"\s+([A-Za-z0-9_]+): (.+)$", line)
+        if match:
+            val = match.group(2).strip()
+            if val.endswith("-->"):
+                val = val[:-3].strip()
+            out[match.group(1)] = val
+        closing = "-->" in line
+        opener = "home-page teaser marker" in line
+        if closing and not opener:
+            break
+    return out
 
 
 def _upload_public_artifact(

@@ -18,7 +18,8 @@ Pick any Pipeline + Transaction Type combination from the chart picker and
 it becomes its own colored line — multiple combinations chart side by side.
 The chart has two Y axes: the left is R$/MMBtu (the source unit as
 published); the right mirrors the same gridlines rescaled to R$/m³, using
-the same fixed PCR conversion factor as the table's own R$/m³ column (see
+the same fixed conversion as the table's own R$/m³ column (R$/MMBtu ÷
+26.8081 m³ per MMBtu; see
 [Known Limitations](Known-Limitations)), so a value read off either axis is
 consistent with the other.
 

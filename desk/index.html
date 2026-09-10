@@ -1406,7 +1406,7 @@ const GB_I18N = {
     methodAssump: "Key assumption",
     methodLimits: "Limits",
     methodAssump_ons: "Gas burn is estimated from verified generation (9,400 kcal/m³; CCGT 1,800 / OCGT 2,500 kcal/kWh; assumptions v1).",
-    methodAssump_poc: "Prices use the POC PCR factor of 28.8081 MMBtu per 1,000 m³ (assumptions v1).",
+    methodAssump_poc: "R$/m³ is R$/MMBtu divided by 26.8081 m³ per MMBtu (assumptions v2).",
     methodAssump_contratos: "Master rows enable later nominations; they are not firm capacity bookings.",
     methodAssump_flows: "Where ANP and TSO overlap, TSO Actual/Scheduled volumes win.",
     methodAssump_supply: "Monthly aggregation of ANP PPGN-EL national series plus imports.",
@@ -1511,7 +1511,7 @@ const GB_I18N = {
     methodAssump: "Premissa-chave",
     methodLimits: "Limites",
     methodAssump_ons: "Queima de gás estimada da geração verificada (9.400 kcal/m³; CC 1.800 / CA 2.500 kcal/kWh; premissas v1).",
-    methodAssump_poc: "Preços usam o fator PCR de 28,8081 MMBtu por 1.000 m³ (premissas v1).",
+    methodAssump_poc: "R$/m³ é R$/MMBtu dividido por 26,8081 m³ por MMBtu (premissas v2).",
     methodAssump_contratos: "Linhas master viabilizam nomeações futuras; não são reservas firmes.",
     methodAssump_flows: "Onde ANP e TSO se sobrepõem, valem os volumes Programado/Realizado das TSO.",
     methodAssump_supply: "Agregação mensal das séries nacionais PPGN-EL da ANP mais importações.",
@@ -2300,6 +2300,26 @@ async function init() {
   try {
     const json = await inflateGzipUrl(PAYLOAD_URL);
     DATA = JSON.parse(json);
+    // Payloads built before poc_energy v2 stored R$/m³ as MMBtu × 28.8081 / 1000.
+    // Rescale those fields so this shell is correct against the still-published
+    // artifact; v2+ payloads set spark.energyVersion and skip this.
+    (function migrateLegacyM3Prices(data) {
+      if (!data || ((data.spark || {}).energyVersion >= 2)) return;
+      const rescale = v => {
+        if (v == null || v === "" || !isFinite(Number(v))) return v;
+        return Math.round(Number(v) * 1000 / (28.8081 * 26.8081) * 1000) / 1000;
+      };
+      const kpi = data.kpi || {};
+      ["gusLast", "anpSantos", "anpNonThermalSe", "pocAvg7d"].forEach(k => {
+        if (kpi[k] != null) kpi[k] = rescale(kpi[k]);
+      });
+      if (data.spark && data.spark.defaultGasPrice != null)
+        data.spark.defaultGasPrice = rescale(data.spark.defaultGasPrice);
+      const monthly = data.pocAnpMonthly || {};
+      ["poc", "anpSantos", "anpNonThermalSe"].forEach(k => {
+        if (Array.isArray(monthly[k])) monthly[k] = monthly[k].map(v => v == null ? v : rescale(v));
+      });
+    })(DATA);
     COMPARE_META.forEach(m => { pickedCompare.add(m.key); colorOf(compareSlots, m.key); });
     POC_ANP_META.forEach(m => { pickedPocAnp.add(m.key); colorOf(pocAnpSlots, m.key); });
     const smSel = document.getElementById("compare-sm");
