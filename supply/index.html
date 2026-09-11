@@ -240,6 +240,7 @@ html, body {
 }
 .muted, .when, .sources-label, .asof, .meta-muted { font-weight: 300; color: var(--muted); }
 .wordmark, h1 { font-weight: 600; }
+.wordmark { transition: color .15s ease; }
 .emph, .navlink, .kpi-title, .card .name, .panel-title, th, b, strong {
   font-weight: 400;
 }
@@ -283,8 +284,8 @@ html, body {
   background: var(--header-bg);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  padding-top: 12px;
-  padding-bottom: 2px;
+  padding-top: 10px;
+  padding-bottom: 8px;
   margin: 0;
   display: flex;
   flex-direction: row;
@@ -354,23 +355,48 @@ footer .asof-strip,
 }
 .navlink:hover { color: var(--accent); border-bottom-color: var(--accent); }
 
-/* Products dropdown: icon-only trigger in the right chrome, not beside the title. */
-.products-dd { position: relative; display: inline-flex; }
+/* Products dropdown lives on the wordmark (leftmost in the frame). Hover
+   the brand cluster to open; the caret is a ghost control for touch/keyboard,
+   not a boxed hamburger. Padding on the wrapper bridges the gap to the menu
+   so the panel doesn't flicker closed on the way down. */
+.products-dd {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 0 8px;
+  margin: -2px 0 -8px;
+}
 .dd-trigger {
   display: inline-flex; align-items: center; justify-content: center;
-  min-width: 34px; height: 34px; padding: 0;
-  background: var(--panel); border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm); color: var(--text); cursor: pointer;
-  font: 400 15px/1 var(--font);
-  width: auto; flex: none; box-sizing: border-box;
-  transition: background .15s ease, border-color .15s ease, color .15s ease;
+  min-width: 16px; width: 16px; height: 28px; padding: 0;
+  background: transparent; border: none; border-radius: 3px;
+  color: var(--muted); cursor: pointer;
+  font: 400 12px/1 var(--font);
+  flex: none; box-sizing: border-box;
+  transition: color .15s ease;
 }
 .dd-trigger:hover, .dd-trigger[aria-expanded="true"] {
-  background: var(--accent-soft); color: var(--text); border-color: var(--border-strong);
+  background: transparent; color: var(--text); border: none;
 }
-.dd-icon { font-size: 14px; line-height: 1; }
+.dd-caret {
+  display: block;
+  width: 0; height: 0;
+  border-left: 3.5px solid transparent;
+  border-right: 3.5px solid transparent;
+  border-top: 4px solid currentColor;
+  opacity: .4;
+  transition: transform .16s ease, opacity .16s ease;
+}
+.products-dd:hover .dd-caret,
+.dd-trigger:hover .dd-caret,
+.dd-trigger[aria-expanded="true"] .dd-caret { opacity: .95; }
+.dd-trigger[aria-expanded="true"] .dd-caret { transform: rotate(180deg); }
+@media (hover: none) {
+  .dd-caret { opacity: .7; }
+}
 
-/* Masthead: brand · title on the left; Wiki / About / ☰ on the right. */
+/* Masthead: wordmark-menu · title on the left; Wiki / About on the right. */
 .masthead {
   display: flex; align-items: center; gap: 12px;
   flex: 1; min-width: 0;
@@ -380,43 +406,47 @@ footer .asof-strip,
   min-width: 0;
 }
 .masthead-brand {
-  font-weight: 600; font-size: 17px; letter-spacing: -.01em;
+  font-weight: 600; font-size: 17px; letter-spacing: -.015em;
   color: var(--text); text-decoration: none; white-space: nowrap;
+  transition: color .15s ease;
 }
-.masthead-brand:hover { color: var(--accent); }
+.masthead-brand:hover,
+.products-dd:hover .masthead-brand,
+.products-dd:hover .wordmark { color: var(--accent); }
+[data-theme="dark"] .masthead-brand:hover,
+[data-theme="dark"] .products-dd:hover .masthead-brand,
+[data-theme="dark"] .products-dd:hover .wordmark { color: var(--brz-yellow); }
 .masthead h1 {
-  font-size: 15px; margin: 0; letter-spacing: -.01em; font-weight: 400;
-  color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font-size: 14px; margin: 0; letter-spacing: -.01em; font-weight: 400;
+  color: var(--muted2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.masthead .products-dd { margin-left: 2px; }
-.nav-trail .dd-menu { left: auto; right: 0; }
 .dd-menu {
   /* Kept in-flow for opacity fade (display:none can't animate). Closed
      state is invisible + non-interactive; .is-open reveals with a quick fade.
      Solid panel background, not the gradient: the menu floats over page
      content and must read near-opaque when open. */
   position: absolute;
-  top: calc(100% + 4px);
-  left: -8px;
-  min-width: 180px;
+  top: calc(100% - 2px);
+  left: 0;
+  min-width: 196px;
   background: var(--panel);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius);
   box-shadow: var(--elevate);
-  padding: 6px;
+  padding: 5px;
   z-index: 50;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transform: translateY(-4px);
-  transition: opacity .14s ease, transform .14s ease, visibility 0s linear .14s;
+  transform: translateY(-6px);
+  transition: opacity .14s ease, transform .16s ease, visibility 0s linear .14s;
 }
 .dd-menu.is-open {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
   transform: translateY(0);
-  transition: opacity .14s ease, transform .14s ease, visibility 0s;
+  transition: opacity .14s ease, transform .16s ease, visibility 0s;
 }
 .dd-menu a, .dd-menu .is-current {
   display: flex;
@@ -425,11 +455,15 @@ footer .asof-strip,
   font: 400 13.5px var(--font);
   color: var(--text);
   text-decoration: none;
-  padding: 7px 8px;
-  border-radius: 5px;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  transition: background .12s ease, color .12s ease;
 }
 .dd-menu a:hover { background: var(--accent-soft); color: var(--accent); }
-.dd-menu .is-current { color: var(--accent); font-weight: 600; }
+.dd-menu .is-current {
+  color: var(--accent); font-weight: 600;
+  background: var(--accent-soft);
+}
 .dd-menu .chk { width: 12px; font-size: 11px; color: var(--accent); flex: none; }
 
 /* Source links: short agency name + external icon (ONS Balances look). */
@@ -824,7 +858,7 @@ header.top #theme-toggle,
   .sources a { padding: 8px 14px; }
 }
 @media (max-width: 640px) {
-  /* Keep the icon chrome; Wiki/About remain in the footer and the ☰ menu. */
+  /* Keep the wordmark menu; Wiki/About remain in the footer. */
   header.dash-head .nav-trail > .navlink { display: none; }
 }
 
@@ -870,8 +904,8 @@ input[type="checkbox"] {
    initStalenessBadgeFor(), so wayfinding and freshness read the same on
    all eight products without adding visible prose to the pages. */
 .crumb-sep {
-  width: 1px; height: 14px; background: var(--border-strong);
-  flex: none; opacity: .9;
+  width: 1px; height: 16px; background: var(--border-strong);
+  flex: none; opacity: .7;
 }
 /* Freshness warning appended to #asof-strip when data-through exceeds the
    product's publication cadence (see STALE_LAG_DAYS). Quiet pill, never
@@ -914,7 +948,7 @@ input[type="checkbox"] {
 
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; font-weight: 300; }
-/* Single-row header: brand · title … Wiki/About/☰ · PT · theme */
+/* Single-row header: wordmark-menu · title … Wiki/About · PT · theme */
 header.dash-head { display: flex; flex-direction: row; align-items: center; gap: 10px; margin-bottom: 0; }
 h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .header-right { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; width: auto; }
@@ -976,11 +1010,11 @@ footer a { color: var(--accent); }
 <header class="dash-head">
   <div class="masthead">
       <div class="masthead-ident">
-      <a class="masthead-brand" id="link-home" href="https://gasbrazil.com" data-i18n="navHome">GasBrazil</a>
+      <div class="products-dd"><a class="masthead-brand" id="link-home" href="https://gasbrazil.com" data-i18n="navHome">GasBrazil</a><button type="button" class="dd-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="gb-products-menu" id="gb-products-trigger" data-i18n-aria="navMenu" aria-label="Menu"><span class="dd-caret" aria-hidden="true"></span></button><div class="dd-menu" id="gb-products-menu" role="menu" aria-labelledby="gb-products-trigger"><a id="link-desk" href="https://gasbrazil.com/desk/" role="menuitem" data-i18n="navDesk"><span class="chk"></span>The Desk</a><a id="link-ons" href="https://gasbrazil.com/ons/" role="menuitem" data-i18n="navOns"><span class="chk"></span>ONS Balances</a><a id="link-pld" href="https://gasbrazil.com/pld/" role="menuitem" data-i18n="navPld"><span class="chk"></span>PLD Prices</a><a id="link-poc" href="https://gasbrazil.com/poc/" role="menuitem" data-i18n="navPoc"><span class="chk"></span>POC Results</a><a id="link-contratos" href="https://gasbrazil.com/contratos/" role="menuitem" data-i18n="navContratos"><span class="chk"></span>POC Contracts</a><a id="link-flows" href="https://gasbrazil.com/flows/" role="menuitem" data-i18n="navFlows"><span class="chk"></span>Pipeline Flows</a><span class="is-current" role="menuitem" aria-current="page" data-i18n="navSupply"><span class="chk">✓</span>Gas Supply</span><a id="link-precos" href="https://gasbrazil.com/precos/" role="menuitem" data-i18n="navPrecos"><span class="chk"></span>ANP Prices</a></div></div>
       <span class="crumb-sep" aria-hidden="true"></span>
       <h1 data-i18n="navSupply">Gas Supply</h1>
       </div>
-      <div class="nav-trail"><a class="navlink" href="../wiki/" data-i18n="navWiki">Wiki</a><a class="navlink" href="../about/" data-i18n="navAbout">About</a><div class="products-dd"><button type="button" class="dd-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="gb-products-menu" id="gb-products-trigger" data-i18n-aria="navMenu" aria-label="Menu"><span class="dd-icon" aria-hidden="true">☰</span></button><div class="dd-menu" id="gb-products-menu" role="menu" aria-labelledby="gb-products-trigger"><a id="link-desk" href="https://gasbrazil.com/desk/" role="menuitem" data-i18n="navDesk"><span class="chk"></span>The Desk</a><a id="link-ons" href="https://gasbrazil.com/ons/" role="menuitem" data-i18n="navOns"><span class="chk"></span>ONS Balances</a><a id="link-pld" href="https://gasbrazil.com/pld/" role="menuitem" data-i18n="navPld"><span class="chk"></span>PLD Prices</a><a id="link-poc" href="https://gasbrazil.com/poc/" role="menuitem" data-i18n="navPoc"><span class="chk"></span>POC Results</a><a id="link-contratos" href="https://gasbrazil.com/contratos/" role="menuitem" data-i18n="navContratos"><span class="chk"></span>POC Contracts</a><a id="link-flows" href="https://gasbrazil.com/flows/" role="menuitem" data-i18n="navFlows"><span class="chk"></span>Pipeline Flows</a><span class="is-current" role="menuitem" aria-current="page" data-i18n="navSupply"><span class="chk">✓</span>Gas Supply</span><a id="link-precos" href="https://gasbrazil.com/precos/" role="menuitem" data-i18n="navPrecos"><span class="chk"></span>ANP Prices</a></div></div></div>
+      <div class="nav-trail"><a class="navlink" href="../wiki/" data-i18n="navWiki">Wiki</a><a class="navlink" href="../about/" data-i18n="navAbout">About</a></div>
       <script>
 (function () {
   var OPEN_MS = 120;

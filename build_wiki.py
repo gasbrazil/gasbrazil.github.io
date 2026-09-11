@@ -104,7 +104,7 @@ header.top{display:flex;flex-wrap:wrap;gap:12px;align-items:center;
   justify-content:space-between;margin:0 auto 4px;padding:12px 0;
   border-bottom:1px solid var(--ring);width:var(--content-w);max-width:var(--content-max)}
 header.top .masthead-ident{display:flex;align-items:center;gap:10px}
-header.top h1{font-size:15px;margin:0;font-weight:400;letter-spacing:-.01em}
+header.top h1{font-size:14px;margin:0;font-weight:400;letter-spacing:-.01em;color:var(--muted2)}
 header.top .row{display:flex;gap:8px;align-items:center}
 .flagbar{width:var(--content-w);max-width:var(--content-max);margin:0 auto 10px}
 a{color:var(--accent)}
@@ -235,7 +235,7 @@ def page_template(title: str, body_html: str, current_out: str, slug: str | None
 <body>
 <header class="top">
   <div class="masthead-ident">
-    <a class="masthead-brand" href="/">GasBrazil</a>
+    {kit.products_dropdown_html("home", '<a class="masthead-brand" href="/">GasBrazil</a>')}
     <span class="crumb-sep" aria-hidden="true"></span>
     <h1>Wiki</h1>
   </div>
@@ -267,6 +267,7 @@ def page_template(title: str, body_html: str, current_out: str, slug: str | None
   </div>
 </footer>
 <script>{THEME_JS}</script>
+{kit._PRODUCTS_DROPDOWN_JS}
 </body>
 </html>
 """
