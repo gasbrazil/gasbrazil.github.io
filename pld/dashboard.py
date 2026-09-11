@@ -327,6 +327,11 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .chart-card { background: var(--panel); border: 1px solid var(--border); border-radius: 5px; padding: var(--card-pad); margin-bottom: var(--gap); }
 .panel-title { font-size: 13px; font-weight: 400; margin: 0 0 2px; }
 .panel-note { font-size: 11.5px; color: var(--muted); margin: 0 0 12px; font-weight: 200; }
+.chart-toolbar { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-bottom: 10px; }
+.chart-toolbar .panel-title { margin: 0; white-space: nowrap; }
+.chart-toolbar .view-toggle { margin: 0; }
+.chart-toolbar .chart-controls { margin: 0; }
+.chart-toolbar .sm-toggles { margin: 0; margin-left: auto; justify-content: flex-end; }
 .chart-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
 .chart-controls label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 200; }
 .chart-controls select { background: var(--panel); border: 1px solid var(--border-strong); border-radius: 5px; padding: 5px 10px; color: var(--text); font-size: 12.5px; font-family: var(--font); font-weight: 300; }
@@ -377,20 +382,22 @@ footer a { color: var(--accent); }
 </div>
 <div class="kpi-row" id="kpi-row"></div>
 <div class="chart-card">
-  <div class="view-toggle" id="view-toggle" role="tablist" aria-label="PLD series"></div>
-  <p class="panel-title" id="chart-title" data-i18n="pldChartTitle">Daily PLD by submarket</p>
-  <p class="panel-note" id="chart-note"></p>
-  <div class="chart-controls">
-    <label for="f-preset" data-i18n="pldWindow">Window</label>
-    <select id="f-preset">
-      <option value="3m">3 months</option>
-      <option value="6m">6 months</option>
-      <option value="12m" selected>12 months</option>
-      <option value="24m">24 months</option>
-      <option value="all">All embedded</option>
-    </select>
+  <div class="chart-toolbar">
+    <div class="view-toggle" id="view-toggle" role="tablist" aria-label="PLD series"></div>
+    <p class="panel-title" id="chart-title" data-i18n="pldChartTitle">Daily PLD by submarket</p>
+    <div class="chart-controls">
+      <label for="f-preset" data-i18n="pldWindow">Window</label>
+      <select id="f-preset">
+        <option value="3m">3 months</option>
+        <option value="6m">6 months</option>
+        <option value="12m" selected>12 months</option>
+        <option value="24m">24 months</option>
+        <option value="all">All embedded</option>
+      </select>
+    </div>
+    <div class="sm-toggles" id="sm-toggles"></div>
   </div>
-  <div class="sm-toggles" id="sm-toggles"></div>
+  <p class="panel-note" id="chart-note"></p>
   <div id="chart-host"></div>
 </div>
 <div class="chart-card" id="compare-card" hidden>
