@@ -327,11 +327,14 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .chart-card { background: var(--panel); border: 1px solid var(--border); border-radius: 5px; padding: var(--card-pad); margin-bottom: var(--gap); }
 .panel-title { font-size: 13px; font-weight: 400; margin: 0 0 2px; }
 .panel-note { font-size: 11.5px; color: var(--muted); margin: 0 0 12px; font-weight: 200; }
-.chart-toolbar { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-bottom: 10px; }
-.chart-toolbar .panel-title { margin: 0; white-space: nowrap; }
-.chart-toolbar .view-toggle { margin: 0; }
-.chart-toolbar .chart-controls { margin: 0; }
-.chart-toolbar .sm-toggles { margin: 0; margin-left: auto; justify-content: flex-end; }
+.chart-toolbar { display: flex; flex-wrap: nowrap; gap: 8px 10px; align-items: center; margin-bottom: 10px; overflow-x: auto; scrollbar-width: thin; }
+.chart-toolbar .panel-title { margin: 0; white-space: nowrap; font-size: 12px; flex: none; }
+.chart-toolbar .view-toggle { margin: 0; flex: none; flex-wrap: nowrap; }
+.chart-toolbar .view-btn { padding: 4px 10px; font-size: 12px; white-space: nowrap; }
+.chart-toolbar .chart-controls { margin: 0; flex: none; }
+.chart-toolbar .chart-controls select { padding: 4px 8px; font-size: 12px; }
+.chart-toolbar .sm-toggles { margin: 0; margin-left: auto; justify-content: flex-end; flex: none; flex-wrap: nowrap; }
+.chart-toolbar .sm-btn { padding: 3px 8px 3px 6px; font-size: 11.5px; white-space: nowrap; }
 .chart-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
 .chart-controls label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 200; }
 .chart-controls select { background: var(--panel); border: 1px solid var(--border-strong); border-radius: 5px; padding: 5px 10px; color: var(--text); font-size: 12.5px; font-family: var(--font); font-weight: 300; }
