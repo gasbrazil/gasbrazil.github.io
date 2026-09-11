@@ -162,6 +162,8 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .qf-btn { background: var(--panel); border: 1px solid var(--border); border-radius: 5px; padding: 4px 12px; font-size: 12px; cursor: pointer; color: var(--text); font-family: var(--font); }
 .qf-btn:hover { background: var(--accent-soft); }
 .qf-btn.active { background: var(--panel); color: var(--text); border-color: var(--border-strong); }
+.qf-sep { width: 1px; align-self: stretch; background: var(--border-strong); margin: 0 4px; }
+.qf-btn.qf-validity { border-style: dashed; }
 .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: var(--gap); }
 .toolbar select, .toolbar input { background: var(--panel); border: 1px solid var(--border-strong); border-radius: 5px; padding: 5px 10px; color: var(--text); font-size: 12.5px; font-family: var(--font); }
 .toolbar select:hover { background: var(--accent-soft); }
@@ -322,6 +324,7 @@ const DATE_FILTER_COLS = new Set(["Trade Date", "Flow Date Start", "Flow Date En
 const QUICK_FILTERS = [
   { key: "last7", label: "Last 7 Days", col: "Trade Date", type: "days", days: 7 },
   { key: "last30", label: "Last 30 Days", col: "Trade Date", type: "days", days: 30 },
+  { key: "gus", label: "GUS", col: "Transaction Type", type: "set", values: ["GUS"] },
   { key: "gus-residual", label: "GUS + Res. Bal.", col: "Transaction Type", type: "set", values: ["GUS", "Res. Bal."] },
   { key: "tso-TAG", label: "TAG", col: "Transporter (TSO)", type: "set", values: ["TAG"] },
   { key: "tso-NTS", label: "NTS", col: "Transporter (TSO)", type: "set", values: ["NTS"] },
@@ -512,7 +515,7 @@ function chartAxisLabel(iso, spanDays) {
 }
 function fmtAxisNum(v, d) {
   if (v === null || v === undefined || !isFinite(v)) return "–";
-  return v.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
+  return v.toLocaleString(numLocale(), { minimumFractionDigits: d, maximumFractionDigits: d });
 }
 const CHART_NS = "http://www.w3.org/2000/svg";
 function chartSvgEl(n, a) {
@@ -685,9 +688,12 @@ function initChartDefaults() {
   syncChartPicked();
 }
 
+function numLocale() {
+  return currentLang() === "pt" ? "pt-BR" : "en-US";
+}
 function fmtNum(v, maxFrac) {
   if (v === null || v === undefined || v === "") return "";
-  return Number(v).toLocaleString("en-US", { maximumFractionDigits: maxFrac === undefined ? 2 : maxFrac });
+  return Number(v).toLocaleString(numLocale(), { maximumFractionDigits: maxFrac === undefined ? 2 : maxFrac });
 }
 
 function label(col) {
@@ -734,6 +740,7 @@ let columnOrder = [];
 let hiddenCols = new Set(DEFAULT_HIDDEN_COLS);
 // columnFilters["Trade Date"] = {from, to}; columnFilters[otherCol] = Set of allowed values.
 let columnFilters = {};
+let showNoTrade = false;
 let draggedCol = null;
 
 function populateSelect(sel, values) {
@@ -1055,6 +1062,7 @@ function applyFilters() {
   const search = document.getElementById("f-search").value.trim().toLowerCase();
   filtered = DATA.rows.filter(r => {
     if (timing && r["Trade Timing"] !== timing) return false;
+    if (!showNoTrade && timing !== "No Trade" && r["Trade Timing"] === "No Trade") return false;
     for (const col of DATA.columns) {
       const active = columnFilters[col];
       if (!active) continue;
@@ -1129,8 +1137,8 @@ function renderTsoRow() {
     if (rows.length) {
       const vol = rows.reduce((a, r) => a + (Number(r["Volume Accepted"]) || 0), 0);
       const volLabel = vol >= 1e6
-        ? (vol / 1e6).toLocaleString("en-US", { maximumFractionDigits: 1 }) + "M m³"
-        : vol.toLocaleString("en-US", { maximumFractionDigits: 0 }) + " m³";
+        ? (vol / 1e6).toLocaleString(numLocale(), { maximumFractionDigits: 1 }) + "M m³"
+        : vol.toLocaleString(numLocale(), { maximumFractionDigits: 0 }) + " m³";
       chip.className = "tso-chip";
       chip.innerHTML = `<b>${escapeHtml(tso)}</b> &middot; ${avg !== null ? avg.toFixed(2) : "—"} R$/m³ avg &middot; ${volLabel} &middot; ${rows.length} trade${rows.length === 1 ? "" : "s"} <span class="muted">(7d)</span>`;
     } else {
@@ -1188,13 +1196,27 @@ function buildQuickFilters() {
     btn.addEventListener("click", () => toggleQuickFilter(qf));
     el.appendChild(btn);
   }
+  const nNoTrade = DATA.rows.filter(r => r["Trade Timing"] === "No Trade").length;
+  if (nNoTrade) {
+    const sep = document.createElement("span");
+    sep.className = "qf-sep";
+    el.appendChild(sep);
+    const btn = document.createElement("button");
+    btn.className = "qf-btn qf-validity";
+    btn.dataset.validity = "notrade";
+    btn.textContent = "Show No Trade (" + nNoTrade.toLocaleString(numLocale()) + ")";
+    btn.addEventListener("click", () => { showNoTrade = !showNoTrade; render(); });
+    el.appendChild(btn);
+  }
 }
 
 function updateQuickFilterButtons() {
-  document.querySelectorAll(".qf-btn").forEach(btn => {
+  document.querySelectorAll(".qf-btn[data-qf]").forEach(btn => {
     const qf = QUICK_FILTERS.find(q => q.key === btn.dataset.qf);
     btn.classList.toggle("active", quickFilterActive(qf));
   });
+  const nt = document.querySelector('.qf-btn[data-validity="notrade"]');
+  if (nt) nt.classList.toggle("active", showNoTrade);
 }
 
 function renderTable() {
@@ -1222,7 +1244,7 @@ function renderTable() {
   }
   tbody.innerHTML = "";
   tbody.appendChild(frag);
-  document.getElementById("row-count").textContent = `${filtered.length.toLocaleString("en-US")} of ${DATA.rows.length.toLocaleString("en-US")} rows`;
+  document.getElementById("row-count").textContent = `${filtered.length.toLocaleString(numLocale())} of ${DATA.rows.length.toLocaleString(numLocale())} rows`;
 }
 
 function updateArrows() {
@@ -1260,6 +1282,7 @@ function applyQueryFilters() {
       else columnFilters[qf.col] = daysAgoRange(qf.days);
     }
   }
+  if (sp.get("notrade") === "1") showNoTrade = true;
 }
 
 function writeQueryFilters() {
@@ -1270,6 +1293,7 @@ function writeQueryFilters() {
     timing: timing || null,
     q: q || null,
     qf: activeQf.length ? activeQf : null,
+    notrade: showNoTrade ? "1" : null,
   });
 }
 
@@ -1363,6 +1387,7 @@ async function init() {
     document.getElementById("f-timing").value = "";
     document.getElementById("f-search").value = "";
     columnFilters = {};
+    showNoTrade = false;
     updateFilterIcons();
     render();
   });

@@ -26,17 +26,20 @@ consistent with the other.
 ## Quick filters
 
 Chips above the toolbar for the filters people reach for most: Last 7 Days,
-Last 30 Days, GUS + Residual Balancing (transaction type), and one chip per
-pipeline. These combine with the toolbar and per-column filters below, not
+Last 30 Days, GUS, GUS + Residual Balancing (transaction type), and one chip
+per pipeline. These combine with the toolbar and per-column filters below, not
 instead of them — a quick filter is a shortcut into the same filter state
-the column menus set.
+the column menus set. Rows with Trade Timing **No Trade** (null-bid) are
+hidden by default; a dashed **Show No Trade** chip brings them back (`notrade=1`
+in the URL). The Trade Timing dropdown can still select No Trade directly.
 
 ## Toolbar and table
 
 - **Trade timing** dropdown and a free-text **search** box (matches process
   code / delivery point) sit above the table.
-- **Reset filters** clears every filter — quick filters, toolbar, and every
-  column's own filter menu — back to showing everything.
+- **Reset filters** clears every filter — quick filters, toolbar, Show No
+  Trade, and every column's own filter menu — back to the default view
+  (No Trade rows stay hidden).
 - **Columns** shows/hides table columns; a few low-signal columns (process
   code, Flow Days, Service Type, Avg Process Price, Total Value, Volume
   Offered, Total Volume) are hidden by default but always available.
