@@ -4,3 +4,5 @@ pytest>=8,<9
 fastapi>=0.115.0,<1
 httpx>=0.27,<1
 boto3>=1.34,<2
+# ons_pipeline (imported by test_ons_reservoirs) uses requests at import time.
+requests>=2.31,<3
