@@ -34,6 +34,7 @@ LAKE_PATHS = {
     "ons_daily": LAKE_ROOT / "power" / "ons_daily.parquet",
     "ons_entities": LAKE_ROOT / "power" / "ons_entities.parquet",
     "pld_daily": LAKE_ROOT / "power" / "pld_daily.parquet",
+    "pld_hourly": LAKE_ROOT / "power" / "pld_hourly.parquet",
     "supply_monthly": LAKE_ROOT / "supply" / "supply_monthly.parquet",
     "anp_prices": LAKE_ROOT / "supply" / "anp_prices.parquet",
 }

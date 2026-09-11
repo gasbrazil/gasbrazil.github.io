@@ -59,6 +59,7 @@ _FALLBACKS = {
     "flows_points": ROOT / "flows" / "data" / "flows_points.parquet",
     "flows_ledger": ROOT / "flows" / "data" / "flows_ledger.parquet",
     "pld_daily": ROOT / "pld" / "data" / "pld_daily.parquet",
+    "pld_hourly": ROOT / "pld" / "data" / "pld_hourly.parquet",
     "supply_monthly": ROOT / "supply" / "data" / "supply_monthly.parquet",
     "anp_prices": ROOT / "precos" / "data" / "anp_prices.parquet",
     "poc_results": ROOT / "poc" / "data" / "poc_results.parquet",
@@ -176,6 +177,39 @@ def pld_daily(
         df = df[df["submarket"].astype(str).str.upper() == sm]
     df = df.sort_values(["date", "submarket"])
     return {"count": int(len(df)), "limit": limit, "rows": _records(df, limit)}
+
+
+@app.get("/v1/pld/hourly")
+def pld_hourly(
+    submarket: Optional[str] = None,
+    tou: Optional[str] = Query(None, description="peak | offpeak (ANEEL-style TOU v1)"),
+    date_from: Optional[str] = Query(None, alias="from"),
+    date_to: Optional[str] = Query(None, alias="to"),
+    limit: int = Query(5000, ge=1, le=50000),
+) -> dict[str, Any]:
+    df = _load("pld_hourly")
+    d0, d1 = _parse_day(date_from), _parse_day(date_to)
+    if d0 is not None:
+        df = df[pd.to_datetime(df["date"]) >= d0]
+    if d1 is not None:
+        df = df[pd.to_datetime(df["date"]) <= d1]
+    if submarket:
+        sm = submarket.upper()
+        df = df[df["submarket"].astype(str).str.upper() == sm]
+    if tou:
+        key = tou.strip().casefold()
+        if key not in ("peak", "offpeak", "off-peak", "ponta", "fora"):
+            raise HTTPException(400, "tou must be peak or offpeak")
+        mask = xf.pld_peak_mask(df["date"], df["hour"])
+        want_peak = key in ("peak", "ponta")
+        df = df[mask if want_peak else ~mask]
+    df = df.sort_values(["date", "hour", "submarket"])
+    return {
+        "count": int(len(df)),
+        "limit": limit,
+        "tou": xf.PLD_TOU["version"],
+        "rows": _records(df, limit),
+    }
 
 
 @app.get("/v1/supply/monthly")

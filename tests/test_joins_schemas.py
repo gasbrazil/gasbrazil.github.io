@@ -55,3 +55,14 @@ def test_schema_rejects_non_numeric_pld():
     df = pd.DataFrame({"date": ["2026-09-01"], "submarket": ["SE"], "pld": ["nope"]})
     with pytest.raises(ValueError, match="non-numeric"):
         schemas.validate_pld_daily(df)
+
+
+def test_schema_rejects_hourly_hour_out_of_range():
+    df = pd.DataFrame({
+        "date": ["2026-09-01"],
+        "hour": [25],
+        "submarket": ["SE"],
+        "pld": [1.0],
+    })
+    with pytest.raises(ValueError, match="0–23"):
+        schemas.validate_pld_hourly(df)

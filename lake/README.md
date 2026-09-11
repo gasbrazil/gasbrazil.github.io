@@ -17,6 +17,7 @@ lake/                          # local (gitignored)
     ons_daily.parquet
     ons_entities.parquet
     pld_daily.parquet
+    pld_hourly.parquet
   supply/
     supply_monthly.parquet
     anp_prices.parquet
