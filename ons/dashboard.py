@@ -458,12 +458,9 @@ __SHARED_THEME_CSS__
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);
   font:14px/1.5 var(--font);}
-/* Title row, then the nav-links/controls row always on its own line below
-   it -- deterministic, not dependent on flex-wrap kicking in at a given
-   viewport width or pill count (see ADR-001: same layout on every
-   GasBrazil.com dashboard, not just whichever happens to wrap). */
-header.dash-head{display:flex;flex-direction:column;gap:10px;margin-bottom:0}
-.header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;width:100%}
+/* Single-row header: brand · title … Wiki/About/☰ · PT · theme */
+header.dash-head{display:flex;flex-direction:row;align-items:center;gap:10px;margin-bottom:0}
+.header-right{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;width:auto;}
 h1{font-size:25px;margin:0;letter-spacing:-.01em}
 /* Green/yellow/blue band under the header -- the one place the flag appears
    as itself rather than as an accent on something else. Proportions echo the

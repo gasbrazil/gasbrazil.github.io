@@ -103,9 +103,8 @@ main{min-width:0;flex:1}
 header.top{display:flex;flex-wrap:wrap;gap:12px;align-items:center;
   justify-content:space-between;margin:0 auto 4px;padding:12px 0;
   border-bottom:1px solid var(--ring);width:var(--content-w);max-width:var(--content-max)}
-header.top .brand{display:flex;align-items:baseline;gap:10px}
-header.top h1{font-size:18px;margin:0;font-weight:400}
-header.top .tag{color:var(--muted2);font-size:12.5px}
+header.top .masthead-ident{display:flex;align-items:center;gap:10px}
+header.top h1{font-size:15px;margin:0;font-weight:400;letter-spacing:-.01em}
 header.top .row{display:flex;gap:8px;align-items:center}
 .flagbar{width:var(--content-w);max-width:var(--content-max);margin:0 auto 10px}
 a{color:var(--accent)}
@@ -235,12 +234,13 @@ def page_template(title: str, body_html: str, current_out: str, slug: str | None
 </head>
 <body>
 <header class="top">
-  <div class="brand">
-    <h1>GasBrazil &mdash; Wiki</h1>
-    <span class="tag">how to read every dashboard, and how the whole site is built</span>
+  <div class="masthead-ident">
+    <a class="masthead-brand" href="/">GasBrazil</a>
+    <span class="crumb-sep" aria-hidden="true"></span>
+    <h1>Wiki</h1>
   </div>
   <div class="row">
-    <a class="navlink" href="{back_href}">&larr; Back to {back_label}</a>
+    <a class="navlink" href="{back_href}">&larr; {back_label}</a>
     <button id="theme-toggle" class="iconBtn" title="Toggle light/dark" aria-label="Toggle light/dark"></button>
   </div>
 </header>

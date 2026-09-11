@@ -37,8 +37,22 @@ def test_masthead_menu_aria():
     assert 'id="gb-products-menu"' in mast
     assert 'role="menu"' in mast
     assert "\u2630" in mast  # hamburger glyph on the Menu trigger
-    assert 'data-i18n="navMenu"' in mast
+    # Icon-only: aria-label via data-i18n-aria, never a visible "Menu" span.
+    assert 'data-i18n-aria="navMenu"' in mast
+    assert 'data-i18n="navMenu"' not in mast
     assert "navProducts" not in mast
+
+
+def test_masthead_menu_lives_in_nav_trail():
+    mast = kit.masthead_html("ons")
+    ident = mast.find('class="masthead-ident"')
+    trail = mast.find('class="nav-trail"')
+    menu = mast.find('class="products-dd"')
+    assert ident != -1 and trail != -1 and menu != -1
+    assert ident < trail < menu
+    # Quiet 1px rule, not a › breadcrumb glyph.
+    assert '<span class="crumb-sep" aria-hidden="true"></span>' in mast
+    assert "›" not in mast
 
 
 def test_masthead_merges_brand_and_title():
@@ -60,6 +74,18 @@ def test_masthead_covers_every_dashboard():
 def test_masthead_rejects_unknown_site():
     with pytest.raises(KeyError):
         kit.masthead_html("nope")
+
+
+def test_dashboard_headers_stay_on_one_row():
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[1]
+    for name in ("desk", "ons", "pld", "poc", "contratos", "flows", "supply", "precos"):
+        src = (root / name / "dashboard.py").read_text(encoding="utf-8")
+        assert "header.dash-head" in src
+        compact = src.replace(" ", "").replace("\n", "")
+        assert "header.dash-head{display:flex;flex-direction:row" in compact
+        assert ".header-right{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;width:auto;}" in compact
 
 
 def test_page_intro_is_title_only():

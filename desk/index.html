@@ -276,7 +276,7 @@ html, body {
   .wrap { width: auto; padding: 14px 12px 32px; }
 }
 
-/* Sticky compact desk header: title · nav · as-of · tools. */
+/* Sticky compact desk header: ident left, chrome right, all in-flow. */
 .site-header, header.top, header.dash-head {
   position: sticky;
   top: 0;
@@ -287,6 +287,11 @@ html, body {
   padding-top: 12px;
   padding-bottom: 2px;
   margin: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 .asof-strip {
   display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px;
@@ -307,28 +312,22 @@ footer .asof-strip,
   padding: 0 0 10px;
 }
 
-/* Text nav: Home + Products stay under the title.
-   Wiki/About join the fixed top-right chrome with PT + theme. */
+/* Text nav + tools share one in-flow row with the title (no position:fixed). */
 .header-right {
-  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-  width: 100%;
+  display: flex; align-items: center; gap: 6px; flex-wrap: nowrap;
+  width: auto; flex: none; margin-left: 0;
 }
 .navlinks, .header-links {
   display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px;
   width: 100%;
   box-sizing: border-box;
 }
-/* Sit on the same row as the fixed PT / theme controls. */
 .nav-trail {
-  position: fixed;
-  top: 14px;
-  right: 100px;
-  z-index: 60;
   display: inline-flex;
   align-items: center;
-  gap: 6px 14px;
-  margin-left: 0;
-  pointer-events: auto;
+  gap: 4px 14px;
+  margin-left: auto;
+  flex: none;
 }
 .nav-trail .navlink {
   font-size: 13px;
@@ -356,39 +355,42 @@ footer .asof-strip,
 }
 .navlink:hover { color: var(--accent); border-bottom-color: var(--accent); }
 
-/* "Products" dropdown nav_links_html() builds (Option A of the 2026-09-08
-   nav mockups): collapses every dashboard but Home into one menu instead
-   of a growing row of top-level links. Hover (with delay) + click toggle
-   live in dashboard_kit.py's _PRODUCTS_DROPDOWN_JS. */
+/* Products dropdown: icon-only trigger in the right chrome, not beside the title. */
 .products-dd { position: relative; display: inline-flex; }
 .dd-trigger {
-  font: 400 14.5px var(--font);
-  color: var(--muted2);
-  background: transparent;
-  border: none;
-  border-bottom: 2px solid transparent;
-  padding: 5px 0;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  transition: color .15s ease, border-color .15s ease;
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 34px; height: 34px; padding: 0;
+  background: var(--panel); border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm); color: var(--text); cursor: pointer;
+  font: 400 15px/1 var(--font);
+  width: auto; flex: none; box-sizing: border-box;
+  transition: background .15s ease, border-color .15s ease, color .15s ease;
 }
-.dd-trigger:hover, .dd-trigger[aria-expanded="true"] { color: var(--accent); border-bottom-color: var(--accent); }
-.dd-icon { font-size: 13px; transform: translateY(-1px); }
+.dd-trigger:hover, .dd-trigger[aria-expanded="true"] {
+  background: var(--accent-soft); color: var(--text); border-color: var(--border-strong);
+}
+.dd-icon { font-size: 14px; line-height: 1; }
 
-/* Single-row dashboard masthead (masthead_html()): brand › title … menu.
-   Brand, breadcrumb separator, and page title share one baseline; the menu
-   trigger follows on the same row instead of a second nav line. The h1 here
-   is the page's only title -- no separate breadcrumb block above it. */
-.masthead { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+/* Masthead: brand · title on the left; Wiki / About / ☰ on the right. */
+.masthead {
+  display: flex; align-items: center; gap: 12px;
+  flex: 1; min-width: 0;
+}
+.masthead-ident {
+  display: flex; align-items: center; gap: 10px;
+  min-width: 0;
+}
 .masthead-brand {
-  font-weight: 600; font-size: 19px; letter-spacing: -.01em;
+  font-weight: 600; font-size: 17px; letter-spacing: -.01em;
   color: var(--text); text-decoration: none; white-space: nowrap;
 }
 .masthead-brand:hover { color: var(--accent); }
-.masthead h1 { font-size: 19px; margin: 0; letter-spacing: -.01em; font-weight: 600; }
+.masthead h1 {
+  font-size: 15px; margin: 0; letter-spacing: -.01em; font-weight: 400;
+  color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 .masthead .products-dd { margin-left: 2px; }
+.nav-trail .dd-menu { left: auto; right: 0; }
 .dd-menu {
   /* Kept in-flow for opacity fade (display:none can't animate). Closed
      state is invisible + non-interactive; .is-open reveals with a quick fade.
@@ -780,31 +782,22 @@ th.num .th-filter { text-align: right; }
   border: none;
 }
 
-/* Pin language + theme to the viewport's top-right on every surface. */
+/* Language + theme sit in the header row (home: .hub-controls; dashboards:
+   .header-right). Do not pin them to the viewport — that pulled chrome off
+   the content column and made the title line look disconnected. */
 .hub-controls,
 .topbar.chrome-tools {
-  position: fixed;
-  top: 14px;
-  right: 14px;
-  z-index: 60;
   display: flex;
   gap: 6px;
+  flex: none;
 }
 header.dash-head #lang-toggle,
 header.top #lang-toggle,
-.site-header #lang-toggle {
-  position: fixed;
-  top: 14px;
-  right: 54px;
-  z-index: 60;
-}
+.site-header #lang-toggle,
 header.dash-head #theme-toggle,
 header.top #theme-toggle,
 .site-header #theme-toggle {
-  position: fixed;
-  top: 14px;
-  right: 14px;
-  z-index: 60;
+  position: static;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -818,23 +811,22 @@ header.top #theme-toggle,
 
 @media (max-width: 720px) {
   .navlinks, .header-links { gap: 4px 12px; }
-  .nav-trail {
-    top: 12px;
-    right: 96px;
-    gap: 4px 10px;
-  }
+  .nav-trail { gap: 4px 10px; }
   .nav-trail .navlink { font-size: 12px; line-height: 32px; }
-  .navlink, .dd-trigger { font-size: 13px; }
+  .navlink { font-size: 13px; }
   .site-header .header-row, header.top .header-row {
     flex-wrap: wrap;
   }
   .filters-drawer-toggle { display: inline-flex !important; }
   .filters-collapsible.is-collapsed { display: none; }
-  header.dash-head #lang-toggle,
-  header.top #lang-toggle,
-  .site-header #lang-toggle { right: 52px; }
+  header.dash-head, .site-header, header.top { flex-wrap: wrap; }
+  header.dash-head .header-right { margin-left: auto; }
   /* Thumb-friendly source pills on small screens. */
   .sources a { padding: 8px 14px; }
+}
+@media (max-width: 640px) {
+  /* Keep the icon chrome; Wiki/About remain in the footer and the ☰ menu. */
+  header.dash-head .nav-trail > .navlink { display: none; }
 }
 
 /* Keyboard focus visibility site-wide. Buttons and links previously had no
@@ -878,7 +870,10 @@ input[type="checkbox"] {
    these from shared/dashboard_kit.py's masthead_html() and
    initStalenessBadgeFor(), so wayfinding and freshness read the same on
    all eight products without adding visible prose to the pages. */
-.crumb-sep { opacity: .55; }
+.crumb-sep {
+  width: 1px; height: 14px; background: var(--border-strong);
+  flex: none; opacity: .9;
+}
 /* Freshness warning appended to #asof-strip when data-through exceeds the
    product's publication cadence (see STALE_LAG_DAYS). Quiet pill, never
    a banner -- informative on monthly ANP lags, alarming only by numbers. */
@@ -920,9 +915,9 @@ input[type="checkbox"] {
 
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; font-weight: 300; }
-header.dash-head { display: flex; flex-direction: column; gap: 10px; margin-bottom: 0; }
+header.dash-head { display: flex; flex-direction: row; align-items: center; gap: 10px; margin-bottom: 0; }
 h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
-.header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; width: 100%; }
+.header-right { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; width: auto; }
 .sources { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0 0 var(--gap); }
 .sources-label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 200; margin-right: 2px; }
 .pill { font-size: 11.5px; color: var(--muted2); text-decoration: none; border: 1px solid var(--border); border-radius: 5px; padding: 3px 10px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; }
@@ -998,11 +993,12 @@ footer a { color: var(--accent); }
 <div class="wrap">
 <header class="dash-head">
   <div class="masthead">
+      <div class="masthead-ident">
       <a class="masthead-brand" id="link-home" href="https://gasbrazil.com" data-i18n="navHome">GasBrazil</a>
-      <span class="crumb-sep" aria-hidden="true">›</span>
+      <span class="crumb-sep" aria-hidden="true"></span>
       <h1 data-i18n="navDesk">The Desk</h1>
-      <div class="products-dd"><button type="button" class="dd-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="gb-products-menu" id="gb-products-trigger"><span class="dd-icon" aria-hidden="true">☰</span><span data-i18n="navMenu">Menu</span></button><div class="dd-menu" id="gb-products-menu" role="menu" aria-labelledby="gb-products-trigger"><span class="is-current" role="menuitem" aria-current="page" data-i18n="navDesk"><span class="chk">✓</span>The Desk</span><a id="link-ons" href="https://gasbrazil.com/ons/" role="menuitem" data-i18n="navOns"><span class="chk"></span>ONS Balances</a><a id="link-pld" href="https://gasbrazil.com/pld/" role="menuitem" data-i18n="navPld"><span class="chk"></span>PLD Prices</a><a id="link-poc" href="https://gasbrazil.com/poc/" role="menuitem" data-i18n="navPoc"><span class="chk"></span>POC Results</a><a id="link-contratos" href="https://gasbrazil.com/contratos/" role="menuitem" data-i18n="navContratos"><span class="chk"></span>POC Contracts</a><a id="link-flows" href="https://gasbrazil.com/flows/" role="menuitem" data-i18n="navFlows"><span class="chk"></span>Pipeline Flows</a><a id="link-supply" href="https://gasbrazil.com/supply/" role="menuitem" data-i18n="navSupply"><span class="chk"></span>Gas Supply</a><a id="link-precos" href="https://gasbrazil.com/precos/" role="menuitem" data-i18n="navPrecos"><span class="chk"></span>ANP Prices</a></div></div>
-      <div class="nav-trail"><a class="navlink" href="../wiki/" data-i18n="navWiki">Wiki</a><a class="navlink" href="../about/" data-i18n="navAbout">About</a></div>
+      </div>
+      <div class="nav-trail"><a class="navlink" href="../wiki/" data-i18n="navWiki">Wiki</a><a class="navlink" href="../about/" data-i18n="navAbout">About</a><div class="products-dd"><button type="button" class="dd-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="gb-products-menu" id="gb-products-trigger" data-i18n-aria="navMenu" aria-label="Menu"><span class="dd-icon" aria-hidden="true">☰</span></button><div class="dd-menu" id="gb-products-menu" role="menu" aria-labelledby="gb-products-trigger"><span class="is-current" role="menuitem" aria-current="page" data-i18n="navDesk"><span class="chk">✓</span>The Desk</span><a id="link-ons" href="https://gasbrazil.com/ons/" role="menuitem" data-i18n="navOns"><span class="chk"></span>ONS Balances</a><a id="link-pld" href="https://gasbrazil.com/pld/" role="menuitem" data-i18n="navPld"><span class="chk"></span>PLD Prices</a><a id="link-poc" href="https://gasbrazil.com/poc/" role="menuitem" data-i18n="navPoc"><span class="chk"></span>POC Results</a><a id="link-contratos" href="https://gasbrazil.com/contratos/" role="menuitem" data-i18n="navContratos"><span class="chk"></span>POC Contracts</a><a id="link-flows" href="https://gasbrazil.com/flows/" role="menuitem" data-i18n="navFlows"><span class="chk"></span>Pipeline Flows</a><a id="link-supply" href="https://gasbrazil.com/supply/" role="menuitem" data-i18n="navSupply"><span class="chk"></span>Gas Supply</a><a id="link-precos" href="https://gasbrazil.com/precos/" role="menuitem" data-i18n="navPrecos"><span class="chk"></span>ANP Prices</a></div></div></div>
       <script>
 (function () {
   var OPEN_MS = 120;
