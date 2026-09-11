@@ -323,10 +323,22 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .kpi-tile { background: var(--panel); border: 1px solid var(--border); border-radius: 5px; padding: 10px 12px; }
 .kpi-tile .k-label { font-size: 11px; font-weight: 400; color: var(--muted2); }
 .kpi-tile .k-val { font-size: 20px; font-weight: 400; font-variant-numeric: tabular-nums; margin-top: 2px; letter-spacing: -.01em; }
-.kpi-tile .k-unit { font-size: 11px; color: var(--muted); font-weight: 200; }
+.kpi-tile .k-sub { display: flex; flex-wrap: wrap; gap: 2px 10px; align-items: baseline; margin-top: 4px; font-size: 11.5px; }
+.kpi-tile .k-sub-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); font-weight: 200; margin-right: 4px; }
+.kpi-tile .k-sub-val { font-variant-numeric: tabular-nums; font-weight: 400; color: var(--text); }
+.kpi-tile .k-sub-sep { color: var(--muted); font-weight: 200; }
+.kpi-tile .k-unit { font-size: 11px; color: var(--muted); font-weight: 200; margin-top: 4px; }
 .chart-card { background: var(--panel); border: 1px solid var(--border); border-radius: 5px; padding: var(--card-pad); margin-bottom: var(--gap); }
 .panel-title { font-size: 13px; font-weight: 400; margin: 0 0 2px; }
 .panel-note { font-size: 11.5px; color: var(--muted); margin: 0 0 12px; font-weight: 200; }
+.chart-toolbar { display: flex; flex-wrap: nowrap; gap: 8px 10px; align-items: center; margin-bottom: 10px; overflow-x: auto; scrollbar-width: thin; }
+.chart-toolbar .panel-title { margin: 0; white-space: nowrap; font-size: 12px; flex: none; }
+.chart-toolbar .view-toggle { margin: 0; flex: none; flex-wrap: nowrap; }
+.chart-toolbar .view-btn { padding: 4px 10px; font-size: 12px; white-space: nowrap; }
+.chart-toolbar .chart-controls { margin: 0; flex: none; }
+.chart-toolbar .chart-controls select { padding: 4px 8px; font-size: 12px; }
+.chart-toolbar .sm-toggles { margin: 0; margin-left: auto; justify-content: flex-end; flex: none; flex-wrap: nowrap; }
+.chart-toolbar .sm-btn { padding: 3px 8px 3px 6px; font-size: 11.5px; white-space: nowrap; }
 .chart-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
 .chart-controls label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 200; }
 .chart-controls select { background: var(--panel); border: 1px solid var(--border-strong); border-radius: 5px; padding: 5px 10px; color: var(--text); font-size: 12.5px; font-family: var(--font); font-weight: 300; }
@@ -377,20 +389,22 @@ footer a { color: var(--accent); }
 </div>
 <div class="kpi-row" id="kpi-row"></div>
 <div class="chart-card">
-  <div class="view-toggle" id="view-toggle" role="tablist" aria-label="PLD series"></div>
-  <p class="panel-title" id="chart-title" data-i18n="pldChartTitle">Daily PLD by submarket</p>
-  <p class="panel-note" id="chart-note"></p>
-  <div class="chart-controls">
-    <label for="f-preset" data-i18n="pldWindow">Window</label>
-    <select id="f-preset">
-      <option value="3m">3 months</option>
-      <option value="6m">6 months</option>
-      <option value="12m" selected>12 months</option>
-      <option value="24m">24 months</option>
-      <option value="all">All embedded</option>
-    </select>
+  <div class="chart-toolbar">
+    <div class="view-toggle" id="view-toggle" role="tablist" aria-label="PLD series"></div>
+    <p class="panel-title" id="chart-title" data-i18n="pldChartTitle">Daily PLD by submarket</p>
+    <div class="chart-controls">
+      <label for="f-preset" data-i18n="pldWindow">Window</label>
+      <select id="f-preset">
+        <option value="3m">3 months</option>
+        <option value="6m">6 months</option>
+        <option value="12m" selected>12 months</option>
+        <option value="24m">24 months</option>
+        <option value="all">All embedded</option>
+      </select>
+    </div>
+    <div class="sm-toggles" id="sm-toggles"></div>
   </div>
-  <div class="sm-toggles" id="sm-toggles"></div>
+  <p class="panel-note" id="chart-note"></p>
   <div id="chart-host"></div>
 </div>
 <div class="chart-card" id="compare-card" hidden>
@@ -481,26 +495,30 @@ function colorOf(sm) {
 function renderKpis() {
   const host = document.getElementById("kpi-row");
   host.innerHTML = "";
+  const peakLbl = t("pldKpiPeak") || "Peak";
+  const offLbl = t("pldKpiOffPeak") || "Off-peak";
   (DATA.submarkets || []).forEach(sm => {
     const tile = document.createElement("div");
     tile.className = "kpi-tile";
-    let v = DATA.latest ? DATA.latest[sm] : null;
-    let unit = "R$/MWh · " + escapeHtml(DATA.latestDate || "");
-    if (viewMode === "hourly" && hasHourly()) {
-      v = DATA.hourly.latest ? DATA.hourly.latest[sm] : null;
-      const ts = DATA.hourly.latestTime || "";
-      unit = "R$/MWh · " + escapeHtml(formatHourlyLabel(ts));
-    } else if (viewMode === "peak" && hasPeak()) {
-      v = DATA.peakOffPeak.latestPeak ? DATA.peakOffPeak.latestPeak[sm] : null;
+    const avg = DATA.latest ? DATA.latest[sm] : null;
+    let subHtml = "";
+    if (hasPeak()) {
+      const pk = DATA.peakOffPeak.latestPeak ? DATA.peakOffPeak.latestPeak[sm] : null;
       const off = DATA.peakOffPeak.latestOffPeak ? DATA.peakOffPeak.latestOffPeak[sm] : null;
-      unit = (currentLang() === "pt" ? "ponta" : "peak") + " · " +
-        (currentLang() === "pt" ? "fora ponta " : "off-peak ") +
-        (off == null ? "–" : fmtNum(off, 2));
+      subHtml =
+        '<div class="k-sub">' +
+          '<span class="k-sub-item"><span class="k-sub-lbl">' + escapeHtml(peakLbl) + "</span>" +
+          '<span class="k-sub-val">' + (pk == null ? "–" : fmtNum(pk, 2)) + "</span></span>" +
+          '<span class="k-sub-sep" aria-hidden="true">·</span>' +
+          '<span class="k-sub-item"><span class="k-sub-lbl">' + escapeHtml(offLbl) + "</span>" +
+          '<span class="k-sub-val">' + (off == null ? "–" : fmtNum(off, 2)) + "</span></span>" +
+        "</div>";
     }
     tile.innerHTML =
       '<div class="k-label">' + escapeHtml(smLabel(sm)) + " (" + sm + ")</div>" +
-      '<div class="k-val">' + (v == null ? "–" : fmtNum(v, 2)) + "</div>" +
-      '<div class="k-unit">' + unit + "</div>";
+      '<div class="k-val">' + (avg == null ? "–" : fmtNum(avg, 2)) + "</div>" +
+      subHtml +
+      '<div class="k-unit">R$/MWh · ' + escapeHtml(DATA.latestDate || "") + "</div>";
     host.appendChild(tile);
   });
 }
