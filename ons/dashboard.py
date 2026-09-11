@@ -590,13 +590,13 @@ table.data tbody tr.is-filtered{background:var(--accent-soft)}
 .legend span{display:flex;align-items:center;gap:6px}
 svg{display:block;width:100%;overflow:hidden}
 /* Chart tooltip (.tt) styles live in shared/theme.css */
-table.data{border-collapse:collapse;width:100%;font-size:var(--table-font-size);
+table.data{width:100%;font-size:var(--table-font-size);
   font-variant-numeric:tabular-nums}
 table.data th,table.data td{padding:4px 8px;border-bottom:1px solid var(--border);
   text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 table.data th:first-child,table.data td:first-child{text-align:left}
 table.data th.l,table.data td.l{text-align:left}
-table.data thead th{position:sticky;top:0;background:var(--panel);
+table.data thead th{background:var(--panel);
   color:var(--muted2);font-weight:300}
 table.data thead th.sortable{cursor:pointer;user-select:none}
 table.data thead th.sortable:hover{background:var(--accent-soft)}

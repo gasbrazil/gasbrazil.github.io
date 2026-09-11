@@ -350,9 +350,9 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .toolbar button:hover { background: var(--accent-soft); }
 .count { color: var(--muted); font-size: 12px; margin-left: auto; font-weight: 200; }
 .table-wrap { background: var(--panel); border: 1px solid var(--border); border-radius: 5px; overflow: auto; max-height: 55vh; margin-bottom: var(--gap); }
-table.data { border-collapse: collapse; width: 100%; font-size: var(--table-font-size); font-weight: 300; table-layout: fixed; }
+table.data { width: 100%; font-size: var(--table-font-size); font-weight: 300; table-layout: fixed; }
 table.data th, table.data td { padding: 4px 8px; text-align: left; border-bottom: 1px solid var(--border); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-table.data th { position: sticky; top: 0; background: var(--panel); color: var(--muted2); font-weight: 400; z-index: 2; }
+table.data th { background: var(--panel); color: var(--muted2); font-weight: 400; }
 table.data .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 table.data tbody tr:hover { background: var(--accent-soft); }
 footer { margin-top: 22px; color: var(--muted); font-size: 11.5px; line-height: 1.7; font-weight: 200; }

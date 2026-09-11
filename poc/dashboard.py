@@ -173,10 +173,10 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
    overflow, sticky header), just taller since here the table is the page's
    primary content rather than a small secondary widget. */
 .table-wrap { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; overflow: auto; box-shadow: var(--shadow); max-height: 65vh; }
-table { border-collapse: collapse; font-size: var(--table-font-size); }
+table { font-size: var(--table-font-size); }
 .table-wrap table { table-layout: fixed; width: max-content; min-width: 100%; }
 th, td { padding: 4px 8px; text-align: left; border-bottom: 1px solid var(--border); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-th { position: sticky; top: 0; background: var(--panel); cursor: pointer; user-select: none; color: var(--muted2); font-weight: 400; z-index: 2; }
+th { background: var(--panel); cursor: pointer; user-select: none; color: var(--muted2); font-weight: 400; }
 th:hover { background: var(--accent-soft); }
 th.dragging { opacity: .4; }
 th.drag-over { box-shadow: inset 2px 0 0 var(--accent); }

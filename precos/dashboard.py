@@ -157,9 +157,9 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .toolbar button:hover { background: var(--accent-soft); }
 .count { color: var(--muted); font-size: 12px; margin-left: auto; font-weight: 200; }
 .table-wrap { background: var(--panel); border: 1px solid var(--border); border-radius: 5px; overflow: auto; max-height: 50vh; }
-table { border-collapse: collapse; width: 100%; font-size: var(--table-font-size); font-weight: 300; }
+table { width: 100%; font-size: var(--table-font-size); font-weight: 300; }
 th, td { padding: 4px 8px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
-th { position: sticky; top: 0; z-index: 2; background: var(--panel); color: var(--muted2); font-weight: 400; }
+th { background: var(--panel); color: var(--muted2); font-weight: 400; }
 th .th-label { cursor: pointer; }
 .num { text-align: right; font-variant-numeric: tabular-nums; }
 tbody tr:hover { background: var(--accent-soft); }
