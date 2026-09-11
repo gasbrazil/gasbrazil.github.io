@@ -236,8 +236,10 @@ body {
 main.hub { flex: 1; width: var(--content-w); max-width: var(--content-max); margin: 0 auto;
   padding: 40px 0 48px; }
 @media (max-width: 900px) { main.hub { width: auto; padding: 28px 16px 40px; } }
-/* Home's own header row -- wordmark left, Wiki/About + PT/theme right. */
+/* Home's own header row -- wordmark-menu left, Wiki/About + PT/theme right. */
 .hub-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.hub-header .products-dd { align-items: center; }
+.hub-header .dd-trigger { height: 32px; }
 .hub-controls { display: flex; align-items: center; gap: 6px 14px; flex: none; }
 .hub-controls .nav-trail { margin-left: 0; }
 .hub-controls #theme-toggle { position: static; }
@@ -422,6 +424,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
 initThemeToggle("theme-toggle");
 initLangToggle("lang-toggle");
 </script>
+""" + kit._PRODUCTS_DROPDOWN_JS + """
 </body>
 </html>
 """
@@ -432,7 +435,7 @@ HOME_TEMPLATE = """__HEAD__
 <a class="skip-link" href="#main" data-i18n="skip">Skip to content</a>
 <main class="hub" id="main">
   <div class="hub-header">
-    <div class="wordmark">GasBrazil</div>
+    __BRAND_MENU__
     __HUB_CONTROLS__
   </div>
   <p class="tagline" data-i18n="tagline">Analytical Firepower for Brazil's Energy Markets</p>
@@ -554,7 +557,7 @@ ABOUT_TEMPLATE = """__HEAD__
 <a class="skip-link" href="#main" data-i18n="skip">Skip to content</a>
 <main class="hub" id="main">
   <div class="hub-header">
-    <div class="wordmark"><a href="../">GasBrazil</a></div>
+    __BRAND_MENU__
     __HUB_CONTROLS__
   </div>
   <h1 class="hub-page-title" data-i18n="aboutH1">About GasBrazil</h1>
@@ -594,7 +597,7 @@ NOTFOUND_TEMPLATE = """__HEAD__
 <a class="skip-link" href="#main" data-i18n="skip">Skip to content</a>
 <main class="hub" id="main">
   <div class="hub-header">
-    <div class="wordmark"><a href="./">GasBrazil</a></div>
+    __BRAND_MENU__
     __HUB_CONTROLS__
   </div>
   <h1 class="hub-page-title" data-i18n="notFound">This page is not here.</h1>
@@ -667,6 +670,10 @@ def write_home(out_path: Path | str = DEFAULT_OUT) -> Path:
     html = html.replace("__PLD_SPARK__", st.get("pld_spark") or "")
     html = html.replace("__TEASERS_URL__", st.get("teasers_url") or "")
     html = html.replace("__HUB_CONTROLS__", _hub_controls("wiki/", "about/"))
+    html = html.replace(
+        "__BRAND_MENU__",
+        kit.products_dropdown_html("home", '<div class="wordmark">GasBrazil</div>'),
+    )
     html = _kit_render(html)
     out_path = Path(out_path)
     out_path.write_text(html, encoding="utf-8")
@@ -684,6 +691,10 @@ def write_about(out_path: Path | None = None) -> Path:
     ))
     html = html.replace("__FOOTER__", _footer("../"))
     html = html.replace("__HUB_CONTROLS__", _hub_controls("../wiki/", "./"))
+    html = html.replace(
+        "__BRAND_MENU__",
+        kit.products_dropdown_html("home", '<div class="wordmark"><a href="../">GasBrazil</a></div>'),
+    )
     # About lives in /about/, so home-relative links in the footer need ../
     html = html.replace('href="./about/"', 'href="./"')
     html = _kit_render(html)
@@ -703,6 +714,10 @@ def write_404(out_path: Path | None = None) -> Path:
     ))
     html = html.replace("__FOOTER__", _footer("./"))
     html = html.replace("__HUB_CONTROLS__", _hub_controls("wiki/", "about/"))
+    html = html.replace(
+        "__BRAND_MENU__",
+        kit.products_dropdown_html("home", '<div class="wordmark"><a href="./">GasBrazil</a></div>'),
+    )
     html = _kit_render(html)
     out_path.write_text(html, encoding="utf-8")
     print(f"Wrote 404 page ({len(html):,} bytes) to {out_path}")

@@ -1245,61 +1245,65 @@ def _menu_items_html(self_id: str) -> str:
     return "".join(items)
 
 
+def products_dropdown_html(self_id: str, brand_html: str) -> str:
+    """Wordmark + ghost caret + products menu. brand_html is the clickable
+    (or static) title; hover on the wrapper opens the menu."""
+    return (
+        '<div class="products-dd">'
+        + brand_html
+        + '<button type="button" class="dd-trigger" aria-haspopup="menu" '
+        'aria-expanded="false" aria-controls="gb-products-menu" '
+        'id="gb-products-trigger" data-i18n-aria="navMenu" aria-label="Menu">'
+        '<span class="dd-caret" aria-hidden="true"></span></button>'
+        '<div class="dd-menu" id="gb-products-menu" role="menu" aria-labelledby="gb-products-trigger">'
+        + _menu_items_html(self_id) + "</div></div>"
+    )
+
+
 def masthead_html(
     self_id: str,
     about_href: str = "../about/",
     wiki_href: str = "../wiki/",
 ) -> str:
-    """Single-row dashboard masthead: brand · title … Wiki/About/☰.
+    """Single-row dashboard masthead: brand-menu · title … Wiki/About.
 
-    One in-flow row: the GasBrazil wordmark links home, a quiet rule leads
-    into the page <h1> (each name appears exactly once), and Wiki / About /
-    the products menu sit on the right with the page's PT and theme
-    toggles. The menu trigger is icon-only (aria-label Menu) so the title
-    line is not a breadcrumb-plus-hamburger. The current page is marked
-    inside the menu with aria-current=page. href defaults to each site's
-    custom-domain URL; initCrossLinks() rewrites sibling hrefs at view time
-    for hostname/flavor -- the #link-<id> anchors getElementById-looked-up,
-    so nesting inside the dropdown needs no site_links_js() changes.
-    wiki_href/about_href are plain relative paths (not run through
-    initCrossLinks) since the wiki and about page only exist at one
-    location, not mirrored per-flavor.
+    The GasBrazil wordmark is the leftmost control in the frame: hover
+    (or the quiet caret, for touch/keyboard) opens the products list
+    underneath it; a click on the wordmark still goes home. The page
+    <h1> follows a 1px rule. Wiki / About sit on the right with PT and
+    theme -- no hamburger wedged into the title or the right chrome.
+    The current page is marked inside the menu with aria-current=page.
+    href defaults to each site's custom-domain URL; initCrossLinks()
+    rewrites sibling hrefs at view time for hostname/flavor -- the
+    #link-<id> anchors getElementById-looked-up, so nesting inside the
+    dropdown needs no site_links_js() changes. wiki_href/about_href are
+    plain relative paths (not run through initCrossLinks) since the wiki
+    and about page only exist at one location, not mirrored per-flavor.
 
     Single source of truth so every dashboard's header stays in the same
     order with the same labels, and a newly-added site lands everywhere
     from one edit."""
     home = _SITES["home"]
-    brand = (
+    # Caret is a sibling of the home link so applyI18n() on navHome cannot
+    # wipe it. Hover is bound on .products-dd, so the wordmark itself opens
+    # the menu; the caret is the keyboard/touch target.
+    brand_menu = products_dropdown_html(
+        self_id,
         f'<a class="masthead-brand" id="link-home" href="{home["custom"]}" data-i18n="navHome">'
-        f'{html.escape(home["label"])}</a>'
-    )
-    # Icon-only trigger: data-i18n-aria (not data-i18n) so applyI18n() never
-    # wipes the hamburger glyph when the language toggles.
-    menu = (
-        '<div class="products-dd">'
-        '<button type="button" class="dd-trigger" aria-haspopup="menu" '
-        'aria-expanded="false" aria-controls="gb-products-menu" '
-        'id="gb-products-trigger" data-i18n-aria="navMenu" aria-label="Menu">'
-        '<span class="dd-icon" aria-hidden="true">☰</span></button>'
-        '<div class="dd-menu" id="gb-products-menu" role="menu" aria-labelledby="gb-products-trigger">'
-        + _menu_items_html(self_id) + "</div>"
-        "</div>"
+        f'{html.escape(home["label"])}</a>',
     )
     wiki_href_esc = html.escape(wiki_href, quote=True)
     about_href_esc = html.escape(about_href, quote=True)
-    # Wiki / About / products sit in .nav-trail; theme.css places that group
-    # on the same in-flow row as the PT / theme toggles (no position:fixed).
     trail = (
         '<div class="nav-trail">'
         f'<a class="navlink" href="{wiki_href_esc}" data-i18n="navWiki">Wiki</a>'
         f'<a class="navlink" href="{about_href_esc}" data-i18n="navAbout">About</a>'
-        + menu
-        + "</div>"
+        "</div>"
     )
     return (
         '<div class="masthead">\n      '
         '<div class="masthead-ident">\n      '
-        + brand
+        + brand_menu
         + '\n      <span class="crumb-sep" aria-hidden="true"></span>\n      '
         + page_intro_html(self_id)
         + "\n      </div>\n      "

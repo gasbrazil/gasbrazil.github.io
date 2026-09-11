@@ -36,20 +36,24 @@ def test_masthead_menu_aria():
     assert 'aria-haspopup="menu"' in mast
     assert 'id="gb-products-menu"' in mast
     assert 'role="menu"' in mast
-    assert "\u2630" in mast  # hamburger glyph on the Menu trigger
-    # Icon-only: aria-label via data-i18n-aria, never a visible "Menu" span.
+    assert 'class="dd-caret"' in mast
+    assert "\u2630" not in mast  # no hamburger; menu hangs off the wordmark
     assert 'data-i18n-aria="navMenu"' in mast
     assert 'data-i18n="navMenu"' not in mast
     assert "navProducts" not in mast
 
 
-def test_masthead_menu_lives_in_nav_trail():
+def test_masthead_menu_hangs_off_wordmark():
     mast = kit.masthead_html("ons")
     ident = mast.find('class="masthead-ident"')
-    trail = mast.find('class="nav-trail"')
+    brand = mast.find('id="link-home"')
     menu = mast.find('class="products-dd"')
-    assert ident != -1 and trail != -1 and menu != -1
-    assert ident < trail < menu
+    trail = mast.find('class="nav-trail"')
+    assert ident != -1 and brand != -1 and menu != -1 and trail != -1
+    # Wordmark is inside the dropdown; Wiki/About stay to the right of ident.
+    assert ident < menu < brand < trail
+    assert 'class="products-dd"' in mast[ident:trail]
+    assert 'class="products-dd"' not in mast[trail:]
     # Quiet 1px rule, not a › breadcrumb glyph.
     assert '<span class="crumb-sep" aria-hidden="true"></span>' in mast
     assert "›" not in mast
@@ -74,6 +78,16 @@ def test_masthead_covers_every_dashboard():
 def test_masthead_rejects_unknown_site():
     with pytest.raises(KeyError):
         kit.masthead_html("nope")
+
+
+def test_products_dropdown_wraps_brand():
+    html = kit.products_dropdown_html("home", '<div class="wordmark">GasBrazil</div>')
+    assert html.startswith('<div class="products-dd">')
+    assert '<div class="wordmark">GasBrazil</div>' in html
+    assert html.find("wordmark") < html.find("dd-trigger")
+    assert html.find("dd-trigger") < html.find("dd-menu")
+    assert "\u2630" not in html
+    assert 'class="dd-caret"' in html
 
 
 def test_dashboard_headers_stay_on_one_row():

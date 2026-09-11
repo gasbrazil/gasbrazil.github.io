@@ -116,7 +116,7 @@ __FONT_PRELOAD__
 __SHARED_THEME_CSS__
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; font-weight: 300; }
-/* Single-row header: brand · title … Wiki/About/☰ · PT · theme */
+/* Single-row header: wordmark-menu · title … Wiki/About · PT · theme */
 header.dash-head { display: flex; flex-direction: row; align-items: center; gap: 10px; margin-bottom: 0; }
 h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .header-right { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; width: auto; }
