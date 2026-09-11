@@ -226,10 +226,6 @@ body {
   background-attachment: fixed; color: var(--text); font-family: var(--font);
   font-weight: 300; display: flex; flex-direction: column; min-height: 100vh;
 }
-.topbar {
-  position: fixed; top: 16px; right: 16px; z-index: 20;
-  display: flex; gap: 6px;
-}
 #theme-toggle {
   background: var(--panel); border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm); width: 34px; height: 34px; cursor: pointer; color: var(--text);
@@ -240,11 +236,10 @@ body {
 main.hub { flex: 1; width: var(--content-w); max-width: var(--content-max); margin: 0 auto;
   padding: 40px 0 48px; }
 @media (max-width: 900px) { main.hub { width: auto; padding: 28px 16px 40px; } }
-/* Home's own header row -- wordmark left, PT/theme controls right, same
-   idea as the header every dashboard uses, just without a redundant nav
-   row here since the product cards below already link to every page. */
+/* Home's own header row -- wordmark left, Wiki/About + PT/theme right. */
 .hub-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.hub-controls { display: flex; gap: 6px; flex: none; }
+.hub-controls { display: flex; align-items: center; gap: 6px 14px; flex: none; }
+.hub-controls .nav-trail { margin-left: 0; }
 .hub-controls #theme-toggle { position: static; }
 .wordmark { font-size: 30px; font-weight: 600; letter-spacing: -.02em; line-height: 1.1; }
 .wordmark .dot { color: var(--accent); }
@@ -401,13 +396,15 @@ __SHARED_THEME_CSS__
 """
 
 
-def _topbar() -> str:
-    return """<a class="skip-link" href="#main" data-i18n="skip">Skip to content</a>
-<div class="topbar chrome-tools">
-  <button type="button" id="lang-toggle" class="langBtn" aria-label="Português">PT</button>
-  <button id="theme-toggle" title="Toggle theme" aria-label="Toggle theme"></button>
-</div>
-"""
+def _hub_controls(wiki_href: str, about_href: str) -> str:
+    return f"""<div class="hub-controls">
+      <div class="nav-trail">
+        <a class="navlink" href="{wiki_href}" data-i18n="navWiki">Wiki</a>
+        <a class="navlink" href="{about_href}" data-i18n="navAbout">About</a>
+      </div>
+      <button type="button" id="lang-toggle" class="langBtn" aria-label="Português">PT</button>
+      <button id="theme-toggle" title="Toggle theme" aria-label="Toggle theme"></button>
+    </div>"""
 
 
 def _footer(home_href: str = "./") -> str:
@@ -436,10 +433,7 @@ HOME_TEMPLATE = """__HEAD__
 <main class="hub" id="main">
   <div class="hub-header">
     <div class="wordmark">GasBrazil</div>
-    <div class="hub-controls">
-      <button type="button" id="lang-toggle" class="langBtn" aria-label="Português">PT</button>
-      <button id="theme-toggle" title="Toggle theme" aria-label="Toggle theme"></button>
-    </div>
+    __HUB_CONTROLS__
   </div>
   <p class="tagline" data-i18n="tagline">Analytical Firepower for Brazil's Energy Markets</p>
   <div class="flagbar" aria-hidden="true"></div>
@@ -561,10 +555,7 @@ ABOUT_TEMPLATE = """__HEAD__
 <main class="hub" id="main">
   <div class="hub-header">
     <div class="wordmark"><a href="../">GasBrazil</a></div>
-    <div class="hub-controls">
-      <button type="button" id="lang-toggle" class="langBtn" aria-label="Português">PT</button>
-      <button id="theme-toggle" title="Toggle theme" aria-label="Toggle theme"></button>
-    </div>
+    __HUB_CONTROLS__
   </div>
   <h1 class="hub-page-title" data-i18n="aboutH1">About GasBrazil</h1>
   <div class="flagbar" aria-hidden="true"></div>
@@ -604,10 +595,7 @@ NOTFOUND_TEMPLATE = """__HEAD__
 <main class="hub" id="main">
   <div class="hub-header">
     <div class="wordmark"><a href="./">GasBrazil</a></div>
-    <div class="hub-controls">
-      <button type="button" id="lang-toggle" class="langBtn" aria-label="Português">PT</button>
-      <button id="theme-toggle" title="Toggle theme" aria-label="Toggle theme"></button>
-    </div>
+    __HUB_CONTROLS__
   </div>
   <h1 class="hub-page-title" data-i18n="notFound">This page is not here.</h1>
   <p class="tagline" data-i18n="notFoundBody">The hub and dashboards are linked below.</p>
@@ -678,6 +666,7 @@ def write_home(out_path: Path | str = DEFAULT_OUT) -> Path:
     html = html.replace("__SUPPLY_SPARK__", st.get("supply_spark") or "")
     html = html.replace("__PLD_SPARK__", st.get("pld_spark") or "")
     html = html.replace("__TEASERS_URL__", st.get("teasers_url") or "")
+    html = html.replace("__HUB_CONTROLS__", _hub_controls("wiki/", "about/"))
     html = _kit_render(html)
     out_path = Path(out_path)
     out_path.write_text(html, encoding="utf-8")
@@ -694,6 +683,7 @@ def write_about(out_path: Path | None = None) -> Path:
         "/about/",
     ))
     html = html.replace("__FOOTER__", _footer("../"))
+    html = html.replace("__HUB_CONTROLS__", _hub_controls("../wiki/", "./"))
     # About lives in /about/, so home-relative links in the footer need ../
     html = html.replace('href="./about/"', 'href="./"')
     html = _kit_render(html)
@@ -712,6 +702,7 @@ def write_404(out_path: Path | None = None) -> Path:
         "/",
     ))
     html = html.replace("__FOOTER__", _footer("./"))
+    html = html.replace("__HUB_CONTROLS__", _hub_controls("wiki/", "about/"))
     html = _kit_render(html)
     out_path.write_text(html, encoding="utf-8")
     print(f"Wrote 404 page ({len(html):,} bytes) to {out_path}")

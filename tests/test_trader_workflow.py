@@ -23,6 +23,8 @@ def test_home_template_has_no_hub_hint():
     assert "hub-hint" not in src
     assert "Every card below opens a live dashboard" not in src
     assert 'data-i18n="hubHint"' not in src
+    assert 'data-i18n="navWiki"' in src
+    assert "def _hub_controls" in src
 
 
 def test_desk_kpis_are_links_with_santos_and_unit_toggle():

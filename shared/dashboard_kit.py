@@ -269,20 +269,27 @@ function initThemeToggle(buttonId, onChange) {
   function paint() {
     const dark = isDarkTheme();
     btn.innerHTML = dark ? SUN_SVG : MOON_SVG;
-    const label = dark ? (typeof t === "function" ? t("themeLight") : "Switch to light mode")
-                       : (typeof t === "function" ? t("themeDark") : "Switch to dark mode");
+    let label = dark ? "Switch to light mode" : "Switch to dark mode";
+    try {
+      if (typeof t === "function") label = t(dark ? "themeLight" : "themeDark");
+    } catch (e) { /* t is declared later in this script */ }
     btn.title = label; btn.setAttribute("aria-label", label);
   }
   paint();
+  if (typeof onChange === "function") btn._onThemeChange = onChange;
+  if (btn.dataset.themeWired === "1") return;
+  btn.dataset.themeWired = "1";
   btn.addEventListener("click", () => {
     const nextDark = !isDarkTheme();
     if (nextDark) document.documentElement.setAttribute("data-theme", "dark");
     else document.documentElement.removeAttribute("data-theme");
     try { localStorage.setItem(THEME_KEY, nextDark ? "dark" : "light"); } catch (e) {}
     paint();
-    if (onChange) onChange(nextDark);
+    const cb = btn._onThemeChange;
+    if (typeof cb === "function") cb(nextDark);
   });
 }
+if (document.getElementById("theme-toggle")) initThemeToggle("theme-toggle");
 """
 
 JS_I18N = r"""
@@ -1243,14 +1250,13 @@ def masthead_html(
     about_href: str = "../about/",
     wiki_href: str = "../wiki/",
 ) -> str:
-    """Single-row dashboard masthead: brand › title … menu … Wiki/About.
+    """Single-row dashboard masthead: brand · title … Wiki/About/☰.
 
-    This replaces the old three-line stack (breadcrumb line, bare <h1>,
-    then a nav row repeating the brand) with one merged row: the "GasBrazil"
-    wordmark links home, the breadcrumb separator leads straight into the
-    page <h1> (each name appears exactly once), and the section menu sits
-    on the same line as a ☰ "Menu" trigger -- "Menu" reads identically in
-    EN and PT, so no new translation burden. The current page is marked
+    One in-flow row: the GasBrazil wordmark links home, a quiet rule leads
+    into the page <h1> (each name appears exactly once), and Wiki / About /
+    the products menu sit on the right with the page's PT and theme
+    toggles. The menu trigger is icon-only (aria-label Menu) so the title
+    line is not a breadcrumb-plus-hamburger. The current page is marked
     inside the menu with aria-current=page. href defaults to each site's
     custom-domain URL; initCrossLinks() rewrites sibling hrefs at view time
     for hostname/flavor -- the #link-<id> anchors getElementById-looked-up,
@@ -1267,37 +1273,36 @@ def masthead_html(
         f'<a class="masthead-brand" id="link-home" href="{home["custom"]}" data-i18n="navHome">'
         f'{html.escape(home["label"])}</a>'
     )
-    # data-i18n goes on the inner span, not the <button> itself: applyI18n()
-    # sets el.textContent, which would silently delete the hamburger glyph
-    # every time the language toggles.
+    # Icon-only trigger: data-i18n-aria (not data-i18n) so applyI18n() never
+    # wipes the hamburger glyph when the language toggles.
     menu = (
         '<div class="products-dd">'
         '<button type="button" class="dd-trigger" aria-haspopup="menu" '
-        'aria-expanded="false" aria-controls="gb-products-menu" id="gb-products-trigger">'
-        '<span class="dd-icon" aria-hidden="true">☰</span>'
-        '<span data-i18n="navMenu">Menu</span></button>'
+        'aria-expanded="false" aria-controls="gb-products-menu" '
+        'id="gb-products-trigger" data-i18n-aria="navMenu" aria-label="Menu">'
+        '<span class="dd-icon" aria-hidden="true">☰</span></button>'
         '<div class="dd-menu" id="gb-products-menu" role="menu" aria-labelledby="gb-products-trigger">'
         + _menu_items_html(self_id) + "</div>"
         "</div>"
     )
     wiki_href_esc = html.escape(wiki_href, quote=True)
     about_href_esc = html.escape(about_href, quote=True)
-    # Wiki + About sit in .nav-trail; theme.css parks that group on the same
-    # fixed top-right row as the PT / theme toggles.
+    # Wiki / About / products sit in .nav-trail; theme.css places that group
+    # on the same in-flow row as the PT / theme toggles (no position:fixed).
     trail = (
         '<div class="nav-trail">'
         f'<a class="navlink" href="{wiki_href_esc}" data-i18n="navWiki">Wiki</a>'
         f'<a class="navlink" href="{about_href_esc}" data-i18n="navAbout">About</a>'
-        "</div>"
+        + menu
+        + "</div>"
     )
     return (
         '<div class="masthead">\n      '
+        '<div class="masthead-ident">\n      '
         + brand
-        + '\n      <span class="crumb-sep" aria-hidden="true">›</span>\n      '
+        + '\n      <span class="crumb-sep" aria-hidden="true"></span>\n      '
         + page_intro_html(self_id)
-        + "\n      "
-        + menu
-        + "\n      "
+        + "\n      </div>\n      "
         + trail
         + "\n      "
         + _PRODUCTS_DROPDOWN_JS
