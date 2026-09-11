@@ -114,6 +114,8 @@ def test_contratos_drill_table_has_own_scroll_wrap():
     assert 'class="drill-table-wrap"' in src
     assert "max-height: 320px; overflow: auto" not in src
     assert "position: sticky" not in src
+    assert "colspan=" not in src
+    assert "${metricHeads}" in src
 
 
 def test_dashboards_do_not_sticky_th_to_the_page():

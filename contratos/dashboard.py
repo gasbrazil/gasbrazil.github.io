@@ -144,10 +144,7 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .drill-card table { width: 100%; font-size: var(--table-font-size); table-layout: fixed; white-space: nowrap; }
 .drill-card th, .drill-card td { padding: 4px 8px; border-bottom: 1px solid var(--border); text-align: left; }
 .drill-card th { color: var(--muted2); font-weight: 400; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; cursor: default; background: var(--panel); }
-.drill-card thead tr:first-child th { border-bottom: none; padding-bottom: 0; }
 .drill-card .tso-summary { font-size: 12px; color: var(--muted2); margin: 0 0 10px; }
-.drill-card th.grp { text-align: center; color: var(--text); letter-spacing: .04em; }
-.drill-card th.grp.on { color: var(--accent); }
 .drill-card .sep { border-left: 1px solid var(--border); }
 .drill-card td.zero { color: var(--muted); }
 .drill-card td.num, .drill-card th.num { text-align: right; font-variant-numeric: tabular-nums; }
@@ -1322,8 +1319,11 @@ function renderDrill() {
   for (const t of cols) totalsByTso[t] = all.reduce((a, e) => a + (e.cap[t] ? e.cap[t].entry + e.cap[t].exit : 0), 0);
 
   const cell = v => v ? fmtNum(v, 0) : '<span class="zero">&ndash;</span>';
-  const head1 = cols.map(t => `<th class="grp sep ${t === drillTso ? "on" : ""}" colspan="2">${escapeHtml(t)}</th>`).join("");
-  const head2 = cols.map(() => '<th class="num sep">Entry</th><th class="num">Exit</th>').join("");
+  // One header row (no colspan): Chrome will not freeze a sticky <th> that
+  // spans columns, which is what made this header hover over the body.
+  const metricHeads = cols.map(t =>
+    `<th class="num sep">${escapeHtml(t)} Entry</th><th class="num">${escapeHtml(t)} Exit</th>`
+  ).join("");
   const body = shown.map((e, i) => {
     const cells = cols.map(t => {
       const c = e.cap[t] || { entry: 0, exit: 0 };
@@ -1361,8 +1361,7 @@ function renderDrill() {
     <table>
       ${colgroup}
       <thead>
-        <tr><th></th><th></th><th></th>${head1}<th class="sep"></th><th></th></tr>
-        <tr><th></th><th>Shipper</th><th class="num">Contracts</th>${head2}<th class="num sep">Total</th><th class="num">Share</th></tr>
+        <tr><th></th><th>Shipper</th><th class="num">Contracts</th>${metricHeads}<th class="num sep">Total</th><th class="num">Share</th></tr>
       </thead>
       <tbody>${body}</tbody>
     </table>

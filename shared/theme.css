@@ -689,25 +689,14 @@ footer.site a:hover,
 .entlist thead th {
   position: sticky;
   top: 0;
-  z-index: 2;
-  background: var(--panel);
-  background-clip: padding-box;
+  z-index: 4;
+  background-color: var(--panel);
+  background-image: none;
+  box-shadow: 0 1px 0 var(--border);
 }
-/* Two-row grouped headers (POC Contracts top shippers): both rows freeze
-   as a unit at the top of the table wrap. */
 .drill-table-wrap {
-  --drill-th-group: 24px;
   max-height: 320px;
   overflow: auto;
-}
-.drill-table-wrap thead tr:first-child th {
-  top: 0;
-  height: var(--drill-th-group);
-  z-index: 3;
-}
-.drill-table-wrap thead tr:nth-child(2) th {
-  top: var(--drill-th-group);
-  z-index: 2;
 }
 
 /* Sortable/filterable table header cells (see shared/dashboard_kit.py's
