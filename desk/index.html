@@ -1344,8 +1344,10 @@ function initThemeToggle(buttonId, onChange) {
   function paint() {
     const dark = isDarkTheme();
     btn.innerHTML = dark ? SUN_SVG : MOON_SVG;
-    const label = dark ? (typeof t === "function" ? t("themeLight") : "Switch to light mode")
-                       : (typeof t === "function" ? t("themeDark") : "Switch to dark mode");
+    let label = dark ? "Switch to light mode" : "Switch to dark mode";
+    try {
+      if (typeof t === "function") label = t(dark ? "themeLight" : "themeDark");
+    } catch (e) { /* t is declared later in this script */ }
     btn.title = label; btn.setAttribute("aria-label", label);
   }
   paint();

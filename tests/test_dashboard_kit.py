@@ -165,6 +165,9 @@ def test_theme_toggle_paints_icon_immediately():
     js = kit.JS_THEME_TOGGLE
     assert "dataset.themeWired" in js
     assert 'if (document.getElementById("theme-toggle")) initThemeToggle("theme-toggle");' in js
+    # paint() must not read `t` unguarded: JS_I18N declares it later in the
+    # same script, so an early init would hit the temporal dead zone.
+    assert "try {" in js and "typeof t === \"function\"" in js
 
 
 def test_query_state_helper_degrades_to_defaults():
