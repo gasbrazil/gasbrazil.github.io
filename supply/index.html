@@ -1488,15 +1488,20 @@ function initThemeToggle(buttonId, onChange) {
     btn.title = label; btn.setAttribute("aria-label", label);
   }
   paint();
+  if (typeof onChange === "function") btn._onThemeChange = onChange;
+  if (btn.dataset.themeWired === "1") return;
+  btn.dataset.themeWired = "1";
   btn.addEventListener("click", () => {
     const nextDark = !isDarkTheme();
     if (nextDark) document.documentElement.setAttribute("data-theme", "dark");
     else document.documentElement.removeAttribute("data-theme");
     try { localStorage.setItem(THEME_KEY, nextDark ? "dark" : "light"); } catch (e) {}
     paint();
-    if (onChange) onChange(nextDark);
+    const cb = btn._onThemeChange;
+    if (typeof cb === "function") cb(nextDark);
   });
 }
+if (document.getElementById("theme-toggle")) initThemeToggle("theme-toggle");
 
 
 const LANG_KEY = "gasbrazil-lang";

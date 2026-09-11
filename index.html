@@ -1126,7 +1126,7 @@ footer.site a:hover { color: var(--text); border-bottom-color: var(--brz-yellow)
       <div class="kpi-label" data-i18n="cardContratos">POC Contracts</div>
       <div class="kpi-role">Firm transport</div>
       <div class="kpi-val" data-en="900 contracts · 186694.8 thousand m³/d" data-pt="900 contratos · 186694.8 mil m³/d">900 contracts · 186694.8 thousand m³/d</div>
-      <div class="kpi-when" data-refresh="2026-09-10 23:03 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-11 01:10 UTC"></div>
     </a>
     <a class="kpi-cell" href="flows/" data-slug="flows">
       <div class="kpi-label" data-i18n="cardFlows">Pipeline Flows</div>
@@ -1207,15 +1207,20 @@ function initThemeToggle(buttonId, onChange) {
     btn.title = label; btn.setAttribute("aria-label", label);
   }
   paint();
+  if (typeof onChange === "function") btn._onThemeChange = onChange;
+  if (btn.dataset.themeWired === "1") return;
+  btn.dataset.themeWired = "1";
   btn.addEventListener("click", () => {
     const nextDark = !isDarkTheme();
     if (nextDark) document.documentElement.setAttribute("data-theme", "dark");
     else document.documentElement.removeAttribute("data-theme");
     try { localStorage.setItem(THEME_KEY, nextDark ? "dark" : "light"); } catch (e) {}
     paint();
-    if (onChange) onChange(nextDark);
+    const cb = btn._onThemeChange;
+    if (typeof cb === "function") cb(nextDark);
   });
 }
+if (document.getElementById("theme-toggle")) initThemeToggle("theme-toggle");
 
 
 const LANG_KEY = "gasbrazil-lang";

@@ -161,6 +161,12 @@ def test_share_link_button_matches_i18n_pack():
     assert "Copy link" in kit.JS_I18N
 
 
+def test_theme_toggle_paints_icon_immediately():
+    js = kit.JS_THEME_TOGGLE
+    assert "dataset.themeWired" in js
+    assert 'if (document.getElementById("theme-toggle")) initThemeToggle("theme-toggle");' in js
+
+
 def test_query_state_helper_degrades_to_defaults():
     js = kit.JS_QUERY_STATE
     for fn in ("gbQueryParams", "gbWriteQuery", "gbValidDate",
