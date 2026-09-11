@@ -428,6 +428,33 @@ def _series_poc_anp(poc: Optional[pd.DataFrame], anp: Optional[pd.DataFrame]) ->
     }
 
 
+def _tso_tariff_m3(contratos: pd.DataFrame) -> dict[str, float]:
+    """Capacity-weighted average allocated tariff (R$/m³) by TSO."""
+    tariff_col = "Allocated Tariff (R$/MMBtu)"
+    cap_col = "Contracted Capacity (000 m3/d)"
+    tso_col = "Transporter (TSO)"
+    if not {tariff_col, cap_col, tso_col}.issubset(contratos.columns):
+        return {}
+    c = contratos.copy()
+    if "Status" in c.columns:
+        c = c[c["Status"].astype(str).str.casefold() != "concluded"]
+    c["tso"] = c[tso_col].astype(str).str.upper().str.strip()
+    c["_tariff"] = pd.to_numeric(c[tariff_col], errors="coerce")
+    c["_cap"] = pd.to_numeric(c[cap_col], errors="coerce")
+    out: dict[str, float] = {}
+    for tso, g in c.groupby("tso"):
+        mask = g["_tariff"].notna() & (g["_cap"] > 0)
+        w = g.loc[mask, "_cap"]
+        v = g.loc[mask, "_tariff"]
+        if w.empty or float(w.sum()) <= 0:
+            continue
+        mmbtu = float((v * w).sum() / w.sum())
+        m3 = xf.brl_per_m3(mmbtu, 3)
+        if m3 is not None:
+            out[str(tso)] = m3
+    return out
+
+
 def _util_table(
     contratos: Optional[pd.DataFrame],
     flows: Optional[pd.DataFrame],
@@ -443,14 +470,17 @@ def _util_table(
         return empty
     try:
         joined = joins.join_capacity_vs_flows(contratos, flows)
+        tariffs = _tso_tariff_m3(contratos)
         rows = []
         for _, r in joined.iterrows():
+            tso = str(r["tso"])
             rows.append(
                 {
-                    "tso": str(r["tso"]),
+                    "tso": tso,
                     "contracted": _num(r.get("contracted_thousand_m3_d"), 1),
                     "realized": _num(r.get("realized_avg_thousand_m3_d"), 1),
                     "utilization": _num(r.get("utilization"), 3),
+                    "tariffM3": tariffs.get(tso.upper()),
                 }
             )
         as_of = None

@@ -933,10 +933,10 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 #theme-toggle svg { width: 16px; height: 16px; display: block; }
 .lede { font-size: 13px; color: var(--muted2); font-weight: 300; margin: 0 0 var(--gap); line-height: 1.45; max-width: 54em; }
 .gap-note { font-size: 12px; color: var(--muted); margin: 0 0 var(--gap); font-weight: 200; }
-.kpi-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: var(--gap); }
-@media (max-width: 960px) { .kpi-row { grid-template-columns: repeat(3, 1fr); } }
-@media (max-width: 520px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } }
-.kpi-cell { padding: 2px 0 6px; border-bottom: 1px solid var(--border); }
+.kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(108px, 1fr)); gap: 8px; margin-bottom: var(--gap); }
+.kpi-cell { padding: 2px 0 6px; border-bottom: 1px solid var(--border); text-decoration: none; color: inherit; display: block; }
+a.kpi-cell:hover { border-bottom-color: var(--border-strong); }
+a.kpi-cell:hover .lbl { color: var(--text); }
 .kpi-cell .lbl { font-size: 11px; color: var(--muted2); font-weight: 400; }
 .kpi-cell .val { font-size: 18px; font-weight: 400; font-variant-numeric: tabular-nums; margin-top: 4px; letter-spacing: -.01em; }
 .kpi-cell .unit { font-size: 11px; color: var(--muted); font-weight: 200; }
@@ -965,7 +965,13 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 @media (max-width: 520px) { .spark-form { grid-template-columns: 1fr; } }
 .spark-form label { display: flex; flex-direction: column; gap: 4px; font-size: 11px; color: var(--muted2); font-weight: 400; }
 .spark-form input, .spark-form select { background: var(--panel); border: 1px solid var(--border-strong); border-radius: 5px; padding: 6px 10px; color: var(--text); font-size: 13px; font-family: var(--font); font-weight: 300; font-variant-numeric: tabular-nums; }
-.spark-hint { font-size: 11px; color: var(--muted); font-weight: 200; margin-top: 2px; }
+.spark-gas-label { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.spark-unit { display: inline-flex; }
+.spark-unit button { background: var(--panel); border: 1px solid var(--border); padding: 1px 7px; font-size: 10px; color: var(--muted2); cursor: pointer; font-family: var(--font); font-weight: 400; line-height: 1.4; }
+.spark-unit button + button { border-left: 0; }
+.spark-unit button:first-child { border-radius: 4px 0 0 4px; }
+.spark-unit button:last-child { border-radius: 0 4px 4px 0; }
+.spark-unit button.active { color: var(--text); border-color: var(--border-strong); background: var(--accent-soft); }
 .spark-out { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 @media (max-width: 520px) { .spark-out { grid-template-columns: 1fr; } }
 .spark-metric .lbl { font-size: 11px; color: var(--muted2); }
@@ -1111,7 +1117,9 @@ footer a { color: var(--accent); }
   <a href="../pld/">CCEE</a>
   <a href="../precos/">ANP</a>
   <a href="../poc/">POC</a>
+  <a href="../contratos/">Contracts</a>
   <a href="../flows/">Flows</a>
+  <a href="../supply/">Supply</a>
 </div>
 <div class="kpi-row" id="kpi-row"></div>
 
@@ -1138,7 +1146,14 @@ footer a { color: var(--accent); }
       <span class="infodot" id="spark-info" title="" aria-label="Formula">i</span>
     </p>
     <div class="spark-form">
-      <label><span data-i18n="deskGasPrice">Gas price</span> (R$/m³)
+      <label>
+        <span class="spark-gas-label">
+          <span data-i18n="deskGasPrice">Gas price</span>
+          <span class="spark-unit" id="spark-unit" role="group" aria-label="Unit">
+            <button type="button" data-unit="m3">R$/m³</button>
+            <button type="button" data-unit="mmbtu">R$/MMBtu</button>
+          </span>
+        </span>
         <input type="number" id="spark-gas" step="0.01" min="0" inputmode="decimal" value="1.2">
       </label>
       <label><span data-i18n="deskHeatRate">Heat rate</span> (kcal/kWh)
@@ -1790,6 +1805,8 @@ GB_I18N.en.deskUtilTso = "TSO";
 GB_I18N.en.deskUtilCap = "Contracted";
 GB_I18N.en.deskUtilReal = "Realized avg";
 GB_I18N.en.deskUtilPct = "Utilization";
+GB_I18N.en.deskUtilTariff = "Tariff";
+GB_I18N.en.deskUtilGus = "GUS";
 GB_I18N.en.deskEmptyChart = "No data";
 GB_I18N.en.deskEmpty = "No data";
 GB_I18N.en.deskPickSeries = "Select series";
@@ -1805,6 +1822,7 @@ GB_I18N.en.deskKpiCmo = "CMO SE";
 GB_I18N.en.deskKpiGus = "GUS last";
 GB_I18N.en.deskKpiPoc = "POC 7d";
 GB_I18N.en.deskKpiFlows = "Flows 7d";
+GB_I18N.en.deskKpiSantos = "Santos";
 
 GB_I18N.pt.deskCompareTitle = "PLD · CMO · CVU";
 GB_I18N.pt.deskSubmarket = "Submercado";
@@ -1824,6 +1842,8 @@ GB_I18N.pt.deskUtilTso = "TSO";
 GB_I18N.pt.deskUtilCap = "Contratada";
 GB_I18N.pt.deskUtilReal = "Realizado méd.";
 GB_I18N.pt.deskUtilPct = "Utilização";
+GB_I18N.pt.deskUtilTariff = "Tarifa";
+GB_I18N.pt.deskUtilGus = "GUS";
 GB_I18N.pt.deskEmptyChart = "Sem dados";
 GB_I18N.pt.deskEmpty = "Sem dados";
 GB_I18N.pt.deskPickSeries = "Selecione séries";
@@ -1839,6 +1859,7 @@ GB_I18N.pt.deskKpiCmo = "CMO SE";
 GB_I18N.pt.deskKpiGus = "GUS último";
 GB_I18N.pt.deskKpiPoc = "POC 7d";
 GB_I18N.pt.deskKpiFlows = "Fluxos 7d";
+GB_I18N.pt.deskKpiSantos = "Santos";
 
 const COMPARE_META = [
   { key: "pld", labelKey: "deskSeriesPld", field: "pld" },
@@ -1861,6 +1882,8 @@ let pocAnpSlots = new Map();
 let utilSortState = { col: "tso", dir: 1 };
 const utilDefaultSort = { col: "tso", dir: 1 };
 let utilFilters = {};
+let sparkUnit = "mmbtu";
+let sparkGasM3 = 1.2;
 
 function fmtNum(v, d) {
   if (v === null || v === undefined || (typeof v === "number" && isNaN(v))) return "—";
@@ -1950,30 +1973,86 @@ function renderNotes() {
   // Intentionally quiet — chart empty-states carry the detail.
 }
 
-function paintGasHint() {}
+function siteHref(slug) {
+  try {
+    const flavor = siteFlavor();
+    const base = (SITE_LINKS[slug] || {})[flavor];
+    if (base) return base;
+  } catch (e) {}
+  return "../" + slug + "/";
+}
+
+function pocFilterHref(keys) {
+  const q = (keys || []).filter(Boolean).join(",");
+  return siteHref("poc") + (q ? "?qf=" + q : "");
+}
+
+function gusKpiHref() {
+  const k = DATA.kpi || {};
+  const keys = ["gus"];
+  const tso = k.gusTso ? String(k.gusTso).toUpperCase() : "";
+  if (tso === "TAG" || tso === "NTS" || tso === "TBG") keys.push("tso-" + tso);
+  return pocFilterHref(keys);
+}
 
 function renderKpis() {
   const k = DATA.kpi || {};
   const gusUnit = "R$/m³" + (k.gusWhen ? " · " + k.gusWhen : "") + (k.gusTso ? " · " + k.gusTso : "");
   const cells = [
-    { lbl: t("deskKpiGen"), val: fmtNum(k.genGasSin, 0), unit: "MWmed" + (k.genGasWhen ? " · " + k.genGasWhen : "") },
-    { lbl: t("deskKpiPld"), val: fmtNum(k.pldSe, 2), unit: "R$/MWh" + (k.pldWhen ? " · " + k.pldWhen : "") },
-    { lbl: t("deskKpiCmo"), val: fmtNum(k.cmoSe, 2), unit: "R$/MWh" + (k.cmoWhen ? " · " + k.cmoWhen : "") },
-    { lbl: t("deskKpiGus"), val: fmtNum(k.gusLast, 3), unit: gusUnit },
-    { lbl: t("deskKpiPoc"), val: fmtNum(k.pocAvg7d, 3), unit: "R$/m³" + (k.pocTrades7d != null ? " · " + k.pocTrades7d : "") },
-    { lbl: t("deskKpiFlows"), val: fmtNum(k.flowsTotal7d, 0), unit: "mil m³" + (k.flowsWhen ? " · " + k.flowsWhen : "") },
+    { lbl: t("deskKpiGen"), val: fmtNum(k.genGasSin, 0), unit: "MWmed" + (k.genGasWhen ? " · " + k.genGasWhen : ""), href: siteHref("ons") },
+    { lbl: t("deskKpiPld"), val: fmtNum(k.pldSe, 2), unit: "R$/MWh" + (k.pldWhen ? " · " + k.pldWhen : ""), href: siteHref("pld") },
+    { lbl: t("deskKpiCmo"), val: fmtNum(k.cmoSe, 2), unit: "R$/MWh" + (k.cmoWhen ? " · " + k.cmoWhen : ""), href: siteHref("ons") },
+    { lbl: t("deskKpiGus"), val: fmtNum(k.gusLast, 3), unit: gusUnit, href: gusKpiHref() },
+    { lbl: t("deskKpiPoc"), val: fmtNum(k.pocAvg7d, 3), unit: "R$/m³" + (k.pocTrades7d != null ? " · " + k.pocTrades7d : ""), href: pocFilterHref(["last7"]) },
+    { lbl: t("deskKpiFlows"), val: fmtNum(k.flowsTotal7d, 0), unit: "000 m³" + (k.flowsWhen ? " · " + k.flowsWhen : ""), href: siteHref("flows") },
+    { lbl: t("deskKpiSantos"), val: fmtNum(k.anpSantos, 3), unit: "R$/m³" + (k.anpSantosMonth ? " · " + k.anpSantosMonth : ""), href: siteHref("precos") },
   ];
   const host = document.getElementById("kpi-row");
-  host.innerHTML = cells.map(c =>
-    '<div class="kpi-cell"><div class="lbl">' + escapeHtml(c.lbl) + '</div>' +
-    '<div class="val">' + escapeHtml(c.val) + '</div>' +
-    '<div class="unit">' + escapeHtml(c.unit) + '</div></div>'
-  ).join("");
+  host.innerHTML = cells.map(c => {
+    const inner = '<div class="lbl">' + escapeHtml(c.lbl) + '</div>' +
+      '<div class="val">' + escapeHtml(c.val) + '</div>' +
+      '<div class="unit">' + escapeHtml(c.unit) + '</div>';
+    return '<a class="kpi-cell" href="' + escapeHtml(c.href) + '">' + inner + '</a>';
+  }).join("");
 }
 
 function impliedCvu(gasM3, hr, natgas) {
   if (gasM3 == null || hr == null || !(natgas > 0)) return null;
   return gasM3 * hr * 1000 / natgas;
+}
+
+function m3PerMmbtu() {
+  return Number((DATA && DATA.spark && DATA.spark.m3PerMmbtu) || 26.8081);
+}
+
+function displayGasFromM3(m3) {
+  if (m3 == null || isNaN(m3)) return "";
+  return sparkUnit === "mmbtu" ? (m3 * m3PerMmbtu()).toFixed(2) : Number(m3).toFixed(3);
+}
+
+function m3FromDisplay(raw) {
+  const gas = parseFloat(raw);
+  if (isNaN(gas)) return null;
+  return sparkUnit === "mmbtu" ? gas / m3PerMmbtu() : gas;
+}
+
+function paintSparkUnit() {
+  document.querySelectorAll("#spark-unit [data-unit]").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.unit === sparkUnit);
+  });
+  const gasEl = document.getElementById("spark-gas");
+  if (gasEl) gasEl.step = sparkUnit === "mmbtu" ? "0.01" : "0.001";
+}
+
+function setSparkUnit(unit) {
+  if (!unit || unit === sparkUnit) return;
+  const gasEl = document.getElementById("spark-gas");
+  const cur = m3FromDisplay(gasEl.value);
+  if (cur != null) sparkGasM3 = cur;
+  sparkUnit = unit;
+  gasEl.value = displayGasFromM3(sparkGasM3);
+  paintSparkUnit();
+  renderSpark();
 }
 
 function renderSpark() {
@@ -1983,7 +2062,7 @@ function renderSpark() {
   const hrEl = document.getElementById("spark-hr");
   const preset = document.getElementById("spark-hr-preset");
   const ovEl = document.getElementById("spark-cvu");
-  const gas = parseFloat(gasEl.value);
+  const gas = m3FromDisplay(gasEl.value);
   let hr = parseFloat(hrEl.value);
   if (preset.value === "ccgt") hr = s.heatRateCcgt;
   else if (preset.value === "ocgt") hr = s.heatRateOcgt;
@@ -2008,6 +2087,7 @@ function renderSpark() {
   const formula = currentLang() === "pt" ? (s.formulaPt || "") : (s.formulaEn || "");
   info.title = formula;
   info.setAttribute("aria-label", formula);
+  paintSparkUnit();
 }
 
 function initSparkForm() {
@@ -2015,11 +2095,17 @@ function initSparkForm() {
   const gasEl = document.getElementById("spark-gas");
   const hrEl = document.getElementById("spark-hr");
   const preset = document.getElementById("spark-hr-preset");
-  const gas = (s.defaultGasPrice != null && !isNaN(s.defaultGasPrice)) ? s.defaultGasPrice : 1.2;
-  gasEl.value = gas;
+  sparkGasM3 = (s.defaultGasPrice != null && !isNaN(s.defaultGasPrice)) ? s.defaultGasPrice : 1.2;
+  sparkUnit = "mmbtu";
+  gasEl.value = displayGasFromM3(sparkGasM3);
   hrEl.value = s.heatRateCcgt || 1800;
   preset.value = "ccgt";
-  ["spark-gas", "spark-hr", "spark-cvu"].forEach(id => {
+  document.getElementById("spark-gas").addEventListener("input", () => {
+    const cur = m3FromDisplay(document.getElementById("spark-gas").value);
+    if (cur != null) sparkGasM3 = cur;
+    renderSpark();
+  });
+  ["spark-hr", "spark-cvu"].forEach(id => {
     document.getElementById(id).addEventListener("input", renderSpark);
   });
   preset.addEventListener("change", () => {
@@ -2028,6 +2114,10 @@ function initSparkForm() {
     else if (preset.value === "ocgt") hrEl.value = s2.heatRateOcgt;
     renderSpark();
   });
+  document.querySelectorAll("#spark-unit [data-unit]").forEach(btn => {
+    btn.addEventListener("click", () => setSparkUnit(btn.dataset.unit));
+  });
+  paintSparkUnit();
   renderSpark();
 }
 
@@ -2203,6 +2293,12 @@ function renderPocAnpChart() {
   drawLineChart("poc-anp-chart", c.months || [], series, c.note || t("deskEmptyChart"));
 }
 
+function gusForTso(tso) {
+  const k = DATA.kpi || {};
+  if (k.gusLast == null || !k.gusTso || !tso) return null;
+  return String(k.gusTso).toUpperCase() === String(tso).toUpperCase() ? k.gusLast : null;
+}
+
 function utilRawRows() {
   const u = DATA.utilization || {};
   return (u.rows || []).map(r => ({
@@ -2210,7 +2306,22 @@ function utilRawRows() {
     contracted: r.contracted,
     realized: r.realized,
     utilization: r.utilization == null ? null : r.utilization * 100,
+    tariffM3: r.tariffM3 == null ? null : r.tariffM3,
+    gusM3: gusForTso(r.tso),
   }));
+}
+
+function utilCols() {
+  const rows = DATA.utilization && DATA.utilization.rows || [];
+  const cols = [
+    { key: "tso", label: t("deskUtilTso") },
+    { key: "contracted", label: t("deskUtilCap"), num: true },
+    { key: "realized", label: t("deskUtilReal"), num: true },
+    { key: "utilization", label: t("deskUtilPct"), num: true },
+  ];
+  if (rows.some(r => r.tariffM3 != null)) cols.push({ key: "tariffM3", label: t("deskUtilTariff"), num: true });
+  if (rows.some(r => gusForTso(r.tso) != null)) cols.push({ key: "gusM3", label: t("deskUtilGus"), num: true });
+  return cols;
 }
 
 function utilTableRows() {
@@ -2231,17 +2342,21 @@ function utilTableRows() {
   });
 }
 
+function utilFmt(col, r) {
+  const v = r[col.key];
+  if (col.key === "tso") return escapeHtml(v == null ? "" : v);
+  if (col.key === "utilization") return v == null ? "—" : escapeHtml(fmtNum(v, 0) + "%");
+  if (v == null) return "—";
+  const d = (col.key === "tariffM3" || col.key === "gusM3") ? 3 : 1;
+  return escapeHtml(fmtNum(v, d));
+}
+
 function renderUtil() {
   if (!DATA) return;
   const u = DATA.utilization || {};
   const thead = document.getElementById("util-thead");
   const body = document.getElementById("util-body");
-  const cols = [
-    { key: "tso", label: t("deskUtilTso") },
-    { key: "contracted", label: t("deskUtilCap"), num: true },
-    { key: "realized", label: t("deskUtilReal"), num: true },
-    { key: "utilization", label: t("deskUtilPct"), num: true },
-  ];
+  const cols = utilCols();
   withFocusPreserved(thead.parentElement.parentElement, () => {
     thead.innerHTML = "";
     cols.forEach(col => {
@@ -2253,18 +2368,16 @@ function renderUtil() {
     const rows = utilTableRows();
     if (!(u.rows || []).length) {
       const tr = document.createElement("tr");
-      tr.innerHTML = '<td colspan="4" style="color:var(--muted)">' + escapeHtml(u.note || t("deskEmptyChart")) + "</td>";
+      tr.innerHTML = '<td colspan="' + cols.length + '" style="color:var(--muted)">' + escapeHtml(u.note || t("deskEmptyChart")) + "</td>";
       body.appendChild(tr);
       return;
     }
     rows.forEach(r => {
       const tr = document.createElement("tr");
-      const util = r.utilization == null ? "—" : fmtNum(r.utilization, 0) + "%";
-      tr.innerHTML =
-        "<td>" + escapeHtml(r.tso) + "</td>" +
-        '<td class="num">' + escapeHtml(fmtNum(r.contracted, 1)) + "</td>" +
-        '<td class="num">' + escapeHtml(fmtNum(r.realized, 1)) + "</td>" +
-        '<td class="num">' + escapeHtml(util) + "</td>";
+      tr.innerHTML = cols.map(col => {
+        const tdClass = col.num ? ' class="num"' : "";
+        return "<td" + tdClass + ">" + utilFmt(col, r) + "</td>";
+      }).join("");
       body.appendChild(tr);
     });
   });

@@ -1020,18 +1020,19 @@ footer.site a{color:var(--muted)}
 from each of the other dashboards, plus an interactive spark-spread
 calculator, rather than a dashboard with its own data pipeline.</p>
 <h2>KPI row</h2>
-<p>SIN gas generation, PLD (SE), CMO (SE), latest GUS trade price, ANP Santos
-basin price, ANP non-thermal Southeast price, POC 7-day average price, and
-Flows 7-day total — one figure pulled from each source dashboard's own
-latest data.</p>
+<p>Each tile is a link to the source dashboard: SIN gas generation and CMO (ONS),
+PLD (CCEE), latest GUS and POC 7-day average (POC Results, with GUS
+deep-linking to that TSO when known), Flows 7-day total, and ANP Santos
+basin price (Prices). Figures follow each source's own latest data.</p>
 <h2>PLD · CMO · CVU</h2>
 <p>A submarket-selectable (SE/S/NE/N) chart comparing PLD, CMO, and an implied
 gas CVU over time, toggle-able via the series picker above the chart.</p>
 <h2>Spark</h2>
-<p>An interactive spark-spread calculator: enter a gas price in <strong>R$/m³</strong>
-(defaults to whichever of the following is available first: the latest GUS
+<p>An interactive spark-spread calculator: enter a gas price in <strong>R$/MMBtu</strong>
+or <strong>R$/m³</strong> (toggle next to the input; MMBtu is the default). The field
+defaults to whichever of the following is available first: the latest GUS
 trade price, else POC's 7-day average price, else an illustrative 1.2
-R$/m³ so the form never loads blank) and a heat rate (CCGT 1800 kcal/kWh,
+R$/m³ so the form never loads blank. Pick a heat rate (CCGT 1800 kcal/kWh,
 OCGT 2500 kcal/kWh, or a custom value), and it computes:</p>
 <pre><code>Implied CVU (R$/MWh) = gas price (R$/m³) × heat rate (kcal/kWh) × 1000 / natural-gas heat content (kcal/m³)
 </code></pre>
@@ -1047,11 +1048,13 @@ disclosures, series picker above the chart.</p>
 <p>A table comparing held transport capacity (from
 <a href="/wiki/contratos/using-the-dashboard.html">POC Contracts</a>) against actual
 physical flow (from <a href="/wiki/flows/using-the-dashboard.html">Pipeline Flows</a>)
-by pipeline.</p>
+by pipeline. When the payload includes it, extra columns show that TSO's
+capacity-weighted allocated tariff (R$/m³) and the latest GUS print when
+it belongs to the same TSO.</p>
 <h2>Getting to the source dashboards</h2>
 <p>The row of pills under the header links straight to each source dashboard
-— ONS, CCEE (PLD), ANP (Prices), POC, and Flows — for anyone who wants the
-full picture behind one of the Desk's headline numbers.</p>
+— ONS, CCEE (PLD), ANP (Prices), POC, Contracts, Flows, and Supply — for
+anyone who wants the full picture behind one of the Desk's headline numbers.</p>
     </div>
   </main>
 </div>
