@@ -28,10 +28,11 @@ so a handful of large contracts don't get outvoted by many small ones.
 
 ## Table
 
-Columns: Pipeline, Contract Number, Contract Category, Status, Shipper,
-Product Type, Point/Zone, Flow, Quality, Start/End Date, Contracted Capacity
-(000 m³/d), Allocated Tariff (R$/MMBtu), Allocated Tariff (R$/m³), Tariff
-Multiplier, Transporter Ownership %, Amendment. The R$/m³ tariff is this
+Columns: Pipeline, Status, Shipper, Point/Zone, Flow, Start/End Date,
+Contracted Capacity (000 m³/d), Allocated Tariff (R$/MMBtu), Allocated
+Tariff (R$/m³) are visible by default. Contract Number, Contract Category,
+Product Type, Quality, Tariff Multiplier, Transporter Ownership %, and
+Amendment stay hidden until turned on from Columns. The R$/m³ tariff is this
 site's conversion of the published R$/MMBtu figure (÷ 26.8081 m³ per MMBtu;
 same factor as [POC Results](/wiki/poc/known-limitations.html)). Same
 Excel-style per-column filters, drag-to-reorder, resize, and sort as POC

@@ -344,8 +344,11 @@ const FALLBACK_COL_WIDTH = 80;
 // Columns hidden by default so the first screenful stays scannable; the rest
 // (including the calculated R$/m³ tariff) is a horizontal scroll away.
 // Users can re-enable any of these (or hide more) from the Columns menu.
-const DEFAULT_HIDDEN_COLS = ["Amendment", "Tariff Multiplier", "Transporter Ownership %", "Quality"];
-const COL_PREFS_KEY = "pocContratosDashboard.columnPrefs.v2";
+const DEFAULT_HIDDEN_COLS = [
+  "Contract Number", "Contract Category", "Product Type", "Quality",
+  "Tariff Multiplier", "Transporter Ownership %", "Amendment",
+];
+const COL_PREFS_KEY = "pocContratosDashboard.columnPrefs.v3";
 // Every column gets an Excel-style header filter menu: a date-range picker for
 // the date columns, a searchable checkbox list for everything else.
 const DATE_FILTER_COLS = new Set(["Start Date", "End Date"]);
@@ -554,9 +557,12 @@ function chartAxisLabelMs(ms, spanDays) {
     ? CHART_MON[d.getUTCMonth()] + " '" + String(d.getUTCFullYear()).slice(2)
     : d.getUTCDate() + " " + CHART_MON[d.getUTCMonth()];
 }
+function numLocale() {
+  return currentLang() === "pt" ? "pt-BR" : "en-US";
+}
 function fmtAxisNum(v, d) {
   if (v === null || v === undefined || !isFinite(v)) return "–";
-  return v.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
+  return v.toLocaleString(numLocale(), { minimumFractionDigits: d, maximumFractionDigits: d });
 }
 const CHART_NS = "http://www.w3.org/2000/svg";
 function chartSvgEl(n, a) {
@@ -736,7 +742,7 @@ function initChartDefaults() {
 
 function fmtNum(v, maxFrac) {
   if (v === null || v === undefined || v === "") return "";
-  return Number(v).toLocaleString("en-US", { maximumFractionDigits: maxFrac === undefined ? 2 : maxFrac });
+  return Number(v).toLocaleString(numLocale(), { maximumFractionDigits: maxFrac === undefined ? 2 : maxFrac });
 }
 
 function label(col) {
@@ -1186,7 +1192,7 @@ function renderTsoRow() {
     chip.dataset.capacity = String(capacity);
     if (rows.length) {
       chip.className = "tso-chip";
-      chip.title = tso + ": " + rows.length.toLocaleString("en-US") + " active contract" +
+      chip.title = tso + ": " + rows.length.toLocaleString(numLocale()) + " active contract" +
         (rows.length === 1 ? "" : "s") + ", " + fmtNum(capacity, 0) + " 000 m³/d contracted — click to isolate";
       chip.innerHTML = `<b>${escapeHtml(tso)}</b>`;
       chip.addEventListener("click", () => toggleDrillTso(tso));
@@ -1330,7 +1336,7 @@ function renderDrill() {
     return `<tr data-shipper="${escapeHtml(e.name)}" class="${pickedShipper === e.name ? "picked" : ""}">
       <td class="rank">${i + 1}</td>
       <td class="shipper" title="${escapeHtml(e.name)}">${escapeHtml(e.name)}</td>
-      <td class="num">${e.nContracts.toLocaleString("en-US")}</td>
+      <td class="num">${e.nContracts.toLocaleString(numLocale())}</td>
       ${cells}
       <td class="num sep">${fmtNum(e.total, 0)}</td>
       <td class="num">${grand > 0 ? fmtNum(100 * e.total / grand, 1) + "%" : "&ndash;"}</td>
@@ -1343,7 +1349,7 @@ function renderDrill() {
     const activeRows = DATA.rows.filter(r => r["Transporter (TSO)"] === drillTso && isActiveRow(r));
     const capacity = activeRows.reduce((a, r) => a + (Number(r["Contracted Capacity (000 m3/d)"]) || 0), 0);
     const n = activeRows.length;
-    tsoSummary = `<p class="tso-summary"><b>${escapeHtml(drillTso)}</b> &middot; ${n.toLocaleString("en-US")} active contract${n === 1 ? "" : "s"} &middot; ${fmtNum(capacity, 0)} 000 m&sup3;/d contracted</p>`;
+    tsoSummary = `<p class="tso-summary"><b>${escapeHtml(drillTso)}</b> &middot; ${n.toLocaleString(numLocale())} active contract${n === 1 ? "" : "s"} &middot; ${fmtNum(capacity, 0)} 000 m&sup3;/d contracted</p>`;
   }
   const colgroup = `<colgroup>
       <col class="rank"><col class="shipper"><col class="contracts">
@@ -1354,7 +1360,7 @@ function renderDrill() {
     <p class="panel-title">Top Shippers by Held Capacity &mdash; ${scope}</p>
     ${tsoSummary}
     <p class="panel-note">Capacity in 000 m&sup3;/d on active contracts currently within their term &middot;
-      ${all.length.toLocaleString("en-US")} shipper${all.length === 1 ? "" : "s"} &middot; ${mix} &middot; total ${fmtNum(grand, 0)}</p>
+      ${all.length.toLocaleString(numLocale())} shipper${all.length === 1 ? "" : "s"} &middot; ${mix} &middot; total ${fmtNum(grand, 0)}</p>
     <table>
       ${colgroup}
       <thead>
@@ -1363,7 +1369,7 @@ function renderDrill() {
       </thead>
       <tbody>${body}</tbody>
     </table>
-    ${all.length > DRILL_TOP_N ? `<button class="drill-more">${drillShowAll ? "Show top " + DRILL_TOP_N + " only" : "Show all " + all.length.toLocaleString("en-US") + " shippers"}</button>` : ""}`;
+    ${all.length > DRILL_TOP_N ? `<button class="drill-more">${drillShowAll ? "Show top " + DRILL_TOP_N + " only" : "Show all " + all.length.toLocaleString(numLocale()) + " shippers"}</button>` : ""}`;
 
   card.querySelectorAll("tbody tr").forEach(tr => {
     tr.addEventListener("click", () => {
@@ -1400,7 +1406,7 @@ function buildQuickFilters() {
     const btn = document.createElement("button");
     btn.className = "qf-btn qf-validity";
     btn.dataset.validity = key;
-    btn.textContent = text + " (" + count.toLocaleString("en-US") + ")";
+    btn.textContent = text + " (" + count.toLocaleString(numLocale()) + ")";
     btn.title = "Hidden by default -- these contracts are not currently in term.";
     btn.addEventListener("click", () => { set(!get()); render(); });
     el.appendChild(btn);
@@ -1448,8 +1454,8 @@ function renderTable() {
   const inScope = DATA.rows.filter(r => (showExpired || !isExpired(r)) && (showFuture || !isNotYetStarted(r))).length;
   const hidden = DATA.rows.length - inScope;
   document.getElementById("row-count").textContent =
-    `${filtered.length.toLocaleString("en-US")} of ${inScope.toLocaleString("en-US")} rows` +
-    (hidden ? ` (${hidden.toLocaleString("en-US")} not currently valid, hidden)` : "");
+    `${filtered.length.toLocaleString(numLocale())} of ${inScope.toLocaleString(numLocale())} rows` +
+    (hidden ? ` (${hidden.toLocaleString(numLocale())} not currently valid, hidden)` : "");
 }
 
 function updateArrows() {
@@ -1594,7 +1600,7 @@ async function init() {
   initStalenessBadgeFor("contratos", through);
   if (DATA.excludedConcluded) {
     document.getElementById("coverage-note").textContent =
-      `Active Transport & Master contracts \u00b7 ${DATA.excludedConcluded.toLocaleString("en-US")} concluded excluded`;
+      `Active Transport & Master contracts \u00b7 ${DATA.excludedConcluded.toLocaleString(numLocale())} concluded excluded`;
   }
   populateSelect(document.getElementById("f-category"), DATA.rows.map(r => r["Contract Category"]));
   buildHeader();
