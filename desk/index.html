@@ -1975,6 +1975,8 @@ function renderNotes() {
 
 function siteHref(slug) {
   try {
+    const h = location.hostname;
+    if (h === "127.0.0.1" || h === "localhost") return "../" + slug + "/";
     const flavor = siteFlavor();
     const base = (SITE_LINKS[slug] || {})[flavor];
     if (base) return base;

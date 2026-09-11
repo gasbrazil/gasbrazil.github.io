@@ -35,6 +35,7 @@ def test_desk_kpis_are_links_with_santos_and_unit_toggle():
     assert 'let sparkUnit = "mmbtu"' in src
     assert '"000 m³"' in src
     assert '"mil m³"' not in src
+    assert 'h === "127.0.0.1"' in src
 
 
 def test_poc_hides_no_trade_and_exposes_gus_chip():
