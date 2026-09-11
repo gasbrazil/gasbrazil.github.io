@@ -704,6 +704,40 @@ footer.site a:hover,
   opacity: 1; visibility: visible;
 }
 
+/* Data tables scroll inside a wrap. Headers freeze to the wrap's top
+   row, never the page. Sticky `th` plus `border-collapse: collapse` is
+   what made headers hover over body rows (shared collapsed borders
+   don't paint a solid freeze plane). Separate + opaque panel fill
+   keeps the header row pinned cleanly. */
+.table-wrap table,
+.table-wrap table.data,
+.table-wrap table.util,
+.scroll table,
+.scroll table.data,
+.meter-table-wrap table,
+.drill-table-wrap table,
+.entlist table,
+.entlist table.data {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.table-wrap thead th,
+.scroll thead th,
+.meter-table-wrap thead th,
+.drill-table-wrap thead th,
+.entlist thead th {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  background-color: var(--panel);
+  background-image: none;
+  box-shadow: 0 1px 0 var(--border);
+}
+.drill-table-wrap {
+  max-height: 320px;
+  overflow: auto;
+}
+
 /* Sortable/filterable table header cells (see shared/dashboard_kit.py's
    JS_TABLE_SORT for the click behavior): a clickable label plus a small
    inline filter box, sharing one look across every table on every
@@ -711,20 +745,12 @@ footer.site a:hover,
    column; a table's own th rule should still set position/background/etc,
    just not cursor (this overrides that to auto so only .th-label, not the
    whole cell, looks clickable). */
-.table-wrap thead th,
-.scroll thead th,
-.meter-table-wrap thead th,
-.drill-card thead th {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  background: var(--panel);
-}
 /* Single-line rows site-wide: overflow truncates with ellipsis instead of
    wrapping and blowing up row height (POC Contracts especially). */
 .table-wrap th, .table-wrap td,
 .scroll table.data th, .scroll table.data td,
 .meter-table-wrap th, .meter-table-wrap td,
+.drill-table-wrap th, .drill-table-wrap td,
 .drill-card th, .drill-card td,
 .entlist table.data th, .entlist table.data td,
 table.data th, table.data td {
@@ -1142,13 +1168,13 @@ footer.site a:hover { color: var(--text); border-bottom-color: var(--brz-yellow)
       <div class="kpi-label" data-i18n="cardOns">ONS Balances</div>
       <div class="kpi-role">Grid &amp; gas dispatch</div>
       <div class="kpi-val" data-en="3,495 MWmed gas" data-pt="3,495 MWmed a gás">3,495 MWmed gas</div>
-      <div class="kpi-when" data-refresh="2026-09-11 02:18 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-11 02:55 UTC"></div>
     </a>
     <a class="kpi-cell" href="pld/" data-slug="pld">
       <div class="kpi-label" data-i18n="cardPld">PLD Prices</div>
       <div class="kpi-role">Power settlement</div>
       <div class="kpi-val" data-en="SE 179.15 R$/MWh · 2026-09-11" data-pt="SE 179.15 R$/MWh · 2026-09-11">SE 179.15 R$/MWh · 2026-09-11</div>
-      <div class="kpi-when" data-refresh="2026-09-11 02:18 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-11 02:55 UTC"></div>
       
     </a>
     <a class="kpi-cell" href="poc/" data-slug="poc">
@@ -1162,26 +1188,26 @@ footer.site a:hover { color: var(--text); border-bottom-color: var(--brz-yellow)
       <div class="kpi-label" data-i18n="cardContratos">POC Contracts</div>
       <div class="kpi-role">Firm transport</div>
       <div class="kpi-val" data-en="900 contracts · 186694.8 thousand m³/d" data-pt="900 contratos · 186694.8 mil m³/d">900 contracts · 186694.8 thousand m³/d</div>
-      <div class="kpi-when" data-refresh="2026-09-11 02:18 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-11 02:55 UTC"></div>
     </a>
     <a class="kpi-cell" href="flows/" data-slug="flows">
       <div class="kpi-label" data-i18n="cardFlows">Pipeline Flows</div>
       <div class="kpi-role">Physical movement</div>
       <div class="kpi-val" data-en="1358.6M m³ realized (7d)" data-pt="1358.6M m³ realizados (7d)">1358.6M m³ realized (7d)</div>
-      <div class="kpi-when" data-refresh="2026-09-11 02:19 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-11 02:56 UTC"></div>
     </a>
     <a class="kpi-cell" href="supply/" data-slug="supply">
       <div class="kpi-label" data-i18n="cardSupply">Gas Supply</div>
       <div class="kpi-role">National balance</div>
       <div class="kpi-val" data-en="6.7M thousand m³ produced · 2026-07" data-pt="6.7M mil m³ produzidos · 2026-07">6.7M thousand m³ produced · 2026-07</div>
-      <div class="kpi-when" data-refresh="2026-09-11 02:18 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-11 02:55 UTC"></div>
       
     </a>
     <a class="kpi-cell" href="precos/" data-slug="precos">
       <div class="kpi-label" data-i18n="cardPrecos">ANP Prices</div>
       <div class="kpi-role">Disclosed R$/MMBtu</div>
       <div class="kpi-val" data-en="Santos 18.2 R$/MMBtu · 2026-06" data-pt="Santos 18.2 R$/MMBtu · 2026-06">Santos 18.2 R$/MMBtu · 2026-06</div>
-      <div class="kpi-when" data-refresh="2026-09-11 02:18 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-11 02:55 UTC"></div>
     </a>
   </div>
   <div class="sources-block">

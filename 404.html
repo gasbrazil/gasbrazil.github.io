@@ -704,6 +704,40 @@ footer.site a:hover,
   opacity: 1; visibility: visible;
 }
 
+/* Data tables scroll inside a wrap. Headers freeze to the wrap's top
+   row, never the page. Sticky `th` plus `border-collapse: collapse` is
+   what made headers hover over body rows (shared collapsed borders
+   don't paint a solid freeze plane). Separate + opaque panel fill
+   keeps the header row pinned cleanly. */
+.table-wrap table,
+.table-wrap table.data,
+.table-wrap table.util,
+.scroll table,
+.scroll table.data,
+.meter-table-wrap table,
+.drill-table-wrap table,
+.entlist table,
+.entlist table.data {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.table-wrap thead th,
+.scroll thead th,
+.meter-table-wrap thead th,
+.drill-table-wrap thead th,
+.entlist thead th {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  background-color: var(--panel);
+  background-image: none;
+  box-shadow: 0 1px 0 var(--border);
+}
+.drill-table-wrap {
+  max-height: 320px;
+  overflow: auto;
+}
+
 /* Sortable/filterable table header cells (see shared/dashboard_kit.py's
    JS_TABLE_SORT for the click behavior): a clickable label plus a small
    inline filter box, sharing one look across every table on every
@@ -711,20 +745,12 @@ footer.site a:hover,
    column; a table's own th rule should still set position/background/etc,
    just not cursor (this overrides that to auto so only .th-label, not the
    whole cell, looks clickable). */
-.table-wrap thead th,
-.scroll thead th,
-.meter-table-wrap thead th,
-.drill-card thead th {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  background: var(--panel);
-}
 /* Single-line rows site-wide: overflow truncates with ellipsis instead of
    wrapping and blowing up row height (POC Contracts especially). */
 .table-wrap th, .table-wrap td,
 .scroll table.data th, .scroll table.data td,
 .meter-table-wrap th, .meter-table-wrap td,
+.drill-table-wrap th, .drill-table-wrap td,
 .drill-card th, .drill-card td,
 .entlist table.data th, .entlist table.data td,
 table.data th, table.data td {
