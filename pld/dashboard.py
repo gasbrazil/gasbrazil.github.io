@@ -637,16 +637,10 @@ function peakWindowStartIso() {
 function hourlyWindowStartTs() {
   const times = (DATA.hourly && DATA.hourly.times) || [];
   if (!times.length) return null;
-  const last = times[times.length - 1];
   const days = { "1d": 1, "3d": 3, "7d": 7, "14d": 14, "30d": 30 }[hourlyPreset] || 7;
-  const end = Date.parse(last + ":00:00Z");
-  if (!isFinite(end)) return times[0];
-  const startMs = end - days * 86400000;
-  const pad = n => (n < 10 ? "0" : "") + n;
-  const d = new Date(startMs);
-  const iso = d.getUTCFullYear() + "-" + pad(d.getUTCMonth() + 1) + "-" + pad(d.getUTCDate()) +
-    "T" + pad(d.getUTCHours());
-  return iso < times[0] ? times[0] : iso;
+  const n = days * 24;
+  if (times.length <= n) return times[0];
+  return times[times.length - n];
 }
 
 function chartNiceTicks(lo, hi, n) {
