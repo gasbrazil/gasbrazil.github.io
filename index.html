@@ -1168,13 +1168,13 @@ footer.site a:hover { color: var(--text); border-bottom-color: var(--brz-yellow)
       <div class="kpi-label" data-i18n="cardOns">ONS Balances</div>
       <div class="kpi-role">Grid &amp; gas dispatch</div>
       <div class="kpi-val" data-en="3,495 MWmed gas" data-pt="3,495 MWmed a gás">3,495 MWmed gas</div>
-      <div class="kpi-when" data-refresh="2026-09-11 04:36 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-11 04:49 UTC"></div>
     </a>
     <a class="kpi-cell" href="pld/" data-slug="pld">
       <div class="kpi-label" data-i18n="cardPld">PLD Prices</div>
       <div class="kpi-role">Power settlement</div>
-      <div class="kpi-val" data-en="SE 179.15 R$/MWh · 2026-09-11" data-pt="SE 179.15 R$/MWh · 2026-09-11">SE 179.15 R$/MWh · 2026-09-11</div>
-      <div class="kpi-when" data-refresh="2026-09-11 04:36 UTC"></div>
+      <div class="kpi-val" data-en="SE 122.33 R$/MWh · 2026-09-06" data-pt="SE 122.33 R$/MWh · 2026-09-06">SE 122.33 R$/MWh · 2026-09-06</div>
+      <div class="kpi-when" data-refresh="2026-09-11 14:44 UTC"></div>
       
     </a>
     <a class="kpi-cell" href="poc/" data-slug="poc">
@@ -1188,26 +1188,26 @@ footer.site a:hover { color: var(--text); border-bottom-color: var(--brz-yellow)
       <div class="kpi-label" data-i18n="cardContratos">POC Contracts</div>
       <div class="kpi-role">Firm transport</div>
       <div class="kpi-val" data-en="892 contracts · 184630.7 thousand m³/d" data-pt="892 contratos · 184630.7 mil m³/d">892 contracts · 184630.7 thousand m³/d</div>
-      <div class="kpi-when" data-refresh="2026-09-11 04:36 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-11 14:57 UTC"></div>
     </a>
     <a class="kpi-cell" href="flows/" data-slug="flows">
       <div class="kpi-label" data-i18n="cardFlows">Pipeline Flows</div>
       <div class="kpi-role">Physical movement</div>
       <div class="kpi-val" data-en="1358.6M m³ realized (7d)" data-pt="1358.6M m³ realizados (7d)">1358.6M m³ realized (7d)</div>
-      <div class="kpi-when" data-refresh="2026-09-11 04:37 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-11 04:50 UTC"></div>
     </a>
     <a class="kpi-cell" href="supply/" data-slug="supply">
       <div class="kpi-label" data-i18n="cardSupply">Gas Supply</div>
       <div class="kpi-role">National balance</div>
       <div class="kpi-val" data-en="6.7M thousand m³ produced · 2026-07" data-pt="6.7M mil m³ produzidos · 2026-07">6.7M thousand m³ produced · 2026-07</div>
-      <div class="kpi-when" data-refresh="2026-09-11 04:36 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-11 04:48 UTC"></div>
       
     </a>
     <a class="kpi-cell" href="precos/" data-slug="precos">
       <div class="kpi-label" data-i18n="cardPrecos">ANP Prices</div>
       <div class="kpi-role">Disclosed R$/MMBtu</div>
       <div class="kpi-val" data-en="Santos 18.2 R$/MMBtu · 2026-06" data-pt="Santos 18.2 R$/MMBtu · 2026-06">Santos 18.2 R$/MMBtu · 2026-06</div>
-      <div class="kpi-when" data-refresh="2026-09-11 04:36 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-11 04:48 UTC"></div>
     </a>
   </div>
   <div class="sources-block">
@@ -1372,6 +1372,8 @@ const GB_I18N = {
     pldViewDaily: "Daily average",
     pldViewHourly: "Hourly",
     pldViewPeak: "Peak / off-peak",
+    pldKpiPeak: "Peak",
+    pldKpiOffPeak: "Off-peak",
     pldCompareTitle: "PLD vs CMO vs gas CVU",
     pldCompareNote: "",
     pldWindow: "Window",
@@ -1484,6 +1486,8 @@ const GB_I18N = {
     pldViewDaily: "Média diária",
     pldViewHourly: "Horário",
     pldViewPeak: "Ponta / fora ponta",
+    pldKpiPeak: "Ponta",
+    pldKpiOffPeak: "Fora ponta",
     pldCompareTitle: "PLD vs CMO vs CVU a gás",
     pldCompareNote: "",
     pldWindow: "Janela",
@@ -1664,7 +1668,7 @@ initLangToggle("lang-toggle");
 </html>
 
 <script>
-const TEASERS_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/hub/teasers.json.gz?v=34563587315";
+const TEASERS_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/hub/teasers.json.gz?v=34613626547";
 function paintRefreshLabels() {
   document.querySelectorAll(".kpi-when[data-refresh]").forEach(el => {
     const when = el.getAttribute("data-refresh");
