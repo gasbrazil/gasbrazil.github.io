@@ -323,7 +323,11 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .kpi-tile { background: var(--panel); border: 1px solid var(--border); border-radius: 5px; padding: 10px 12px; }
 .kpi-tile .k-label { font-size: 11px; font-weight: 400; color: var(--muted2); }
 .kpi-tile .k-val { font-size: 20px; font-weight: 400; font-variant-numeric: tabular-nums; margin-top: 2px; letter-spacing: -.01em; }
-.kpi-tile .k-unit { font-size: 11px; color: var(--muted); font-weight: 200; }
+.kpi-tile .k-sub { display: flex; flex-wrap: wrap; gap: 2px 10px; align-items: baseline; margin-top: 4px; font-size: 11.5px; }
+.kpi-tile .k-sub-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); font-weight: 200; margin-right: 4px; }
+.kpi-tile .k-sub-val { font-variant-numeric: tabular-nums; font-weight: 400; color: var(--text); }
+.kpi-tile .k-sub-sep { color: var(--muted); font-weight: 200; }
+.kpi-tile .k-unit { font-size: 11px; color: var(--muted); font-weight: 200; margin-top: 4px; }
 .chart-card { background: var(--panel); border: 1px solid var(--border); border-radius: 5px; padding: var(--card-pad); margin-bottom: var(--gap); }
 .panel-title { font-size: 13px; font-weight: 400; margin: 0 0 2px; }
 .panel-note { font-size: 11.5px; color: var(--muted); margin: 0 0 12px; font-weight: 200; }
@@ -491,26 +495,30 @@ function colorOf(sm) {
 function renderKpis() {
   const host = document.getElementById("kpi-row");
   host.innerHTML = "";
+  const peakLbl = t("pldKpiPeak") || "Peak";
+  const offLbl = t("pldKpiOffPeak") || "Off-peak";
   (DATA.submarkets || []).forEach(sm => {
     const tile = document.createElement("div");
     tile.className = "kpi-tile";
-    let v = DATA.latest ? DATA.latest[sm] : null;
-    let unit = "R$/MWh · " + escapeHtml(DATA.latestDate || "");
-    if (viewMode === "hourly" && hasHourly()) {
-      v = DATA.hourly.latest ? DATA.hourly.latest[sm] : null;
-      const ts = DATA.hourly.latestTime || "";
-      unit = "R$/MWh · " + escapeHtml(formatHourlyLabel(ts));
-    } else if (viewMode === "peak" && hasPeak()) {
-      v = DATA.peakOffPeak.latestPeak ? DATA.peakOffPeak.latestPeak[sm] : null;
+    const avg = DATA.latest ? DATA.latest[sm] : null;
+    let subHtml = "";
+    if (hasPeak()) {
+      const pk = DATA.peakOffPeak.latestPeak ? DATA.peakOffPeak.latestPeak[sm] : null;
       const off = DATA.peakOffPeak.latestOffPeak ? DATA.peakOffPeak.latestOffPeak[sm] : null;
-      unit = (currentLang() === "pt" ? "ponta" : "peak") + " · " +
-        (currentLang() === "pt" ? "fora ponta " : "off-peak ") +
-        (off == null ? "–" : fmtNum(off, 2));
+      subHtml =
+        '<div class="k-sub">' +
+          '<span class="k-sub-item"><span class="k-sub-lbl">' + escapeHtml(peakLbl) + "</span>" +
+          '<span class="k-sub-val">' + (pk == null ? "–" : fmtNum(pk, 2)) + "</span></span>" +
+          '<span class="k-sub-sep" aria-hidden="true">·</span>' +
+          '<span class="k-sub-item"><span class="k-sub-lbl">' + escapeHtml(offLbl) + "</span>" +
+          '<span class="k-sub-val">' + (off == null ? "–" : fmtNum(off, 2)) + "</span></span>" +
+        "</div>";
     }
     tile.innerHTML =
       '<div class="k-label">' + escapeHtml(smLabel(sm)) + " (" + sm + ")</div>" +
-      '<div class="k-val">' + (v == null ? "–" : fmtNum(v, 2)) + "</div>" +
-      '<div class="k-unit">' + unit + "</div>";
+      '<div class="k-val">' + (avg == null ? "–" : fmtNum(avg, 2)) + "</div>" +
+      subHtml +
+      '<div class="k-unit">R$/MWh · ' + escapeHtml(DATA.latestDate || "") + "</div>";
     host.appendChild(tile);
   });
 }
