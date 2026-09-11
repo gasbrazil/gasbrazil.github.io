@@ -155,9 +155,9 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .toolbar button:hover { background: var(--accent-soft); }
 .count { color: var(--muted); font-size: 12px; margin-left: auto; font-weight: 200; }
 .table-wrap { overflow: auto; max-height: 55vh; border: 1px solid var(--border); border-radius: 5px; }
-table { border-collapse: collapse; width: 100%; font-size: var(--table-font-size); table-layout: fixed; }
+table { width: 100%; font-size: var(--table-font-size); table-layout: fixed; }
 th, td { padding: 4px 8px; text-align: left; border-bottom: 1px solid var(--border); font-weight: 300; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-th { position: sticky; top: 0; background: var(--panel); color: var(--muted2); font-weight: 400; z-index: 2; }
+th { background: var(--panel); color: var(--muted2); font-weight: 400; }
 th .th-label { cursor: pointer; }
 .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }

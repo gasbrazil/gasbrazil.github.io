@@ -90,6 +90,41 @@ def test_products_dropdown_wraps_brand():
     assert 'class="dd-caret"' in html
 
 
+def test_table_headers_freeze_inside_scroll_wraps():
+    css = kit.THEME_CSS
+    assert "border-collapse: separate" in css
+    assert ".drill-table-wrap" in css
+    assert ".drill-card thead th" not in css
+    for wrap in (
+        ".table-wrap thead th",
+        ".scroll thead th",
+        ".meter-table-wrap thead th",
+        ".drill-table-wrap thead th",
+        ".entlist thead th",
+    ):
+        assert wrap in css
+
+
+def test_contratos_drill_table_has_own_scroll_wrap():
+    from pathlib import Path
+
+    src = (Path(__file__).resolve().parents[1] / "contratos" / "dashboard.py").read_text(
+        encoding="utf-8"
+    )
+    assert 'class="drill-table-wrap"' in src
+    assert "max-height: 320px; overflow: auto" not in src
+    assert "position: sticky" not in src
+
+
+def test_dashboards_do_not_sticky_th_to_the_page():
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[1]
+    for name in ("desk", "ons", "pld", "poc", "contratos", "flows", "supply", "precos"):
+        src = (root / name / "dashboard.py").read_text(encoding="utf-8")
+        assert "position: sticky" not in src, name
+
+
 def test_dashboard_headers_stay_on_one_row():
     from pathlib import Path
 

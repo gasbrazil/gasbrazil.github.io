@@ -140,12 +140,11 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .quick-filters { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: var(--gap); }
 .qf-sep { width: 1px; align-self: stretch; background: var(--border-strong); margin: 0 4px; }
 .qf-btn.qf-validity { border-style: dashed; }
-.drill-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: var(--card-pad); margin-bottom: var(--gap); max-height: 320px; overflow: auto; }
-.drill-card table { border-collapse: collapse; width: 100%; font-size: var(--table-font-size); table-layout: fixed; white-space: nowrap; }
+.drill-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: var(--card-pad); margin-bottom: var(--gap); }
+.drill-card table { width: 100%; font-size: var(--table-font-size); table-layout: fixed; white-space: nowrap; }
 .drill-card th, .drill-card td { padding: 4px 8px; border-bottom: 1px solid var(--border); text-align: left; }
-.drill-card th { color: var(--muted2); font-weight: 400; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; cursor: default; position: sticky; top: 0; background: var(--panel); z-index: 2; }
-.drill-card thead tr:first-child th { border-bottom: none; padding-bottom: 0; top: 0; }
-.drill-card thead tr:nth-child(2) th { top: 1.6em; }
+.drill-card th { color: var(--muted2); font-weight: 400; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; cursor: default; background: var(--panel); }
+.drill-card thead tr:first-child th { border-bottom: none; padding-bottom: 0; }
 .drill-card .tso-summary { font-size: 12px; color: var(--muted2); margin: 0 0 10px; }
 .drill-card th.grp { text-align: center; color: var(--text); letter-spacing: .04em; }
 .drill-card th.grp.on { color: var(--accent); }
@@ -175,10 +174,10 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .toolbar button.secondary { background: var(--panel); color: var(--text); border: 1px solid var(--border-strong); }
 .count { color: var(--muted); font-size: 12px; margin-left: auto; }
 .table-wrap { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; overflow: auto; box-shadow: var(--shadow); max-height: 65vh; }
-table { border-collapse: collapse; font-size: var(--table-font-size); }
+table { font-size: var(--table-font-size); }
 .table-wrap table { table-layout: fixed; width: max-content; min-width: 100%; }
 th, td { padding: 4px 8px; text-align: left; border-bottom: 1px solid var(--border); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-th { position: sticky; top: 0; background: var(--panel); cursor: pointer; user-select: none; color: var(--muted2); font-weight: 400; z-index: 2; }
+th { background: var(--panel); cursor: pointer; user-select: none; color: var(--muted2); font-weight: 400; }
 th:hover { background: var(--accent-soft); }
 th.dragging { opacity: .4; }
 th.drag-over { box-shadow: inset 2px 0 0 var(--accent); }
@@ -1358,6 +1357,7 @@ function renderDrill() {
     ${tsoSummary}
     <p class="panel-note">Capacity in 000 m&sup3;/d on active contracts currently within their term &middot;
       ${all.length.toLocaleString(numLocale())} shipper${all.length === 1 ? "" : "s"} &middot; ${mix} &middot; total ${fmtNum(grand, 0)}</p>
+    <div class="drill-table-wrap">
     <table>
       ${colgroup}
       <thead>
@@ -1366,6 +1366,7 @@ function renderDrill() {
       </thead>
       <tbody>${body}</tbody>
     </table>
+    </div>
     ${all.length > DRILL_TOP_N ? `<button class="drill-more">${drillShowAll ? "Show top " + DRILL_TOP_N + " only" : "Show all " + all.length.toLocaleString(numLocale()) + " shippers"}</button>` : ""}`;
 
   card.querySelectorAll("tbody tr").forEach(tr => {

@@ -101,9 +101,9 @@ a.kpi-cell:hover .lbl { color: var(--text); }
 .spark-metric.pos .val { color: var(--accent); }
 .spark-metric.neg .val { color: var(--muted2); }
 .table-wrap { overflow: auto; max-height: 40vh; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-table.util { border-collapse: collapse; width: 100%; font-size: var(--table-font-size); }
+table.util { width: 100%; font-size: var(--table-font-size); }
 table.util th, table.util td { padding: 4px 8px; text-align: left; border-bottom: 1px solid var(--border); font-weight: 300; }
-table.util th { color: var(--muted2); font-weight: 400; position: sticky; top: 0; background: var(--panel); z-index: 2; }
+table.util th { color: var(--muted2); font-weight: 400; background: var(--panel); }
 th .th-label { cursor: pointer; }
 table.util .num { text-align: right; font-variant-numeric: tabular-nums; }
 table.util tbody tr:hover { background: var(--accent-soft); }
