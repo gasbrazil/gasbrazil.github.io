@@ -39,6 +39,20 @@ PLD_ONS_SUBMARKET_MAP: dict[str, str] = {
     "S": "S",
 }
 
+# Peak / off-peak (ponta / fora ponta) for hourly PLD. CCEE does not publish
+# a ponta flag; this is the common ANEEL-style 3-hour weekday window.
+PLD_TOU: dict[str, Any] = {
+    "version": 1,
+    "peak_hours": (18, 19, 20),  # 18:00–21:00 (hour-beginning)
+    "peak_weekdays": (0, 1, 2, 3, 4),  # Monday–Friday (pandas dayofweek)
+    "notes": (
+        "Peak is hours 18, 19, 20 (18:00–21:00) on Monday–Friday. "
+        "All other hours, including weekends, are off-peak. National "
+        "holidays are not excluded (no holiday calendar in this tree)."
+    ),
+    "owners": ("pld/pld_pipeline.py", "pld/dashboard.py", "api/main.py"),
+}
+
 # Health-gate thresholds. Pipelines should fail (not WARN) past these.
 HEALTH: dict[str, Any] = {
     "version": 1,
@@ -54,6 +68,8 @@ HEALTH: dict[str, Any] = {
 M3_PER_MMBTU = float(POC_ENERGY["m3_per_mmbtu"])
 NATGAS_KCAL_PER_M3 = float(ONS_GAS_HEAT["natgas_kcal_per_m3"])
 PLD_MAX_LAG_DAYS = int(HEALTH["pld_max_lag_days"])
+PLD_PEAK_HOURS = tuple(int(h) for h in PLD_TOU["peak_hours"])
+PLD_PEAK_WEEKDAYS = tuple(int(d) for d in PLD_TOU["peak_weekdays"])
 FLOWS_MAX_STALENESS_DAYS = int(HEALTH["flows_max_staleness_days"])
 SUPPLY_MAX_LAG_MONTHS = int(HEALTH["supply_max_lag_months"])
 PRECOS_MAX_LAG_MONTHS = int(HEALTH["precos_max_lag_months"])
@@ -67,8 +83,36 @@ TRANSFORM_REGISTRY: dict[str, dict[str, Any]] = {
         "map": PLD_ONS_SUBMARKET_MAP,
         "notes": "SIN has no PLD; join is submarket-level only.",
     },
+    "pld_tou": PLD_TOU,
     "health": HEALTH,
 }
+
+
+def pld_is_peak(date, hour) -> bool:
+    """True when ``hour`` (0–23) on ``date`` is ANEEL-style ponta (TOU v1)."""
+    import pandas as pd
+
+    try:
+        h = int(hour)
+    except (TypeError, ValueError):
+        return False
+    if h not in PLD_PEAK_HOURS:
+        return False
+    ts = pd.Timestamp(date)
+    if pd.isna(ts):
+        return False
+    return int(ts.dayofweek) in PLD_PEAK_WEEKDAYS
+
+
+def pld_peak_mask(dates, hours):
+    """Boolean mask aligned to ``dates`` / ``hours`` for peak (ponta) hours."""
+    import pandas as pd
+
+    dates_s = dates if isinstance(dates, pd.Series) else pd.Series(dates)
+    hours_s = hours if isinstance(hours, pd.Series) else pd.Series(hours, index=dates_s.index)
+    d = pd.to_datetime(dates_s, errors="coerce")
+    h = pd.to_numeric(hours_s, errors="coerce")
+    return d.dt.dayofweek.isin(PLD_PEAK_WEEKDAYS) & h.isin(PLD_PEAK_HOURS)
 
 
 def brl_per_m3(price_mmbtu: Any, nd: int = 2) -> float | None:

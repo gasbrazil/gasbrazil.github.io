@@ -60,7 +60,7 @@ jobs:
             pld-raw-${{ steps.ym.outputs.ym }}-
             pld-raw-
 
-      - name: Fetch CCEE yearly CSVs
+      - name: Fetch CCEE yearly CSVs (daily + hourly)
         run: python pld_pipeline.py fetch
 
       - name: Build tidy parquet

@@ -89,6 +89,15 @@ PLD_DAILY_COLUMNS = (
     "pld",
 )
 
+# Hourly CCEE PLD (from 2021; we store a recent-year slice).
+# `date` is the Brazil calendar day; `hour` is 0–23 local (no DST).
+PLD_HOURLY_COLUMNS = (
+    "date",
+    "hour",
+    "submarket",
+    "pld",
+)
+
 SUBMARKET_CODES = ("N", "NE", "SE", "S")
 
 # --- Supply -------------------------------------------------------------------
@@ -183,6 +192,20 @@ def validate_pld_daily(df: "pd.DataFrame") -> None:
     _require(df, PLD_DAILY_COLUMNS, "pld_daily")
     _assert_allowed(df, "submarket", SUBMARKET_CODES, label="pld_daily", casefold=False)
     _assert_numeric(df, "pld", label="pld_daily")
+
+
+def validate_pld_hourly(df: "pd.DataFrame") -> None:
+    import pandas as pd
+
+    _require(df, PLD_HOURLY_COLUMNS, "pld_hourly")
+    _assert_allowed(df, "submarket", SUBMARKET_CODES, label="pld_hourly", casefold=False)
+    _assert_numeric(df, "pld", label="pld_hourly")
+    _assert_numeric(df, "hour", label="pld_hourly")
+    if "hour" in df.columns and not df.empty:
+        hours = pd.to_numeric(df["hour"], errors="coerce")
+        bad = hours.dropna()
+        if ((bad < 0) | (bad > 23)).any():
+            raise ValueError("pld_hourly: hour must be in 0–23")
 
 
 def validate_supply_monthly(df: "pd.DataFrame") -> None:
