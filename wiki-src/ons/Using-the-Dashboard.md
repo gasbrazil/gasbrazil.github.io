@@ -82,15 +82,19 @@ to zero) are omitted from the picker, basin averages, and the
 lowest-reservoir KPI — use **Show empty** to bring them back. Click a
 region or basin row to scope the picker to that slice.
 
-Above the per-reservoir picker sits a three-tier summary, coarsest to finest:
+Above the per-reservoir picker sits a summary, coarsest to finest:
 
 1. **Hydro reservoirs by region** — SIN + each subsystem, EAR% with a
    capacity-filled bar, stored/capacity in MWmês, 30-day change, and inflow
-   (ENA %MLT). Click a region to list its reservoirs.
+   (ENA %MLT). Click a region to list its reservoirs. Directly under the
+   table, a line chart plots the same regional EAR% over your selected date
+   range (SIN + SE/S/NE/N) so the market-level hydro picture is visible
+   without picking individual reservoirs.
 2. **EAR by Reservoir Equivalent (REE)** — the same storage metric at REE
    granularity (finer than subsystem, coarser than basin) — useful because
    two REEs can move in opposite directions underneath one steady regional
-   number.
+   number. REEs with zero reported capacity (ONS sometimes lists these as
+   `0 / 0`) are omitted.
 3. **Usable volume by basin** — reservoir count, a capacity-filled bar, and
    avg/min/max usable volume % of useful capacity, grouped by basin and
    sorted lowest-first. Empty/invalid reservoirs are omitted so they cannot
