@@ -14,7 +14,10 @@ python build_payload.py      # print KPI / source summary only
 
 At build time `build_payload.py` calls `data_kit.ensure_lake(...)` so CI can
 pull sibling parquet mirrors from the private R2 lake bucket when local
-`*/data/*.parquet` trees are absent (they are gitignored).
+`*/data/*.parquet` trees are absent (they are gitignored). `dashboard.py`
+treats a configured lake bucket as enough to rebuild — it must not fall back
+to the previously published payload just because the checkout has no local
+parquet.
 
 ## Spark formula
 

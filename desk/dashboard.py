@@ -922,15 +922,22 @@ init();
 
 
 def write_dashboard(out_path: Path | str = DEFAULT_OUT) -> Path:
+    import os
+
     sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "shared"))
     import data_kit as dk  # noqa: E402
 
-    here = Path(__file__).resolve().parent
+    here = HERE.resolve()
     out_path = Path(out_path)
     lake_root = here.parent / "lake"
     sibling_poc = here.parent / "poc" / "data" / "poc_results.parquet"
-    can_rebuild = sibling_poc.exists() or any(lake_root.glob("**/*.parquet"))
-    if can_rebuild:
+    has_local = sibling_poc.exists() or any(lake_root.glob("**/*.parquet"))
+    # CI ships an empty lake/ (parquet is gitignored). build_payload() calls
+    # ensure_lake() to pull sibling mirrors from R2 — so lake credentials mean
+    # we *can* rebuild even with no local files. Gating only on local parquet
+    # (post-#17) made scheduled Desk runs reuse a week-old published payload.
+    lake_ready = bool(os.environ.get("GASBRAZIL_LAKE_BUCKET", "").strip()) and dk.r2_configured()
+    if has_local or lake_ready:
         payload = build_payload()
         payload_path, payload_href = dk.write_and_publish_artifact("desk", payload, here)
         kpi = payload.get("kpi") or {}
