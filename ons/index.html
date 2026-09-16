@@ -10,7 +10,7 @@
 <link rel="preload" href="/shared/fonts/Pacaembu-Light.ttf" as="font" type="font/ttf" crossorigin>
 <!-- home-page teaser marker, read by ../build_home.py -- not otherwise used by this page:
      generated: 2026-09-16 23:15 UTC
-     kpi_gas_mwmed: 4516 -->
+     kpi_gas_mwmed:  -->
 <script>
 (function(){
   try {
@@ -2032,7 +2032,7 @@ const ONS_I18N = {
     smooth30: "30d avg",
     tipSubsystems: "National and per-subsystem balance: load, generation by source, hydrology and CMO, on a daily grid. Toggle SIN/SE/S/NE/N to fan any picked series across subsystems. Net interchange is positive when a subsystem is a net exporter.",
     tipPlants: "One row per dispatched thermal plant, filterable by region and fuel. The five pinned Total rows are synthetic subsystem/national aggregates of the gas-fired fleet, not plants, and are excluded from fleet-wide KPI sums. A combined-cycle block appears both as its individual dispatch phases and as one combined row — don't sum the two together. Installed capacity, utilization and estimated gas consumption are derived, not published by ONS: see Methodology in the footer for the heat-rate assumption behind the gas figures.",
-    tipReservoirs: "Individual reservoirs below, with region / REE / basin rollups above. Usable volume is % of each reservoir's useful capacity (0–100), not a raw water volume. Empty or invalid readings (ONS sometimes publishes negatives) are omitted from averages and the picker. EAR is stored energy rather than raw volume, which is what makes cascades comparable. Reservoirs down usually means more thermal (and gas) later."
+    tipReservoirs: "Region EAR chart and region / REE / basin rollups above; individual reservoirs below. Usable volume is % of each reservoir's useful capacity (0–100), not a raw water volume. Empty or invalid readings (ONS sometimes publishes negatives) are omitted from averages and the picker. REEs with zero reported capacity (e.g. Itaipu) are omitted from the REE table. EAR is stored energy rather than raw volume, which is what makes cascades comparable. Reservoirs down usually means more thermal (and gas) later."
   },
   pt: {
     viewSubsystems: "Subsistemas",
@@ -2052,7 +2052,7 @@ const ONS_I18N = {
     smooth30: "Média 30d",
     tipSubsystems: "Balanço nacional e por subsistema: carga, geração por fonte, hidrologia e CMO, em grade diária. Alternar SIN/SE/S/NE/N espalha qualquer série escolhida pelos subsistemas. Intercâmbio líquido positivo = subsistema exportador líquido.",
     tipPlants: "Uma linha por usina térmica despachada, filtrável por região e combustível. As cinco linhas Total fixas são agregados sintéticos da frota a gás — não são usinas — e ficam de fora das somas de frota. Um bloco ciclo combinado aparece como fases e como linha combinada: não some as duas. Capacidade, utilização e consumo estimado de gás são derivados, não publicados pela ONS: ver Metodologia no rodapé.",
-    tipReservoirs: "Reservatórios individuais abaixo, com totais por região / REE / bacia acima. Volume útil é % da capacidade útil de cada reservatório (0–100), não um volume bruto. Leituras vazias ou inválidas (a ONS às vezes publica negativos) ficam de fora das médias e da lista. EAR é energia armazenada, não volume bruto — por isso as cascadas são comparáveis. Reservatórios baixos costumam antecipar mais térmica (e gás)."
+    tipReservoirs: "Gráfico EAR por região e totais por região / REE / bacia acima; reservatórios individuais abaixo. Volume útil é % da capacidade útil de cada reservatório (0–100), não um volume bruto. Leituras vazias ou inválidas (a ONS às vezes publica negativos) ficam de fora das médias e da lista. REEs com capacidade zero reportada (ex.: Itaipu) ficam de fora da tabela de REE. EAR é energia armazenada, não volume bruto — por isso as cascadas são comparáveis. Reservatórios baixos costumam antecipar mais térmica (e gás)."
   }
 };
 function ot(key) {
@@ -2931,20 +2931,27 @@ function axisLabel(iso,span){
 }
 const shorten=(s,n)=> s.length>n ? s.slice(0,n-1)+"…" : s;
 
-function drawPanel(unit,title,keys,W){
+function drawPanel(unit,title,keys,W,opts){
+  opts=opts||{};
+  const colorFn=opts.colorFn||(k=>colorOf(k));
+  const labelFn=opts.labelFn||(k=>labelOf(k));
   const dates=windowDates();
-  const cols=keys.map(k=>({key:k,vals:seriesValues(k),color:colorOf(k)}))
+  const cols=keys.map(k=>({key:k,vals:seriesValues(k),color:colorFn(k)}))
                  .filter(c=>c.vals.some(v=>v!=null));
   if(!cols.length) return null;
 
   const card=el("div","card");
   const decs = ["%","R$/MWh","m"].includes(unit) ? 1 : 0;
-  card.innerHTML='<p class="panel-title">'+title+'</p><p class="panel-note">'+
+  card.innerHTML='<p class="panel-title">'+title+
+    (opts.info? '<button class="infodot" type="button" aria-label="About this chart" '+
+      'data-info="'+escapeHtml(opts.info)+'">i</button>' : '')+
+    '</p><p class="panel-note">'+
     (state.smooth>1? state.smooth+"-day moving average" : "Daily values")+
-    ' · '+dates[0]+' to '+dates[dates.length-1]+'</p>';
+    ' · '+dates[0]+' to '+dates[dates.length-1]+
+    (opts.note? ' · '+opts.note : '')+'</p>';
 
   const H=330, ML=64, MT=12, MB=30;
-  const direct = cols.length<=4, MR = direct?200:16;
+  const direct = cols.length<=(opts.directMax||4), MR = direct?200:16;
   const svg=svgEl("svg",{viewBox:"0 0 "+W+" "+H,width:W,height:H,role:"img",
     "aria-label":title});
   svg.style.width="100%"; svg.style.height=H+"px";
@@ -3001,7 +3008,7 @@ function drawPanel(unit,title,keys,W){
       svg.appendChild(svgEl("circle",{cx:x(m.li),cy:y(m.c.vals[m.li]),r:3.5,
         fill:m.c.color,stroke:"var(--panel)","stroke-width":2}));
       const g=svgEl("text",{x:W-MR+9,y:m.y+4,fill:"var(--text)","font-size":11.5});
-      g.textContent=shorten(labelOf(m.c.key),28); svg.appendChild(g);
+      g.textContent=shorten(labelFn(m.c.key),28); svg.appendChild(g);
     });
   }
 
@@ -3052,7 +3059,7 @@ function drawPanel(unit,title,keys,W){
       dots.appendChild(svgEl("circle",{cx:x(i),cy:y(v),r:4,fill:c.color,
         stroke:"var(--panel)","stroke-width":2}));
       rows+='<tr><td><span class="sw" style="display:inline-block;background:'+
-        c.color+';border-color:'+c.color+'"></span> '+escapeHtml(labelOf(c.key))+
+        c.color+';border-color:'+c.color+'"></span> '+escapeHtml(labelFn(c.key))+
         '</td><td class="v">'+fmtNum(v,decs)+'</td></tr>';
     });
     tt.innerHTML='<div class="d">'+dates[i]+'</div><table>'+rows+'</table>';
@@ -3090,7 +3097,7 @@ function drawPanel(unit,title,keys,W){
     cols.forEach(c=>{
       const s=el("span");
       s.innerHTML='<span class="sw" style="background:'+c.color+';border-color:'+
-        c.color+'"></span>'+escapeHtml(labelOf(c.key));
+        c.color+'"></span>'+escapeHtml(labelFn(c.key));
       lg.appendChild(s);
     });
     card.appendChild(lg);
@@ -3708,9 +3715,45 @@ function renderReservoirKpis(host, extra){
   }
   if(extra){
     renderReservoirRegionTable(extra);
+    renderReservoirRegionChart(extra);
     renderReeTable(extra);
     renderBasinSummary(extra);
   }
+}
+function subColor(sub){
+  // Same fixed SIN/SE/S/NE/N hues as the Thermal Plants Total rows, so a
+  // region's color means the same thing across tabs.
+  const pal=isDark()?TOTAL_COLOR_DARK:TOTAL_COLOR_LIGHT;
+  return pal[sub]||mixColor("hydro");
+}
+function renderReservoirRegionChart(host){
+  // Always-on EAR% time series for the four published regions + SIN — the
+  // market-level hydro picture the per-reservoir chart below cannot give.
+  const order=["SIN","SE","S","NE","N"];
+  const keys=order.map(s=>skey("ear_pct",s)).filter(exists);
+  if(keys.length<2) return;
+  let box=document.getElementById("resRegionChart");
+  if(!box){
+    box=el("div"); box.id="resRegionChart"; box.style.marginBottom="14px";
+    host.appendChild(box);
+  }else{
+    box.innerHTML="";
+    if(!box.parentNode) host.appendChild(box);
+  }
+  const W=Math.max(680,(host.clientWidth||box.clientWidth||900)-8);
+  const card=drawPanel("%","Hydro reservoirs by region",keys,W,{
+    colorFn:k=>subColor(k.split("|")[1]),
+    labelFn:k=>{
+      const s=k.split("|")[1];
+      return DATA.subsystemLabels[s]||subShort(s);
+    },
+    directMax:5,
+    note:"stored energy (EAR) as % of regional capacity",
+    info:"Same EAR figures as the region table above, plotted over your date "+
+      "range. This is the cascade-comparable stored-energy view of hydro — "+
+      "not the per-reservoir usable-volume chart further down the page."
+  });
+  if(card) box.appendChild(card);
 }
 function reeRow(e){
   const i=lastIdx(DATA.series[skey("ear_ree_pct",e.subsystem,e.entity)]||[]);
@@ -3722,18 +3765,28 @@ function reeRow(e){
     stored:at("ear_ree_mwmes"), cap:at("ear_ree_max_mwmes"),
     chg:(pct!=null&&pctPrior!=null)?pct-pctPrior:null};
 }
+function reeHasCapacity(r){
+  // ONS sometimes lists an REE with 0 MWmês capacity (Itaipu today) — that
+  // reads as "0.0% · 0 / 0" and is not a real storage figure to rank or chart.
+  return r && r.pct!=null && r.cap!=null && r.cap>0;
+}
 function renderReeTable(host){
   const ents=uniqueByEntity((DATA.entities||[]).filter(e=>e.kind==="ree"));
   if(!ents.length) return;
-  const rows=ents.map(reeRow).filter(r=>r && r.pct!=null).sort((a,b)=>a.pct-b.pct);
+  const all=ents.map(reeRow).filter(r=>r && r.pct!=null);
+  const omitted=all.filter(r=>!reeHasCapacity(r)).length;
+  const rows=all.filter(reeHasCapacity).sort((a,b)=>a.pct-b.pct);
   if(!rows.length) return;
   const card=el("div","card"); card.style.marginBottom="14px";
   let h='<p class="panel-title">EAR by Reservoir Equivalent (REE)'+
     '<button class="infodot" type="button" aria-label="About EAR by REE" '+
     'data-info="ONS’s own cascade-level storage figures, finer than the 4-region '+
     'view above. The region table is these REEs summed up, so two can be moving in '+
-    'opposite directions underneath one steady regional number.">i</button></p>'+
-    '<p class="panel-note">Lowest stored-energy % first. Finer than the region table, coarser than a single reservoir.</p>';
+    'opposite directions underneath one steady regional number. REEs with zero '+
+    'reported capacity are omitted.">i</button></p>'+
+    '<p class="panel-note">Lowest stored-energy % first. Finer than the region table, coarser than a single reservoir.'+
+    (omitted? ' · '+omitted+' zero-capacity REE'+(omitted===1?'':'s')+' omitted.':'')+
+    '</p>';
   h+='<div class="scroll"><table class="data"><thead><tr>'+
     '<th class="l">Reservoir Equivalent</th><th class="l">Region</th>'+
     '<th class="l">Capacity filled</th><th>Stored / capacity (MWmês)</th>'+
@@ -4698,7 +4751,13 @@ async function boot(){
   });
   applyOnsI18n();
   let rz; window.addEventListener("resize",()=>{
-    clearTimeout(rz); rz=setTimeout(renderCharts,140);
+    clearTimeout(rz); rz=setTimeout(()=>{
+      renderCharts();
+      if(state.view==="reservoirs"){
+        const host=document.getElementById("resSummary");
+        if(host) renderReservoirRegionChart(host);
+      }
+    },140);
   });
 
   // opening selections -- gas generation front and center, hydro (the swing
