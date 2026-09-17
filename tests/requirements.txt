@@ -6,3 +6,5 @@ httpx>=0.27,<1
 boto3>=1.34,<2
 # ons_pipeline (imported by test_ons_reservoirs) uses requests at import time.
 requests>=2.31,<3
+# flows TSO adapters + test_flows_tso fixtures write/read .xlsx via openpyxl.
+openpyxl>=3.1,<3.2
