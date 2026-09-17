@@ -2,19 +2,20 @@ name: Refresh Pipeline Flows dashboard
 
 # ANP publishes one file per month, typically with a lag of several weeks,
 # and revises recently-published months in place. TAG/TBG/NTS Portaria 1/2003
-# workbooks often land sooner for Actual/Scheduled volumes. The schedule
-# below pulls fresh data twice a month (the 8th and 20th, UTC) -- ahead of
-# ANP's cadence without hammering upstream sites daily. fetch refreshes the
-# last few ANP months plus TSO transparency files (see flows/tso/).
+# workbooks land irregularly mid-month and often beat ANP for Actual/Scheduled
+# volumes. The schedule below pulls fresh data twice a week (Mon + Thu, UTC)
+# so new TSO publications are usually on the dashboard within a few days.
+# fetch refreshes the last few ANP months plus TSO transparency files
+# (see flows/tso/). Manual "Run workflow" (workflow_dispatch) also fetches.
 #
 # A push (a code/style change to flows/** or shared/**, not a data refresh)
 # still rebuilds and redeploys the dashboard immediately, but does NOT hit
-# ANP/TSO sites again -- it reuses whatever raw data is already cached
-# from the last scheduled fetch. Only the twice-monthly schedule, or an
-# on-demand "Run workflow" dispatch, actually pulls fresh upstream data.
+# ANP/TSO sites again when both ANP CSVs and TSO files are already cached.
+# If raw/tso/ is empty (e.g. overlays landed after the last ANP-only fetch),
+# push still fetches so overlays bootstrap without waiting for the schedule.
 on:
   schedule:
-    - cron: "15 12 8,20 * *"
+    - cron: "15 12 * * 1,4"
   workflow_dispatch: {}
   push:
     branches: [main]
@@ -75,13 +76,14 @@ jobs:
 
       # A code-only push doesn't need fresh upstream data -- skip the
       # network fetch and rebuild from whatever raw/ the cache restored
-      # (from the last scheduled run). The one exception is a cold/evicted
-      # cache with nothing in it at all (e.g. this workflow's very first
-      # run): fetch anyway so a push never produces an empty dashboard.
+      # (from the last scheduled run). Exceptions that still fetch:
+      #   - cold/evicted cache (no ANP CSVs) so a push never ships empty
+      #   - ANP present but raw/tso/ empty, so Portaria overlays bootstrap
+      #     after the adapters land without waiting for Mon/Thu
       - name: Check for cached raw data
         id: rawcheck
         run: |
-          if [ -n "$(ls -A raw 2>/dev/null)" ]; then
+          if [ -n "$(ls -A raw 2>/dev/null)" ] && [ -n "$(ls -A raw/tso 2>/dev/null)" ]; then
             echo "has_data=true" >> "$GITHUB_OUTPUT"
           else
             echo "has_data=false" >> "$GITHUB_OUTPUT"
@@ -93,7 +95,7 @@ jobs:
 
       - name: Skip fetch (code-only push, using cached raw data)
         if: github.event_name == 'push' && steps.rawcheck.outputs.has_data == 'true'
-        run: echo "Code-only push -- rebuilding from raw ANP/TSO data already cached from the last scheduled fetch (8th/20th), not re-fetching upstream."
+        run: echo "Code-only push -- rebuilding from raw ANP/TSO data already cached from the last scheduled fetch (Mon/Thu), not re-fetching upstream."
 
       # Health gate (zero rows, staleness, missing point codes) runs inside
       # `build` and exits non-zero on failure -- a bad build stops here

@@ -1117,6 +1117,11 @@ publish those in a comparable form).</p>
 and revises recently-published months in place — a figure for last month
 quoted today may not match the same figure quoted next month, once ANP's
 own revision settles.</p>
+<p>TSO transparency packs (TAG / TBG / NTS) usually land sooner. The Flows
+workflow re-fetches ANP + TSO sources every Monday and Thursday (UTC), and
+can be kicked off any time with <strong>Actions → Refresh Pipeline Flows
+dashboard → Run workflow</strong>. Code-only pushes to <code>flows/**</code> rebuild from
+the cached raw tree and do not hit upstream unless <code>raw/tso/</code> is empty.</p>
     </div>
   </main>
 </div>

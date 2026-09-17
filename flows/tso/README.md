@@ -22,21 +22,29 @@ daily m³/dia series. Convert to thousand m³ (`/1000`) to match ANP.
 
 Subsystems: GASENE, Malhas NE, Pilar–Ipojuca, Urucu–Manaus.
 
+When the cache holds multiple coverage windows for the same subsystem,
+build keeps only the workbook whose `_a_MM-YYYY` end date is newest.
+
 ### TBG
 
-Monthly files under [Informações à ANP](https://www.tbg.com.br/informacoes-a-anp)
-(Liferay document library; opaque URLs). Parser expects the same wide
-Prog/Realizado sheet layout when Excel is published. PDFs are discovered but
-not parsed. Seed local `.xlsx` under `flows/raw/tso/tbg/` if fetch is empty.
+Monthly ZIPs under [Informações à ANP](https://www.tbg.com.br/informacoes-a-anp)
+(Liferay document library; opaque UUID URLs). `fetch` pulls recent
+`ANP <Mês> <Ano>.zip` packs, extracts the Volumes Entregues / Recebidos
+Excel workbooks, and melts paired Programado/Realizado columns (already in
+Mm³). PDFs on the same page are ignored.
 
 ### NTS
 
 [Volumes Programados e Realizados](https://www.ntsbrasil.com/transparencia/)
-via MZIQ CDN (`api.mziq.com/mzfilemanager/...`). Same wide-layout parser as
-TAG/TBG when the download is Excel. Seed `flows/raw/tso/nts/` as needed.
+are listed via the MZIQ catalog API
+(`apicatalog.mziq.com/filemanager/...`), not plain HTML hrefs. Year
+workbooks expose one sheet per month (`Programado (AGO)` /
+`Realizado (AGO)`); values are already mil m³/dia.
 
 ## Crosswalk
 
 Optional ANP code mapping in `point_crosswalk.json`. Keys are
 `normalize_key("{tso}|{point_name}")`. Without a hit, synthetic codes
 `{source}:{subsystem}:{slug}:{hash10}` are used so series remain chartable.
+TBG Entregues sheets often embed ANP point codes directly; those are
+preferred when present.

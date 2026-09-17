@@ -46,3 +46,9 @@ ANP typically publishes files with a lag of several weeks after month-end,
 and revises recently-published months in place — a figure for last month
 quoted today may not match the same figure quoted next month, once ANP's
 own revision settles.
+
+TSO transparency packs (TAG / TBG / NTS) usually land sooner. The Flows
+workflow re-fetches ANP + TSO sources every Monday and Thursday (UTC), and
+can be kicked off any time with **Actions → Refresh Pipeline Flows
+dashboard → Run workflow**. Code-only pushes to `flows/**` rebuild from
+the cached raw tree and do not hit upstream unless `raw/tso/` is empty.
