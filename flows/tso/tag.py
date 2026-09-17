@@ -15,11 +15,13 @@ SOURCE = "tag"
 TSO = "TAG"
 
 # Fallback URLs when HTML discovery fails (filenames change with coverage).
+# Keep these pointed at the latest known-good publication so a soft-fail
+# discover still extends past ANP lag instead of freezing on an old month.
 FALLBACK_URLS = [
-    "https://www.ntag.com.br/wp-content/uploads/2026/08/Prog-Real_GASENE_01-2017_a_07-2026.xlsx",
-    "https://www.ntag.com.br/wp-content/uploads/2026/08/Prog-Real_MALHAS-NE_01-2017_a_07-2026.xlsx",
-    "https://www.ntag.com.br/wp-content/uploads/2026/08/Prog-Real_PILAR-IPOJUCA_01-2017_a_07-2026.xlsx",
-    "https://www.ntag.com.br/wp-content/uploads/2026/08/Prog-Real_URUCU-MANAUS_01-2017_a_07-2026.xlsx",
+    "https://www.ntag.com.br/wp-content/uploads/2026/09/Prog-Real_GASENE_01-2017_a_08-2026.xlsx",
+    "https://www.ntag.com.br/wp-content/uploads/2026/09/Prog-Real_MALHAS-NE_01-2017_a_08-2026.xlsx",
+    "https://www.ntag.com.br/wp-content/uploads/2026/09/Prog-Real_PILAR-IPOJUCA_01-2017_a_08-2026.xlsx",
+    "https://www.ntag.com.br/wp-content/uploads/2026/09/Prog-Real_URUCU-MANAUS_01-2017_a_08-2026.xlsx",
 ]
 
 SUBSYSTEM_LABELS = {
@@ -117,7 +119,8 @@ def _subsystem_label(filename: str) -> str:
 def build(raw_dir: Path) -> pd.DataFrame:
     crosswalk = load_crosswalk().get("tag", {})
     frames: list[pd.DataFrame] = []
-    for path in sorted(raw_dir.glob("Prog-Real*.xlsx")):
+    candidates = base.prefer_newest_prog_real_files(sorted(raw_dir.glob("Prog-Real*.xlsx")))
+    for path in candidates:
         subsystem = _subsystem_label(path.name)
         df = base.parse_wide_prog_real_workbook(
             path,

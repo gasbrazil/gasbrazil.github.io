@@ -92,6 +92,14 @@ def save_manifest(path: Path, manifest: dict) -> None:
 def http_get(url: str, *, headers: dict | None = None, timeout: int = 90, max_retries: int = 3) -> bytes:
     hdrs = {**BROWSER_HEADERS, **(headers or {})}
     last_err: Exception | None = None
+    # Quote non-ASCII path segments (TBG Liferay titles use ç/ã etc.).
+    try:
+        from urllib.parse import urlsplit, urlunsplit, quote, unquote
+        parts = urlsplit(url)
+        path = quote(unquote(parts.path), safe="/%:@")
+        url = urlunsplit((parts.scheme, parts.netloc, path, parts.query, parts.fragment))
+    except Exception:
+        pass
     for attempt in range(max_retries):
         try:
             req = urllib.request.Request(url, headers=hdrs)
@@ -109,6 +117,38 @@ def http_get(url: str, *, headers: dict | None = None, timeout: int = 90, max_re
 
 def http_get_text(url: str, *, headers: dict | None = None) -> str:
     return http_get(url, headers=headers).decode("utf-8", errors="replace")
+
+
+def http_post_json(
+    url: str,
+    payload: dict,
+    *,
+    headers: dict | None = None,
+    timeout: int = 90,
+    max_retries: int = 3,
+) -> dict:
+    """POST JSON and return the decoded response object."""
+    hdrs = {
+        **BROWSER_HEADERS,
+        "Content-Type": "application/json",
+        "Accept": "application/json, text/plain, */*",
+        **(headers or {}),
+    }
+    body = json.dumps(payload).encode("utf-8")
+    last_err: Exception | None = None
+    for attempt in range(max_retries):
+        try:
+            req = urllib.request.Request(url, data=body, headers=hdrs, method="POST")
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                return json.loads(resp.read().decode("utf-8", errors="replace"))
+        except urllib.error.HTTPError as e:
+            if e.code == 404:
+                raise
+            last_err = e
+        except (urllib.error.URLError, TimeoutError, ConnectionError, json.JSONDecodeError) as e:
+            last_err = e
+        time.sleep(1.0 * (attempt + 1))
+    raise RuntimeError(f"Failed to POST {url} after {max_retries} attempts: {last_err}")
 
 
 def download_file(url: str, dest: Path, *, headers: dict | None = None) -> bool:
@@ -204,6 +244,35 @@ def _subsystem_from_filename(name: str) -> str:
     if m:
         return m.group(1).replace("-", " ").replace("_", " ").strip()
     return stem
+
+
+def workbook_coverage_end(filename: str) -> tuple[int, int] | None:
+    """Parse ``_a_MM-YYYY`` end coverage from a TAG-style Prog-Real filename."""
+    m = re.search(r"_a_(\d{2})-(\d{4})", filename, re.I)
+    if not m:
+        return None
+    return int(m.group(2)), int(m.group(1))  # year, month
+
+
+def prefer_newest_prog_real_files(paths: Iterable[Path]) -> list[Path]:
+    """Keep one Prog-Real workbook per subsystem — the one covering the latest month.
+
+    CI caches accumulate prior publications (``…_a_07-2026.xlsx`` next to
+    ``…_a_08-2026.xlsx``). Concatenating both would duplicate overlapping
+    history; prefer the newest end date in the filename.
+    """
+    best: dict[str, tuple[tuple[int, int], Path]] = {}
+    passthrough: list[Path] = []
+    for path in paths:
+        sub = normalize_key(_subsystem_from_filename(path.name))
+        end = workbook_coverage_end(path.name)
+        if end is None:
+            passthrough.append(path)
+            continue
+        prev = best.get(sub)
+        if prev is None or end > prev[0]:
+            best[sub] = (end, path)
+    return [item[1] for item in best.values()] + passthrough
 
 
 def _melt_wide_sheet(

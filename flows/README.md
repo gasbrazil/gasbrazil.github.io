@@ -35,11 +35,13 @@ gunzipped in the browser). Parquet under `data/` stays gitignored / CI-cached.
   cached.
 - **TSO overlay (Portaria ANP nº 1/2003):** TAG, TBG, and NTS also publish
   programmed/actual meter volumes on their transparency pages (often
-  sooner than ANP). `fetch` pulls those into `raw/tso/{tag,tbg,nts}/`;
-  `build` merges Actual/Scheduled over ANP when the same `point_code` +
-  date exists (see [`tso/README.md`](tso/README.md)). TAG units are m³/dia
-  and are converted to thousand m³. Ledger / pressure / allocation /
-  requested stay ANP-only.
+  sooner than ANP). `fetch` always re-downloads those into
+  `raw/tso/{tag,tbg,nts}/` (small set; TAG rotates filenames as coverage
+  grows, TBG/NTS update packs in place). `build` merges Actual/Scheduled
+  over ANP when the same `point_code` + date exists (see
+  [`tso/README.md`](tso/README.md)). TAG units are m³/dia and are converted
+  to thousand m³; TBG/NTS publish already in thousand m³. Ledger / pressure
+  / allocation / requested stay ANP-only.
 - Encoding is `latin-1`, delimiter is `;`, decimals use a comma. Some files
   have malformed number formatting (stray whitespace, `- 123,45` with a
   space after the minus sign) that silently breaks pandas' built-in
@@ -98,10 +100,13 @@ the repo for anyone who wants it.
 - `make_mock.py` — synthetic raw CSV for local testing without hitting the
   live source; deliberately exercises the broadcast-vs-per-shipper
   aggregation cases above.
-- `../.github/workflows/flows.yml` — scheduled + push + manual dispatch:
-  fetch → build → dashboard → commit `index.html` + `payload.json.gz` (`raw/` and `data/`
-  are gitignored — large and fully rebuildable from the source, same as
-  `ons/raw/` and `ons/data/`).
+- `../.github/workflows/flows.yml` — Mon/Thu schedule + push + manual
+  dispatch (`workflow_dispatch` / "Run workflow" in the Actions UI):
+  fetch → build → dashboard → commit `index.html` + `payload.json.gz`
+  (`raw/` and `data/` are gitignored — large and fully rebuildable from
+  the source, same as `ons/raw/` and `ons/data/`). Code-only pushes reuse
+  the cached raw tree when both ANP CSVs and `raw/tso/` are present; an
+  empty `raw/tso/` still triggers fetch so overlays bootstrap.
 
 ## Local dev
 

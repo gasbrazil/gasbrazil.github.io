@@ -296,8 +296,12 @@ def cmd_fetch(args) -> None:
             sys.exit(2)
 
     # TSO Portaria overlays (soft-fail per adapter -- never wipe ANP success).
+    # Always re-download TSO files: TAG rotates filenames when coverage grows,
+    # and TBG/NTS update opaque/same-named packs in place. The set is small
+    # (a handful of xlsx/zip), so force-refresh on every scheduled/manual
+    # fetch is cheap and is what keeps Actual/Scheduled ahead of ANP lag.
     print("Fetching TSO Portaria 1/2003 programmed/actual files...")
-    tso_fetch_all(tso_adapters(), force=bool(getattr(args, "force", False)))
+    tso_fetch_all(tso_adapters(), force=True)
 
 
 import re
