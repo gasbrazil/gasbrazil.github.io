@@ -494,6 +494,13 @@ footer .asof-strip,
 }
 .ext-icon { width: 10px; height: 10px; display: inline-block; flex: none; opacity: .75; }
 
+/* KPI strip / row: same buffer below as .card → next section (var(--gap)).
+   ONS uses #kpiTiles; other dashboards use .kpi-row (also declared locally). */
+#kpiTiles,
+.kpi-row {
+  margin-bottom: var(--gap);
+}
+
 /* Shared chip / pill / series-button lift — same language as hub KPI cards. */
 .pill,
 .series-btn,
