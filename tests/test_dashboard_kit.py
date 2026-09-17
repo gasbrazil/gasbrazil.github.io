@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import html
+from pathlib import Path
 
 import pytest
 
@@ -137,6 +138,25 @@ def test_dashboard_headers_stay_on_one_row():
         compact = src.replace(" ", "").replace("\n", "")
         assert "header.dash-head{display:flex;flex-direction:row" in compact
         assert ".header-right{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;width:auto;}" in compact
+
+
+def test_kpi_strip_has_gap_below_across_dashboards():
+    """KPI strips must leave the same buffer as .card → next section."""
+    root = Path(__file__).resolve().parents[1]
+    theme = (root / "shared" / "theme.css").read_text(encoding="utf-8")
+    assert "#kpiTiles," in theme or "#kpiTiles {" in theme
+    assert ".kpi-row" in theme
+    # Shared rule (and local ONS rule) use the site gap token.
+    assert "margin-bottom: var(--gap)" in theme
+    ons = (root / "ons" / "dashboard.py").read_text(encoding="utf-8")
+    assert "#kpiTiles{margin-bottom:var(--gap)}" in ons.replace(" ", "")
+    for name in ("desk", "pld", "precos", "supply"):
+        src = (root / name / "dashboard.py").read_text(encoding="utf-8")
+        assert "margin-bottom: var(--gap)" in src
+        assert ".kpi-row" in src
+    flows = (root / "flows" / "dashboard.py").read_text(encoding="utf-8")
+    assert ".kpi-card-wrap" in flows
+    assert "margin-bottom: var(--gap)" in flows
 
 
 def test_page_intro_is_title_only():

@@ -488,6 +488,13 @@ footer .asof-strip,
 }
 .ext-icon { width: 10px; height: 10px; display: inline-block; flex: none; opacity: .75; }
 
+/* KPI strip / row: same buffer below as .card → next section (var(--gap)).
+   ONS uses #kpiTiles; other dashboards use .kpi-row (also declared locally). */
+#kpiTiles,
+.kpi-row {
+  margin-bottom: var(--gap);
+}
+
 /* Shared chip / pill / series-button lift — same language as hub KPI cards. */
 .pill,
 .series-btn,
@@ -1080,8 +1087,11 @@ button[aria-pressed=true]{background:var(--panel);border-color:var(--border-stro
    own column whatever the count, and minmax(0,1fr) lets them share the width
    evenly and shrink below their content instead of wrapping onto a second
    row. Type steps down a little as the strip gets tight. Below 760px the
-   strip becomes a horizontal scroller rather than squeezing to nothing. */
+   strip becomes a horizontal scroller rather than squeezing to nothing.
+   margin-bottom matches .card / sibling .kpi-row spacing so the strip does
+   not sit flush against controls / Reservoirs summary cards below it. */
 .tiles{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:8px}
+#kpiTiles{margin-bottom:var(--gap)}
 .tile{background:var(--panel);border:1px solid var(--ring);border-radius:10px;
   padding:8px 10px;min-width:0}
 .tile .nm{display:flex;align-items:flex-start;gap:5px;font-size:11px;color:var(--muted2);
@@ -1295,7 +1305,7 @@ table.data thead th.sortable:hover{background:var(--accent-soft)}
 
 <div id="viewInfo"></div>
 <div class="tiles" id="kpiTiles"></div>
-<div id="mixStrip" style="margin:8px 0 var(--gap)"></div>
+<div id="mixStrip" style="margin:0 0 var(--gap)"></div>
 <div id="resSummary"></div>
 
 <div class="card" id="controlsCard">
