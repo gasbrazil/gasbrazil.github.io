@@ -465,6 +465,19 @@ footer .asof-strip,
   transition: background .12s ease, color .12s ease;
 }
 .dd-menu a:hover { background: var(--accent-soft); color: var(--accent); }
+.dd-menu a:focus-visible {
+  background: var(--accent-soft);
+  color: var(--accent);
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+[data-theme="dark"] .dd-menu a:hover,
+[data-theme="dark"] .dd-menu a:focus-visible {
+  color: var(--brz-yellow);
+}
+[data-theme="dark"] .dd-menu a:focus-visible {
+  outline-color: var(--brz-yellow);
+}
 .dd-menu .is-current {
   color: var(--accent); font-weight: 600;
   background: var(--accent-soft);
@@ -859,9 +872,11 @@ th.num .th-filter { text-align: right; }
 .hub-controls,
 .topbar.chrome-tools {
   display: flex;
+  align-items: center;
   gap: 6px;
   flex: none;
 }
+.hub-controls .nav-trail { margin-left: 0; }
 header.dash-head #lang-toggle,
 header.top #lang-toggle,
 .site-header #lang-toggle,
@@ -877,6 +892,19 @@ header.top #theme-toggle,
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+  .kpi-cell:hover,
+  .card:hover,
+  .sources-block a:hover,
+  .sources a:hover,
+  .pill:hover,
+  .series-btn:hover:not(:disabled),
+  .tso-chip:hover:not(.selected),
+  .tso-toggle:hover:not(.active),
+  .chip:hover:not(.selected):not(.active),
+  .wrap button:not(:disabled):hover,
+  header button:not(:disabled):hover {
+    transform: none !important;
   }
 }
 
@@ -897,7 +925,8 @@ header.top #theme-toggle,
 }
 @media (max-width: 640px) {
   /* Keep the wordmark menu; Wiki/About remain in the footer. */
-  header.dash-head .nav-trail > .navlink { display: none; }
+  header.dash-head .nav-trail > .navlink,
+  .hub-controls .nav-trail > .navlink { display: none; }
 }
 
 /* Keyboard focus visibility site-wide. Buttons and links previously had no
@@ -992,23 +1021,31 @@ body {
   background-attachment: fixed; color: var(--text); font-family: var(--font);
   font-weight: 300; display: flex; flex-direction: column; min-height: 100vh;
 }
-#theme-toggle {
-  background: var(--panel); border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm); width: 34px; height: 34px; cursor: pointer; color: var(--text);
-  display: flex; align-items: center; justify-content: center;
-}
-#theme-toggle svg { width: 17px; height: 17px; }
 /* Match dashboard .wrap: shared --content-w / --content-max (~1280px). */
 main.hub { flex: 1; width: var(--content-w); max-width: var(--content-max); margin: 0 auto;
   padding: 40px 0 48px; }
 @media (max-width: 900px) { main.hub { width: auto; padding: 28px 16px 40px; } }
-/* Home's own header row -- wordmark-menu left, Wiki/About + PT/theme right. */
-.hub-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+/* Home header: same sticky blur treatment as dashboard mastheads. */
+.hub-header {
+  position: sticky; top: 0; z-index: 40;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  background: var(--header-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 10px 0 8px;
+  margin: 0 0 4px;
+}
+@media (max-width: 720px) {
+  .hub-header { flex-wrap: wrap; }
+  .hub-controls { margin-left: auto; }
+}
 .hub-header .products-dd { align-items: center; }
 .hub-header .dd-trigger { height: 32px; }
-.hub-controls { display: flex; align-items: center; gap: 6px 14px; flex: none; }
-.hub-controls .nav-trail { margin-left: 0; }
 .hub-controls #theme-toggle { position: static; }
+.hub-section-title {
+  font-size: 11px; text-transform: uppercase; letter-spacing: .06em;
+  color: var(--muted); font-weight: 400; margin: 18px 0 8px;
+}
 .wordmark { font-size: 30px; font-weight: 600; letter-spacing: -.02em; line-height: 1.1; }
 .wordmark .dot { color: var(--accent); }
 .wordmark a { color: inherit; text-decoration: none; }
@@ -1023,6 +1060,7 @@ main.hub { flex: 1; width: var(--content-w); max-width: var(--content-max); marg
 }
 @media (max-width: 900px) { .kpi-strip { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 480px) { .kpi-strip { grid-template-columns: 1fr; } }
+a.kpi-cell { cursor: pointer; }
 .kpi-cell {
   position: relative; overflow: hidden;
   background: var(--panel-grad); border: 1px solid var(--border); border-radius: var(--radius-sm);
@@ -1152,7 +1190,7 @@ footer.site a:hover { color: var(--text); border-bottom-color: var(--brz-yellow)
 <a class="skip-link" href="#main" data-i18n="skip">Skip to content</a>
 <main class="hub" id="main">
   <div class="hub-header">
-    <div class="products-dd"><div class="wordmark"><a href="../">GasBrazil</a></div><button type="button" class="dd-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="gb-products-menu" id="gb-products-trigger" data-i18n-aria="navMenu" aria-label="Menu"><span class="dd-caret" aria-hidden="true"></span></button><div class="dd-menu" id="gb-products-menu" role="menu" aria-labelledby="gb-products-trigger"><a id="link-desk" href="https://gasbrazil.com/desk/" role="menuitem" data-i18n="navDesk"><span class="chk"></span>The Desk</a><a id="link-ons" href="https://gasbrazil.com/ons/" role="menuitem" data-i18n="navOns"><span class="chk"></span>ONS Balances</a><a id="link-pld" href="https://gasbrazil.com/pld/" role="menuitem" data-i18n="navPld"><span class="chk"></span>PLD Prices</a><a id="link-poc" href="https://gasbrazil.com/poc/" role="menuitem" data-i18n="navPoc"><span class="chk"></span>POC Results</a><a id="link-contratos" href="https://gasbrazil.com/contratos/" role="menuitem" data-i18n="navContratos"><span class="chk"></span>POC Contracts</a><a id="link-flows" href="https://gasbrazil.com/flows/" role="menuitem" data-i18n="navFlows"><span class="chk"></span>Pipeline Flows</a><a id="link-supply" href="https://gasbrazil.com/supply/" role="menuitem" data-i18n="navSupply"><span class="chk"></span>Gas Supply</a><a id="link-precos" href="https://gasbrazil.com/precos/" role="menuitem" data-i18n="navPrecos"><span class="chk"></span>ANP Prices</a></div></div>
+    <div class="products-dd"><div class="wordmark"><a href="../">GasBrazil<span class="dot" aria-hidden="true">.</span></a></div><button type="button" class="dd-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="gb-products-menu" id="gb-products-trigger" data-i18n-aria="navMenu" aria-label="Menu"><span class="dd-caret" aria-hidden="true"></span></button><div class="dd-menu" id="gb-products-menu" role="menu" aria-labelledby="gb-products-trigger"><a id="link-desk" href="https://gasbrazil.com/desk/" role="menuitem" data-i18n="navDesk"><span class="chk"></span>The Desk</a><a id="link-ons" href="https://gasbrazil.com/ons/" role="menuitem" data-i18n="navOns"><span class="chk"></span>ONS Balances</a><a id="link-pld" href="https://gasbrazil.com/pld/" role="menuitem" data-i18n="navPld"><span class="chk"></span>PLD Prices</a><a id="link-poc" href="https://gasbrazil.com/poc/" role="menuitem" data-i18n="navPoc"><span class="chk"></span>POC Results</a><a id="link-contratos" href="https://gasbrazil.com/contratos/" role="menuitem" data-i18n="navContratos"><span class="chk"></span>POC Contracts</a><a id="link-flows" href="https://gasbrazil.com/flows/" role="menuitem" data-i18n="navFlows"><span class="chk"></span>Pipeline Flows</a><a id="link-supply" href="https://gasbrazil.com/supply/" role="menuitem" data-i18n="navSupply"><span class="chk"></span>Gas Supply</a><a id="link-precos" href="https://gasbrazil.com/precos/" role="menuitem" data-i18n="navPrecos"><span class="chk"></span>ANP Prices</a></div></div>
     <div class="hub-controls">
       <div class="nav-trail">
         <a class="navlink" href="../wiki/" data-i18n="navWiki">Wiki</a>
@@ -1290,6 +1328,7 @@ const GB_I18N = {
     copyLink: "Copy link",
     linkCopied: "Copied",
     tagline: "Analytical Firepower for Brazil's Energy Markets",
+    hubDashboards: "Live dashboards",
     hubHint: "Every card below opens a live dashboard — pick a product to explore.",
     aboutLead: "Independent public-data dashboards. Not an official ONS, ANP, CCEE, or transportadora product.",
     aboutBody: "GasBrazil republishes open Brazilian gas and power data as filterable dashboards. Caveats are on each page and on About.",
@@ -1404,6 +1443,7 @@ const GB_I18N = {
     copyLink: "Copiar link",
     linkCopied: "Copiado",
     tagline: "Potência analítica para os mercados de energia do Brasil",
+    hubDashboards: "Painéis ao vivo",
     hubHint: "Cada cartão abaixo abre um painel ao vivo — escolha um produto para explorar.",
     aboutLead: "Painéis independentes com dados públicos. Não é produto oficial da ONS, ANP, CCEE ou transportadoras.",
     aboutBody: "O GasBrazil republica dados abertos de gás e energia em painéis filtráveis. Ressalvas em cada página e em Sobre.",
