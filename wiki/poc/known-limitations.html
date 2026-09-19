@@ -473,13 +473,12 @@ main.hub .brand-lockup .wordmark,
 .brand-mark.dd-trigger {
   position: relative;
   display: inline-flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: center;
-  min-width: 0.55em;
+  min-width: 0.5em;
   width: auto;
   height: auto;
-  min-height: 1em;
-  padding: 0;
+  padding: 0 0 0 0.04em;
   margin: 0;
   background: transparent;
   border: none;
@@ -492,53 +491,48 @@ main.hub .brand-lockup .wordmark,
   vertical-align: baseline;
   transition: color .15s ease;
 }
+/* Solid flag-blue dot; on hover it shifts to flag yellow (no caret morph). */
 .brand-mark-dot,
 .wordmark .dot {
   display: inline-block;
-  color: var(--accent);
-  font-size: 1em;
-  font-weight: inherit;
-  line-height: inherit;
-  transition: opacity .14s ease, transform .16s ease;
+  width: 0.48em;
+  height: 0.48em;
+  min-width: 0.48em;
+  min-height: 0.48em;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+  vertical-align: -0.06em;
+  transition: background-color .15s ease;
+}
+.masthead-ident .brand-mark-dot {
+  width: 7px;
+  height: 7px;
+  min-width: 7px;
+  min-height: 7px;
+}
+main.hub .brand-mark-dot,
+.hub-header .brand-mark-dot {
+  width: 11px;
+  height: 11px;
+  min-width: 11px;
+  min-height: 11px;
 }
 .brand-mark .dd-caret {
-  position: absolute;
-  left: 50%;
-  bottom: 0.12em;
-  margin-left: -3.5px;
-  width: 0;
-  height: 0;
-  border-left: 3.5px solid transparent;
-  border-right: 3.5px solid transparent;
-  border-top: 4px solid currentColor;
-  opacity: 0;
-  transform: scale(0.55);
-  transition: opacity .14s ease, transform .16s ease;
+  display: none;
 }
 .products-dd:hover .brand-mark-dot,
-.products-dd:focus-within .brand-mark-dot,
-.dd-trigger[aria-expanded="true"] .brand-mark-dot {
-  opacity: 0;
-  transform: scale(0.35);
-}
-.products-dd:hover .brand-mark .dd-caret,
-.products-dd:focus-within .brand-mark .dd-caret,
-.dd-trigger[aria-expanded="true"] .dd-caret {
-  opacity: .95;
-  transform: scale(1);
-}
-.dd-trigger[aria-expanded="true"] .dd-caret {
-  transform: scale(1) rotate(180deg);
+.products-dd:focus-within .brand-mark-dot {
+  background: var(--brz-yellow);
 }
 .dd-trigger:hover, .dd-trigger[aria-expanded="true"] {
   background: transparent;
   border: none;
 }
 @media (hover: none) {
-  .brand-mark .dd-caret { opacity: .55; }
-  .brand-mark-dot { opacity: 1; }
-  .dd-trigger[aria-expanded="true"] .brand-mark-dot { opacity: 0; }
-  .dd-trigger[aria-expanded="true"] .dd-caret { opacity: .95; }
+  .products-dd:has(.dd-menu.is-open) .brand-mark-dot {
+    background: var(--brz-yellow);
+  }
 }
 
 /* Masthead: wordmark-menu · title on the left; Wiki / About on the right. */
@@ -562,18 +556,6 @@ main.hub .brand-lockup .wordmark,
 [data-theme="dark"] .masthead-brand:hover,
 [data-theme="dark"] .products-dd:hover .masthead-brand,
 [data-theme="dark"] .products-dd:hover .wordmark a { color: var(--brz-yellow); }
-.products-dd:hover .brand-mark-dot,
-.products-dd:hover .brand-mark .dd-caret,
-.dd-trigger[aria-expanded="true"] .brand-mark-dot,
-.dd-trigger[aria-expanded="true"] .brand-mark .dd-caret {
-  color: var(--accent);
-}
-[data-theme="dark"] .products-dd:hover .brand-mark-dot,
-[data-theme="dark"] .products-dd:hover .brand-mark .dd-caret,
-[data-theme="dark"] .dd-trigger[aria-expanded="true"] .brand-mark-dot,
-[data-theme="dark"] .dd-trigger[aria-expanded="true"] .brand-mark .dd-caret {
-  color: var(--accent);
-}
 .masthead h1 {
   font-family: var(--font-display);
   font-size: 14px; margin: 0; letter-spacing: -.01em; font-weight: 600;
@@ -1271,7 +1253,7 @@ footer.site a{color:var(--muted)}
 <body>
 <header class="top">
   <div class="masthead-ident">
-    <div class="products-dd"><span class="brand-lockup"><a class="masthead-brand" href="/">GasBrazil</a><button type="button" class="dd-trigger brand-mark" aria-haspopup="menu" aria-expanded="false" aria-controls="gb-products-menu" id="gb-products-trigger" data-i18n-aria="navMenu" aria-label="Menu"><span class="brand-mark-dot" aria-hidden="true">.</span><span class="dd-caret" aria-hidden="true"></span></button></span><div class="dd-menu" id="gb-products-menu" role="menu" aria-labelledby="gb-products-trigger"><a id="link-desk" href="https://gasbrazil.com/desk/" role="menuitem" data-i18n="navDesk"><span class="chk"></span>The Desk</a><a id="link-ons" href="https://gasbrazil.com/ons/" role="menuitem" data-i18n="navOns"><span class="chk"></span>ONS Balances</a><a id="link-pld" href="https://gasbrazil.com/pld/" role="menuitem" data-i18n="navPld"><span class="chk"></span>PLD Prices</a><a id="link-poc" href="https://gasbrazil.com/poc/" role="menuitem" data-i18n="navPoc"><span class="chk"></span>POC Results</a><a id="link-contratos" href="https://gasbrazil.com/contratos/" role="menuitem" data-i18n="navContratos"><span class="chk"></span>POC Contracts</a><a id="link-flows" href="https://gasbrazil.com/flows/" role="menuitem" data-i18n="navFlows"><span class="chk"></span>Pipeline Flows</a><a id="link-supply" href="https://gasbrazil.com/supply/" role="menuitem" data-i18n="navSupply"><span class="chk"></span>Gas Supply</a><a id="link-precos" href="https://gasbrazil.com/precos/" role="menuitem" data-i18n="navPrecos"><span class="chk"></span>ANP Prices</a></div></div>
+    <div class="products-dd"><span class="brand-lockup"><a class="masthead-brand" href="/">GasBrazil</a><button type="button" class="dd-trigger brand-mark" aria-haspopup="menu" aria-expanded="false" aria-controls="gb-products-menu" id="gb-products-trigger" data-i18n-aria="navMenu" aria-label="Menu"><span class="brand-mark-dot" aria-hidden="true"></span><span class="dd-caret" aria-hidden="true"></span></button></span><div class="dd-menu" id="gb-products-menu" role="menu" aria-labelledby="gb-products-trigger"><a id="link-desk" href="https://gasbrazil.com/desk/" role="menuitem" data-i18n="navDesk"><span class="chk"></span>The Desk</a><a id="link-ons" href="https://gasbrazil.com/ons/" role="menuitem" data-i18n="navOns"><span class="chk"></span>ONS Balances</a><a id="link-pld" href="https://gasbrazil.com/pld/" role="menuitem" data-i18n="navPld"><span class="chk"></span>PLD Prices</a><a id="link-poc" href="https://gasbrazil.com/poc/" role="menuitem" data-i18n="navPoc"><span class="chk"></span>POC Results</a><a id="link-contratos" href="https://gasbrazil.com/contratos/" role="menuitem" data-i18n="navContratos"><span class="chk"></span>POC Contracts</a><a id="link-flows" href="https://gasbrazil.com/flows/" role="menuitem" data-i18n="navFlows"><span class="chk"></span>Pipeline Flows</a><a id="link-supply" href="https://gasbrazil.com/supply/" role="menuitem" data-i18n="navSupply"><span class="chk"></span>Gas Supply</a><a id="link-precos" href="https://gasbrazil.com/precos/" role="menuitem" data-i18n="navPrecos"><span class="chk"></span>ANP Prices</a></div></div>
     <span class="crumb-sep" aria-hidden="true"></span>
     <h1>Wiki</h1>
   </div>
