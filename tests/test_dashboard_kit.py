@@ -8,6 +8,18 @@ import pytest
 import dashboard_kit as kit
 
 
+def test_js_boot_binds_flagbar_header_glow():
+    assert "bindFlagbarHeaderGlow" in kit.JS_BOOT
+    assert "flag-glow" in kit.JS_BOOT
+
+
+def test_theme_uses_display_font_on_nav_chrome():
+    css = kit.render_theme_css()
+    assert ".dd-menu a" in css and "var(--font-display)" in css
+    assert ".navlink" in css
+    assert "Brand / navigation chrome" in css
+
+
 def test_embed_font_face_includes_plex_and_pacaembu():
     css = kit.embed_font_face()
     assert "font-family:'Pacaembu'" in css
