@@ -10,7 +10,7 @@
 <link rel="preload" href="/shared/fonts/IBMPlexSans-Regular.ttf" as="font" type="font/ttf" crossorigin>
 <link rel="preload" href="/shared/fonts/Pacaembu-SemiBold.ttf" as="font" type="font/ttf" crossorigin>
 <!-- home-page teaser marker, read by ../build_home.py -- not otherwise used by this page:
-     generated: 2026-09-19 17:02 UTC
+     generated: 2026-09-19 17:46 UTC
      kpi_gas_mwmed: 3697 -->
 <script>
 (function(){
@@ -46,21 +46,6 @@
     document.addEventListener("DOMContentLoaded", bindFlagbarHeaderGlow);
   else
     bindFlagbarHeaderGlow();
-})();
-; only "light" opts out. */
-    var theme = localStorage.getItem("gasbrazil-theme");
-    if (theme !== "light")
-      document.documentElement.setAttribute("data-theme", "dark");
-    var lang = localStorage.getItem("gasbrazil-lang");
-    if (!lang)
-      lang = ((navigator.language || "en").toLowerCase().indexOf("pt") === 0) ? "pt" : "en";
-    document.documentElement.setAttribute("data-lang", lang);
-    document.documentElement.setAttribute("lang", lang === "pt" ? "pt-BR" : "en");
-  } catch (e) {
-    document.documentElement.setAttribute("data-theme", "dark");
-    document.documentElement.setAttribute("data-lang", "en");
-    document.documentElement.setAttribute("lang", "en");
-  }
 })();
 </script>
 <style>
@@ -493,7 +478,7 @@ footer .asof-strip,
   min-width: 16px; width: 16px; height: 28px; padding: 0;
   background: transparent; border: none; border-radius: 3px;
   color: var(--muted); cursor: pointer;
-  font: 400 12px/1 var(--font);
+  font: 400 12px/1 var(--font-display);
   flex: none; box-sizing: border-box;
   transition: color .15s ease;
 }
@@ -1132,6 +1117,7 @@ input[type="checkbox"] {
   font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em;
 }
 .method-row > span:last-child { color: var(--muted2); font-weight: 300; }
+
 /* Everything below is ons-dashboard's own layout/components. The palette
    (neutral tokens + the shared Brazilian-flag accent) now lives entirely in
    shared/theme.css -- see ADR-001, Decision 2 Option C -- this file only
@@ -1503,7 +1489,7 @@ table.data thead th.sortable:hover{background:var(--accent-soft)}
 <div class="tt" id="tt"></div>
 
 <script>
-const PAYLOAD_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/ons/payload.json.gz?v=35456794196";
+const PAYLOAD_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/ons/payload.json.gz?v=35459034452";
 
 function b64ToBytes(b64) {
   const bin = atob(b64);
