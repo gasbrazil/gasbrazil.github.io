@@ -226,6 +226,14 @@ async function inflateGzipUrl(url) {
   const stream = res.body.pipeThrough(ds);
   return new TextDecoder().decode(await new Response(stream).arrayBuffer());
 }
+function parseDashboardJson(text) {
+  // Legacy gzip payloads were built with Python json.dumps NaN tokens, which
+  // JSON.parse rejects. New publishes sanitize to null; normalize on read too.
+  const safe = String(text)
+    .replace(/:\s*NaN\b/g, ":null")
+    .replace(/,\s*NaN\b/g, ",null");
+  return JSON.parse(safe);
+}
 """
 
 JS_ESCAPE_HTML = r"""
