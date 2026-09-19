@@ -37,6 +37,9 @@ def test_desk_kpis_are_links_with_santos_and_unit_toggle():
     assert 'href="../supply/">Supply</a>' in src
     assert 'data-unit="mmbtu"' in src
     assert 'let sparkUnit = "mmbtu"' in src
+    assert 'id="spark-gas-preset"' in src
+    assert "compareSeriesColor" in src
+    assert "DESK_FLAG_SERIES" in src
     assert '"000 m³"' in src
     assert '"mil m³"' not in src
     assert 'h === "127.0.0.1"' in src
