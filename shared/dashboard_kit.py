@@ -1310,7 +1310,7 @@ _BRAND_MARK_BUTTON = (
     '<button type="button" class="dd-trigger brand-mark" aria-haspopup="menu" '
     'aria-expanded="false" aria-controls="gb-products-menu" '
     'id="gb-products-trigger" data-i18n-aria="navMenu" aria-label="Menu">'
-    '<span class="brand-mark-dot" aria-hidden="true">.</span>'
+    '<span class="brand-mark-dot" aria-hidden="true"></span>'
     '<span class="dd-caret" aria-hidden="true"></span></button>'
 )
 
@@ -1318,7 +1318,7 @@ _BRAND_MARK_BUTTON = (
 def products_dropdown_html(self_id: str, brand_html: str) -> str:
     """Wordmark + blue-dot menu control + products menu. brand_html is the
     clickable (or static) title without the trailing dot; the dot lives on
-    .brand-mark and morphs into the caret on hover / when open."""
+    .brand-mark and turns flag-yellow on hover."""
     return (
         '<div class="products-dd">'
         '<span class="brand-lockup">'
