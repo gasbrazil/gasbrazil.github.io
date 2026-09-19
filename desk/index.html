@@ -1164,11 +1164,12 @@ a.kpi-cell:hover .lbl { color: var(--text); }
 .legend span { display: flex; align-items: center; gap: 6px; }
 .legend .sw { width: 9px; height: 9px; border-radius: 2px; flex: none; }
 /* Chart tooltip (.tt) styles live in shared/theme.css */
-.spark-form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; margin-bottom: 14px; }
-@media (max-width: 520px) { .spark-form { grid-template-columns: 1fr; } }
-.spark-form label { display: flex; flex-direction: column; gap: 4px; font-size: 11px; color: var(--muted2); font-weight: 400; }
-.spark-form input, .spark-form select { background: var(--panel); border: 1px solid var(--border-strong); border-radius: 5px; padding: 6px 10px; color: var(--text); font-size: 13px; font-family: var(--font); font-weight: 300; font-variant-numeric: tabular-nums; }
-.spark-gas-label { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.spark-form { display: flex; flex-direction: column; gap: 12px; margin-bottom: 14px; }
+.spark-field { display: flex; flex-direction: column; gap: 6px; font-size: 11px; color: var(--muted2); font-weight: 400; }
+.spark-field-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 22px; }
+.spark-field select { width: 100%; background: var(--panel); border: 1px solid var(--border-strong); border-radius: 5px; padding: 7px 10px; color: var(--text); font-size: 13px; font-family: var(--font); font-weight: 400; }
+.spark-gas-readout { font-size: 15px; font-weight: 500; color: var(--text); font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+.spark-gas-readout .hint { font-size: 11px; font-weight: 400; color: var(--muted); margin-left: 6px; }
 .spark-unit { display: inline-flex; }
 .spark-unit button { background: var(--panel); border: 1px solid var(--border); padding: 1px 7px; font-size: 10px; color: var(--muted2); cursor: pointer; font-family: var(--font); font-weight: 400; line-height: 1.4; }
 .spark-unit button + button { border-left: 0; }
@@ -1350,28 +1351,28 @@ footer a { color: var(--accent); }
       <span class="infodot" id="spark-info" title="" aria-label="Formula">i</span>
     </p>
     <div class="spark-form">
-      <label>
-        <span class="spark-gas-label">
+      <div class="spark-field">
+        <div class="spark-field-head">
           <span data-i18n="deskGasPrice">Gas price</span>
           <span class="spark-unit" id="spark-unit" role="group" aria-label="Unit">
             <button type="button" data-unit="m3">R$/m³</button>
             <button type="button" data-unit="mmbtu">R$/MMBtu</button>
           </span>
-        </span>
-        <input type="number" id="spark-gas" step="0.01" min="0" inputmode="decimal" value="1.2">
-      </label>
-      <label><span data-i18n="deskHeatRate">Heat rate</span> (kcal/kWh)
+        </div>
+        <select id="spark-gas-preset" aria-describedby="spark-gas-readout"></select>
+        <div class="spark-gas-readout" id="spark-gas-readout" aria-live="polite"></div>
+      </div>
+      <label class="spark-field"><span data-i18n="deskHeatRate">Heat rate</span> (kcal/kWh)
         <select id="spark-hr-preset">
           <option value="ccgt" data-i18n="deskHrCcgt">CCGT 1800</option>
           <option value="ocgt" data-i18n="deskHrOcgt">OCGT 2500</option>
-          <option value="custom" data-i18n="deskHrCustom">Custom</option>
         </select>
       </label>
-      <label><span data-i18n="deskHrCustom">Custom heat rate</span>
-        <input type="number" id="spark-hr" step="50" min="500" inputmode="decimal" value="1800">
-      </label>
-      <label><span data-i18n="deskCvuOverride">CVU override</span> (R$/MWh)
-        <input type="number" id="spark-cvu" step="1" min="0" inputmode="decimal">
+      <label class="spark-field"><span data-i18n="deskCvuBasis">CVU basis</span>
+        <select id="spark-cvu-mode">
+          <option value="implied" data-i18n="deskCvuImplied">Implied from gas + heat rate</option>
+          <option value="ons" data-i18n="deskCvuOns">Latest ONS CVU (submarket)</option>
+        </select>
       </label>
     </div>
     <div class="spark-out">
@@ -2115,10 +2116,14 @@ GB_I18N.en.deskSubmarket = "Submarket";
 GB_I18N.en.deskSparkTitle = "Spark";
 GB_I18N.en.deskGasPrice = "Gas price";
 GB_I18N.en.deskHeatRate = "Heat rate";
-GB_I18N.en.deskHrCustom = "Custom";
 GB_I18N.en.deskHrCcgt = "CCGT 1800";
 GB_I18N.en.deskHrOcgt = "OCGT 2500";
-GB_I18N.en.deskCvuOverride = "CVU override";
+GB_I18N.en.deskCvuBasis = "CVU basis";
+GB_I18N.en.deskCvuImplied = "Implied from gas + heat rate";
+GB_I18N.en.deskCvuOns = "Latest ONS CVU (submarket)";
+GB_I18N.en.deskSparkGasGus = "Last GUS trade (POC)";
+GB_I18N.en.deskSparkGasPoc7d = "POC 7-day average";
+GB_I18N.en.deskSparkGasSantos = "ANP Santos (monthly)";
 GB_I18N.en.deskImpliedCvu = "Implied CVU";
 GB_I18N.en.deskVsPld = "vs PLD";
 GB_I18N.en.deskVsCmo = "vs CMO";
@@ -2155,10 +2160,14 @@ GB_I18N.pt.deskSubmarket = "Submercado";
 GB_I18N.pt.deskSparkTitle = "Spark";
 GB_I18N.pt.deskGasPrice = "Preço do gás";
 GB_I18N.pt.deskHeatRate = "Heat rate";
-GB_I18N.pt.deskHrCustom = "Personalizado";
 GB_I18N.pt.deskHrCcgt = "CCGT 1800";
 GB_I18N.pt.deskHrOcgt = "OCGT 2500";
-GB_I18N.pt.deskCvuOverride = "Override de CVU";
+GB_I18N.pt.deskCvuBasis = "Base do CVU";
+GB_I18N.pt.deskCvuImplied = "Implícito (gás + heat rate)";
+GB_I18N.pt.deskCvuOns = "Último CVU ONS (submercado)";
+GB_I18N.pt.deskSparkGasGus = "Último GUS (POC)";
+GB_I18N.pt.deskSparkGasPoc7d = "Média POC 7 dias";
+GB_I18N.pt.deskSparkGasSantos = "ANP Santos (mensal)";
 GB_I18N.pt.deskImpliedCvu = "CVU implícito";
 GB_I18N.pt.deskVsPld = "vs PLD";
 GB_I18N.pt.deskVsCmo = "vs CMO";
@@ -2216,6 +2225,24 @@ const utilDefaultSort = { col: "tso", dir: 1 };
 let utilFilters = {};
 let sparkUnit = "mmbtu";
 let sparkGasM3 = 1.2;
+let sparkGasPresetId = "gus";
+
+/** PLD=yellow, CMO=green, CVU=blue (palette indices 1,0,2). */
+const DESK_FLAG_SERIES = { pld: 1, cmo: 0, cvu: 2 };
+const DESK_POC_ANP_SERIES = { poc: 1, anpSantos: 0, anpNtSe: 2 };
+
+function deskSeriesColor(key, map) {
+  const pal = chartPalette();
+  const i = map[key];
+  if (i != null && pal[i]) return pal[i];
+  return pal[0] || "var(--accent)";
+}
+function compareSeriesColor(key) {
+  return deskSeriesColor(key, DESK_FLAG_SERIES);
+}
+function pocAnpSeriesColor(key) {
+  return deskSeriesColor(key, DESK_POC_ANP_SERIES);
+}
 
 function fmtNum(v, d) {
   if (v === null || v === undefined || (typeof v === "number" && isNaN(v))) return "—";
@@ -2229,7 +2256,7 @@ function colorOf(slots, key) {
   return pal[slots.get(key) % pal.length] || "var(--accent)";
 }
 
-function buildPicker(hostId, meta, picked, slots, onToggle) {
+function buildPicker(hostId, meta, picked, slots, onToggle, getColor) {
   const host = document.getElementById(hostId);
   host.innerHTML = "";
   meta.forEach(m => {
@@ -2237,10 +2264,18 @@ function buildPicker(hostId, meta, picked, slots, onToggle) {
     btn.type = "button";
     btn.className = "series-btn" + (picked.has(m.key) ? " active" : "");
     btn.innerHTML = '<span class="sw"></span>' + escapeHtml(t(m.labelKey));
-    btn.querySelector(".sw").style.background = picked.has(m.key) ? colorOf(slots, m.key) : "";
+    const swColor = picked.has(m.key)
+      ? (getColor ? getColor(m.key) : colorOf(slots, m.key))
+      : "";
+    btn.querySelector(".sw").style.background = swColor;
     btn.addEventListener("click", () => {
-      if (picked.has(m.key)) { picked.delete(m.key); slots.delete(m.key); }
-      else { picked.add(m.key); colorOf(slots, m.key); }
+      if (picked.has(m.key)) {
+        picked.delete(m.key);
+        if (!getColor) slots.delete(m.key);
+      } else {
+        picked.add(m.key);
+        if (!getColor) colorOf(slots, m.key);
+      }
       onToggle();
     });
     host.appendChild(btn);
@@ -2248,18 +2283,18 @@ function buildPicker(hostId, meta, picked, slots, onToggle) {
 }
 
 function refreshCompare() {
-  buildPicker("picker-compare", COMPARE_META, pickedCompare, compareSlots, refreshCompare);
+  buildPicker("picker-compare", COMPARE_META, pickedCompare, compareSlots, refreshCompare, compareSeriesColor);
   renderCompareChart();
   writeDeskQuery();
 }
 function refreshPocAnp() {
-  buildPicker("picker-poc-anp", POC_ANP_META, pickedPocAnp, pocAnpSlots, refreshPocAnp);
+  buildPicker("picker-poc-anp", POC_ANP_META, pickedPocAnp, pocAnpSlots, refreshPocAnp, pocAnpSeriesColor);
   renderPocAnpChart();
   writeDeskQuery();
 }
 function buildPickers() {
-  buildPicker("picker-compare", COMPARE_META, pickedCompare, compareSlots, refreshCompare);
-  buildPicker("picker-poc-anp", POC_ANP_META, pickedPocAnp, pocAnpSlots, refreshPocAnp);
+  buildPicker("picker-compare", COMPARE_META, pickedCompare, compareSlots, refreshCompare, compareSeriesColor);
+  buildPicker("picker-poc-anp", POC_ANP_META, pickedPocAnp, pocAnpSlots, refreshPocAnp, pocAnpSeriesColor);
 }
 
 // Shareable view state: compare submarket + both picked series sets.
@@ -2275,14 +2310,10 @@ function applyDeskQuery() {
   const series = gbValidList(sp.get("series"), COMPARE_META.map(m => m.key));
   if (series) {
     pickedCompare = new Set(series);
-    compareSlots = new Map();
-    series.forEach(k => colorOf(compareSlots, k));
   }
   const poc = gbValidList(sp.get("poc"), POC_ANP_META.map(m => m.key));
   if (poc) {
     pickedPocAnp = new Set(poc);
-    pocAnpSlots = new Map();
-    poc.forEach(k => colorOf(pocAnpSlots, k));
   }
   const ar = gbValidEnum(sp.get("arange"), ["90d", "1y"]);
   if (ar) analysisRange = ar;
@@ -2385,17 +2416,80 @@ function paintSparkUnit() {
   document.querySelectorAll("#spark-unit [data-unit]").forEach(btn => {
     btn.classList.toggle("active", btn.dataset.unit === sparkUnit);
   });
-  const gasEl = document.getElementById("spark-gas");
-  if (gasEl) gasEl.step = sparkUnit === "mmbtu" ? "0.01" : "0.001";
+}
+
+function sparkGasPresets() {
+  const k = DATA.kpi || {};
+  const presets = [];
+  if (k.gusLast != null && !isNaN(k.gusLast)) {
+    presets.push({ id: "gus", label: t("deskSparkGasGus"), m3: Number(k.gusLast) });
+  }
+  if (k.pocAvg7d != null && !isNaN(k.pocAvg7d)) {
+    presets.push({ id: "poc7d", label: t("deskSparkGasPoc7d"), m3: Number(k.pocAvg7d) });
+  }
+  if (k.anpSantos != null && !isNaN(k.anpSantos)) {
+    presets.push({ id: "santos", label: t("deskSparkGasSantos"), m3: Number(k.anpSantos) });
+  }
+  return presets;
+}
+
+function sparkGasM3FromPreset(id) {
+  const hit = sparkGasPresets().find(p => p.id === id);
+  return hit ? hit.m3 : null;
+}
+
+function paintSparkGasPresetSelect() {
+  const sel = document.getElementById("spark-gas-preset");
+  if (!sel) return;
+  const presets = sparkGasPresets();
+  sel.innerHTML = presets.map(p =>
+    '<option value="' + escapeHtml(p.id) + '">' + escapeHtml(p.label) + "</option>"
+  ).join("");
+  if (!presets.length) {
+    sel.innerHTML = '<option value="">' + escapeHtml(t("deskEmpty")) + "</option>";
+    return;
+  }
+  const s = DATA.spark || {};
+  const prefer = s.gasPriceSource === "poc_7d" ? "poc7d"
+    : s.gasPriceSource === "gus_last" ? "gus" : presets[0].id;
+  if (!presets.some(p => p.id === sparkGasPresetId)) sparkGasPresetId = prefer;
+  sel.value = sparkGasPresetId;
+  const m3 = sparkGasM3FromPreset(sparkGasPresetId);
+  if (m3 != null) sparkGasM3 = m3;
+}
+
+function paintSparkGasReadout() {
+  const el = document.getElementById("spark-gas-readout");
+  if (!el) return;
+  if (sparkGasM3 == null || isNaN(sparkGasM3)) {
+    el.textContent = "—";
+    return;
+  }
+  const unit = sparkUnit === "mmbtu" ? "R$/MMBtu" : "R$/m³";
+  el.innerHTML = escapeHtml(displayGasFromM3(sparkGasM3)) +
+    ' <span class="hint">' + escapeHtml(unit) + "</span>";
+}
+
+function sparkHeatRateKcal() {
+  const s = DATA.spark || {};
+  const preset = document.getElementById("spark-hr-preset");
+  if (!preset) return s.heatRateCcgt || 1800;
+  return preset.value === "ocgt" ? (s.heatRateOcgt || 2500) : (s.heatRateCcgt || 1800);
+}
+
+function lastLiveCvu() {
+  const c = compareBlock();
+  const vals = c.cvu || [];
+  for (let i = vals.length - 1; i >= 0; i--) {
+    if (vals[i] != null && !isNaN(vals[i])) return Number(vals[i]);
+  }
+  return null;
 }
 
 function setSparkUnit(unit) {
   if (!unit || unit === sparkUnit) return;
-  const gasEl = document.getElementById("spark-gas");
-  const cur = m3FromDisplay(gasEl.value);
-  if (cur != null) sparkGasM3 = cur;
   sparkUnit = unit;
-  gasEl.value = displayGasFromM3(sparkGasM3);
+  paintSparkGasReadout();
   paintSparkUnit();
   renderSpark();
 }
@@ -2403,18 +2497,13 @@ function setSparkUnit(unit) {
 function renderSpark() {
   if (!DATA) return;
   const s = DATA.spark || {};
-  const gasEl = document.getElementById("spark-gas");
-  const hrEl = document.getElementById("spark-hr");
-  const preset = document.getElementById("spark-hr-preset");
-  const ovEl = document.getElementById("spark-cvu");
-  const gas = m3FromDisplay(gasEl.value);
-  let hr = parseFloat(hrEl.value);
-  if (preset.value === "ccgt") hr = s.heatRateCcgt;
-  else if (preset.value === "ocgt") hr = s.heatRateOcgt;
-  if (preset.value !== "custom") hrEl.value = hr;
-  const override = ovEl.value === "" ? null : parseFloat(ovEl.value);
+  const cvuMode = document.getElementById("spark-cvu-mode");
+  const gas = sparkGasM3;
+  const hr = sparkHeatRateKcal();
   const calc = impliedCvu(gas, hr, s.natgasKcalPerM3);
-  const cost = (override != null && !isNaN(override)) ? override : calc;
+  const mode = cvuMode ? cvuMode.value : "implied";
+  const liveCvu = lastLiveCvu();
+  const cost = mode === "ons" && liveCvu != null ? liveCvu : calc;
   document.getElementById("spark-implied").textContent = fmtNum(cost, 1);
   const vsPld = (cost != null && s.pldSe != null) ? (s.pldSe - cost) : null;
   const vsCmo = (cost != null && s.cmoSe != null) ? (s.cmoSe - cost) : null;
@@ -2432,37 +2521,28 @@ function renderSpark() {
   const formula = currentLang() === "pt" ? (s.formulaPt || "") : (s.formulaEn || "");
   info.title = formula;
   info.setAttribute("aria-label", formula);
+  paintSparkGasReadout();
   paintSparkUnit();
 }
 
 function initSparkForm() {
-  const s = DATA.spark || {};
-  const gasEl = document.getElementById("spark-gas");
-  const hrEl = document.getElementById("spark-hr");
-  const preset = document.getElementById("spark-hr-preset");
-  sparkGasM3 = (s.defaultGasPrice != null && !isNaN(s.defaultGasPrice)) ? s.defaultGasPrice : 1.2;
   sparkUnit = "mmbtu";
-  gasEl.value = displayGasFromM3(sparkGasM3);
-  hrEl.value = s.heatRateCcgt || 1800;
-  preset.value = "ccgt";
-  document.getElementById("spark-gas").addEventListener("input", () => {
-    const cur = m3FromDisplay(document.getElementById("spark-gas").value);
-    if (cur != null) sparkGasM3 = cur;
+  const s = DATA.spark || {};
+  sparkGasPresetId = s.gasPriceSource === "poc_7d" ? "poc7d" : "gus";
+  paintSparkGasPresetSelect();
+  document.getElementById("spark-hr-preset").value = "ccgt";
+  document.getElementById("spark-cvu-mode").value = "implied";
+  document.getElementById("spark-gas-preset").addEventListener("change", e => {
+    sparkGasPresetId = e.target.value;
+    const m3 = sparkGasM3FromPreset(sparkGasPresetId);
+    if (m3 != null) sparkGasM3 = m3;
     renderSpark();
   });
-  ["spark-hr", "spark-cvu"].forEach(id => {
-    document.getElementById(id).addEventListener("input", renderSpark);
-  });
-  preset.addEventListener("change", () => {
-    const s2 = DATA.spark || {};
-    if (preset.value === "ccgt") hrEl.value = s2.heatRateCcgt;
-    else if (preset.value === "ocgt") hrEl.value = s2.heatRateOcgt;
-    renderSpark();
-  });
+  document.getElementById("spark-hr-preset").addEventListener("change", renderSpark);
+  document.getElementById("spark-cvu-mode").addEventListener("change", renderSpark);
   document.querySelectorAll("#spark-unit [data-unit]").forEach(btn => {
     btn.addEventListener("click", () => setSparkUnit(btn.dataset.unit));
   });
-  paintSparkUnit();
   renderSpark();
 }
 
@@ -2618,7 +2698,7 @@ function renderCompareChart() {
   const series = COMPARE_META.filter(m => pickedCompare.has(m.key)).map(m => ({
     label: t(m.labelKey),
     values: c[m.field] || [],
-    color: colorOf(compareSlots, m.key),
+    color: compareSeriesColor(m.key),
   }));
   drawLineChart("main-chart", c.dates || [], series, c.note || t("deskEmptyChart"));
 }
@@ -2633,7 +2713,7 @@ function renderPocAnpChart() {
   const series = POC_ANP_META.filter(m => pickedPocAnp.has(m.key)).map(m => ({
     label: t(m.labelKey),
     values: c[m.field] || [],
-    color: colorOf(pocAnpSlots, m.key),
+    color: pocAnpSeriesColor(m.key),
   }));
   drawLineChart("poc-anp-chart", c.months || [], series, c.note || t("deskEmptyChart"));
 }
@@ -2888,8 +2968,8 @@ async function init() {
         if (Array.isArray(monthly[k])) monthly[k] = monthly[k].map(v => v == null ? v : rescale(v));
       });
     })(DATA);
-    COMPARE_META.forEach(m => { pickedCompare.add(m.key); colorOf(compareSlots, m.key); });
-    POC_ANP_META.forEach(m => { pickedPocAnp.add(m.key); colorOf(pocAnpSlots, m.key); });
+    COMPARE_META.forEach(m => pickedCompare.add(m.key));
+    POC_ANP_META.forEach(m => pickedPocAnp.add(m.key));
     const smSel = document.getElementById("compare-sm");
     const c0 = DATA.compareSe || {};
     compareSm = c0.defaultSubmarket || "SE";
@@ -2909,6 +2989,7 @@ async function init() {
       smSel.addEventListener("change", () => {
         compareSm = smSel.value;
         renderCompareChart();
+        renderSpark();
         writeDeskQuery();
       });
     }
