@@ -246,7 +246,7 @@ main.hub { flex: 1; width: var(--content-w); max-width: var(--content-max); marg
   .hub-controls { margin-left: auto; }
 }
 .hub-header .products-dd { align-items: center; }
-.hub-header .dd-trigger { height: 32px; }
+.hub-header .brand-mark { min-height: 0; }
 .hub-controls #theme-toggle { position: static; }
 .hub-section-title {
   font-size: 11px; text-transform: uppercase; letter-spacing: .06em;
