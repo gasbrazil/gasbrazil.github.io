@@ -1623,8 +1623,70 @@ function tsoFromChartKey(key) {
   }
   return '';
 }
+function hideChartTooltips() {
+  document.querySelectorAll(".tt").forEach(function (el) {
+    el.style.display = "none";
+    if (el._gbIo) { el._gbIo.disconnect(); el._gbIo = null; }
+  });
+}
+var __gbChartTtScrollLock = false;
+var __gbChartTtScrollTimer = 0;
+function bindChartTooltipDismiss() {
+  if (window.__gbChartTtBound) return;
+  window.__gbChartTtBound = true;
+  function hideFromScroll() {
+    __gbChartTtScrollLock = true;
+    hideChartTooltips();
+    window.clearTimeout(__gbChartTtScrollTimer);
+    __gbChartTtScrollTimer = window.setTimeout(function () {
+      __gbChartTtScrollLock = false;
+    }, 180);
+  }
+  window.addEventListener("scroll", hideFromScroll, { capture: true, passive: true });
+  window.addEventListener("resize", hideChartTooltips, { passive: true });
+  window.addEventListener("orientationchange", hideChartTooltips);
+  window.addEventListener("pagehide", hideChartTooltips);
+  window.addEventListener("pageshow", hideChartTooltips);
+  window.addEventListener("hashchange", hideChartTooltips);
+  window.addEventListener("popstate", hideChartTooltips);
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState !== "visible") hideChartTooltips();
+  });
+  document.addEventListener("keydown", function (ev) {
+    if (ev.key === "Escape") hideChartTooltips();
+  });
+  document.addEventListener("pointercancel", hideFromScroll, true);
+  document.addEventListener("pointerdown", function (ev) {
+    const t = ev.target;
+    if (t && t.closest) {
+      if (t.closest(".tt")) return;
+      if (t.closest("svg")) return;
+    }
+    hideChartTooltips();
+  }, true);
+}
+bindChartTooltipDismiss();
+function watchChartTooltipAnchor(tt, clientX, clientY) {
+  if (!tt || typeof IntersectionObserver === "undefined") return;
+  if (tt._gbIo) { tt._gbIo.disconnect(); tt._gbIo = null; }
+  const node = document.elementFromPoint(clientX, clientY);
+  const svg = node && node.closest && node.closest("svg");
+  if (!svg) return;
+  const io = new IntersectionObserver(function (entries) {
+    for (let i = 0; i < entries.length; i++) {
+      if (!entries[i].isIntersecting) {
+        hideChartTooltips();
+        return;
+      }
+    }
+  }, { threshold: 0 });
+  io.observe(svg);
+  tt._gbIo = io;
+}
 function placeChartTooltip(tt, clientX, clientY) {
   if (!tt) return;
+  if (__gbChartTtScrollLock) return;
+  bindChartTooltipDismiss();
   tt.style.display = "block";
   const pad = 12, gap = 14;
   const tw = tt.offsetWidth, th = tt.offsetHeight;
@@ -1638,7 +1700,9 @@ function placeChartTooltip(tt, clientX, clientY) {
   if (top + th > vh - pad) top = Math.max(pad, vh - th - pad);
   tt.style.left = left + "px";
   tt.style.top = top + "px";
+  watchChartTooltipAnchor(tt, clientX, clientY);
 }
+
 
 
 const LANG_KEY = "gasbrazil-lang";

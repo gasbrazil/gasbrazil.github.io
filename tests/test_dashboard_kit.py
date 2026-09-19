@@ -259,3 +259,154 @@ def test_csv_download_prepends_utf8_bom():
     assert "downloadTextFile" in js
     assert "\\uFEFF" in js
     assert "isCsv" in js
+
+
+def test_built_dashboards_ship_tooltip_dismiss():
+    root = Path(__file__).resolve().parents[1]
+    for name in ("desk", "ons", "pld", "poc", "contratos", "flows", "supply", "precos"):
+        html = (root / name / "index.html").read_text(encoding="utf-8")
+        assert "function hideChartTooltips()" in html, name
+        assert 'addEventListener("scroll", hideFromScroll' in html, name
+        assert 'addEventListener("pagehide", hideChartTooltips)' in html, name
+        assert "if (__gbChartTtScrollLock) return;" in html, name
+
+
+def test_chart_tooltip_js_binds_mobile_dismiss():
+    js = kit.chart_palette_js()
+
+    assert "function hideChartTooltips()" in js
+    assert "function bindChartTooltipDismiss()" in js
+    assert "bindChartTooltipDismiss();" in js
+    assert 'addEventListener("scroll", hideFromScroll' in js
+    assert "capture: true, passive: true" in js
+    assert 'addEventListener("pagehide", hideChartTooltips)' in js
+    assert 'addEventListener("pageshow", hideChartTooltips)' in js
+    assert 'addEventListener("hashchange", hideChartTooltips)' in js
+    assert 'addEventListener("pointercancel", hideFromScroll, true)' in js
+    assert 't.closest("svg")' in js
+    assert "if (__gbChartTtScrollLock) return;" in js
+    assert "watchChartTooltipAnchor" in js
+    assert "IntersectionObserver" in js
+
+
+def test_chart_tooltip_hides_on_scroll_nav_and_outside_tap(tmp_path):
+    """Behavioral check of the inlined tooltip JS against a tiny DOM mock."""
+    import shutil
+    import subprocess
+
+    node = shutil.which("node")
+    if not node:
+        pytest.skip("node is required to execute the tooltip dismiss harness")
+
+    harness = tmp_path / "tooltip_dismiss.js"
+    harness.write_text(
+        _CHART_TOOLTIP_DISMISS_HARNESS.replace("__CHART_JS__", kit.chart_palette_js()),
+        encoding="utf-8",
+    )
+    subprocess.run([node, str(harness)], check=True)
+
+
+_CHART_TOOLTIP_DISMISS_HARNESS = r"""
+"use strict";
+
+const windowListeners = {};
+const documentListeners = {};
+function store(map, type, fn, opts) {
+  (map[type] = map[type] || []).push({ fn, opts });
+}
+function fire(map, type, ev) {
+  (map[type] || []).forEach((h) => h.fn(ev || {}));
+}
+
+const svg = {
+  tagName: "SVG",
+  closest(sel) { return sel === "svg" ? this : null; },
+};
+const outside = {
+  tagName: "BUTTON",
+  closest() { return null; },
+};
+const tt = {
+  className: "tt",
+  style: { display: "none", left: "", top: "" },
+  offsetWidth: 120,
+  offsetHeight: 40,
+  _gbIo: null,
+  closest(sel) { return sel === ".tt" ? this : null; },
+};
+
+global.window = {
+  innerWidth: 390,
+  innerHeight: 844,
+  __gbChartTtBound: undefined,
+  addEventListener(type, fn, opts) { store(windowListeners, type, fn, opts); },
+  clearTimeout(id) { clearTimeout(id); },
+  setTimeout(fn, ms) { return setTimeout(fn, ms); },
+};
+global.document = {
+  visibilityState: "visible",
+  querySelectorAll(sel) { return sel === ".tt" ? [tt] : []; },
+  elementFromPoint() { return svg; },
+  addEventListener(type, fn, opts) { store(documentListeners, type, fn, opts); },
+};
+global.IntersectionObserver = function (cb) {
+  this.observe = function () {};
+  this.disconnect = function () {};
+  this._cb = cb;
+};
+
+__CHART_JS__
+
+function assert(cond, msg) {
+  if (!cond) throw new Error(msg);
+}
+
+assert(window.__gbChartTtBound === true, "dismiss listeners bind on load");
+assert((windowListeners.scroll || []).length === 1, "scroll listener");
+assert(windowListeners.scroll[0].opts && windowListeners.scroll[0].opts.capture === true,
+  "scroll uses capture so overflow containers count");
+assert((windowListeners.pagehide || []).length === 1, "pagehide listener");
+assert((windowListeners.hashchange || []).length === 1, "hashchange listener");
+assert((documentListeners.pointerdown || []).length === 1, "pointerdown listener");
+assert((documentListeners.pointercancel || []).length === 1, "pointercancel listener");
+
+placeChartTooltip(tt, 80, 120);
+assert(tt.style.display === "block", "tooltip shows");
+assert(tt.style.left && tt.style.top, "tooltip is positioned");
+
+fire(windowListeners, "scroll");
+assert(tt.style.display === "none", "scroll hides tooltip");
+
+placeChartTooltip(tt, 80, 120);
+assert(tt.style.display === "none", "scroll lock blocks reshow mid-gesture");
+
+placeChartTooltip(tt, 80, 120);
+// lock still held; simulate lock expiry then show
+__gbChartTtScrollLock = false;
+placeChartTooltip(tt, 80, 120);
+assert(tt.style.display === "block", "tooltip can show after scroll lock");
+
+fire(documentListeners, "pointerdown", { target: svg });
+assert(tt.style.display === "block", "tap on chart keeps tooltip");
+
+fire(documentListeners, "pointerdown", { target: outside });
+assert(tt.style.display === "none", "tap outside chart hides tooltip");
+
+__gbChartTtScrollLock = false;
+placeChartTooltip(tt, 80, 120);
+fire(windowListeners, "pagehide");
+assert(tt.style.display === "none", "pagehide hides tooltip");
+
+__gbChartTtScrollLock = false;
+placeChartTooltip(tt, 80, 120);
+fire(windowListeners, "hashchange");
+assert(tt.style.display === "none", "hashchange hides tooltip");
+
+__gbChartTtScrollLock = false;
+placeChartTooltip(tt, 80, 120);
+fire(documentListeners, "pointercancel");
+assert(tt.style.display === "none", "pointercancel (scroll takeover) hides tooltip");
+
+console.log("ok");
+"""
+
