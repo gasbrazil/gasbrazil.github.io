@@ -226,23 +226,31 @@ body {
   background-attachment: fixed; color: var(--text); font-family: var(--font);
   font-weight: 300; display: flex; flex-direction: column; min-height: 100vh;
 }
-#theme-toggle {
-  background: var(--panel); border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm); width: 34px; height: 34px; cursor: pointer; color: var(--text);
-  display: flex; align-items: center; justify-content: center;
-}
-#theme-toggle svg { width: 17px; height: 17px; }
 /* Match dashboard .wrap: shared --content-w / --content-max (~1280px). */
 main.hub { flex: 1; width: var(--content-w); max-width: var(--content-max); margin: 0 auto;
   padding: 40px 0 48px; }
 @media (max-width: 900px) { main.hub { width: auto; padding: 28px 16px 40px; } }
-/* Home's own header row -- wordmark-menu left, Wiki/About + PT/theme right. */
-.hub-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+/* Home header: same sticky blur treatment as dashboard mastheads. */
+.hub-header {
+  position: sticky; top: 0; z-index: 40;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  background: var(--header-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 10px 0 8px;
+  margin: 0 0 4px;
+}
+@media (max-width: 720px) {
+  .hub-header { flex-wrap: wrap; }
+  .hub-controls { margin-left: auto; }
+}
 .hub-header .products-dd { align-items: center; }
 .hub-header .dd-trigger { height: 32px; }
-.hub-controls { display: flex; align-items: center; gap: 6px 14px; flex: none; }
-.hub-controls .nav-trail { margin-left: 0; }
 .hub-controls #theme-toggle { position: static; }
+.hub-section-title {
+  font-size: 11px; text-transform: uppercase; letter-spacing: .06em;
+  color: var(--muted); font-weight: 400; margin: 18px 0 8px;
+}
 .wordmark { font-size: 30px; font-weight: 600; letter-spacing: -.02em; line-height: 1.1; }
 .wordmark .dot { color: var(--accent); }
 .wordmark a { color: inherit; text-decoration: none; }
@@ -257,6 +265,7 @@ main.hub { flex: 1; width: var(--content-w); max-width: var(--content-max); marg
 }
 @media (max-width: 900px) { .kpi-strip { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 480px) { .kpi-strip { grid-template-columns: 1fr; } }
+a.kpi-cell { cursor: pointer; }
 .kpi-cell {
   position: relative; overflow: hidden;
   background: var(--panel-grad); border: 1px solid var(--border); border-radius: var(--radius-sm);
@@ -440,6 +449,8 @@ HOME_TEMPLATE = """__HEAD__
   </div>
   <p class="tagline" data-i18n="tagline">Analytical Firepower for Brazil's Energy Markets</p>
   <div class="flagbar" aria-hidden="true"></div>
+  <nav class="hub-launch" aria-labelledby="hub-dash-title">
+  <h2 id="hub-dash-title" class="hub-section-title" data-i18n="hubDashboards">Live dashboards</h2>
   <div class="kpi-strip">
     <a class="kpi-cell" href="desk/" data-slug="desk">
       <div class="kpi-label" data-i18n="cardDesk">The Desk</div>
@@ -493,6 +504,7 @@ HOME_TEMPLATE = """__HEAD__
       <div class="kpi-when" data-refresh="__PRECOS_WHEN__"></div>
     </a>
   </div>
+  </nav>
   <div class="sources-block">
     <div class="label" data-i18n="sources">Sources</div>
     <div class="row">
@@ -672,7 +684,10 @@ def write_home(out_path: Path | str = DEFAULT_OUT) -> Path:
     html = html.replace("__HUB_CONTROLS__", _hub_controls("wiki/", "about/"))
     html = html.replace(
         "__BRAND_MENU__",
-        kit.products_dropdown_html("home", '<div class="wordmark">GasBrazil</div>'),
+        kit.products_dropdown_html(
+            "home",
+            '<div class="wordmark">GasBrazil<span class="dot" aria-hidden="true">.</span></div>',
+        ),
     )
     html = _kit_render(html)
     out_path = Path(out_path)
@@ -693,7 +708,10 @@ def write_about(out_path: Path | None = None) -> Path:
     html = html.replace("__HUB_CONTROLS__", _hub_controls("../wiki/", "./"))
     html = html.replace(
         "__BRAND_MENU__",
-        kit.products_dropdown_html("home", '<div class="wordmark"><a href="../">GasBrazil</a></div>'),
+        kit.products_dropdown_html(
+            "home",
+            '<div class="wordmark"><a href="../">GasBrazil<span class="dot" aria-hidden="true">.</span></a></div>',
+        ),
     )
     # About lives in /about/, so home-relative links in the footer need ../
     html = html.replace('href="./about/"', 'href="./"')
@@ -716,7 +734,10 @@ def write_404(out_path: Path | None = None) -> Path:
     html = html.replace("__HUB_CONTROLS__", _hub_controls("wiki/", "about/"))
     html = html.replace(
         "__BRAND_MENU__",
-        kit.products_dropdown_html("home", '<div class="wordmark"><a href="./">GasBrazil</a></div>'),
+        kit.products_dropdown_html(
+            "home",
+            '<div class="wordmark"><a href="./">GasBrazil<span class="dot" aria-hidden="true">.</span></a></div>',
+        ),
     )
     html = _kit_render(html)
     out_path.write_text(html, encoding="utf-8")
