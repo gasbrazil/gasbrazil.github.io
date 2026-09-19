@@ -484,7 +484,7 @@ footer .asof-strip,
   min-width: 16px; width: 16px; height: 28px; padding: 0;
   background: transparent; border: none; border-radius: 3px;
   color: var(--muted); cursor: pointer;
-  font: 400 12px/1 var(--font);
+  font: 400 12px/1 var(--font-display);
   flex: none; box-sizing: border-box;
   transition: color .15s ease;
 }
@@ -1839,7 +1839,7 @@ initLangToggle("lang-toggle");
 </html>
 
 <script>
-const TEASERS_URL = "hub/teasers.json.gz";
+const TEASERS_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/hub/teasers.json.gz?v=35459034475";
 function paintRefreshLabels() {
   document.querySelectorAll(".kpi-when[data-refresh]").forEach(el => {
     const when = el.getAttribute("data-refresh");
