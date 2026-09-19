@@ -243,6 +243,39 @@ def coerce_dates(df: pd.DataFrame, col: str = "date") -> pd.DataFrame:
     return out
 
 
+def sanitize_for_json(obj):
+    """Recursively replace NaN/Inf and numpy/pandas scalars for strict JSON."""
+    import math
+
+    if obj is None:
+        return None
+    if isinstance(obj, float):
+        if math.isnan(obj) or math.isinf(obj):
+            return None
+        return obj
+    if isinstance(obj, (int, str, bool)):
+        return obj
+    if isinstance(obj, dict):
+        return {str(k): sanitize_for_json(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [sanitize_for_json(v) for v in obj]
+    if isinstance(obj, pd.Timestamp):
+        return obj.isoformat()
+    if isinstance(obj, (pd.Series, pd.DataFrame)):
+        raise TypeError("sanitize_for_json does not accept Series/DataFrame; convert first")
+    try:
+        if pd.isna(obj):
+            return None
+    except (TypeError, ValueError):
+        pass
+    if hasattr(obj, "item"):
+        try:
+            return sanitize_for_json(obj.item())
+        except (ValueError, TypeError):
+            pass
+    return obj
+
+
 def write_json_gzip(payload: dict, path: Path, *, compresslevel: int = 9) -> Path:
     """Track B artifact: raw gzip JSON (no base64). Smaller than HTML embed."""
     import gzip
@@ -250,7 +283,8 @@ def write_json_gzip(payload: dict, path: Path, *, compresslevel: int = 9) -> Pat
 
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    raw = json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+    safe = sanitize_for_json(payload)
+    raw = json.dumps(safe, ensure_ascii=False, separators=(",", ":"), allow_nan=False).encode("utf-8")
     blob = gzip.compress(raw, compresslevel=compresslevel, mtime=0)
     tmp = path.with_name(path.name + ".tmp")
     try:

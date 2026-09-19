@@ -1248,6 +1248,27 @@ footer a { color: var(--accent); }
   <div class="chart-host" id="poc-anp-chart"></div>
 </section>
 
+<section class="panel" aria-labelledby="analysis-title">
+  <p class="panel-title" id="analysis-title" data-i18n="deskAnalysisTitle">Analysis</p>
+  <p class="panel-note" data-i18n="deskAnalysisNote">Pick any series to compare on one timeline. Monthly values repeat across their calendar month; the chart is indexed to 100 at the start of the range.</p>
+  <div class="compare-tools">
+    <label class="sm-pick"><span data-i18n="deskAnalysisRange">Range</span>
+      <select id="analysis-range">
+        <option value="90d">90 days</option>
+        <option value="1y">1 year</option>
+      </select>
+    </label>
+  </div>
+  <div class="series-picker" id="picker-analysis"></div>
+  <div class="chart-host" id="analysis-chart"></div>
+  <div class="table-wrap">
+    <table class="util" id="analysis-table">
+      <thead><tr id="analysis-thead"></tr></thead>
+      <tbody id="analysis-body"></tbody>
+    </table>
+  </div>
+</section>
+
 <section class="panel" aria-labelledby="util-title">
   <p class="panel-title" id="util-title" data-i18n="deskUtilTitle">Capacity vs flows</p>
   <div class="table-wrap">
@@ -1975,6 +1996,9 @@ GB_I18N.en.deskKpiGus = "GUS last";
 GB_I18N.en.deskKpiPoc = "POC 7d";
 GB_I18N.en.deskKpiFlows = "Flows 7d";
 GB_I18N.en.deskKpiSantos = "Santos";
+GB_I18N.en.deskAnalysisTitle = "Analysis";
+GB_I18N.en.deskAnalysisNote = "Pick any series to compare on one timeline. Monthly values repeat across their calendar month; the chart is indexed to 100 at the start of the range.";
+GB_I18N.en.deskAnalysisRange = "Range";
 
 GB_I18N.pt.deskCompareTitle = "PLD · CMO · CVU";
 GB_I18N.pt.deskSubmarket = "Submercado";
@@ -2012,6 +2036,9 @@ GB_I18N.pt.deskKpiGus = "GUS último";
 GB_I18N.pt.deskKpiPoc = "POC 7d";
 GB_I18N.pt.deskKpiFlows = "Fluxos 7d";
 GB_I18N.pt.deskKpiSantos = "Santos";
+GB_I18N.pt.deskAnalysisTitle = "Análise";
+GB_I18N.pt.deskAnalysisNote = "Escolha séries para comparar na mesma linha do tempo. Valores mensais se repetem no mês; o gráfico usa índice 100 no início do intervalo.";
+GB_I18N.pt.deskAnalysisRange = "Intervalo";
 
 const COMPARE_META = [
   { key: "pld", labelKey: "deskSeriesPld", field: "pld" },
@@ -2031,6 +2058,9 @@ let pickedCompare = new Set();
 let pickedPocAnp = new Set();
 let compareSlots = new Map();
 let pocAnpSlots = new Map();
+let pickedAnalysis = new Set(["pld_se", "poc_gus_m3", "ons_gas_gen_sin"]);
+let analysisSlots = new Map();
+let analysisRange = "90d";
 let utilSortState = { col: "tso", dir: 1 };
 const utilDefaultSort = { col: "tso", dir: 1 };
 let utilFilters = {};
@@ -2104,6 +2134,15 @@ function applyDeskQuery() {
     pocAnpSlots = new Map();
     poc.forEach(k => colorOf(pocAnpSlots, k));
   }
+  const ar = gbValidEnum(sp.get("arange"), ["90d", "1y"]);
+  if (ar) analysisRange = ar;
+  const ids = (DATA.analysisSeries || []).map(s => s.id);
+  const apick = gbValidList(sp.get("analysis"), ids);
+  if (apick) {
+    pickedAnalysis = new Set(apick);
+    analysisSlots = new Map();
+    apick.forEach(k => colorOf(analysisSlots, k));
+  }
 }
 function writeDeskQuery() {
   if (!DATA) return;
@@ -2111,6 +2150,8 @@ function writeDeskQuery() {
     sm: compareSm,
     series: [...pickedCompare],
     poc: [...pickedPocAnp],
+    analysis: [...pickedAnalysis],
+    arange: analysisRange,
   });
 }
 
@@ -2447,6 +2488,114 @@ function renderPocAnpChart() {
   drawLineChart("poc-anp-chart", c.months || [], series, c.note || t("deskEmptyChart"));
 }
 
+function analysisCatalog() {
+  return (DATA && DATA.analysisSeries) || [];
+}
+
+function analysisValueAt(series, dayKey) {
+  if (!series) return null;
+  if (series.freq === "daily") {
+    const i = series.timeline.indexOf(dayKey);
+    return i >= 0 ? series.values[i] : null;
+  }
+  const month = dayKey.slice(0, 7);
+  const i = series.timeline.indexOf(month);
+  return i >= 0 ? series.values[i] : null;
+}
+
+function analysisDays() {
+  const seriesList = analysisCatalog().filter(s => pickedAnalysis.has(s.id));
+  if (!seriesList.length) return [];
+  let max = null;
+  seriesList.forEach(s => {
+    const last = s.timeline[s.timeline.length - 1];
+    if (!last) return;
+    const day = s.freq === "daily" ? last : (last.length === 7 ? last + "-01" : last);
+    if (!max || day > max) max = day;
+  });
+  if (!max) return [];
+  const minDate = new Date(max + "T00:00:00Z");
+  if (analysisRange === "90d") minDate.setUTCDate(minDate.getUTCDate() - 89);
+  else minDate.setUTCFullYear(minDate.getUTCFullYear() - 1);
+  const min = minDate.toISOString().slice(0, 10);
+  const out = [];
+  const cur = new Date(min + "T00:00:00Z");
+  const end = new Date(max + "T00:00:00Z");
+  while (cur <= end) {
+    out.push(cur.toISOString().slice(0, 10));
+    cur.setUTCDate(cur.getUTCDate() + 1);
+  }
+  return out;
+}
+
+function buildAnalysisPicker() {
+  const host = document.getElementById("picker-analysis");
+  if (!host) return;
+  host.innerHTML = "";
+  analysisCatalog().forEach(s => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "series-btn" + (pickedAnalysis.has(s.id) ? " active" : "");
+    btn.title = s.unit;
+    btn.innerHTML = '<span class="sw"></span>' + escapeHtml(s.label);
+    if (pickedAnalysis.has(s.id)) btn.querySelector(".sw").style.background = colorOf(analysisSlots, s.id);
+    btn.addEventListener("click", () => {
+      if (pickedAnalysis.has(s.id)) { pickedAnalysis.delete(s.id); analysisSlots.delete(s.id); }
+      else { pickedAnalysis.add(s.id); colorOf(analysisSlots, s.id); }
+      renderAnalysis();
+      writeDeskQuery();
+    });
+    host.appendChild(btn);
+  });
+}
+
+function renderAnalysisTable(days, seriesList) {
+  const head = document.getElementById("analysis-thead");
+  const body = document.getElementById("analysis-body");
+  if (!head || !body) return;
+  if (!days.length || !seriesList.length) {
+    head.innerHTML = "";
+    body.innerHTML = '<tr><td colspan="2" style="color:var(--muted)">' + escapeHtml(t("deskPickSeries")) + "</td></tr>";
+    return;
+  }
+  head.innerHTML = "<th>Date</th>" + seriesList.map(s =>
+    '<th class="num">' + escapeHtml(s.label) + ' <span style="color:var(--muted);font-weight:300">(' + escapeHtml(s.unit) + ")</span></th>"
+  ).join("");
+  body.innerHTML = days.map(d => {
+    const cells = seriesList.map(s => {
+      const v = analysisValueAt(s, d);
+      return '<td class="num">' + (v == null ? "—" : fmtNum(v, 2)) + "</td>";
+    }).join("");
+    return "<tr><td>" + escapeHtml(d) + "</td>" + cells + "</tr>";
+  }).join("");
+}
+
+function renderAnalysisChart(days, seriesList) {
+  if (!pickedAnalysis.size) {
+    drawLineChart("analysis-chart", [], [], t("deskPickSeries"));
+    return;
+  }
+  const indexed = seriesList.map(s => {
+    const vals = days.map(d => analysisValueAt(s, d));
+    let base = null;
+    for (const v of vals) { if (v != null) { base = v; break; } }
+    const norm = (base != null && base !== 0)
+      ? vals.map(v => v == null ? null : Math.round((v / base) * 1000) / 10)
+      : vals;
+    return { label: s.label + " (index)", values: norm, color: colorOf(analysisSlots, s.id) };
+  });
+  drawLineChart("analysis-chart", days, indexed, t("deskEmptyChart"));
+}
+
+function renderAnalysis() {
+  if (!DATA) return;
+  buildAnalysisPicker();
+  const seriesList = analysisCatalog().filter(s => pickedAnalysis.has(s.id));
+  const days = analysisDays();
+  renderAnalysisTable(days, seriesList);
+  renderAnalysisChart(days, seriesList);
+}
+
 function gusForTso(tso) {
   const k = DATA.kpi || {};
   if (k.gusLast == null || !k.gusTso || !tso) return null;
@@ -2543,6 +2692,7 @@ function renderAll() {
   buildPickers();
   renderCompareChart();
   renderPocAnpChart();
+  renderAnalysis();
   renderUtil();
   renderSpark();
   applyI18n();
@@ -2555,6 +2705,7 @@ async function init() {
       buildPickers();
       renderCompareChart();
       renderPocAnpChart();
+      renderAnalysis();
     }
   });
   initLangToggle("lang-toggle", () => {
@@ -2593,6 +2744,16 @@ async function init() {
     const c0 = DATA.compareSe || {};
     compareSm = c0.defaultSubmarket || "SE";
     applyDeskQuery();
+    pickedAnalysis.forEach(k => colorOf(analysisSlots, k));
+    const arSel = document.getElementById("analysis-range");
+    if (arSel) {
+      arSel.value = analysisRange;
+      arSel.addEventListener("change", () => {
+        analysisRange = arSel.value;
+        renderAnalysis();
+        writeDeskQuery();
+      });
+    }
     if (smSel) {
       smSel.value = compareSm;
       smSel.addEventListener("change", () => {
@@ -2609,6 +2770,7 @@ async function init() {
       chartResizeTimer = setTimeout(() => {
         renderCompareChart();
         renderPocAnpChart();
+        renderAnalysis();
       }, 140);
     });
   } catch (err) {

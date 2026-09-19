@@ -1559,19 +1559,34 @@ __SHARED_JS_ASOF__
 
 async function init() {
   document.getElementById("year").textContent = new Date().getFullYear();
-  const text = await inflateGzipUrl(PAYLOAD_URL);
-  DATA = JSON.parse(text);
-  variable = DATA.pointVars[0];
+  try {
+    const text = await inflateGzipUrl(PAYLOAD_URL);
+    DATA = parseDashboardJson(text);
+    if (!DATA.pointVars || !DATA.pointVars.length) {
+      throw new Error("Flows payload has no point variables — rebuild flows data.");
+    }
+    variable = DATA.pointVars[0];
 
-  const through = DATA.dates.length ? DATA.dates[DATA.dates.length - 1] : "—";
-  document.getElementById("asof-through").textContent = through;
-  initStalenessBadgeFor("flows", through);
-  document.getElementById("asof-refreshed").textContent =
-    formatRefreshedLocal(DATA.generatedIso, DATA.generated);
+    const through = DATA.dates.length ? DATA.dates[DATA.dates.length - 1] : "—";
+    document.getElementById("asof-through").textContent = through;
+    initStalenessBadgeFor("flows", through);
+    document.getElementById("asof-refreshed").textContent =
+      formatRefreshedLocal(DATA.generatedIso, DATA.generated);
 
-  buildKpiMonthSelect();
-  applyQueryState();
-  onLevelOrVariableChanged();
+    buildKpiMonthSelect();
+    applyQueryState();
+    onLevelOrVariableChanged();
+  } catch (err) {
+    console.error(err);
+    const msg = String(err && err.message || err);
+    document.getElementById("asof-refreshed").textContent = "—";
+    document.getElementById("asof-through").textContent = "—";
+    const host = document.getElementById("chart-host");
+    if (host) host.innerHTML = '<div class="chart-empty">' + escapeHtml(msg) + "</div>";
+    const kpi = document.getElementById("kpi-cards");
+    if (kpi) kpi.innerHTML = "";
+    return;
+  }
 
   const drawer = document.getElementById("filters-drawer");
   const drawerToggle = document.getElementById("filters-drawer-toggle");
@@ -1616,19 +1631,37 @@ init();
 
 
 def write_dashboard(out_path=DEFAULT_OUT):
-    payload = load_payload()
-    # ADR-002 Track B + R2: payload.json.gz locally (and on R2 when configured).
-    # Hub teasers still read __GENERATED__ markers from the thin HTML shell.
     sys.path.insert(0, str(HERE.parent / "shared"))
     import data_kit as dk  # noqa: E402
-    payload_path, payload_href = dk.write_and_publish_artifact("flows", payload, HERE)
+    out_path = Path(out_path)
+    has_parquet = POINTS_PARQUET.exists() or LEDGER_PARQUET.exists()
+    if has_parquet:
+        payload = load_payload()
+        # ADR-002 Track B + R2: payload.json.gz locally (and on R2 when configured).
+        payload_path, payload_href = dk.write_and_publish_artifact("flows", payload, HERE)
+        generated = payload["generated"]
+        kpi_total_7d = str(payload["kpiTotal7d"]) if payload["kpiTotal7d"] is not None else ""
+        n_points = str(payload["nPoints"])
+        size_note = (
+            f"{payload_path.name} ({payload_path.stat().st_size:,} bytes, "
+            f"{len(payload['points'])} points, {len(payload['pipelines'])} pipelines)"
+        )
+    else:
+        shell = out_path if out_path.exists() else DEFAULT_OUT
+        payload_href = dk.published_payload_url(shell)
+        markers = dk.published_teaser_markers(shell)
+        generated = markers.get("generated") or ""
+        kpi_total_7d = markers.get("kpi_total_7d") or ""
+        n_points = markers.get("n_points") or ""
+        size_note = "reused published payload (no local parquet)"
+        print("No flows parquet; rebuilding HTML shell against the published payload.")
 
     html = kit.render(
         TEMPLATE,
         PAYLOAD_URL=payload_href,
-        GENERATED=payload["generated"],
-        KPI_TOTAL_7D=str(payload["kpiTotal7d"]) if payload["kpiTotal7d"] is not None else "",
-        N_POINTS=str(payload["nPoints"]),
+        GENERATED=generated,
+        KPI_TOTAL_7D=kpi_total_7d,
+        N_POINTS=n_points,
         SHARED_THEME_CSS=kit.render_theme_css(),
         SHARED_JS_DECODE=kit.JS_DECODE,
         SHARED_JS_ESCAPE_HTML=kit.JS_ESCAPE_HTML,
@@ -1647,14 +1680,9 @@ def write_dashboard(out_path=DEFAULT_OUT):
         FAVICON_DATA_URI=kit.embed_favicon(),
         FONT_PRELOAD=kit.font_preload_html(),
     )
-    out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(html, encoding="utf-8")
-    print(
-        f"Wrote dashboard shell ({len(html):,} bytes) + {payload_path.name} "
-        f"({payload_path.stat().st_size:,} bytes, {len(payload['points'])} points, "
-        f"{len(payload['pipelines'])} pipelines) → {payload_href}"
-    )
+    print(f"Wrote dashboard shell ({len(html):,} bytes) + {size_note} → {payload_href}")
 
 if __name__ == "__main__":
     out = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_OUT
