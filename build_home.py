@@ -688,7 +688,7 @@ def write_home(out_path: Path | str = DEFAULT_OUT) -> Path:
         "__BRAND_MENU__",
         kit.products_dropdown_html(
             "home",
-            '<div class="wordmark">GasBrazil<span class="dot" aria-hidden="true">.</span></div>',
+            '<div class="wordmark">GasBrazil</div>',
         ),
     )
     html = _kit_render(html)
@@ -712,7 +712,7 @@ def write_about(out_path: Path | None = None) -> Path:
         "__BRAND_MENU__",
         kit.products_dropdown_html(
             "home",
-            '<div class="wordmark"><a href="../">GasBrazil<span class="dot" aria-hidden="true">.</span></a></div>',
+            '<div class="wordmark"><a href="../">GasBrazil</a></div>',
         ),
     )
     # About lives in /about/, so home-relative links in the footer need ../
@@ -738,7 +738,7 @@ def write_404(out_path: Path | None = None) -> Path:
         "__BRAND_MENU__",
         kit.products_dropdown_html(
             "home",
-            '<div class="wordmark"><a href="./">GasBrazil<span class="dot" aria-hidden="true">.</span></a></div>',
+            '<div class="wordmark"><a href="./">GasBrazil</a></div>',
         ),
     )
     html = _kit_render(html)

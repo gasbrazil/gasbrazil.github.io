@@ -57,6 +57,7 @@ def test_masthead_menu_aria():
     assert 'aria-haspopup="menu"' in mast
     assert 'id="gb-products-menu"' in mast
     assert 'role="menu"' in mast
+    assert 'class="brand-mark-dot"' in mast
     assert 'class="dd-caret"' in mast
     assert "\u2630" not in mast  # no hamburger; menu hangs off the wordmark
     assert 'data-i18n-aria="navMenu"' in mast
@@ -101,13 +102,22 @@ def test_masthead_rejects_unknown_site():
         kit.masthead_html("nope")
 
 
+def test_theme_native_selects_follow_dark_mode():
+    css = kit.render_theme_css()
+    assert "html[data-theme=\"dark\"] select" in css
+    assert "color-scheme: dark" in css
+    assert "select option" in css
+
+
 def test_products_dropdown_wraps_brand():
     html = kit.products_dropdown_html("home", '<div class="wordmark">GasBrazil</div>')
     assert html.startswith('<div class="products-dd">')
     assert '<div class="wordmark">GasBrazil</div>' in html
-    assert html.find("wordmark") < html.find("dd-trigger")
-    assert html.find("dd-trigger") < html.find("dd-menu")
+    assert 'class="brand-lockup"' in html
+    assert html.find("wordmark") < html.find("brand-mark")
+    assert html.find("brand-mark") < html.find("dd-menu")
     assert "\u2630" not in html
+    assert 'class="brand-mark-dot"' in html
     assert 'class="dd-caret"' in html
 
 

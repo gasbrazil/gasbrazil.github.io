@@ -1306,18 +1306,28 @@ def _menu_items_html(self_id: str) -> str:
     return "".join(items)
 
 
+_BRAND_MARK_BUTTON = (
+    '<button type="button" class="dd-trigger brand-mark" aria-haspopup="menu" '
+    'aria-expanded="false" aria-controls="gb-products-menu" '
+    'id="gb-products-trigger" data-i18n-aria="navMenu" aria-label="Menu">'
+    '<span class="brand-mark-dot" aria-hidden="true">.</span>'
+    '<span class="dd-caret" aria-hidden="true"></span></button>'
+)
+
+
 def products_dropdown_html(self_id: str, brand_html: str) -> str:
-    """Wordmark + ghost caret + products menu. brand_html is the clickable
-    (or static) title; hover on the wrapper opens the menu."""
+    """Wordmark + blue-dot menu control + products menu. brand_html is the
+    clickable (or static) title without the trailing dot; the dot lives on
+    .brand-mark and morphs into the caret on hover / when open."""
     return (
         '<div class="products-dd">'
+        '<span class="brand-lockup">'
         + brand_html
-        + '<button type="button" class="dd-trigger" aria-haspopup="menu" '
-        'aria-expanded="false" aria-controls="gb-products-menu" '
-        'id="gb-products-trigger" data-i18n-aria="navMenu" aria-label="Menu">'
-        '<span class="dd-caret" aria-hidden="true"></span></button>'
+        + _BRAND_MARK_BUTTON
+        + "</span>"
         '<div class="dd-menu" id="gb-products-menu" role="menu" aria-labelledby="gb-products-trigger">'
-        + _menu_items_html(self_id) + "</div></div>"
+        + _menu_items_html(self_id)
+        + "</div></div>"
     )
 
 
