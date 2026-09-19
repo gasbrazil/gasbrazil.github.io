@@ -32,6 +32,17 @@ def test_write_json_gzip_reproducible(tmp_path):
     assert json.loads(raw) == payload
 
 
+def test_sanitize_for_json_replaces_nan(tmp_path):
+    import math
+
+    out = dk.sanitize_for_json({"muni": float("nan"), "uf": "SP", "vals": [1, math.inf]})
+    assert out == {"muni": None, "uf": "SP", "vals": [1, None]}
+    path = dk.write_json_gzip(out, tmp_path / "nan-test.json.gz")
+    raw = gzip.decompress(path.read_bytes())
+    assert b"NaN" not in raw
+    assert json.loads(raw) == out
+
+
 def test_payload_url_encodes_bust(monkeypatch):
     monkeypatch.setenv("GASBRAZIL_DATA_BASE_URL", "https://example.test")
     monkeypatch.setenv("GASBRAZIL_DATA_CACHE_BUST", "a b")
