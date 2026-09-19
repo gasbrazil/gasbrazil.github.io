@@ -1221,7 +1221,7 @@ footer.site a:hover { color: var(--text); border-bottom-color: var(--brz-yellow)
       <div class="kpi-label" data-i18n="cardPld">PLD Prices</div>
       <div class="kpi-role">Power settlement</div>
       <div class="kpi-val" data-en="SE 74.34 R$/MWh · 2026-09-19" data-pt="SE 74.34 R$/MWh · 2026-09-19">SE 74.34 R$/MWh · 2026-09-19</div>
-      <div class="kpi-when" data-refresh="2026-09-19 16:35 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-19 16:39 UTC"></div>
       
     </a>
     <a class="kpi-cell" href="poc/" data-slug="poc">
@@ -1240,8 +1240,8 @@ footer.site a:hover { color: var(--text); border-bottom-color: var(--brz-yellow)
     <a class="kpi-cell" href="flows/" data-slug="flows">
       <div class="kpi-label" data-i18n="cardFlows">Pipeline Flows</div>
       <div class="kpi-role">Physical movement</div>
-      <div class="kpi-val" data-en="2.2M m³ realized (7d)" data-pt="2.2M m³ realizados (7d)">2.2M m³ realized (7d)</div>
-      <div class="kpi-when" data-refresh="2026-09-18 21:03 UTC"></div>
+      <div class="kpi-val" data-en="1662.4M m³ realized (7d)" data-pt="1662.4M m³ realizados (7d)">1662.4M m³ realized (7d)</div>
+      <div class="kpi-when" data-refresh="2026-09-17 19:32 UTC"></div>
     </a>
     <a class="kpi-cell" href="supply/" data-slug="supply">
       <div class="kpi-label" data-i18n="cardSupply">Gas Supply</div>
@@ -1726,7 +1726,7 @@ initLangToggle("lang-toggle");
 </html>
 
 <script>
-const TEASERS_URL = "hub/teasers.json.gz";
+const TEASERS_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/hub/teasers.json.gz?v=35455756308";
 function paintRefreshLabels() {
   document.querySelectorAll(".kpi-when[data-refresh]").forEach(el => {
     const when = el.getAttribute("data-refresh");
