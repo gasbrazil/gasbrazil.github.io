@@ -8,6 +8,14 @@ import pytest
 import dashboard_kit as kit
 
 
+def test_embed_font_face_includes_plex_and_pacaembu():
+    css = kit.embed_font_face()
+    assert "font-family:'Pacaembu'" in css
+    assert "font-family:'IBM Plex Sans'" in css
+    assert "IBMPlexSans-Regular.ttf" in css
+    assert "Pacaembu-SemiBold.ttf" in css
+
+
 def test_seo_head_escapes_title_and_description():
     head = kit.seo_head(
         title='PLD <script>alert(1)</script>',
