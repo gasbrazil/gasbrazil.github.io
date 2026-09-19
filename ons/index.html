@@ -29,6 +29,38 @@
     document.documentElement.setAttribute("data-lang", "en");
     document.documentElement.setAttribute("lang", "en");
   }
+  function bindFlagbarHeaderGlow() {
+    var bar = document.querySelector(".flagbar");
+    if (!bar) return;
+    var heads = document.querySelectorAll(
+      "header.dash-head, header.top, .site-header, .hub-header"
+    );
+    if (!heads.length) return;
+    var io = new IntersectionObserver(function(entries) {
+      var vis = entries[0] && entries[0].isIntersecting;
+      heads.forEach(function(h) { h.classList.toggle("flag-glow", !vis); });
+    }, { threshold: 0, rootMargin: "0px 0px -2px 0px" });
+    io.observe(bar);
+  }
+  if (document.readyState === "loading")
+    document.addEventListener("DOMContentLoaded", bindFlagbarHeaderGlow);
+  else
+    bindFlagbarHeaderGlow();
+})();
+; only "light" opts out. */
+    var theme = localStorage.getItem("gasbrazil-theme");
+    if (theme !== "light")
+      document.documentElement.setAttribute("data-theme", "dark");
+    var lang = localStorage.getItem("gasbrazil-lang");
+    if (!lang)
+      lang = ((navigator.language || "en").toLowerCase().indexOf("pt") === 0) ? "pt" : "en";
+    document.documentElement.setAttribute("data-lang", lang);
+    document.documentElement.setAttribute("lang", lang === "pt" ? "pt-BR" : "en");
+  } catch (e) {
+    document.documentElement.setAttribute("data-theme", "dark");
+    document.documentElement.setAttribute("data-lang", "en");
+    document.documentElement.setAttribute("lang", "en");
+  }
 })();
 </script>
 <style>
@@ -229,7 +261,7 @@
   --tso-tbg-4: #86efac;
 }
 
-/* IBM Plex Sans for UI; Pacaembu for wordmark, page titles, hub hero line. */
+/* Plex Sans for data UI; Pacaembu for brand chrome (nav, menus, footer). */
 html, body {
   margin: 0;
   font-family: var(--font-ui);
@@ -239,17 +271,53 @@ html, body {
   background-image: var(--bg-grad);
   background-attachment: fixed;
 }
-.muted, .when, .sources-label, .asof, .meta-muted { font-weight: 400; color: var(--muted); }
+.muted, .when, .asof, .meta-muted { font-weight: 400; color: var(--muted); }
+/* Brand / navigation chrome */
 .wordmark,
 .masthead-brand,
-h1,
+.masthead h1,
 .tagline,
-.panel-title {
+.hub-page-title,
+.hub-header,
+.hub-controls,
+.hub-section-title,
+.navlink,
+.nav-trail,
+.navlinks,
+.header-links,
+.header-right,
+.dd-trigger,
+.dd-menu,
+.dd-menu a,
+.dd-menu .is-current,
+footer,
+footer.site,
+footer a,
+.method summary,
+.sources,
+.sources-label,
+.sources a,
+main.hub .kpi-cell,
+#lang-toggle,
+header.dash-head .nav-trail,
+.topbar.chrome-tools {
   font-family: var(--font-display);
+}
+.wordmark,
+.masthead-brand,
+.masthead h1,
+.tagline,
+.hub-page-title {
   font-weight: 600;
 }
 .wordmark { transition: color .15s ease; }
-.emph, .navlink, .kpi-title, .card .name, th, b, strong {
+.panel-title,
+.emph,
+.kpi-title,
+.card .name,
+th,
+b,
+strong {
   font-weight: 500;
 }
 strong, b, th { font-weight: 600; }
@@ -272,6 +340,46 @@ td.num, th.num {
   box-shadow:
     0 2px 10px rgba(0, 156, 59, .18),
     0 1px 6px rgba(0, 39, 118, .12);
+  transition: opacity 0.2s ease;
+}
+
+/* Sticky header absorbs the flag band when it scrolls away — glow via JS (.flag-glow). */
+.site-header::after,
+header.top::after,
+header.dash-head::after,
+.hub-header::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  border-radius: 0 0 2px 2px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  background: linear-gradient(90deg,
+    var(--brz-green) 0 46%, var(--brz-yellow) 46% 73%, var(--brz-blue) 73% 100%);
+  box-shadow:
+    0 0 14px rgba(0, 156, 59, .35),
+    0 0 10px rgba(255, 223, 0, .2),
+    0 0 12px rgba(0, 39, 118, .25);
+}
+.site-header.flag-glow::after,
+header.top.flag-glow::after,
+header.dash-head.flag-glow::after,
+.hub-header.flag-glow::after {
+  opacity: 0.82;
+}
+[data-theme="dark"] .site-header.flag-glow::after,
+[data-theme="dark"] header.top.flag-glow::after,
+[data-theme="dark"] header.dash-head.flag-glow::after,
+[data-theme="dark"] .hub-header.flag-glow::after {
+  opacity: 0.9;
+  box-shadow:
+    0 0 16px rgba(34, 197, 94, .4),
+    0 0 12px rgba(255, 223, 0, .25),
+    0 0 14px rgba(107, 154, 255, .35);
 }
 
 /* Shared content column. 80% of the viewport, capped so it doesn't sprawl on
@@ -297,13 +405,14 @@ td.num, th.num {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   padding-top: 10px;
-  padding-bottom: 8px;
+  padding-bottom: 10px;
   margin: 0;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  isolation: isolate;
 }
 .asof-strip {
   display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px;
@@ -466,7 +575,9 @@ footer .asof-strip,
   display: flex;
   align-items: center;
   gap: 8px;
-  font: 400 13.5px var(--font);
+  font-family: var(--font-display);
+  font-size: 13.5px;
+  font-weight: 400;
   color: var(--text);
   text-decoration: none;
   padding: 7px 10px;
@@ -1021,7 +1132,6 @@ input[type="checkbox"] {
   font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em;
 }
 .method-row > span:last-child { color: var(--muted2); font-weight: 300; }
-
 /* Everything below is ons-dashboard's own layout/components. The palette
    (neutral tokens + the shared Brazilian-flag accent) now lives entirely in
    shared/theme.css -- see ADR-001, Decision 2 Option C -- this file only

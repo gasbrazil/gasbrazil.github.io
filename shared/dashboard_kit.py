@@ -279,6 +279,23 @@ JS_BOOT = r"""
     document.documentElement.setAttribute("data-lang", "en");
     document.documentElement.setAttribute("lang", "en");
   }
+  function bindFlagbarHeaderGlow() {
+    var bar = document.querySelector(".flagbar");
+    if (!bar) return;
+    var heads = document.querySelectorAll(
+      "header.dash-head, header.top, .site-header, .hub-header"
+    );
+    if (!heads.length) return;
+    var io = new IntersectionObserver(function(entries) {
+      var vis = entries[0] && entries[0].isIntersecting;
+      heads.forEach(function(h) { h.classList.toggle("flag-glow", !vis); });
+    }, { threshold: 0, rootMargin: "0px 0px -2px 0px" });
+    io.observe(bar);
+  }
+  if (document.readyState === "loading")
+    document.addEventListener("DOMContentLoaded", bindFlagbarHeaderGlow);
+  else
+    bindFlagbarHeaderGlow();
 })();
 """
 

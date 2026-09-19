@@ -237,8 +237,9 @@ main.hub { flex: 1; width: var(--content-w); max-width: var(--content-max); marg
   background: var(--header-bg);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  padding: 10px 0 8px;
+  padding: 10px 0 10px;
   margin: 0 0 4px;
+  isolation: isolate;
 }
 @media (max-width: 720px) {
   .hub-header { flex-wrap: wrap; }
@@ -250,6 +251,7 @@ main.hub { flex: 1; width: var(--content-w); max-width: var(--content-max); marg
 .hub-section-title {
   font-size: 11px; text-transform: uppercase; letter-spacing: .06em;
   color: var(--muted); font-weight: 400; margin: 18px 0 8px;
+  font-family: var(--font-display);
 }
 .wordmark { font-size: 30px; font-weight: 600; letter-spacing: -.02em; line-height: 1.1; }
 .wordmark .dot { color: var(--accent); }
@@ -363,7 +365,7 @@ a.kpi-cell { cursor: pointer; }
   border-color: rgba(255, 223, 0, .35);
   box-shadow: var(--elevate), 0 0 0 1px rgba(255, 223, 0, .12);
 }
-footer.site { padding: 20px 24px; color: var(--muted); font-weight: 300; font-size: 13px; text-align: center; line-height: 1.7; }
+footer.site { padding: 20px 24px; color: var(--muted); font-weight: 300; font-size: 13px; text-align: center; line-height: 1.7; font-family: var(--font-display); }
 /* Keyboard users: every hub link and control gets a visible focus ring. */
 .kpi-cell:focus-visible, .card:focus-visible,
 .sources-block a:focus-visible, .hub-controls button:focus-visible,
