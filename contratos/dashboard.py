@@ -153,12 +153,13 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .drill-card tbody tr.picked { background: var(--accent-soft); font-weight: 400; }
 .drill-card col.rank { width: 2.25rem; }
 .drill-card col.shipper { width: auto; }
-.drill-card col.contracts { width: 5.5rem; }
-.drill-card col.metric { width: 4.75rem; }
-.drill-card col.total { width: 5.25rem; }
-.drill-card col.share { width: 4.5rem; }
+.drill-card col.contracts { width: 4.75rem; }
+.drill-card col.metric { width: 4.25rem; }
+.drill-card col.total { width: 4.75rem; }
+.drill-card th { white-space: normal; line-height: 1.25; vertical-align: bottom; }
 .drill-card .rank { color: var(--muted); }
-.drill-card td.shipper { overflow: hidden; text-overflow: ellipsis; }
+.drill-card td.shipper { white-space: normal; overflow: visible; text-overflow: clip; word-break: break-word; }
+.drill-card .th-sub { display: block; font-size: 10px; font-weight: 300; text-transform: none; letter-spacing: 0; color: var(--muted); }
 .drill-more { background: none; border: none; color: var(--accent); font-size: 12px; cursor: pointer; padding: 8px 0 0; font-family: var(--font); }
 .qf-btn { background: var(--panel); border: 1px solid var(--border); border-radius: 5px; padding: 4px 12px; font-size: 12px; cursor: pointer; color: var(--text); font-family: var(--font); }
 .qf-btn:hover { background: var(--accent-soft); }
@@ -1314,16 +1315,12 @@ function renderDrill() {
   const pickedShipper = columnFilters["Shipper"] && columnFilters["Shipper"].size === 1
     ? [...columnFilters["Shipper"]][0] : null;
   const shown = drillShowAll ? all : all.slice(0, DRILL_TOP_N);
-  const grand = all.reduce((a, e) => a + e.total, 0);
   const totalsByTso = {};
   for (const t of cols) totalsByTso[t] = all.reduce((a, e) => a + (e.cap[t] ? e.cap[t].entry + e.cap[t].exit : 0), 0);
 
   const cell = v => v ? fmtNum(v, 0) : '<span class="zero">&ndash;</span>';
-  // One header row (no colspan): Chrome will not freeze a sticky <th> that
-  // spans columns, which is what made this header hover over the body.
-  const metricHeads = cols.map(t =>
-    `<th class="num sep">${escapeHtml(t)} Entry</th><th class="num">${escapeHtml(t)} Exit</th>`
-  ).join("");
+  const metricHead = tso => `<th class="num sep">${escapeHtml(tso)}<br><span class="th-sub">Entry</span></th><th class="num"><span class="th-sub">${escapeHtml(tso)} Exit</span></th>`;
+  const metricHeads = cols.map(metricHead).join("");
   const body = shown.map((e, i) => {
     const cells = cols.map(t => {
       const c = e.cap[t] || { entry: 0, exit: 0 };
@@ -1331,11 +1328,10 @@ function renderDrill() {
     }).join("");
     return `<tr data-shipper="${escapeHtml(e.name)}" class="${pickedShipper === e.name ? "picked" : ""}">
       <td class="rank">${i + 1}</td>
-      <td class="shipper" title="${escapeHtml(e.name)}">${escapeHtml(e.name)}</td>
+      <td class="shipper">${escapeHtml(e.name)}</td>
       <td class="num">${e.nContracts.toLocaleString(numLocale())}</td>
       ${cells}
       <td class="num sep">${fmtNum(e.total, 0)}</td>
-      <td class="num">${grand > 0 ? fmtNum(100 * e.total / grand, 1) + "%" : "&ndash;"}</td>
     </tr>`;
   }).join("");
 
@@ -1350,18 +1346,18 @@ function renderDrill() {
   const colgroup = `<colgroup>
       <col class="rank"><col class="shipper"><col class="contracts">
       ${cols.map(() => '<col class="metric"><col class="metric">').join("")}
-      <col class="total"><col class="share">
+      <col class="total">
     </colgroup>`;
   card.innerHTML = `
     <p class="panel-title">Top Shippers by Held Capacity &mdash; ${scope}</p>
     ${tsoSummary}
     <p class="panel-note">Capacity in 000 m&sup3;/d on active contracts currently within their term &middot;
-      ${all.length.toLocaleString(numLocale())} shipper${all.length === 1 ? "" : "s"} &middot; ${mix} &middot; total ${fmtNum(grand, 0)}</p>
+      ${all.length.toLocaleString(numLocale())} shipper${all.length === 1 ? "" : "s"} &middot; ${mix} &middot; total ${fmtNum(all.reduce((a, e) => a + e.total, 0), 0)}</p>
     <div class="drill-table-wrap">
     <table>
       ${colgroup}
       <thead>
-        <tr><th></th><th>Shipper</th><th class="num">Contracts</th>${metricHeads}<th class="num sep">Total</th><th class="num">Share</th></tr>
+        <tr><th></th><th>Shipper</th><th class="num">Contracts</th>${metricHeads}<th class="num sep">Total</th></tr>
       </thead>
       <tbody>${body}</tbody>
     </table>
