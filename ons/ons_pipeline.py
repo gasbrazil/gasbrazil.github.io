@@ -1937,7 +1937,12 @@ def cmd_health(args) -> int:
         print(f"  {'OK  ' if passed else 'FAIL'} {name:<18} {str(got):<22} want {want}")
         ok &= passed
     print("\nHealthy." if ok else "\nUnhealthy - not safe to deploy.")
-    return 0 if ok else 1
+    code = 0 if ok else 1
+    # Large parquet reads can trigger a PyArrow/pandas abort during normal
+    # interpreter shutdown on some Linux CI images; exit without teardown.
+    import os
+
+    os._exit(code)
 
 
 def cmd_refresh(args) -> int:

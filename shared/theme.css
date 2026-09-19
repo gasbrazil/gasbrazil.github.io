@@ -10,7 +10,7 @@
  *
  * The FONT_FACE placeholder below is filled in by
  * shared/dashboard_kit.py's embed_font_face() at build time with
- * @font-face rules that load ExtraLight / Light / Regular / SemiBold
+ * @font-face rules for Pacaembu (wordmark / titles) and IBM Plex Sans (UI)
  * from /shared/fonts/*.ttf (or left blank if that directory is empty).
  */
 __FONT_FACE__
@@ -51,7 +51,10 @@ __FONT_FACE__
     #ffffff 0%,
     color-mix(in srgb, var(--panel-hover) 96%, var(--brz-green)) 100%
   );
-  --font: "Pacaembu", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-ui: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Pacaembu", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  /* Legacy alias — dashboards reference var(--font) everywhere. */
+  --font: var(--font-ui);
   --radius: 8px;
   --radius-sm: 5px;
 
@@ -192,23 +195,32 @@ __FONT_FACE__
   --tso-tbg-4: #86efac;
 }
 
-/* Pacaembu is heavy at Regular -- default the whole UI to Light (300).
-   Mid emphasis uses Regular (400); wordmark + page titles use SemiBold (600).
-   Never Bold / 700 (that synthesizes badly and the face is already dense). */
+/* IBM Plex Sans for UI; Pacaembu for wordmark, page titles, hub hero line. */
 html, body {
   margin: 0;
-  font-family: var(--font);
-  font-weight: 300;
+  font-family: var(--font-ui);
+  font-weight: 400;
   color: var(--text);
   background-color: var(--bg);
   background-image: var(--bg-grad);
   background-attachment: fixed;
 }
-.muted, .when, .sources-label, .asof, .meta-muted { font-weight: 300; color: var(--muted); }
-.wordmark, h1 { font-weight: 600; }
+.muted, .when, .sources-label, .asof, .meta-muted { font-weight: 400; color: var(--muted); }
+.wordmark,
+.masthead-brand,
+h1,
+.tagline,
+.panel-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+}
 .wordmark { transition: color .15s ease; }
-.emph, .navlink, .kpi-title, .card .name, .panel-title, th, b, strong {
-  font-weight: 400;
+.emph, .navlink, .kpi-title, .card .name, th, b, strong {
+  font-weight: 500;
+}
+strong, b, th { font-weight: 600; }
+td.num, th.num {
+  font-variant-numeric: tabular-nums;
 }
 
 /* Green/yellow/blue band, proportioned like the flag itself (green field,
@@ -372,6 +384,7 @@ footer .asof-strip,
   min-width: 0;
 }
 .masthead-brand {
+  font-family: var(--font-display);
   font-weight: 600; font-size: 17px; letter-spacing: -.015em;
   color: var(--text); text-decoration: none; white-space: nowrap;
   transition: color .15s ease;
@@ -383,7 +396,8 @@ footer .asof-strip,
 [data-theme="dark"] .products-dd:hover .masthead-brand,
 [data-theme="dark"] .products-dd:hover .wordmark { color: var(--brz-yellow); }
 .masthead h1 {
-  font-size: 14px; margin: 0; letter-spacing: -.01em; font-weight: 400;
+  font-family: var(--font-display);
+  font-size: 14px; margin: 0; letter-spacing: -.01em; font-weight: 600;
   color: var(--muted2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .dd-menu {

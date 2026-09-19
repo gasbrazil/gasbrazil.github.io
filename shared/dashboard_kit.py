@@ -30,6 +30,7 @@ import gzip
 import html
 import json
 import re
+from collections.abc import Iterable
 from pathlib import Path
 
 HERE = Path(__file__).parent
@@ -54,51 +55,66 @@ PACAEMBU_FACES = (
     (600, "Pacaembu-SemiBold.ttf"),
 )
 
+# UI body type (data tables, controls, chart chrome). Self-hosted from the
+# Google Fonts download bundle (static/*.ttf).
+PLEX_SANS_FACES = (
+    (300, "IBMPlexSans-Light.ttf"),
+    (400, "IBMPlexSans-Regular.ttf"),
+    (500, "IBMPlexSans-Medium.ttf"),
+    (600, "IBMPlexSans-SemiBold.ttf"),
+)
+PLEX_FAMILY = "IBM Plex Sans"
+
 # Raw theme.css text, __FONT_FACE__ placeholder still unresolved -- callers
 # combine this with embed_font_face() (see render_theme_css below) and their
 # own per-project accent block before dropping it into their TEMPLATE.
 THEME_CSS = THEME_CSS_PATH.read_text(encoding="utf-8")
 
 
-def embed_font_face(font_path: Path | str = DEFAULT_FONT_PATH) -> str:
-    """Return @font-face rules pointing at /shared/fonts/*.ttf, or "" if none.
-
-    Fonts are loaded as separate cacheable files (not base64-inlined). Keep
-    font-display:swap so text paints with the system stack first.
-
-    font_path is accepted for call-site compatibility; when it points at the
-    shared fonts dir (or the Light file), all available weights are linked.
-    A one-off alternate path still emits a single face at weight 300."""
-    font_path = Path(font_path)
-    faces: list[tuple[int, str]] = []
-    if font_path == DEFAULT_FONT_PATH or font_path == FONTS_DIR:
-        for weight, name in PACAEMBU_FACES:
-            if (FONTS_DIR / name).exists():
-                faces.append((weight, name))
-    elif font_path.exists():
-        faces.append((300, font_path.name))
-    if not faces:
-        return ""
-    rules = []
+def _font_face_rules(family: str, faces: Iterable[tuple[int, str]]) -> list[str]:
+    rules: list[str] = []
     for weight, name in faces:
+        if not (FONTS_DIR / name).exists():
+            continue
         url = f"{FONTS_URL_PREFIX}/{name}"
         rules.append(
-            "@font-face{font-family:'Pacaembu';font-weight:" + str(weight) +
-            ";font-style:normal;font-display:swap;src:url('" + url +
-            "') format('truetype');}"
+            f"@font-face{{font-family:'{family}';font-weight:{weight};"
+            f"font-style:normal;font-display:swap;src:url('{url}') format('truetype');}}"
         )
+    return rules
+
+
+def embed_font_face(font_path: Path | str = DEFAULT_FONT_PATH) -> str:
+    """Return @font-face rules for Pacaembu (display) + IBM Plex Sans (UI).
+
+    font_path is kept for call-site compatibility; all bundled weights are
+    linked when it points at the shared fonts dir or the default Light file."""
+    font_path = Path(font_path)
+    if font_path != DEFAULT_FONT_PATH and font_path != FONTS_DIR and font_path.exists():
+        return "".join(_font_face_rules("Pacaembu", [(300, font_path.name)]))
+    rules = _font_face_rules("Pacaembu", PACAEMBU_FACES)
+    rules.extend(_font_face_rules(PLEX_FAMILY, PLEX_SANS_FACES))
     return "".join(rules)
 
 
 def font_preload_html(*, weight: int = 300) -> str:
-    """<link rel=preload> for the default Pacaembu weight (Light = 300)."""
+    """Preload default UI + display faces (Plex Regular, Pacaembu SemiBold)."""
+    links: list[str] = []
+    for name in ("IBMPlexSans-Regular.ttf", "Pacaembu-SemiBold.ttf"):
+        path = FONTS_DIR / name
+        if path.exists():
+            href = f"{FONTS_URL_PREFIX}/{name}"
+            links.append(
+                f'<link rel="preload" href="{href}" as="font" type="font/ttf" crossorigin>'
+            )
+    if links:
+        return "\n".join(links)
+    # Fallback when Plex bundle not extracted yet.
     name = next((n for w, n in PACAEMBU_FACES if w == weight), None)
     if not name or not (FONTS_DIR / name).exists():
         return ""
     href = f"{FONTS_URL_PREFIX}/{name}"
-    return (
-        f'<link rel="preload" href="{href}" as="font" type="font/ttf" crossorigin>'
-    )
+    return f'<link rel="preload" href="{href}" as="font" type="font/ttf" crossorigin>'
 
 
 def embed_favicon(favicon_path: Path | str = DEFAULT_FAVICON_PATH,
