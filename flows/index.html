@@ -1364,6 +1364,14 @@ async function inflateGzipUrl(url) {
   const stream = res.body.pipeThrough(ds);
   return new TextDecoder().decode(await new Response(stream).arrayBuffer());
 }
+function parseDashboardJson(text) {
+  // Legacy gzip payloads were built with Python json.dumps NaN tokens, which
+  // JSON.parse rejects. New publishes sanitize to null; normalize on read too.
+  const safe = String(text)
+    .replace(/:\s*NaN\b/g, ":null")
+    .replace(/,\s*NaN\b/g, ",null");
+  return JSON.parse(safe);
+}
 
 
 function csvEscape(v) {
@@ -1763,7 +1771,6 @@ function placeChartTooltip(tt, clientX, clientY) {
   tt.style.top = top + "px";
   watchChartTooltipAnchor(tt, clientX, clientY);
 }
-
 
 const MAX_CHIPS_SHOWN = 60;
 const DEFAULT_PICK_COUNT = 5;
@@ -3214,19 +3221,34 @@ function initStalenessBadgeFor(site, through) {
 
 async function init() {
   document.getElementById("year").textContent = new Date().getFullYear();
-  const text = await inflateGzipUrl(PAYLOAD_URL);
-  DATA = JSON.parse(text);
-  variable = DATA.pointVars[0];
+  try {
+    const text = await inflateGzipUrl(PAYLOAD_URL);
+    DATA = parseDashboardJson(text);
+    if (!DATA.pointVars || !DATA.pointVars.length) {
+      throw new Error("Flows payload has no point variables — rebuild flows data.");
+    }
+    variable = DATA.pointVars[0];
 
-  const through = DATA.dates.length ? DATA.dates[DATA.dates.length - 1] : "—";
-  document.getElementById("asof-through").textContent = through;
-  initStalenessBadgeFor("flows", through);
-  document.getElementById("asof-refreshed").textContent =
-    formatRefreshedLocal(DATA.generatedIso, DATA.generated);
+    const through = DATA.dates.length ? DATA.dates[DATA.dates.length - 1] : "—";
+    document.getElementById("asof-through").textContent = through;
+    initStalenessBadgeFor("flows", through);
+    document.getElementById("asof-refreshed").textContent =
+      formatRefreshedLocal(DATA.generatedIso, DATA.generated);
 
-  buildKpiMonthSelect();
-  applyQueryState();
-  onLevelOrVariableChanged();
+    buildKpiMonthSelect();
+    applyQueryState();
+    onLevelOrVariableChanged();
+  } catch (err) {
+    console.error(err);
+    const msg = String(err && err.message || err);
+    document.getElementById("asof-refreshed").textContent = "—";
+    document.getElementById("asof-through").textContent = "—";
+    const host = document.getElementById("chart-host");
+    if (host) host.innerHTML = '<div class="chart-empty">' + escapeHtml(msg) + "</div>";
+    const kpi = document.getElementById("kpi-cards");
+    if (kpi) kpi.innerHTML = "";
+    return;
+  }
 
   const drawer = document.getElementById("filters-drawer");
   const drawerToggle = document.getElementById("filters-drawer-toggle");
