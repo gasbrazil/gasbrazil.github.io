@@ -1168,20 +1168,20 @@ footer.site a:hover { color: var(--text); border-bottom-color: var(--brz-yellow)
     <a class="kpi-cell" href="desk/" data-slug="desk">
       <div class="kpi-label" data-i18n="cardDesk">The Desk</div>
       <div class="kpi-role">Cross-product snapshot</div>
-      <div class="kpi-val" data-en="3622 MWmed gas · PLD SE 89.56" data-pt="3622 MWmed a gás · PLD SE 89.56">3622 MWmed gas · PLD SE 89.56</div>
-      <div class="kpi-when" data-refresh="2026-09-18 17:15 UTC"></div>
+      <div class="kpi-val" data-en="3488 MWmed gas · PLD SE 89.56" data-pt="3488 MWmed a gás · PLD SE 89.56">3488 MWmed gas · PLD SE 89.56</div>
+      <div class="kpi-when" data-refresh="2026-09-19 16:15 UTC"></div>
     </a>
     <a class="kpi-cell" href="ons/" data-slug="ons">
       <div class="kpi-label" data-i18n="cardOns">ONS Balances</div>
       <div class="kpi-role">Grid &amp; gas dispatch</div>
-      <div class="kpi-val" data-en="3,488 MWmed gas" data-pt="3,488 MWmed a gás">3,488 MWmed gas</div>
-      <div class="kpi-when" data-refresh="2026-09-19 01:25 UTC"></div>
+      <div class="kpi-val" data-en="3,697 MWmed gas" data-pt="3,697 MWmed a gás">3,697 MWmed gas</div>
+      <div class="kpi-when" data-refresh="2026-09-19 16:16 UTC"></div>
     </a>
     <a class="kpi-cell" href="pld/" data-slug="pld">
       <div class="kpi-label" data-i18n="cardPld">PLD Prices</div>
       <div class="kpi-role">Power settlement</div>
-      <div class="kpi-val" data-en="SE 89.56 R$/MWh · 2026-09-18" data-pt="SE 89.56 R$/MWh · 2026-09-18">SE 89.56 R$/MWh · 2026-09-18</div>
-      <div class="kpi-when" data-refresh="2026-09-18 17:08 UTC"></div>
+      <div class="kpi-val" data-en="SE 74.34 R$/MWh · 2026-09-19" data-pt="SE 74.34 R$/MWh · 2026-09-19">SE 74.34 R$/MWh · 2026-09-19</div>
+      <div class="kpi-when" data-refresh="2026-09-19 16:16 UTC"></div>
       
     </a>
     <a class="kpi-cell" href="poc/" data-slug="poc">
@@ -1195,7 +1195,7 @@ footer.site a:hover { color: var(--text); border-bottom-color: var(--brz-yellow)
       <div class="kpi-label" data-i18n="cardContratos">POC Contracts</div>
       <div class="kpi-role">Firm transport</div>
       <div class="kpi-val" data-en="895 contracts · 189415.3 thousand m³/d" data-pt="895 contratos · 189415.3 mil m³/d">895 contracts · 189415.3 thousand m³/d</div>
-      <div class="kpi-when" data-refresh="2026-09-19 14:18 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-19 16:16 UTC"></div>
     </a>
     <a class="kpi-cell" href="flows/" data-slug="flows">
       <div class="kpi-label" data-i18n="cardFlows">Pipeline Flows</div>
@@ -1207,14 +1207,14 @@ footer.site a:hover { color: var(--text); border-bottom-color: var(--brz-yellow)
       <div class="kpi-label" data-i18n="cardSupply">Gas Supply</div>
       <div class="kpi-role">National balance</div>
       <div class="kpi-val" data-en="6.7M thousand m³ produced · 2026-07" data-pt="6.7M mil m³ produzidos · 2026-07">6.7M thousand m³ produced · 2026-07</div>
-      <div class="kpi-when" data-refresh="2026-09-18 12:50 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-19 16:16 UTC"></div>
       
     </a>
     <a class="kpi-cell" href="precos/" data-slug="precos">
       <div class="kpi-label" data-i18n="cardPrecos">ANP Prices</div>
       <div class="kpi-role">Disclosed R$/MMBtu</div>
       <div class="kpi-val" data-en="Santos 18.2 R$/MMBtu · 2026-06" data-pt="Santos 18.2 R$/MMBtu · 2026-06">Santos 18.2 R$/MMBtu · 2026-06</div>
-      <div class="kpi-when" data-refresh="2026-09-17 12:50 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-19 16:15 UTC"></div>
     </a>
   </div>
   <div class="sources-block">
@@ -1258,6 +1258,14 @@ async function inflateGzipUrl(url) {
   const ds = new DecompressionStream("gzip");
   const stream = res.body.pipeThrough(ds);
   return new TextDecoder().decode(await new Response(stream).arrayBuffer());
+}
+function parseDashboardJson(text) {
+  // Legacy gzip payloads were built with Python json.dumps NaN tokens, which
+  // JSON.parse rejects. New publishes sanitize to null; normalize on read too.
+  const safe = String(text)
+    .replace(/:\s*NaN\b/g, ":null")
+    .replace(/,\s*NaN\b/g, ",null");
+  return JSON.parse(safe);
 }
 
 
@@ -1675,7 +1683,7 @@ initLangToggle("lang-toggle");
 </html>
 
 <script>
-const TEASERS_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/hub/teasers.json.gz?v=35454374893";
+const TEASERS_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/hub/teasers.json.gz?v=35455415017";
 function paintRefreshLabels() {
   document.querySelectorAll(".kpi-when[data-refresh]").forEach(el => {
     const when = el.getAttribute("data-refresh");
