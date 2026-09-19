@@ -492,6 +492,157 @@ def _util_table(
         return empty
 
 
+def _ons_national_daily(
+    ons: Optional[pd.DataFrame],
+    series: str,
+    *,
+    days: int = COMPARE_DAYS,
+) -> tuple[list[str], list[Optional[float]]]:
+    if ons is None or ons.empty:
+        return [], []
+    need = {"date", "subsystem", "series", "value"}
+    if not need.issubset(ons.columns):
+        return [], []
+    o = ons.copy()
+    o["date"] = pd.to_datetime(o["date"], errors="coerce")
+    o = o.dropna(subset=["date"])
+    o = o[o["series"].astype(str) == series]
+    if "entity" in o.columns:
+        o = o[o["entity"].astype(str).fillna("") == ""]
+    o = o[o["subsystem"].astype(str).str.upper().isin(["SE", "S", "NE", "N"])]
+    if o.empty:
+        return [], []
+    daily = o.groupby("date", as_index=False)["value"].sum().sort_values("date")
+    last = daily["date"].max()
+    if pd.isna(last):
+        return [], []
+    from_d = last - pd.Timedelta(days=days)
+    daily = daily[daily["date"] >= from_d]
+    dates = [d.strftime("%Y-%m-%d") for d in daily["date"]]
+    values = [_num(v, 2 if series != "thermal_gas" else 1) for v in daily["value"]]
+    return dates, values
+
+
+def _poc_daily_avg_m3(poc: Optional[pd.DataFrame], *, gus_only: bool = False) -> tuple[list[str], list[Optional[float]]]:
+    if poc is None or poc.empty:
+        return [], []
+    if "Trade Date" not in poc.columns or "Price" not in poc.columns:
+        return [], []
+    p = poc.copy()
+    p["Trade Date"] = pd.to_datetime(p["Trade Date"], errors="coerce")
+    p = p.dropna(subset=["Trade Date", "Price"])
+    if gus_only:
+        tt = p.get("Transaction Type")
+        if tt is not None:
+            p = p[tt.astype(str).str.upper().str.contains("GUS", na=False)]
+    if p.empty:
+        return [], []
+    p["d"] = p["Trade Date"].dt.strftime("%Y-%m-%d")
+    g = p.groupby("d")["Price"].mean().sort_index()
+    last = pd.Timestamp(p["Trade Date"].max())
+    from_d = (last - pd.Timedelta(days=COMPARE_DAYS)).strftime("%Y-%m-%d")
+    dates = [d for d in g.index.astype(str).tolist() if d >= from_d]
+    values = [_mmbtu_to_m3(g[d], 3) for d in dates]
+    return dates, values
+
+
+def _analysis_series(
+    ons: Optional[pd.DataFrame],
+    poc: Optional[pd.DataFrame],
+    compare: dict,
+    poc_anp: dict,
+) -> list[dict]:
+    """Cross-product series the Analysis picker can join on a shared timeline."""
+    out: list[dict] = []
+    dates = compare.get("dates") or []
+    by = compare.get("bySubmarket") or {}
+    for sm in ("SE", "S", "NE", "N"):
+        block = by.get(sm) or {}
+        for field, label, unit in (
+            ("pld", f"PLD {sm}", "R$/MWh"),
+            ("cmo", f"CMO {sm}", "R$/MWh"),
+            ("cvu", f"CVU gas med {sm}", "R$/MWh"),
+        ):
+            vals = block.get(field)
+            if not vals or not any(v is not None for v in vals):
+                continue
+            out.append({
+                "id": f"{field}_{sm.lower()}",
+                "label": label,
+                "group": "Power",
+                "freq": "daily",
+                "unit": unit,
+                "timeline": dates,
+                "values": vals,
+            })
+
+    gen_d, gen_v = _ons_national_daily(ons, "thermal_gas")
+    if gen_d:
+        out.append({
+            "id": "ons_gas_gen_sin",
+            "label": "Gas generation (national)",
+            "group": "ONS",
+            "freq": "daily",
+            "unit": "MWmed",
+            "timeline": gen_d,
+            "values": gen_v,
+        })
+    gas_d, gas_v = _ons_national_daily(ons, "gas_consumption_m3")
+    if gas_d:
+        out.append({
+            "id": "ons_est_gas_sin",
+            "label": "Est. gas consumption (national)",
+            "group": "ONS",
+            "freq": "daily",
+            "unit": "m³/d",
+            "timeline": gas_d,
+            "values": gas_v,
+        })
+
+    gus_d, gus_v = _poc_daily_avg_m3(poc, gus_only=True)
+    if gus_d:
+        out.append({
+            "id": "poc_gus_m3",
+            "label": "POC GUS price",
+            "group": "POC",
+            "freq": "daily",
+            "unit": "R$/m³",
+            "timeline": gus_d,
+            "values": gus_v,
+        })
+    poc_d, poc_v = _poc_daily_avg_m3(poc, gus_only=False)
+    if poc_d:
+        out.append({
+            "id": "poc_all_m3",
+            "label": "POC avg trade price",
+            "group": "POC",
+            "freq": "daily",
+            "unit": "R$/m³",
+            "timeline": poc_d,
+            "values": poc_v,
+        })
+
+    months = poc_anp.get("months") or []
+    for field, label, unit in (
+        ("poc", "POC avg (monthly)", "R$/m³"),
+        ("anpSantos", "ANP Santos (monthly)", "R$/m³"),
+        ("anpNonThermalSe", "ANP non-thermal SE (monthly)", "R$/m³"),
+    ):
+        vals = poc_anp.get(field)
+        if not vals or not months or not any(v is not None for v in vals):
+            continue
+        out.append({
+            "id": f"monthly_{field}",
+            "label": label,
+            "group": "Prices",
+            "freq": "monthly",
+            "unit": unit,
+            "timeline": months,
+            "values": vals,
+        })
+    return out
+
+
 def build_payload() -> dict:
     heat = xf.ONS_GAS_HEAT
     notes: list[str] = []
@@ -592,6 +743,7 @@ def build_payload() -> dict:
     for key in ("poc", "anpSantos", "anpNonThermalSe"):
         if key in poc_anp and isinstance(poc_anp[key], list):
             poc_anp[key] = [_mmbtu_to_m3(v) for v in poc_anp[key]]
+    analysis_series = _analysis_series(ons, poc, compare, poc_anp)
     util = _util_table(contratos, flows)
     for block in (compare, poc_anp, util):
         if block.get("note"):
@@ -655,6 +807,7 @@ def build_payload() -> dict:
         },
         "compareSe": compare,
         "pocAnpMonthly": poc_anp,
+        "analysisSeries": analysis_series,
         "utilization": util,
         "spark": {
             "defaultGasPrice": default_gas,

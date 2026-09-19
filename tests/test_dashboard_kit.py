@@ -117,9 +117,30 @@ def test_contratos_drill_table_has_own_scroll_wrap():
     assert "position: sticky" not in src
     assert "colspan=" not in src
     assert "${metricHeads}" in src
+    assert ">Share<" not in src
+    assert "col.share" not in src
 
 
-def test_dashboards_do_not_sticky_th_to_the_page():
+def test_desk_analysis_section_in_source():
+    from pathlib import Path
+
+    src = (Path(__file__).resolve().parents[1] / "desk" / "dashboard.py").read_text(
+        encoding="utf-8"
+    )
+    assert 'id="picker-analysis"' in src
+    assert "analysisSeries" in src
+    assert "renderAnalysis" in src
+
+
+def test_flows_init_handles_load_errors():
+    from pathlib import Path
+
+    src = (Path(__file__).resolve().parents[1] / "flows" / "dashboard.py").read_text(
+        encoding="utf-8"
+    )
+    assert "async function init()" in src
+    assert "chart-empty" in src
+    assert "No flows parquet" in src
     from pathlib import Path
 
     root = Path(__file__).resolve().parents[1]
