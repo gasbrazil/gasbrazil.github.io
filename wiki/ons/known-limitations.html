@@ -445,15 +445,40 @@ footer .asof-strip,
   align-items: baseline;
   gap: 0;
   flex: none;
+  /* Dot + name share one typographic size (was shrinking on the button alone). */
+  font-weight: 600;
+  line-height: 1.1;
+}
+.masthead-ident .brand-lockup {
+  font-size: 17px;
+  letter-spacing: -.015em;
+}
+.masthead-ident .brand-lockup .masthead-brand {
+  font-size: inherit;
+  letter-spacing: inherit;
+  font-weight: inherit;
+}
+main.hub .brand-lockup,
+.hub-header .brand-lockup {
+  font-size: 30px;
+  letter-spacing: -.02em;
+}
+main.hub .brand-lockup .wordmark,
+.hub-header .brand-lockup .wordmark {
+  font-size: inherit;
+  letter-spacing: inherit;
+  font-weight: inherit;
+  line-height: inherit;
 }
 .brand-mark.dd-trigger {
   position: relative;
   display: inline-flex;
-  align-items: flex-end;
+  align-items: baseline;
   justify-content: center;
-  min-width: 0.45em;
+  min-width: 0.55em;
   width: auto;
-  height: 1em;
+  height: auto;
+  min-height: 1em;
   padding: 0;
   margin: 0;
   background: transparent;
@@ -461,7 +486,7 @@ footer .asof-strip,
   border-radius: 0;
   color: var(--accent);
   cursor: pointer;
-  font: 600 1em/1 var(--font-display);
+  font: inherit;
   flex: none;
   box-sizing: border-box;
   vertical-align: baseline;
@@ -471,8 +496,9 @@ footer .asof-strip,
 .wordmark .dot {
   display: inline-block;
   color: var(--accent);
-  font-weight: 600;
-  line-height: 1;
+  font-size: 1em;
+  font-weight: inherit;
+  line-height: inherit;
   transition: opacity .14s ease, transform .16s ease;
 }
 .brand-mark .dd-caret {
