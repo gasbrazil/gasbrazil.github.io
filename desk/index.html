@@ -2505,12 +2505,12 @@ function analysisColorIndex(id) {
     return (base + smOff) % 8;
   }
   const fixed = {
-    poc_gus_m3: 0,
-    poc_all_m3: 1,
-    flows_vol_sin: 6,
-    monthly_poc: 2,
-    monthly_anpSantos: 3,
-    monthly_anpNonThermalSe: 4,
+    poc_gus_m3: 6,
+    poc_all_m3: 7,
+    flows_vol_sin: 5,
+    monthly_poc: 3,
+    monthly_anpSantos: 4,
+    monthly_anpNonThermalSe: 2,
   };
   if (fixed[id] != null) return fixed[id] % 8;
   let h = 0;
@@ -3329,6 +3329,10 @@ async function init() {
   initCrossLinks();
   gbCopyLink("btn-share");
   applyI18n();
+  const tabFromUrl = gbValidEnum(gbQueryParams().get("tab"), ["overview", "analysis"]);
+  if (tabFromUrl) deskTab = tabFromUrl;
+  buildDeskTabs();
+  setDeskTab(deskTab);
   try {
     const json = await inflateGzipUrl(PAYLOAD_URL);
     DATA = JSON.parse(json);
