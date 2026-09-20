@@ -473,32 +473,32 @@ main.hub .brand-lockup .wordmark,
   vertical-align: baseline;
   transition: color .15s ease;
 }
-/* Solid flag-blue dot; on hover it shifts to flag yellow (no caret morph). */
+/* Solid flag-blue dot; on hover only the dot shifts to flag yellow. */
 .brand-mark-dot,
 .wordmark .dot {
   display: inline-block;
-  width: 0.48em;
-  height: 0.48em;
-  min-width: 0.48em;
-  min-height: 0.48em;
+  width: 0.36em;
+  height: 0.36em;
+  min-width: 0.36em;
+  min-height: 0.36em;
   border-radius: 50%;
   background: var(--accent);
   flex-shrink: 0;
-  vertical-align: -0.06em;
+  vertical-align: -0.05em;
   transition: background-color .15s ease;
 }
 .masthead-ident .brand-mark-dot {
-  width: 7px;
-  height: 7px;
-  min-width: 7px;
-  min-height: 7px;
+  width: 5.5px;
+  height: 5.5px;
+  min-width: 5.5px;
+  min-height: 5.5px;
 }
 main.hub .brand-mark-dot,
 .hub-header .brand-mark-dot {
-  width: 11px;
-  height: 11px;
-  min-width: 11px;
-  min-height: 11px;
+  width: 8px;
+  height: 8px;
+  min-width: 8px;
+  min-height: 8px;
 }
 .brand-mark .dd-caret {
   display: none;
@@ -532,12 +532,21 @@ main.hub .brand-mark-dot,
   color: var(--text); text-decoration: none; white-space: nowrap;
   transition: color .15s ease;
 }
-.masthead-brand:hover,
+.masthead-brand:hover { color: var(--accent); }
+[data-theme="dark"] .masthead-brand:hover { color: var(--text); }
+/* Menu hover: yellow dot only — keep GasBrazil text at normal color. */
 .products-dd:hover .masthead-brand,
-.products-dd:hover .wordmark a { color: var(--accent); }
-[data-theme="dark"] .masthead-brand:hover,
+.products-dd:hover .wordmark a,
+.products-dd:focus-within .masthead-brand,
+.products-dd:focus-within .wordmark a {
+  color: var(--text);
+}
 [data-theme="dark"] .products-dd:hover .masthead-brand,
-[data-theme="dark"] .products-dd:hover .wordmark a { color: var(--brz-yellow); }
+[data-theme="dark"] .products-dd:hover .wordmark a,
+[data-theme="dark"] .products-dd:focus-within .masthead-brand,
+[data-theme="dark"] .products-dd:focus-within .wordmark a {
+  color: var(--text);
+}
 .masthead h1 {
   font-family: var(--font-display);
   font-size: 14px; margin: 0; letter-spacing: -.01em; font-weight: 600;
