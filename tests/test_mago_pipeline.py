@@ -100,15 +100,52 @@ def test_build_from_mock(tmp_path, monkeypatch):
 
 
 def test_load_payload_groups_and_history(tmp_path, monkeypatch):
-    sys.path.insert(0, str(ROOT / "mago"))
+    monkeypatch.setattr(mp, "HERE", tmp_path)
+    monkeypatch.setattr(mp, "RAW_DIR", tmp_path / "raw" / "snapshots")
+    monkeypatch.setattr(mp, "MANIFEST_PATH", tmp_path / "raw" / "_manifest.json")
+    monkeypatch.setattr(mp, "DATA_DIR", tmp_path / "data")
+    monkeypatch.setattr(mp, "PARQUET_PATH", tmp_path / "data" / "tag_mago_series.parquet")
+
     import dashboard as md  # noqa: E402
 
     monkeypatch.setattr(md, "PARQUET_PATH", mp.PARQUET_PATH)
-    mp.RAW_DIR.mkdir(parents=True, exist_ok=True)
-    if not mp.PARQUET_PATH.exists():
-        mp.cmd_build()
-    payload = md.load_payload()
-    assert "total" in payload["groups"]
-    assert payload["groupSeries"]["BA"]["times"]
-    assert len(payload["linepackHistoryRows"]) >= 1
-    assert payload["linepackHistory"]["times"]
+
+    mp.RAW_DIR.mkdir(parents=True)
+    snap = datetime(2026, 9, 19, 8, 8, 24, tzinfo=timezone.utc)
+    name = "EMPACOTAMENTOS_19_09_2026_08_08_24.json"
+    payload = {
+        "Items": [
+            {
+                "Tag": "MALHA-INT-1MIN",
+                "Timestamp": "2026-09-19T00:00:00Z",
+                "Value": 68000000.0,
+                "Good": True,
+            },
+            {
+                "Tag": "MALHA-INT-1MIN",
+                "Timestamp": "2026-09-19T01:00:00Z",
+                "Value": 68100000.0,
+                "Good": True,
+            },
+        ]
+        + [
+            {
+                "Tag": f"Previsao - ZONA_{z} - Diario",
+                "Timestamp": "2026-09-19T00:00:00Z",
+                "Value": 90.0,
+                "Good": True,
+            }
+            for z in [
+                "AL", "BA1", "BA2", "BA3", "BA4", "BA5", "CE1", "CE2", "ES1", "ES2", "ES3",
+                "PB", "PE1", "PE2", "RJ", "RN1", "RN2", "RN3", "SE",
+            ]
+        ]
+    }
+    (mp.RAW_DIR / name).write_text(json.dumps(payload), encoding="utf-8")
+    mp.cmd_build()
+
+    result = md.load_payload()
+    assert "total" in result["groups"]
+    assert result["groupSeries"]["BA"]["times"]
+    assert len(result["linepackHistoryRows"]) >= 1
+    assert result["linepackHistory"]["times"]
