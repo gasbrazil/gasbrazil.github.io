@@ -11,6 +11,8 @@ on:
     paths:
       - "shared/**"
       - "build_home.py"
+      - "mago/index.html"
+      - "mago/dashboard.py"
       - ".github/workflows/home.yml"
 
 permissions:
