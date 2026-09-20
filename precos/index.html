@@ -10,7 +10,7 @@
 <link rel="preload" href="/shared/fonts/IBMPlexSans-Regular.ttf" as="font" type="font/ttf" crossorigin>
 <link rel="preload" href="/shared/fonts/Pacaembu-SemiBold.ttf" as="font" type="font/ttf" crossorigin>
 <!-- home-page teaser marker, read by ../build_home.py:
-     generated: 2026-09-20 17:00 UTC
+     generated: 2026-09-20 17:56 UTC
      kpi_santos: 18.2
      data_through: 2026-06 -->
 <script>
@@ -1002,6 +1002,20 @@ th.num .th-filter { text-align: right; }
   width: auto; flex: none; box-sizing: border-box;
 }
 .langBtn:hover, #lang-toggle:hover { background: var(--accent-soft); }
+
+/* Shared “clear all selections” control for dashboard pickers/chips. */
+.btn-clear {
+  font-size: 12px;
+  color: var(--muted2);
+  background: var(--panel);
+  border: 1px solid var(--border-strong);
+  border-radius: 5px;
+  padding: 4px 12px;
+  cursor: pointer;
+  font-family: var(--font);
+  font-weight: 400;
+}
+.btn-clear:hover { background: var(--accent-soft); color: var(--text); }
 #theme-toggle {
   display: inline-flex; align-items: center; justify-content: center;
   min-width: 34px; height: 34px; padding: 5px 9px; line-height: 0;
@@ -1505,6 +1519,7 @@ main h3,
   <div class="legend" id="leg-marketers"></div>
 </div>
 <div class="toolbar">
+  <button type="button" id="btn-clear-precos" class="btn-clear" data-i18n="clearAllSelections">Clear all</button>
   <button type="button" id="btn-csv" data-i18n="precosCsv">Download CSV</button>
   <button type="button" id="btn-xlsx" data-i18n="precosXlsx">Export Excel</button>
   <button type="button" id="btn-share" data-i18n="copyLink">Copy link</button>
@@ -1534,7 +1549,7 @@ main h3,
 </div>
 <div class="tt" id="chart-tt"></div>
 <script>
-const PAYLOAD_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/precos/payload.json.gz?v=35524494901";
+const PAYLOAD_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/precos/payload.json.gz?v=35527444679";
 
 function b64ToBytes(b64) {
   const bin = atob(b64);
@@ -2004,6 +2019,7 @@ const GB_I18N = {
     contact: "Contact",
     copyLink: "Copy link",
     linkCopied: "Copied",
+    clearAllSelections: "Clear all",
     tagline: "Analytical Firepower for Brazil's Energy Markets",
     hubDashboards: "Live dashboards",
     hubHint: "Every card below opens a live dashboard — pick a product to explore.",
@@ -2131,6 +2147,7 @@ const GB_I18N = {
     contact: "Contato",
     copyLink: "Copiar link",
     linkCopied: "Copiado",
+    clearAllSelections: "Limpar tudo",
     tagline: "Potência analítica para os mercados de energia do Brasil",
     hubDashboards: "Painéis ao vivo",
     hubHint: "Cada cartão abaixo abre um painel ao vivo — escolha um produto para explorar.",
@@ -2821,6 +2838,14 @@ async function init() {
     renderKpis();
     refreshPickersAndCharts();
     renderTable();
+    document.getElementById("btn-clear-precos").addEventListener("click", () => {
+      pickedProd.clear();
+      pickedDist.clear();
+      prodSlots.clear();
+      distSlots.clear();
+      refreshPickersAndCharts();
+      writePrecosQuery();
+    });
     document.getElementById("btn-csv").addEventListener("click", downloadCsv);
     document.getElementById("btn-xlsx").addEventListener("click", downloadXlsx);
     window.addEventListener("resize", () => { clearTimeout(window.__pr); window.__pr = setTimeout(renderCharts, 120); });
