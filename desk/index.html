@@ -10,7 +10,7 @@
 <link rel="preload" href="/shared/fonts/IBMPlexSans-Regular.ttf" as="font" type="font/ttf" crossorigin>
 <link rel="preload" href="/shared/fonts/Pacaembu-SemiBold.ttf" as="font" type="font/ttf" crossorigin>
 <!-- home-page teaser marker, read by ../build_home.py:
-     generated: 2026-09-20 17:29 UTC
+     generated: 2026-09-20 18:04 UTC
      kpi_pld_se: 77.12
      kpi_gen_gas: 3265.6
      data_through: 2026-09-20 -->
@@ -1003,6 +1003,20 @@ th.num .th-filter { text-align: right; }
   width: auto; flex: none; box-sizing: border-box;
 }
 .langBtn:hover, #lang-toggle:hover { background: var(--accent-soft); }
+
+/* Shared “clear all selections” control for dashboard pickers/chips. */
+.btn-clear {
+  font-size: 12px;
+  color: var(--muted2);
+  background: var(--panel);
+  border: 1px solid var(--border-strong);
+  border-radius: 5px;
+  padding: 4px 12px;
+  cursor: pointer;
+  font-family: var(--font);
+  font-weight: 400;
+}
+.btn-clear:hover { background: var(--accent-soft); color: var(--text); }
 #theme-toggle {
   display: inline-flex; align-items: center; justify-content: center;
   min-width: 34px; height: 34px; padding: 5px 9px; line-height: 0;
@@ -1863,7 +1877,7 @@ main h3,
 </div>
 <div class="tt" id="chart-tt"></div>
 <script>
-const PAYLOAD_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/desk/payload.json.gz?v=35526035350";
+const PAYLOAD_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/desk/payload.json.gz?v=35527864337";
 
 
 function b64ToBytes(b64) {
@@ -2116,6 +2130,7 @@ const GB_I18N = {
     contact: "Contact",
     copyLink: "Copy link",
     linkCopied: "Copied",
+    clearAllSelections: "Clear all",
     tagline: "Analytical Firepower for Brazil's Energy Markets",
     hubDashboards: "Live dashboards",
     hubHint: "Every card below opens a live dashboard — pick a product to explore.",
@@ -2243,6 +2258,7 @@ const GB_I18N = {
     contact: "Contato",
     copyLink: "Copiar link",
     linkCopied: "Copiado",
+    clearAllSelections: "Limpar tudo",
     tagline: "Potência analítica para os mercados de energia do Brasil",
     hubDashboards: "Painéis ao vivo",
     hubHint: "Cada cartão abaixo abre um painel ao vivo — escolha um produto para explorar.",
@@ -3651,6 +3667,7 @@ function mountAnalysisGroup(host, groupName, items) {
     row.className = "analysis-series-row" + (pickedAnalysis.has(s.id) ? " is-on" : "");
     const sw = analysisSeriesColor(s.id);
     const pref = analysisAxisPref.get(s.id) || "auto";
+    const multiUnit = analysisSelectedUnits().size > 1;
     row.innerHTML =
       '<input type="checkbox"' + (pickedAnalysis.has(s.id) ? " checked" : "") + ">" +
       '<span class="sw" style="background:' + sw + '"></span>' +
