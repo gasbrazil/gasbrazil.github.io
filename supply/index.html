@@ -10,7 +10,7 @@
 <link rel="preload" href="/shared/fonts/IBMPlexSans-Regular.ttf" as="font" type="font/ttf" crossorigin>
 <link rel="preload" href="/shared/fonts/Pacaembu-SemiBold.ttf" as="font" type="font/ttf" crossorigin>
 <!-- home-page teaser marker, read by ../build_home.py:
-     generated: 2026-09-20 05:39 UTC
+     generated: 2026-09-20 17:01 UTC
      kpi_production: 6663999.303
      data_through: 2026-07 -->
 <script>
@@ -1367,7 +1367,7 @@ main h3,
 <header class="dash-head">
   <div class="masthead">
       <div class="masthead-ident">
-      <div class="products-dd"><span class="brand-lockup"><a class="masthead-brand" id="link-home" href="https://gasbrazil.com" data-i18n="navHome">GasBrazil</a><button type="button" class="dd-trigger brand-mark" aria-haspopup="menu" aria-expanded="false" aria-controls="gb-products-menu" id="gb-products-trigger" data-i18n-aria="navMenu" aria-label="Menu"><span class="brand-mark-dot" aria-hidden="true"></span><span class="dd-caret" aria-hidden="true"></span></button></span><div class="dd-menu" id="gb-products-menu" role="menu" aria-labelledby="gb-products-trigger"><a id="link-desk" href="https://gasbrazil.com/desk/" role="menuitem" data-i18n="navDesk"><span class="chk"></span>The Desk</a><a id="link-ons" href="https://gasbrazil.com/ons/" role="menuitem" data-i18n="navOns"><span class="chk"></span>ONS Balances</a><a id="link-pld" href="https://gasbrazil.com/pld/" role="menuitem" data-i18n="navPld"><span class="chk"></span>PLD Prices</a><a id="link-poc" href="https://gasbrazil.com/poc/" role="menuitem" data-i18n="navPoc"><span class="chk"></span>POC Results</a><a id="link-contratos" href="https://gasbrazil.com/contratos/" role="menuitem" data-i18n="navContratos"><span class="chk"></span>POC Contracts</a><a id="link-flows" href="https://gasbrazil.com/flows/" role="menuitem" data-i18n="navFlows"><span class="chk"></span>Pipeline Flows</a><span class="is-current" role="menuitem" aria-current="page" data-i18n="navSupply"><span class="chk">✓</span>Gas Supply</span><a id="link-precos" href="https://gasbrazil.com/precos/" role="menuitem" data-i18n="navPrecos"><span class="chk"></span>ANP Prices</a></div></div>
+      <div class="products-dd"><span class="brand-lockup"><a class="masthead-brand" id="link-home" href="https://gasbrazil.com" data-i18n="navHome">GasBrazil</a><button type="button" class="dd-trigger brand-mark" aria-haspopup="menu" aria-expanded="false" aria-controls="gb-products-menu" id="gb-products-trigger" data-i18n-aria="navMenu" aria-label="Menu"><span class="brand-mark-dot" aria-hidden="true"></span><span class="dd-caret" aria-hidden="true"></span></button></span><div class="dd-menu" id="gb-products-menu" role="menu" aria-labelledby="gb-products-trigger"><a id="link-desk" href="https://gasbrazil.com/desk/" role="menuitem" data-i18n="navDesk"><span class="chk"></span>The Desk</a><a id="link-ons" href="https://gasbrazil.com/ons/" role="menuitem" data-i18n="navOns"><span class="chk"></span>ONS Balances</a><a id="link-pld" href="https://gasbrazil.com/pld/" role="menuitem" data-i18n="navPld"><span class="chk"></span>PLD Prices</a><a id="link-poc" href="https://gasbrazil.com/poc/" role="menuitem" data-i18n="navPoc"><span class="chk"></span>POC Results</a><a id="link-contratos" href="https://gasbrazil.com/contratos/" role="menuitem" data-i18n="navContratos"><span class="chk"></span>POC Contracts</a><a id="link-flows" href="https://gasbrazil.com/flows/" role="menuitem" data-i18n="navFlows"><span class="chk"></span>Pipeline Flows</a><a id="link-mago" href="https://gasbrazil.com/mago/" role="menuitem" data-i18n="navMago"><span class="chk"></span>TAG Mago</a><span class="is-current" role="menuitem" aria-current="page" data-i18n="navSupply"><span class="chk">✓</span>Gas Supply</span><a id="link-precos" href="https://gasbrazil.com/precos/" role="menuitem" data-i18n="navPrecos"><span class="chk"></span>ANP Prices</a></div></div>
       <span class="crumb-sep" aria-hidden="true"></span>
       <h1 data-i18n="navSupply">Gas Supply</h1>
       </div>
@@ -1529,7 +1529,7 @@ main h3,
 </div>
 <div class="tt" id="chart-tt"></div>
 <script>
-const PAYLOAD_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/supply/payload.json.gz?v=35492203288";
+const PAYLOAD_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/supply/payload.json.gz?v=35524494837";
 
 function b64ToBytes(b64) {
   const bin = atob(b64);
@@ -1910,6 +1910,11 @@ const SITE_LINKS = {
     "caissonpoint": "https://gasbrazil.com/flows/",
     "hub": "https://gasbrazil.github.io/flows/"
   },
+  "mago": {
+    "custom": "https://gasbrazil.com/mago/",
+    "caissonpoint": "https://gasbrazil.com/mago/",
+    "hub": "https://gasbrazil.github.io/mago/"
+  },
   "precos": {
     "custom": "https://gasbrazil.com/precos/",
     "caissonpoint": "https://gasbrazil.com/precos/",
@@ -1931,6 +1936,7 @@ function initCrossLinks() {
   { const el = document.getElementById("link-poc"); if (el) el.href = SITE_LINKS.poc[flavor]; }
   { const el = document.getElementById("link-contratos"); if (el) el.href = SITE_LINKS.contratos[flavor]; }
   { const el = document.getElementById("link-flows"); if (el) el.href = SITE_LINKS.flows[flavor]; }
+  { const el = document.getElementById("link-mago"); if (el) el.href = SITE_LINKS.mago[flavor]; }
   { const el = document.getElementById("link-precos"); if (el) el.href = SITE_LINKS.precos[flavor]; }
 }
 
@@ -1983,6 +1989,7 @@ const GB_I18N = {
     navSupply: "Gas Supply",
     navPld: "PLD Prices",
     navPrecos: "ANP Prices",
+    navMago: "TAG Mago",
     navDesk: "The Desk",
     navProducts: "Products", // retained for previously deployed pages cached in browsers
     navMenu: "Menu",
@@ -2042,6 +2049,14 @@ const GB_I18N = {
     sourceSupply: "ANP",
     sourcePrecos: "ANP",
     sourcePld: "CCEE",
+    sourceMago: "TAG Mago",
+    methodAssump_mago: "One EMPACOTAMENTOS snapshot feeds both line pack and zone forecasts; values are stored as published (m³ line pack, Mm³/d zones).",
+    magoKpiLinepack: "Integrated line pack",
+    magoKpiSnapshot: "Snapshot (UTC)",
+    magoLinepackTitle: "Line pack — integrated mesh",
+    magoLinepackSub: "Hourly actual (solid) and short-horizon forecast (dashed) from the latest Mago snapshot.",
+    magoZonesTitle: "Consumption forecast by zone",
+    magoZonesSub: "TAG 7-day hourly estimates (Mm³/d). Toggle zones to compare.",
     pldSubtitle: "CCEE daily-average and hourly PLD by submarket (R$/MWh).",
     pldNote: "PLD (CCEE) is not the same series as ONS CMO. See",
     pldNoteLink: "ONS Balances",
@@ -2080,6 +2095,9 @@ const GB_I18N = {
     aboutCoverSupply: "Gas Supply: ANP PPGN-EL national monthly series plus national imports (no Bolivia vs LNG split in the open CSV).",
     aboutCoverPrecos: "ANP Prices: Resolution 52/2011 monthly disclosures (R$/MMBtu, tax-inclusive). Some months are suppressed for confidentiality.",
     aboutCoverPld: "PLD: CCEE daily averages and hourly prices by submarket; peak is hours 18–20 on weekdays. Optional ONS CMO and median gas CVU when lake data is present.",
+    aboutCoverMago: "TAG Mago: hourly line pack and 7-day balancing-zone consumption forecasts from EMPACOTAMENTOS API snapshots.",
+    cardMago: "TAG Mago",
+    cardMagoDesc: "TAG operational line pack and zone consumption forecasts.",
     aboutCoverDesk: "The Desk: cross-product headline series. Full history and filters live on each product page.",
     notFound: "This page is not here.",
     notFoundBody: "The hub and dashboards are linked below.",
@@ -2098,6 +2116,7 @@ const GB_I18N = {
     navSupply: "Oferta de Gás",
     navPld: "Preços PLD",
     navPrecos: "Preços ANP",
+    navMago: "TAG Mago",
     navDesk: "The Desk",
     navProducts: "Produtos", // retained for previously deployed pages cached in browsers
     navMenu: "Menu",
@@ -2157,6 +2176,14 @@ const GB_I18N = {
     sourceSupply: "ANP",
     sourcePrecos: "ANP",
     sourcePld: "CCEE",
+    sourceMago: "TAG Mago",
+    methodAssump_mago: "Um snapshot EMPACOTAMENTOS alimenta empacotamento e previsão por zona; valores como publicados (m³ e Mm³/d).",
+    magoKpiLinepack: "Empacotamento integrado",
+    magoKpiSnapshot: "Snapshot (UTC)",
+    magoLinepackTitle: "Empacotamento — malha integrada",
+    magoLinepackSub: "Realizado horário (sólido) e previsão de curto prazo (tracejado) do último snapshot Mago.",
+    magoZonesTitle: "Previsão de consumo por zona",
+    magoZonesSub: "Estimativas horárias TAG em 7 dias (Mm³/d). Selecione zonas para comparar.",
     pldSubtitle: "PLD médio diário e horário da CCEE por submercado (R$/MWh).",
     pldNote: "O PLD (CCEE) não é a mesma série do CMO da ONS. Veja",
     pldNoteLink: "Balanços ONS",
@@ -2195,6 +2222,9 @@ const GB_I18N = {
     aboutCoverSupply: "Oferta: séries mensais PPGN-EL da ANP mais importações nacionais (CSV aberto sem split Bolívia vs GNL).",
     aboutCoverPrecos: "Preços ANP: divulgações mensais da Resolução 52/2011 (R$/MMBtu com impostos). Alguns meses são omitidos por confidencialidade.",
     aboutCoverPld: "PLD: médias diárias e preços horários da CCEE por submercado; ponta = horas 18–20 em dias úteis. CMO e CVU a gás da ONS quando disponíveis no lake.",
+    aboutCoverMago: "TAG Mago: empacotamento horário e previsões de consumo por zona de balanceamento (snapshots EMPACOTAMENTOS).",
+    cardMago: "TAG Mago",
+    cardMagoDesc: "Empacotamento operacional TAG e previsões de consumo por zona.",
     aboutCoverDesk: "The Desk: séries-resumo entre produtos. Histórico e filtros ficam em cada painel.",
     notFound: "Esta página não existe.",
     notFoundBody: "O hub e os painéis estão nos links abaixo.",
@@ -2254,7 +2284,7 @@ function formatRefreshedLocal(iso, fallback, locale) {
     return fallback || "—";
   }
 }
-const STALE_MAX_LAG_DAYS = {"ons": 7, "pld": 7, "contratos": 7, "flows": 60, "supply": 100, "precos": 100, "desk": 14};
+const STALE_MAX_LAG_DAYS = {"ons": 7, "pld": 7, "contratos": 7, "flows": 60, "mago": 2, "supply": 100, "precos": 100, "desk": 14};
 function initStalenessBadgeFor(site, through) {
   try {
     var maxLag = STALE_MAX_LAG_DAYS[site];
