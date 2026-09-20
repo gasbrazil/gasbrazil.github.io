@@ -163,6 +163,8 @@ def test_desk_analysis_section_in_source():
     assert "analysisSeriesColor" in src
     assert 'id="analysis-clear"' in src
     assert "desk-tabs" in src
+    assert "analysis-workspace-inner" in src
+    assert "analysis-sidebar" in src
 
 
 def test_flows_init_handles_load_errors():

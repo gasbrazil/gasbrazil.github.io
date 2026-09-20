@@ -83,13 +83,187 @@ a.kpi-cell:hover .lbl { color: var(--text); }
 .desk-tabs button[aria-pressed="true"] { color: var(--text); background: var(--panel); border-bottom-color: var(--accent); }
 .desk-tabs button:hover { background: var(--accent-soft); }
 .desk-tabs button[aria-pressed="true"]:hover { background: var(--panel-grad-hover, var(--panel)); }
+body.desk-analysis-active .sources,
+body.desk-analysis-active .kpi-row { display: none; }
+body.desk-analysis-active footer { margin-top: 12px; }
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+.analysis-workspace { margin: 0 0 var(--gap); }
+.analysis-workspace-inner {
+  display: grid;
+  grid-template-columns: minmax(268px, 300px) minmax(0, 1fr);
+  min-height: calc(100vh - 168px);
+  max-height: calc(100vh - 168px);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg);
+}
+.analysis-sidebar {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-right: 1px solid var(--border);
+  background: var(--panel);
+}
+.analysis-sidebar-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 12px 8px;
+  border-bottom: 1px solid var(--border);
+}
+.analysis-sidebar-title { font-size: 13px; font-weight: 400; margin: 0; }
+.analysis-pick-count { font-size: 11px; color: var(--muted2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.analysis-sidebar-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.analysis-sidebar-tools .sm-pick { flex: 1 1 auto; min-width: 120px; }
+.analysis-filter {
+  width: calc(100% - 24px);
+  margin: 0 12px 8px;
+  padding: 7px 10px;
+  font: 400 12.5px var(--font);
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+}
+.analysis-filter::placeholder { color: var(--muted); }
+.analysis-catalog {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: 4px 8px 12px;
+  overscroll-behavior: contain;
+}
+.analysis-group { margin: 0 0 4px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); overflow: hidden; }
+.analysis-group[open] { border-color: var(--border-strong); }
+.analysis-group summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 10px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--muted2);
+  font-weight: 400;
+  user-select: none;
+}
+.analysis-group summary::-webkit-details-marker { display: none; }
+.analysis-group summary:hover { background: var(--accent-soft); color: var(--text); }
+.analysis-group-meta { font-size: 10px; color: var(--muted); text-transform: none; letter-spacing: 0; font-weight: 300; }
+.analysis-group-actions { display: inline-flex; gap: 6px; margin-left: auto; }
+.analysis-group-actions button {
+  border: 0;
+  background: none;
+  padding: 0 2px;
+  font-size: 10px;
+  color: var(--accent);
+  cursor: pointer;
+  font-family: var(--font);
+  text-transform: none;
+  letter-spacing: 0;
+}
+.analysis-group-actions button:hover { text-decoration: underline; }
+.analysis-series-list { padding: 2px 4px 6px; }
+.analysis-series-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--text);
+}
+.analysis-series-row:hover { background: var(--accent-soft); }
+.analysis-series-row.is-on { background: var(--accent-soft); }
+.analysis-series-row input { margin: 2px 0 0; flex: none; accent-color: var(--accent); cursor: pointer; }
+.analysis-series-row .sw { width: 8px; height: 8px; border-radius: 2px; flex: none; margin-top: 4px; background: var(--border-strong); }
+.analysis-series-row .lbl { flex: 1; min-width: 0; }
+.analysis-series-row .unit { display: block; font-size: 10px; color: var(--muted); font-weight: 300; margin-top: 1px; }
+.analysis-stage {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+.analysis-stage-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding: 10px 14px 8px;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel);
+}
+.analysis-stage-head .panel-note { margin: 0; max-width: 42em; font-size: 11.5px; }
+.analysis-pane-toggle { display: inline-flex; border: 1px solid var(--border-strong); border-radius: 6px; overflow: hidden; }
+.analysis-pane-toggle button {
+  border: 0;
+  background: var(--bg);
+  color: var(--muted2);
+  font: 400 11px var(--font);
+  padding: 5px 12px;
+  cursor: pointer;
+}
+.analysis-pane-toggle button + button { border-left: 1px solid var(--border); }
+.analysis-pane-toggle button[aria-pressed="true"] { background: var(--accent-soft); color: var(--text); }
+.analysis-chart-panel {
+  flex: 1 1 52%;
+  min-height: 200px;
+  padding: 8px 12px 4px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.analysis-chart-panel .chart-host { flex: 1 1 auto; min-height: 180px; }
+.analysis-table-panel {
+  flex: 1 1 48%;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--border);
+  overflow: hidden;
+}
+.analysis-table-panel .table-wrap {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
+  border: 0;
+}
+.analysis-table-panel[data-hidden="true"],
+.analysis-chart-panel[data-hidden="true"] { display: none; }
 .analysis-tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 0 0 12px; }
-.analysis-group { margin: 0 0 14px; }
-.analysis-group-title { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 400; margin: 0 0 6px; }
-.analysis-group .series-picker { margin-bottom: 0; }
-.btn-clear { font-size: 12px; color: var(--muted2); background: var(--panel); border: 1px solid var(--border-strong); border-radius: 5px; padding: 4px 12px; cursor: pointer; font-family: var(--font); font-weight: 400; }
+.btn-clear { font-size: 12px; color: var(--muted2); background: var(--bg); border: 1px solid var(--border-strong); border-radius: 5px; padding: 4px 10px; cursor: pointer; font-family: var(--font); font-weight: 400; white-space: nowrap; }
 .btn-clear:hover { background: var(--accent-soft); color: var(--text); }
-.chart-host svg { display: block; overflow: hidden; }
+@media (max-width: 960px) {
+  .analysis-workspace-inner {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(200px, 38vh) minmax(320px, 1fr);
+    max-height: none;
+    min-height: calc(100vh - 168px);
+  }
+  .analysis-sidebar { border-right: 0; border-bottom: 1px solid var(--border); max-height: 38vh; }
+}
+@media (max-width: 720px) {
+  .sources, .series-picker { flex-direction: column; align-items: stretch; }
+}
 .chart-empty { color: var(--muted); font-size: 13px; padding: 44px 0; text-align: center; }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; font-size: 12px; color: var(--muted2); }
 .legend span { display: flex; align-items: center; gap: 6px; }
@@ -126,6 +300,7 @@ footer a { color: var(--accent); }
 @media (max-width: 720px) {
   .sources, .series-picker { flex-direction: column; align-items: stretch; }
 }
+.chart-host svg { display: block; overflow: hidden; }
 __SHARED_TYPO_WEIGHT_CSS__
 </style>
 </head>
@@ -229,25 +404,48 @@ __SHARED_TYPO_WEIGHT_CSS__
 </section>
 </div>
 
-<section class="panel" id="desk-view-analysis" aria-labelledby="analysis-title" hidden>
-  <p class="panel-title" id="analysis-title" data-i18n="deskAnalysisTitle">Analysis</p>
-  <p class="panel-note" data-i18n="deskAnalysisNote">Compare any site-wide series on one timeline. Monthly values repeat across their calendar month; the chart is indexed to 100 at the start of the range.</p>
-  <div class="analysis-tools">
-    <label class="sm-pick"><span data-i18n="deskAnalysisRange">Range</span>
-      <select id="analysis-range">
-        <option value="90d">90 days</option>
-        <option value="1y">1 year</option>
-      </select>
-    </label>
-    <button type="button" class="btn-clear" id="analysis-clear" data-i18n="deskAnalysisClear">Clear all</button>
-  </div>
-  <div id="picker-analysis"></div>
-  <div class="chart-host" id="analysis-chart"></div>
-  <div class="table-wrap">
-    <table class="util" id="analysis-table">
-      <thead><tr id="analysis-thead"></tr></thead>
-      <tbody id="analysis-body"></tbody>
-    </table>
+<section class="analysis-workspace" id="desk-view-analysis" aria-labelledby="analysis-title" hidden>
+  <h2 class="visually-hidden" id="analysis-title" data-i18n="deskAnalysisTitle">Analysis</h2>
+  <div class="analysis-workspace-inner">
+    <aside class="analysis-sidebar" aria-label="Series catalog">
+      <div class="analysis-sidebar-head">
+        <p class="analysis-sidebar-title" data-i18n="deskAnalysisCatalog">Series catalog</p>
+        <span class="analysis-pick-count" id="analysis-pick-count" aria-live="polite"></span>
+      </div>
+      <div class="analysis-sidebar-tools">
+        <label class="sm-pick"><span data-i18n="deskAnalysisRange">Range</span>
+          <select id="analysis-range">
+            <option value="90d">90 days</option>
+            <option value="1y">1 year</option>
+          </select>
+        </label>
+        <button type="button" class="btn-clear" id="analysis-clear" data-i18n="deskAnalysisClear">Clear all</button>
+      </div>
+      <input type="search" class="analysis-filter" id="analysis-filter" autocomplete="off"
+        data-i18n-placeholder="deskAnalysisFilterPh" placeholder="Filter series…">
+      <div class="analysis-catalog" id="picker-analysis"></div>
+    </aside>
+    <div class="analysis-stage">
+      <div class="analysis-stage-head">
+        <p class="panel-note" data-i18n="deskAnalysisNote">Compare any site-wide series on one timeline. Monthly values repeat across their calendar month; the chart is indexed to 100 at the start of the range.</p>
+        <div class="analysis-pane-toggle" role="group" aria-label="View">
+          <button type="button" id="analysis-pane-split" aria-pressed="true" data-i18n="deskAnalysisPaneSplit">Split</button>
+          <button type="button" id="analysis-pane-chart" aria-pressed="false" data-i18n="deskAnalysisPaneChart">Chart</button>
+          <button type="button" id="analysis-pane-table" aria-pressed="false" data-i18n="deskAnalysisPaneTable">Table</button>
+        </div>
+      </div>
+      <div class="analysis-chart-panel" id="analysis-chart-panel">
+        <div class="chart-host" id="analysis-chart"></div>
+      </div>
+      <div class="analysis-table-panel" id="analysis-table-panel">
+        <div class="table-wrap">
+          <table class="util" id="analysis-table">
+            <thead><tr id="analysis-thead"></tr></thead>
+            <tbody id="analysis-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -324,6 +522,14 @@ GB_I18N.en.deskAnalysisRange = "Range";
 GB_I18N.en.deskAnalysisClear = "Clear all";
 GB_I18N.en.deskTabOverview = "Overview";
 GB_I18N.en.deskTabAnalysis = "Analysis";
+GB_I18N.en.deskAnalysisCatalog = "Series catalog";
+GB_I18N.en.deskAnalysisFilterPh = "Filter series…";
+GB_I18N.en.deskAnalysisSelected = "{n} selected";
+GB_I18N.en.deskAnalysisGroupAll = "All";
+GB_I18N.en.deskAnalysisGroupNone = "None";
+GB_I18N.en.deskAnalysisPaneSplit = "Split";
+GB_I18N.en.deskAnalysisPaneChart = "Chart";
+GB_I18N.en.deskAnalysisPaneTable = "Table";
 
 GB_I18N.pt.deskCompareTitle = "PLD · CMO · CVU";
 GB_I18N.pt.deskSubmarket = "Submercado";
@@ -371,6 +577,14 @@ GB_I18N.pt.deskAnalysisRange = "Intervalo";
 GB_I18N.pt.deskAnalysisClear = "Limpar tudo";
 GB_I18N.pt.deskTabOverview = "Visão geral";
 GB_I18N.pt.deskTabAnalysis = "Análise";
+GB_I18N.pt.deskAnalysisCatalog = "Catálogo de séries";
+GB_I18N.pt.deskAnalysisFilterPh = "Filtrar séries…";
+GB_I18N.pt.deskAnalysisSelected = "{n} selecionadas";
+GB_I18N.pt.deskAnalysisGroupAll = "Todas";
+GB_I18N.pt.deskAnalysisGroupNone = "Nenhuma";
+GB_I18N.pt.deskAnalysisPaneSplit = "Dividido";
+GB_I18N.pt.deskAnalysisPaneChart = "Gráfico";
+GB_I18N.pt.deskAnalysisPaneTable = "Tabela";
 
 const COMPARE_META = [
   { key: "pld", labelKey: "deskSeriesPld", field: "pld" },
@@ -399,6 +613,8 @@ let compareSlots = new Map();
 let pocAnpSlots = new Map();
 let pickedAnalysis = new Set(["pld_se", "poc_gus_m3", "ons_gas_gen_sin"]);
 let analysisRange = "90d";
+let analysisFilter = "";
+let analysisPane = "split";
 let deskTab = "overview";
 let utilSortState = { col: "tso", dir: 1 };
 const utilDefaultSort = { col: "tso", dir: 1 };
@@ -545,6 +761,8 @@ function applyDeskQuery() {
   if (apick) {
     pickedAnalysis = new Set(apick);
   }
+  const pane = gbValidEnum(sp.get("apane"), ["split", "chart", "table"]);
+  if (pane) analysisPane = pane;
 }
 function writeDeskQuery() {
   if (!DATA) return;
@@ -555,6 +773,7 @@ function writeDeskQuery() {
     analysis: [...pickedAnalysis],
     arange: analysisRange,
     tab: deskTab === "overview" ? null : deskTab,
+    apane: analysisPane === "split" ? null : analysisPane,
   });
   try { localStorage.setItem("desk-tab", deskTab); } catch (e) {}
 }
@@ -578,6 +797,7 @@ function buildDeskTabs() {
 function setDeskTab(id) {
   if (!DESK_VIEWS.some(v => v.id === id)) id = "overview";
   deskTab = id;
+  document.body.classList.toggle("desk-analysis-active", deskTab === "analysis");
   const ov = document.getElementById("desk-view-overview");
   const an = document.getElementById("desk-view-analysis");
   if (ov) ov.hidden = deskTab !== "overview";
@@ -585,7 +805,10 @@ function setDeskTab(id) {
   document.querySelectorAll("#desk-tabs button").forEach(btn => {
     btn.setAttribute("aria-pressed", btn.dataset.tab === deskTab ? "true" : "false");
   });
-  if (deskTab === "analysis") renderAnalysis();
+  if (deskTab === "analysis") {
+    syncAnalysisPaneUi();
+    renderAnalysis();
+  }
   writeDeskQuery();
 }
 
@@ -819,7 +1042,12 @@ function drawLineChart(hostId, dates, seriesList, emptyMsg) {
   }
   const pal = chartPalette();
   const W = Math.max(320, host.clientWidth || 640);
-  const H = 260;
+  let H = 260;
+  if (hostId === "analysis-chart") {
+    const panel = host.closest(".analysis-chart-panel");
+    const panelH = panel ? panel.clientHeight : 0;
+    H = Math.max(200, Math.min(440, (panelH || host.clientHeight || 280) - 36));
+  }
   const pad = { t: 16, r: 16, b: 36, l: 48 };
   const iw = W - pad.l - pad.r, ih = H - pad.t - pad.b;
   let lo = Infinity, hi = -Infinity;
@@ -1011,9 +1239,114 @@ function analysisDays() {
   return out;
 }
 
+const ANALYSIS_REGION_ORDER = { SIN: 0, SE: 1, S: 2, NE: 3, N: 4 };
+
+function analysisSortSeries(a, b) {
+  const ra = ANALYSIS_REGION_ORDER[a.region] != null ? ANALYSIS_REGION_ORDER[a.region] : 9;
+  const rb = ANALYSIS_REGION_ORDER[b.region] != null ? ANALYSIS_REGION_ORDER[b.region] : 9;
+  if (ra !== rb) return ra - rb;
+  return String(a.label).localeCompare(String(b.label));
+}
+
+function analysisMatchesFilter(s, q) {
+  if (!q) return true;
+  const hay = (s.label + " " + (s.group || "") + " " + (s.unit || "") + " " + s.id).toLowerCase();
+  return hay.indexOf(q) >= 0;
+}
+
+function paintAnalysisPickCount() {
+  const el = document.getElementById("analysis-pick-count");
+  if (!el) return;
+  const n = pickedAnalysis.size;
+  let msg = t("deskAnalysisSelected");
+  el.textContent = msg.indexOf("{n}") >= 0 ? msg.replace("{n}", String(n)) : (n + " selected");
+}
+
+function syncAnalysisPaneUi() {
+  const chartPanel = document.getElementById("analysis-chart-panel");
+  const tablePanel = document.getElementById("analysis-table-panel");
+  const showChart = analysisPane === "split" || analysisPane === "chart";
+  const showTable = analysisPane === "split" || analysisPane === "table";
+  if (chartPanel) chartPanel.dataset.hidden = showChart ? "false" : "true";
+  if (tablePanel) tablePanel.dataset.hidden = showTable ? "false" : "true";
+  [["split", "analysis-pane-split"], ["chart", "analysis-pane-chart"], ["table", "analysis-pane-table"]].forEach(([mode, id]) => {
+    const btn = document.getElementById(id);
+    if (btn) btn.setAttribute("aria-pressed", analysisPane === mode ? "true" : "false");
+  });
+}
+
+function setAnalysisPane(mode) {
+  if (mode !== "split" && mode !== "chart" && mode !== "table") mode = "split";
+  analysisPane = mode;
+  syncAnalysisPaneUi();
+  if (deskTab === "analysis") renderAnalysisChart(analysisDays(), analysisCatalog().filter(s => pickedAnalysis.has(s.id)));
+  writeDeskQuery();
+}
+
+function setAnalysisGroupPicked(items, on) {
+  items.forEach(s => {
+    if (on) pickedAnalysis.add(s.id);
+    else pickedAnalysis.delete(s.id);
+  });
+  renderAnalysis();
+  writeDeskQuery();
+}
+
+function mountAnalysisGroup(host, groupName, items) {
+  const q = analysisFilter.trim().toLowerCase();
+  const visible = items.filter(s => analysisMatchesFilter(s, q));
+  if (!visible.length) return;
+  visible.sort(analysisSortSeries);
+  const pickedN = visible.filter(s => pickedAnalysis.has(s.id)).length;
+  const details = document.createElement("details");
+  details.className = "analysis-group";
+  details.open = !!q || pickedN > 0 || visible.length <= 6;
+  const summary = document.createElement("summary");
+  summary.innerHTML = '<span>' + escapeHtml(groupName) + '</span>' +
+    '<span class="analysis-group-meta">' + pickedN + "/" + visible.length + "</span>" +
+    '<span class="analysis-group-actions">' +
+    '<button type="button" data-act="all">' + escapeHtml(t("deskAnalysisGroupAll")) + "</button>" +
+    '<button type="button" data-act="none">' + escapeHtml(t("deskAnalysisGroupNone")) + "</button>" +
+    "</span>";
+  summary.querySelector('[data-act="all"]').addEventListener("click", ev => {
+    ev.preventDefault();
+    ev.stopPropagation();
+    setAnalysisGroupPicked(visible, true);
+  });
+  summary.querySelector('[data-act="none"]').addEventListener("click", ev => {
+    ev.preventDefault();
+    ev.stopPropagation();
+    setAnalysisGroupPicked(visible, false);
+  });
+  details.appendChild(summary);
+  const list = document.createElement("div");
+  list.className = "analysis-series-list";
+  visible.forEach(s => {
+    const row = document.createElement("label");
+    row.className = "analysis-series-row" + (pickedAnalysis.has(s.id) ? " is-on" : "");
+    const sw = analysisSeriesColor(s.id);
+    row.innerHTML =
+      '<input type="checkbox"' + (pickedAnalysis.has(s.id) ? " checked" : "") + ">" +
+      '<span class="sw" style="background:' + sw + '"></span>' +
+      '<span class="lbl">' + escapeHtml(s.label) +
+      '<span class="unit">' + escapeHtml(s.unit) + "</span></span>";
+    row.querySelector("input").addEventListener("change", ev => {
+      ev.stopPropagation();
+      if (ev.target.checked) pickedAnalysis.add(s.id);
+      else pickedAnalysis.delete(s.id);
+      renderAnalysis();
+      writeDeskQuery();
+    });
+    list.appendChild(row);
+  });
+  details.appendChild(list);
+  host.appendChild(details);
+}
+
 function buildAnalysisPicker() {
   const host = document.getElementById("picker-analysis");
   if (!host) return;
+  const scrollTop = host.scrollTop;
   host.innerHTML = "";
   const byGroup = new Map();
   analysisCatalog().forEach(s => {
@@ -1021,77 +1354,25 @@ function buildAnalysisPicker() {
     if (!byGroup.has(g)) byGroup.set(g, []);
     byGroup.get(g).push(s);
   });
-  const regionOrder = { SIN: 0, SE: 1, S: 2, NE: 3, N: 4 };
-  const sortSeries = (a, b) => {
-    const ra = regionOrder[a.region] != null ? regionOrder[a.region] : 9;
-    const rb = regionOrder[b.region] != null ? regionOrder[b.region] : 9;
-    if (ra !== rb) return ra - rb;
-    return String(a.label).localeCompare(String(b.label));
-  };
+  let any = false;
   ANALYSIS_GROUP_ORDER.forEach(g => {
     const items = byGroup.get(g);
     if (!items || !items.length) return;
-    items.sort(sortSeries);
-    const section = document.createElement("div");
-    section.className = "analysis-group";
-    const title = document.createElement("p");
-    title.className = "analysis-group-title";
-    title.textContent = g;
-    section.appendChild(title);
-    const row = document.createElement("div");
-    row.className = "series-picker";
-    items.forEach(s => {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "series-btn" + (pickedAnalysis.has(s.id) ? " active" : "");
-      btn.title = s.unit;
-      btn.innerHTML = '<span class="sw"></span>' + escapeHtml(s.label);
-      if (pickedAnalysis.has(s.id)) {
-        btn.querySelector(".sw").style.background = analysisSeriesColor(s.id);
-      }
-      btn.addEventListener("click", () => {
-        if (pickedAnalysis.has(s.id)) pickedAnalysis.delete(s.id);
-        else pickedAnalysis.add(s.id);
-        renderAnalysis();
-        writeDeskQuery();
-      });
-      row.appendChild(btn);
-    });
-    section.appendChild(row);
-    host.appendChild(section);
+    mountAnalysisGroup(host, g, items);
     byGroup.delete(g);
+    any = true;
   });
   byGroup.forEach((items, g) => {
     if (!items.length) return;
-    items.sort(sortSeries);
-    const section = document.createElement("div");
-    section.className = "analysis-group";
-    const title = document.createElement("p");
-    title.className = "analysis-group-title";
-    title.textContent = g;
-    section.appendChild(title);
-    const row = document.createElement("div");
-    row.className = "series-picker";
-    items.forEach(s => {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "series-btn" + (pickedAnalysis.has(s.id) ? " active" : "");
-      btn.title = s.unit;
-      btn.innerHTML = '<span class="sw"></span>' + escapeHtml(s.label);
-      if (pickedAnalysis.has(s.id)) {
-        btn.querySelector(".sw").style.background = analysisSeriesColor(s.id);
-      }
-      btn.addEventListener("click", () => {
-        if (pickedAnalysis.has(s.id)) pickedAnalysis.delete(s.id);
-        else pickedAnalysis.add(s.id);
-        renderAnalysis();
-        writeDeskQuery();
-      });
-      row.appendChild(btn);
-    });
-    section.appendChild(row);
-    host.appendChild(section);
+    mountAnalysisGroup(host, g, items);
+    any = true;
   });
+  if (!any) {
+    host.innerHTML = '<p style="padding:12px;color:var(--muted);font-size:12px;margin:0">' +
+      escapeHtml(t("deskEmptyChart")) + "</p>";
+  }
+  host.scrollTop = scrollTop;
+  paintAnalysisPickCount();
 }
 
 function renderAnalysisTable(days, seriesList) {
@@ -1135,6 +1416,7 @@ function renderAnalysisChart(days, seriesList) {
 function renderAnalysis() {
   if (!DATA) return;
   buildAnalysisPicker();
+  syncAnalysisPaneUi();
   const seriesList = analysisCatalog().filter(s => pickedAnalysis.has(s.id));
   const days = analysisDays();
   renderAnalysisTable(days, seriesList);
@@ -1313,6 +1595,21 @@ async function init() {
         writeDeskQuery();
       });
     }
+    const filterEl = document.getElementById("analysis-filter");
+    if (filterEl && filterEl.dataset.bound !== "1") {
+      filterEl.dataset.bound = "1";
+      filterEl.addEventListener("input", () => {
+        analysisFilter = filterEl.value || "";
+        buildAnalysisPicker();
+      });
+    }
+    [["split", "analysis-pane-split"], ["chart", "analysis-pane-chart"], ["table", "analysis-pane-table"]].forEach(([mode, id]) => {
+      const btn = document.getElementById(id);
+      if (!btn || btn.dataset.bound === "1") return;
+      btn.dataset.bound = "1";
+      btn.addEventListener("click", () => setAnalysisPane(mode));
+    });
+    syncAnalysisPaneUi();
     if (smSel) {
       smSel.value = compareSm;
       smSel.addEventListener("change", () => {
