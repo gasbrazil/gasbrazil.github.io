@@ -2,11 +2,15 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timedelta, timezone
-from pathlib import Path
+from datetime import UTC, datetime, timedelta
 
 import mago_pipeline as mp
-from mago_client import TAG_LINEPACK_FORECAST, TAG_LINEPACK_INTEGRATED
+from mago_client import (
+    DEFAULT_FAIXAS_INTEGRATED,
+    FAIXA_TAG_MAP,
+    TAG_LINEPACK_FORECAST,
+    TAG_LINEPACK_INTEGRATED,
+)
 
 ZONES = [
     "AL", "BA1", "BA2", "BA3", "BA4", "BA5", "CE1", "CE2", "ES1", "ES2", "ES3",
@@ -37,6 +41,9 @@ def build_snapshot(snapshot_at: datetime) -> dict:
     for h in range(49):
         ts = day_start + timedelta(hours=h)
         items.append(_item(TAG_LINEPACK_FORECAST, ts, base_lp + 20_000 + h * 500))
+    for tag, (band, _mesh) in FAIXA_TAG_MAP.items():
+        val = DEFAULT_FAIXAS_INTEGRATED.get(band, 70_000_000.0)
+        items.append(_item(tag, day_start, val))
     for zone in ZONES:
         zbase = 90.0 + (hash(zone) % 17)
         for d in range(7):
@@ -51,7 +58,7 @@ if __name__ == "__main__":
     mp.RAW_DIR.mkdir(parents=True, exist_ok=True)
     for old in mp.RAW_DIR.glob("EMPACOTAMENTOS_*.json"):
         old.unlink()
-    now = datetime.now(timezone.utc).replace(minute=8, second=24, microsecond=0)
+    now = datetime.now(UTC).replace(minute=8, second=24, microsecond=0)
     for d in range(3):
         snap = now - timedelta(days=d)
         name = (

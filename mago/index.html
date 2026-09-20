@@ -10,9 +10,9 @@
 <link rel="preload" href="/shared/fonts/IBMPlexSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/shared/fonts/Pacaembu-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
 <!-- home-page teaser marker, read by ../build_home.py:
-     generated: 2026-09-20 18:59 UTC
-     kpi_linepack: 68.71
-     kpi_snapshot: 2026-09-20 15:08 UTC -->
+     generated: 2026-09-20 22:20 UTC
+     kpi_linepack: 68.69
+     kpi_snapshot: 2026-09-20 22:08 UTC -->
 <script>
 (function(){
   try {
@@ -1720,6 +1720,7 @@ th.has-filter .th-label {
   color: var(--brz-yellow);
 }
 
+
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; font-weight: 300; }
 header.dash-head { display: flex; flex-direction: row; align-items: center; gap: 10px; margin-bottom: 0; }
@@ -1777,7 +1778,29 @@ table.lp-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
 .toolbar button:hover, .filter-bar .btn-clear:hover { background: var(--accent-soft); }
 footer { margin-top: 16px; color: var(--muted); font-size: 11px; line-height: 1.6; font-weight: 200; }
 footer a { color: var(--accent); }
-
+.zone-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: 550; line-height: 1.3; }
+.zone-badge::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.badge-target { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+.badge-success { background: rgba(16, 185, 129, 0.12); color: #10b981; }
+.badge-warning { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+.badge-danger { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+.badge-unknown { background: rgba(156, 163, 175, 0.15); color: #9ca3af; }
+.zone-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid transparent; }
+.zone-pill.badge-target { background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.3); color: #10b981; }
+.zone-pill.badge-success { background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.25); color: #10b981; }
+.zone-pill.badge-warning { background: rgba(245, 158, 11, 0.12); border-color: rgba(245, 158, 11, 0.3); color: #f59e0b; }
+.zone-pill.badge-danger { background: rgba(239, 68, 68, 0.14); border-color: rgba(239, 68, 68, 0.35); color: #ef4444; }
+.legend-band { display: inline-flex; align-items: center; font-size: 11px; }
+.legend-band::before { content: ""; display: inline-block; width: 10px; height: 8px; border-radius: 2px; background: var(--band-color, #888); margin-right: 4px; }
+.faixas-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 6px; }
+.faixas-table th, .faixas-table td { padding: 6px 10px; border-bottom: 1px solid var(--border); text-align: left; }
+.faixas-table th { background: var(--bg); color: var(--muted); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: .03em; }
+.faixas-table td.range { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+.faixas-table tr:hover td { background: var(--accent-soft); }
+.hist-filter-group { display: inline-flex; gap: 4px; margin-left: auto; }
+.hist-filter-btn { border: 1px solid var(--border-strong); background: var(--bg); color: var(--muted); font-size: 11px; padding: 3px 8px; border-radius: 4px; cursor: pointer; font-family: var(--font); }
+.hist-filter-btn:hover { background: var(--accent-soft); color: var(--text); }
+.hist-filter-btn.active { background: var(--accent-soft); border-color: var(--accent); color: var(--text); font-weight: 600; }
 
 /* Shared header/label typography — last in cascade (Pacaembu SemiBold on chrome labels). */
 .wrap h1,
@@ -1830,6 +1853,7 @@ main h3,
   font-family: var(--font-display);
   font-weight: 600;
 }
+
 </style>
 </head>
 <body>
@@ -1957,14 +1981,32 @@ main h3,
 </div>
   <div class="kpi-row">
     <div class="kpi"><div class="label" data-i18n="magoKpiLinepack">Integrated line pack</div><div class="val" id="kpi-lp">—</div></div>
+    <div class="kpi"><div class="label" data-i18n="magoKpiZone">Operating Zone</div><div class="val" id="kpi-zone">—</div></div>
     <div class="kpi"><div class="label" data-i18n="magoKpiSnapshot">Snapshot (UTC)</div><div class="val" id="kpi-snap">—</div></div>
   </div>
 
   <section class="panel panel-tight">
-    <h2 data-i18n="magoLinepackTitle">Line pack — integrated mesh</h2>
-    <p class="sub compact" data-i18n="magoLinepackSub">Hourly actual (solid) and short-horizon forecast (dashed) from the latest Mago snapshot.</p>
+    <div class="panel-head-row">
+      <div>
+        <h2 data-i18n="magoLinepackTitle">Line pack — integrated mesh</h2>
+        <p class="sub compact" data-i18n="magoLinepackSub">Hourly actual (solid) and short-horizon forecast (dashed) with TAG commercial tolerance risk bands.</p>
+      </div>
+      <div id="linepack-zone-pill" class="zone-pill">—</div>
+    </div>
     <div class="chart-box chart-sm"><div id="chart-lp"></div></div>
-    <div class="legend"><span style="color:var(--tso-tag,#0066cc)">Actual</span><span class="dash" style="color:#888">Forecast</span></div>
+    <div class="legend">
+      <span style="color:var(--tso-tag,#0066cc)" data-i18n="magoLegendActual">Actual</span>
+      <span class="dash" style="color:#888" data-i18n="magoLegendForecast">Forecast</span>
+      <span class="legend-band" style="--band-color:#ef4444" data-i18n="magoLegendSev">Severo (Critical)</span>
+      <span class="legend-band" style="--band-color:#f59e0b" data-i18n="magoLegendAlt">Alto (Alert)</span>
+      <span class="legend-band" style="--band-color:#10b981" data-i18n="magoLegendMarg">Marginal (Target)</span>
+    </div>
+  </section>
+
+  <section class="panel panel-tight" id="faixas-panel">
+    <h2 data-i18n="magoFaixasTitle">Operating Risk & Imbalance Tolerance Bands</h2>
+    <p class="sub compact" data-i18n="magoFaixasSub">Commercial balancing tolerance thresholds established for TAG's integrated pipeline system. Exceeding marginal thresholds incurs imbalance penalties or triggers operational balancing actions.</p>
+    <div id="faixas-grid"></div>
   </section>
 
   <details class="panel-fold">
@@ -1974,6 +2016,10 @@ main h3,
       <div class="chart-box chart-sm"><div id="chart-lp-hist"></div></div>
       <div class="toolbar">
         <button type="button" id="btn-lp-csv" data-i18n="magoLpCsv">Download line pack CSV</button>
+        <div class="hist-filter-group">
+          <button type="button" id="btn-hist-all" class="hist-filter-btn active" data-i18n="magoHistAll">All Hours</button>
+          <button type="button" id="btn-hist-alerts" class="hist-filter-btn" data-i18n="magoHistAlerts">Alerts & Breaches Only (Alto & Severo)</button>
+        </div>
       </div>
       <div class="data-table-wrap">
         <table class="lp-table" id="lp-table">
@@ -1981,6 +2027,7 @@ main h3,
             <th data-col="observedAt" data-i18n="magoColObserved">Observed (UTC)</th>
             <th data-col="valueMm3" class="num" data-i18n="magoColMm3">Mm³</th>
             <th data-col="valueM3" class="num" data-i18n="magoColM3">m³</th>
+            <th data-col="zone" data-i18n="magoColZone">Operating Zone</th>
             <th data-col="snapshotAt" data-i18n="magoColSnapshot">Source snapshot</th>
           </tr></thead>
           <tbody id="lp-tbody"></tbody>
@@ -2037,7 +2084,7 @@ main h3,
 </footer>
 </div>
 <script>
-const PAYLOAD_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/mago/payload.json.gz?v=35530786636";
+const PAYLOAD_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/mago/payload.json.gz";
 /** Public R2 artifact (same bucket as other GasBrazil dashboards). Used when the shell still points at a sibling payload.json.gz that is not on Pages. */
 const MAGO_PAYLOAD_R2 = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/mago/payload.json.gz";
 
@@ -3094,8 +3141,36 @@ GB_I18N.en.magoColMm3 = "Mm³";
 GB_I18N.pt.magoColMm3 = "Mm³";
 GB_I18N.en.magoColM3 = "m³";
 GB_I18N.pt.magoColM3 = "m³";
+GB_I18N.en.magoColZone = "Operating Zone";
+GB_I18N.pt.magoColZone = "Faixa Operacional";
 GB_I18N.en.magoColSnapshot = "Source snapshot";
 GB_I18N.pt.magoColSnapshot = "Snapshot de origem";
+GB_I18N.en.magoKpiZone = "Operating Zone";
+GB_I18N.pt.magoKpiZone = "Faixa Operacional";
+GB_I18N.en.magoFaixasTitle = "Operating Risk & Imbalance Tolerance Bands";
+GB_I18N.pt.magoFaixasTitle = "Faixas de Tolerância e Risco Operacional";
+GB_I18N.en.magoFaixasSub = "TAG commercial balancing tolerance thresholds. Exceeding marginal thresholds incurs imbalance penalties or triggers operational balancing actions.";
+GB_I18N.pt.magoFaixasSub = "Limites comerciais de tolerância da TAG. Desvios fora da faixa marginal geram penalidades de desbalanceamento ou ações operacionais de compra/venda de gás.";
+GB_I18N.en.magoHistAll = "All Hours";
+GB_I18N.pt.magoHistAll = "Todas as Horas";
+GB_I18N.en.magoHistAlerts = "Alerts & Breaches Only (Alto & Severo)";
+GB_I18N.pt.magoHistAlerts = "Apenas Alertas e Violações (Alto e Severo)";
+GB_I18N.en.magoFaixaTier = "Operational Risk Tier";
+GB_I18N.pt.magoFaixaTier = "Nível de Risco Operacional";
+GB_I18N.en.magoFaixaRange = "Line Pack Threshold";
+GB_I18N.pt.magoFaixaRange = "Faixa de Empacotamento";
+GB_I18N.en.magoFaixaBalancing = "Commercial & Physical Balancing Consequence";
+GB_I18N.pt.magoFaixaBalancing = "Consequência Comercial e Operacional";
+GB_I18N.en.magoLegendActual = "Actual";
+GB_I18N.pt.magoLegendActual = "Realizado";
+GB_I18N.en.magoLegendForecast = "Forecast";
+GB_I18N.pt.magoLegendForecast = "Estimativa";
+GB_I18N.en.magoLegendSev = "Severo (Critical)";
+GB_I18N.pt.magoLegendSev = "Severo (Crítico)";
+GB_I18N.en.magoLegendAlt = "Alto (Alert)";
+GB_I18N.pt.magoLegendAlt = "Alto (Alerta)";
+GB_I18N.en.magoLegendMarg = "Marginal (Target)";
+GB_I18N.pt.magoLegendMarg = "Marginal (Ideal)";
 
 let DATA = {};
 let LP = {};
@@ -3108,6 +3183,7 @@ let selectedZones = new Set();
 let granularity = "state";
 let chartMode = "line";
 let lpSort = { col: "observedAt", dir: -1 };
+let lpFilter = "all";
 
 function fmtMm3(v) {
   if (v === null || v === undefined || !isFinite(v)) return "—";
@@ -3118,6 +3194,20 @@ function setKpis() {
   document.getElementById("kpi-lp").textContent = DATA.kpiLinepackMm3 != null
     ? DATA.kpiLinepackMm3.toFixed(2) + " Mm³" : fmtMm3(DATA.kpiLinepackM3);
   document.getElementById("kpi-snap").textContent = DATA.snapshotAt || "—";
+  const z = DATA.kpiZone;
+  const kpiZoneEl = document.getElementById("kpi-zone");
+  const pillEl = document.getElementById("linepack-zone-pill");
+  if (z) {
+    const lang = document.documentElement.getAttribute("data-lang") || "en";
+    const label = lang === "pt" ? (z.namePt || z.name) : z.name;
+    if (kpiZoneEl) {
+      kpiZoneEl.innerHTML = `<span class="zone-badge ${escapeHtml(z.badgeClass || '')}">${escapeHtml(label)}</span>`;
+    }
+    if (pillEl) {
+      pillEl.className = "zone-pill " + (z.badgeClass || "");
+      pillEl.textContent = label;
+    }
+  }
 }
 
 function chartSvg(tag, attrs) {
@@ -3131,7 +3221,7 @@ function tsMs(iso) {
   return d.getTime();
 }
 
-function drawLines(hostId, seriesList, yFmt) {
+function drawLines(hostId, seriesList, yFmt, bands) {
   const host = document.getElementById(hostId);
   host.innerHTML = "";
   const usable = seriesList.filter(s => (s.points || []).length >= 2);
@@ -3144,12 +3234,58 @@ function drawLines(hostId, seriesList, yFmt) {
   const ys = allPts.map(p => p.y).filter(v => v != null && isFinite(v));
   const minX = Math.min(...xs), maxX = Math.max(...xs);
   let lo = Math.min(...ys), hi = Math.max(...ys);
-  const pad = (hi - lo) * 0.08 || 1; lo -= pad; hi += pad;
-  const W = Math.max(640, host.clientWidth || 640), H = hostId === "chart-zones" ? 240 : 220, ML = 52, MR = 10, MT = 12, MB = 26;
-  const x = v => ML + (W - ML - MR) * ((v - minX) / (maxX - minX || 1));
-  const y = v => MT + (H - MT - MB) * (1 - (v - lo) / (hi - lo || 1));
+  if (bands) {
+    const bVals = Object.values(bands).filter(v => v != null && isFinite(v));
+    if (bVals.length) {
+      lo = Math.min(lo, ...bVals);
+      hi = Math.max(hi, ...bVals);
+    }
+  }
+  const pad = (hi - lo) * 0.06 || 1; lo -= pad; hi += pad;
+  const W = Math.max(640, host.clientWidth || 640), H = hostId === "chart-zones" ? 240 : 220;
+  const ML = 52, MR = bands ? 58 : 10, MT = 12, MB = 26;
+  const plotLeft = ML, plotWidth = W - ML - MR, plotTop = MT, plotBottom = H - MB;
+  const x = v => ML + plotWidth * ((v - minX) / (maxX - minX || 1));
+  const y = v => MT + (plotBottom - plotTop) * (1 - (v - lo) / (hi - lo || 1));
   const svg = chartSvg("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: "img" });
   svg.style.width = "100%"; svg.style.height = H + "px";
+
+  if (bands) {
+    const sevSup = bands.severo_superior;
+    const bSup = bands.baixo_superior;
+    const mSup = bands.marginal_superior;
+    const mInf = bands.marginal_inferior;
+    const bInf = bands.baixo_inferior;
+    const sevInf = bands.severo_inferior;
+
+    const zoneRects = [
+      { topVal: hi, botVal: sevSup, color: "rgba(239, 68, 68, 0.09)" },
+      { topVal: sevSup, botVal: bSup, color: "rgba(245, 158, 11, 0.08)" },
+      { topVal: bSup, botVal: mSup, color: "rgba(16, 185, 129, 0.05)" },
+      { topVal: mSup, botVal: mInf, color: "rgba(16, 185, 129, 0.12)" },
+      { topVal: mInf, botVal: bInf, color: "rgba(16, 185, 129, 0.05)" },
+      { topVal: bInf, botVal: sevInf, color: "rgba(245, 158, 11, 0.08)" },
+      { topVal: sevInf, botVal: lo, color: "rgba(239, 68, 68, 0.09)" },
+    ];
+
+    zoneRects.forEach(zr => {
+      if (zr.topVal == null || zr.botVal == null) return;
+      const y1 = Math.max(plotTop, Math.min(plotBottom, y(zr.topVal)));
+      const y2 = Math.max(plotTop, Math.min(plotBottom, y(zr.botVal)));
+      const rH = y2 - y1;
+      if (rH > 0) {
+        svg.appendChild(chartSvg("rect", {
+          x: plotLeft,
+          y: y1,
+          width: plotWidth,
+          height: rH,
+          fill: zr.color,
+          stroke: "none",
+        }));
+      }
+    });
+  }
+
   for (let i = 0; i <= 4; i++) {
     const t = lo + (hi - lo) * (i / 4);
     const yy = y(t);
@@ -3157,6 +3293,67 @@ function drawLines(hostId, seriesList, yFmt) {
     const lb = chartSvg("text", { x: ML - 6, y: yy + 4, "text-anchor": "end", fill: "var(--muted)", "font-size": 11 });
     lb.textContent = yFmt(t); svg.appendChild(lb);
   }
+
+  if (bands) {
+    const guides = [
+      { key: "sev_sup", val: bands.severo_superior, color: "#ef4444", label: "Sev. Sup" },
+      { key: "alt_sup", val: bands.baixo_superior, color: "#f59e0b", label: "Alto Sup" },
+      { key: "marg_sup", val: bands.marginal_superior, color: "#10b981", label: "Marg. Sup" },
+      { key: "marg_inf", val: bands.marginal_inferior, color: "#10b981", label: "Marg. Inf" },
+      { key: "alt_inf", val: bands.baixo_inferior, color: "#f59e0b", label: "Alto Inf" },
+      { key: "sev_inf", val: bands.severo_inferior, color: "#ef4444", label: "Sev. Inf" },
+    ];
+    guides.forEach(g => {
+      if (g.val == null || !isFinite(g.val)) return;
+      const gy = y(g.val);
+      if (gy < plotTop - 2 || gy > plotBottom + 2) return;
+      const line = chartSvg("line", {
+        x1: plotLeft,
+        x2: plotLeft + plotWidth,
+        y1: gy,
+        y2: gy,
+        stroke: g.color,
+        "stroke-width": 1,
+        "stroke-dasharray": "3 3",
+        opacity: 0.65,
+      });
+      const tip = chartSvg("title");
+      tip.textContent = `${g.label}: ${(g.val / 1e6).toFixed(2)} Mm³`;
+      line.appendChild(tip);
+      svg.appendChild(line);
+
+      const rLabel = chartSvg("text", {
+        x: plotLeft + plotWidth + 4,
+        y: gy + 3,
+        fill: g.color,
+        "font-size": 9,
+        "font-weight": 600,
+      });
+      rLabel.textContent = `${(g.val / 1e6).toFixed(1)}M`;
+      const tipText = chartSvg("title");
+      tipText.textContent = `${g.label}: ${(g.val / 1e6).toFixed(2)} Mm³`;
+      rLabel.appendChild(tipText);
+      svg.appendChild(rLabel);
+    });
+  }
+
+  const numTicks = 4;
+  for (let i = 0; i <= numTicks; i++) {
+    const tMs = minX + (maxX - minX) * (i / numTicks);
+    const tx = x(tMs);
+    const d = new Date(tMs);
+    const timeStr = (d.getUTCMonth() + 1) + "/" + d.getUTCDate() + " " + String(d.getUTCHours()).padStart(2, "0") + "h";
+    const tLabel = chartSvg("text", {
+      x: tx,
+      y: H - 8,
+      "text-anchor": i === 0 ? "start" : (i === numTicks ? "end" : "middle"),
+      fill: "var(--muted)",
+      "font-size": 10,
+    });
+    tLabel.textContent = timeStr;
+    svg.appendChild(tLabel);
+  }
+
   usable.forEach(s => {
     let d = "";
     let started = false;
@@ -3270,14 +3467,14 @@ function packLinepack() {
   drawLines("chart-lp", [
     { points: act, color: "var(--tso-tag,#0066cc)", dashed: false },
     { points: fore, color: "#888", dashed: true },
-  ], v => (v / 1e6).toFixed(1));
+  ], v => (v / 1e6).toFixed(1), DATA.toleranceBands);
 }
 
 function packLinepackHistory() {
   const pts = (LP_HIST.times || []).map((t, i) => ({ x: tsMs(t), y: LP_HIST.values[i] }));
   drawLines("chart-lp-hist", [
     { points: pts, color: "var(--tso-tag,#0066cc)", dashed: false },
-  ], v => (v / 1e6).toFixed(2));
+  ], v => (v / 1e6).toFixed(2), DATA.toleranceBands);
 }
 
 function activeZoneSeries() {
@@ -3399,8 +3596,45 @@ function syncGranularityUi() {
   renderFilters();
 }
 
+function renderFaixasTable() {
+  const host = document.getElementById("faixas-grid");
+  if (!host) return;
+  const list = DATA.toleranceBandsList || [];
+  if (!list.length) {
+    host.innerHTML = '<div class="chart-empty">No tolerance band data available.</div>';
+    return;
+  }
+  const lang = document.documentElement.getAttribute("data-lang") || "en";
+  const isPt = lang === "pt";
+  const thTier = isPt ? "Nível de Risco Operacional" : "Operational Risk Tier";
+  const thRange = isPt ? "Faixa de Empacotamento" : "Line Pack Threshold";
+  const thBal = isPt ? "Consequência Comercial e Operacional" : "Commercial & Physical Balancing Consequence";
+
+  let html = `<div style="overflow-x:auto"><table class="faixas-table">
+    <thead><tr>
+      <th data-i18n="magoFaixaTier">${thTier}</th>
+      <th data-i18n="magoFaixaRange">${thRange}</th>
+      <th data-i18n="magoFaixaBalancing">${thBal}</th>
+    </tr></thead>
+    <tbody>`;
+  list.forEach(b => {
+    const name = isPt ? b.name : (b.nameEn || b.name);
+    const desc = isPt ? b.descPt : (b.descEn || b.descPt);
+    html += `<tr>
+      <td><span class="zone-badge ${escapeHtml(b.badgeClass || '')}">${escapeHtml(name)}</span></td>
+      <td class="range">${escapeHtml(b.range)}</td>
+      <td>${escapeHtml(desc)}</td>
+    </tr>`;
+  });
+  html += `</tbody></table></div>`;
+  host.innerHTML = html;
+}
+
 function sortedLpRows() {
-  const rows = LP_ROWS.slice();
+  let rows = LP_ROWS.slice();
+  if (lpFilter === "alerts") {
+    rows = rows.filter(r => r.isAlert || r.isCritical);
+  }
   const col = lpSort.col;
   rows.sort((a, b) => {
     const av = a[col], bv = b[col];
@@ -3415,23 +3649,38 @@ function sortedLpRows() {
 
 function renderLpTable() {
   const tbody = document.getElementById("lp-tbody");
-  tbody.innerHTML = sortedLpRows().map(r => `
+  if (!tbody) return;
+  const rows = sortedLpRows();
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:1rem;">No records match the active filter.</td></tr>';
+    return;
+  }
+  const lang = document.documentElement.getAttribute("data-lang") || "en";
+  const isPt = lang === "pt";
+  tbody.innerHTML = rows.map(r => {
+    const label = isPt ? (r.zoneLabelPt || r.zoneLabel || r.zone) : (r.zoneLabel || r.zone);
+    const badge = r.zone ? `<span class="zone-badge ${escapeHtml(r.badgeClass || '')}">${escapeHtml(label || '')}</span>` : '—';
+    return `
     <tr>
       <td>${escapeHtml(r.observedAt)}</td>
       <td class="num">${r.valueMm3 != null ? r.valueMm3.toFixed(4) : "—"}</td>
       <td class="num">${r.valueM3 != null ? r.valueM3.toFixed(2) : "—"}</td>
+      <td>${badge}</td>
       <td>${escapeHtml(r.snapshotAt)}</td>
-    </tr>`).join("");
+    </tr>`;
+  }).join("");
 }
 
 function downloadLpCsv() {
-  const header = ["observed_utc", "mm3", "m3", "source_snapshot_utc"];
+  const header = ["observed_utc", "mm3", "m3", "operating_zone", "is_alert", "source_snapshot_utc"];
   const lines = [header.map(csvEscape).join(",")];
   sortedLpRows().forEach(r => {
     lines.push([
       r.observedAt,
       r.valueMm3 != null ? r.valueMm3 : "",
       r.valueM3 != null ? r.valueM3 : "",
+      r.zone || "",
+      r.isAlert ? "true" : "false",
       r.snapshotAt,
     ].map(csvEscape).join(","));
   });
@@ -3472,6 +3721,7 @@ function paintAsof() {
 function paintPage() {
   setKpis();
   syncGranularityUi();
+  renderFaixasTable();
   packLinepack();
   packLinepackHistory();
   packZones();
@@ -3559,10 +3809,29 @@ async function init() {
     });
   });
 
+  const btnAll = document.getElementById("btn-hist-all");
+  const btnAlerts = document.getElementById("btn-hist-alerts");
+  if (btnAll && btnAlerts) {
+    btnAll.addEventListener("click", () => {
+      lpFilter = "all";
+      btnAll.classList.add("active");
+      btnAlerts.classList.remove("active");
+      renderLpTable();
+    });
+    btnAlerts.addEventListener("click", () => {
+      lpFilter = "alerts";
+      btnAlerts.classList.add("active");
+      btnAll.classList.remove("active");
+      renderLpTable();
+    });
+  }
+
   initThemeToggle("theme-toggle", () => { packLinepack(); packLinepackHistory(); packZones(); });
   initLangToggle("lang-toggle", () => {
     renderFilters();
     setKpis();
+    renderFaixasTable();
+    renderLpTable();
     applyI18n();
   });
   initCrossLinks();

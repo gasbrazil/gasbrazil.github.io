@@ -15,10 +15,183 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "shared"))
 import dashboard_kit as kit  # noqa: E402
+from mago_client import DEFAULT_FAIXAS_INTEGRATED  # noqa: E402
 
 HERE = Path(__file__).parent
 PARQUET_PATH = HERE / "data" / "tag_mago_series.parquet"
 DEFAULT_OUT = HERE / "index.html"
+
+FAIXA_INFO = [
+    {
+        "key": "severo_superior",
+        "name_en": "Critical High (Severo)",
+        "name_pt": "Severo (Superior)",
+        "color": "#ef4444",
+        "badge_class": "badge-danger",
+        "desc_en": "Critical overpack: venting / relief risk, maximum imbalance penalty",
+        "desc_pt": "Empacotamento crítico elevado: risco de alívio e penalidades máximas",
+    },
+    {
+        "key": "alto_superior",
+        "name_en": "High Alert (Alto)",
+        "name_pt": "Alto (Superior)",
+        "color": "#f59e0b",
+        "badge_class": "badge-warning",
+        "desc_en": "High inventory: network balancing actions / penalties apply",
+        "desc_pt": "Inventário elevado: ações comerciais e penalidades aplicáveis",
+    },
+    {
+        "key": "baixo_superior",
+        "name_en": "Mild High (Baixo)",
+        "name_pt": "Baixo (Superior)",
+        "color": "#10b981",
+        "badge_class": "badge-success",
+        "desc_en": "Mild high inventory above target operating envelope",
+        "desc_pt": "Inventário moderadamente alto, acima da faixa ideal",
+    },
+    {
+        "key": "marginal",
+        "name_en": "Target Operating (Marginal)",
+        "name_pt": "Marginal (Operação Ideal)",
+        "color": "#10b981",
+        "badge_class": "badge-target",
+        "desc_en": "Optimal operating envelope: standard transport, zero imbalance penalty",
+        "desc_pt": "Faixa de operação ideal: transporte neutro sem penalidades",
+    },
+    {
+        "key": "baixo_inferior",
+        "name_en": "Mild Low (Baixo)",
+        "name_pt": "Baixo (Inferior)",
+        "color": "#10b981",
+        "badge_class": "badge-success",
+        "desc_en": "Mild low inventory below target operating envelope",
+        "desc_pt": "Inventário moderadamente baixo, abaixo da faixa ideal",
+    },
+    {
+        "key": "alto_inferior",
+        "name_en": "Low Alert (Alto)",
+        "name_pt": "Alto (Inferior)",
+        "color": "#f59e0b",
+        "badge_class": "badge-warning",
+        "desc_en": "Low inventory: transport system alert, balancing injections needed",
+        "desc_pt": "Inventário reduzido: alerta no sistema, compras de gás pela transportadora",
+    },
+    {
+        "key": "severo_inferior",
+        "name_en": "Critical Low (Severo)",
+        "name_pt": "Severo (Inferior)",
+        "color": "#ef4444",
+        "badge_class": "badge-danger",
+        "desc_en": "Critical underpack: risk of system depressurization and supply curtailment",
+        "desc_pt": "Empacotamento criticamente baixo: risco de despressurização e corte",
+    },
+]
+
+
+def determine_linepack_zone(val_m3: float | None, bands: dict[str, float]) -> dict:
+    if val_m3 is None or pd.isna(val_m3):
+        return {
+            "key": "unknown",
+            "name": "Unknown",
+            "namePt": "Desconhecido",
+            "color": "#9ca3af",
+            "badgeClass": "badge-unknown",
+            "isAlert": False,
+            "isCritical": False,
+        }
+    sev_sup = bands["severo_superior"]
+    bx_sup = bands["baixo_superior"]
+    mg_sup = bands["marginal_superior"]
+    mg_inf = bands["marginal_inferior"]
+    bx_inf = bands["baixo_inferior"]
+    sev_inf = bands["severo_inferior"]
+
+    if val_m3 >= sev_sup:
+        k = "severo_superior"
+    elif val_m3 >= bx_sup:
+        k = "alto_superior"
+    elif val_m3 >= mg_sup:
+        k = "baixo_superior"
+    elif val_m3 >= mg_inf:
+        k = "marginal"
+    elif val_m3 >= bx_inf:
+        k = "baixo_inferior"
+    elif val_m3 >= sev_inf:
+        k = "alto_inferior"
+    else:
+        k = "severo_inferior"
+
+    info = next((item for item in FAIXA_INFO if item["key"] == k), FAIXA_INFO[3])
+    return {
+        "key": k,
+        "name": info["name_en"],
+        "namePt": info["name_pt"],
+        "color": info["color"],
+        "badgeClass": info["badge_class"],
+        "isAlert": k in ("severo_superior", "alto_superior", "alto_inferior", "severo_inferior"),
+        "isCritical": k in ("severo_superior", "severo_inferior"),
+    }
+
+
+def _extract_tolerance_bands(snap_df: pd.DataFrame) -> dict[str, float]:
+    bands = dict(DEFAULT_FAIXAS_INTEGRATED)
+    faixas_df = snap_df[
+        (snap_df["series"] == "linepack_tolerance_band") & (snap_df["mesh"] == "integrated")
+    ]
+    if not faixas_df.empty:
+        for band_key in DEFAULT_FAIXAS_INTEGRATED:
+            band_rows = faixas_df[faixas_df["zone"] == band_key]
+            if not band_rows.empty:
+                val = band_rows.sort_values("observed_at")["value"].iloc[-1]
+                if val and not pd.isna(val) and val >= 1_000_000:
+                    bands[band_key] = round(float(val), 2)
+    return bands
+
+
+def _linepack_history(df: pd.DataFrame, default_bands: dict[str, float]) -> tuple[dict, list[dict]]:
+    lp = df[(df["series"] == "linepack_actual") & (df["mesh"] == "integrated")].copy()
+    if lp.empty:
+        return {"times": [], "values": []}, []
+    lp = lp.sort_values(["observed_at", "snapshot_at"])
+    lp = lp.drop_duplicates(subset=["observed_at"], keep="last")
+    series = _series_pack(lp)
+
+    bands_by_snap: dict[pd.Timestamp, dict[str, float]] = {}
+    faixas_all = df[
+        (df["series"] == "linepack_tolerance_band") & (df["mesh"] == "integrated")
+    ]
+    if not faixas_all.empty:
+        for snap_ts, group in faixas_all.groupby("snapshot_at"):
+            snap_bands = dict(default_bands)
+            for b_key in default_bands:
+                b_match = group[group["zone"] == b_key]
+                if not b_match.empty:
+                    val = b_match.sort_values("observed_at")["value"].iloc[-1]
+                    if val and not pd.isna(val) and val >= 1_000_000:
+                        snap_bands[b_key] = round(float(val), 2)
+            bands_by_snap[snap_ts] = snap_bands
+
+    rows: list[dict] = []
+    for _, row in lp.iterrows():
+        val = _num(row["value"])
+        snap_ts = pd.Timestamp(row["snapshot_at"])
+        active_bands = bands_by_snap.get(snap_ts, default_bands)
+        zone_info = determine_linepack_zone(val, active_bands)
+        rows.append(
+            {
+                "observedAt": pd.Timestamp(row["observed_at"]).strftime("%Y-%m-%dT%H:%M"),
+                "snapshotAt": snap_ts.strftime("%Y-%m-%dT%H:%M"),
+                "valueM3": val,
+                "valueMm3": None if val is None else round(val / 1_000_000, 4),
+                "zone": zone_info["key"],
+                "zoneLabel": zone_info["name"],
+                "zoneLabelPt": zone_info["namePt"],
+                "badgeClass": zone_info["badgeClass"],
+                "isAlert": zone_info["isAlert"],
+                "isCritical": zone_info["isCritical"],
+            }
+        )
+    return series, rows
 
 ZONE_LABELS = {
     "AL": "Alagoas",
@@ -114,27 +287,6 @@ def _sum_zone_series(zone_series: dict[str, dict], zones: list[str]) -> dict:
     return {"times": all_times, "values": values}
 
 
-def _linepack_history(df: pd.DataFrame) -> tuple[dict, list[dict]]:
-    lp = df[(df["series"] == "linepack_actual") & (df["mesh"] == "integrated")].copy()
-    if lp.empty:
-        return {"times": [], "values": []}, []
-    lp = lp.sort_values(["observed_at", "snapshot_at"])
-    lp = lp.drop_duplicates(subset=["observed_at"], keep="last")
-    series = _series_pack(lp)
-    rows: list[dict] = []
-    for _, row in lp.iterrows():
-        val = _num(row["value"])
-        rows.append(
-            {
-                "observedAt": pd.Timestamp(row["observed_at"]).strftime("%Y-%m-%dT%H:%M"),
-                "snapshotAt": pd.Timestamp(row["snapshot_at"]).strftime("%Y-%m-%dT%H:%M"),
-                "valueM3": val,
-                "valueMm3": None if val is None else round(val / 1_000_000, 4),
-            }
-        )
-    return series, rows
-
-
 def load_payload(*, snapshot_at: pd.Timestamp | None = None) -> dict:
     if not PARQUET_PATH.exists():
         raise RuntimeError(f"Missing {PARQUET_PATH} — run make_mock.py or mago_pipeline.py build")
@@ -176,13 +328,89 @@ def load_payload(*, snapshot_at: pd.Timestamp | None = None) -> dict:
         group_zones[key] = members
         group_series[key] = _sum_zone_series(zone_series, members)
 
-    lp_hist_series, lp_hist_rows = _linepack_history(df)
+    tolerance_bands = _extract_tolerance_bands(snap_df)
+    lp_hist_series, lp_hist_rows = _linepack_history(df, tolerance_bands)
 
     latest_lp = None
     if len(lp_actual):
         latest_lp = _num(lp_actual.sort_values("observed_at")["value"].iloc[-1])
 
-    now = dt.datetime.now(dt.timezone.utc)
+    current_zone = determine_linepack_zone(latest_lp, tolerance_bands)
+
+    bands_list = [
+        {
+            "key": "severo_superior",
+            "name": "Severo (Superior)",
+            "nameEn": "Critical High (Severo)",
+            "color": "#ef4444",
+            "badgeClass": "badge-danger",
+            "range": f"≥ {tolerance_bands['severo_superior'] / 1_000_000:.2f} Mm³",
+            "descEn": "Critical overpack: venting / relief risk, maximum imbalance penalty",
+            "descPt": "Empacotamento crítico elevado: risco de alívio e penalidades máximas",
+        },
+        {
+            "key": "alto_superior",
+            "name": "Alto (Superior)",
+            "nameEn": "High Alert (Alto)",
+            "color": "#f59e0b",
+            "badgeClass": "badge-warning",
+            "range": f"{tolerance_bands['baixo_superior'] / 1_000_000:.2f} – {tolerance_bands['severo_superior'] / 1_000_000:.2f} Mm³",
+            "descEn": "High inventory: network balancing actions / penalties apply",
+            "descPt": "Inventário elevado: ações comerciais e penalidades aplicáveis",
+        },
+        {
+            "key": "baixo_superior",
+            "name": "Baixo (Superior)",
+            "nameEn": "Mild High (Baixo)",
+            "color": "#10b981",
+            "badgeClass": "badge-success",
+            "range": f"{tolerance_bands['marginal_superior'] / 1_000_000:.2f} – {tolerance_bands['baixo_superior'] / 1_000_000:.2f} Mm³",
+            "descEn": "Mild high inventory above target operating envelope",
+            "descPt": "Inventário moderadamente alto, acima da faixa ideal",
+        },
+        {
+            "key": "marginal",
+            "name": "Marginal (Ideal)",
+            "nameEn": "Target Operating (Marginal)",
+            "color": "#10b981",
+            "badgeClass": "badge-target",
+            "range": f"{tolerance_bands['marginal_inferior'] / 1_000_000:.2f} – {tolerance_bands['marginal_superior'] / 1_000_000:.2f} Mm³",
+            "descEn": "Optimal operating envelope: standard transport, zero imbalance penalty",
+            "descPt": "Faixa de operação ideal: transporte neutro sem penalidades",
+        },
+        {
+            "key": "baixo_inferior",
+            "name": "Baixo (Inferior)",
+            "nameEn": "Mild Low (Baixo)",
+            "color": "#10b981",
+            "badgeClass": "badge-success",
+            "range": f"{tolerance_bands['baixo_inferior'] / 1_000_000:.2f} – {tolerance_bands['marginal_inferior'] / 1_000_000:.2f} Mm³",
+            "descEn": "Mild low inventory below target operating envelope",
+            "descPt": "Inventário moderadamente baixo, abaixo da faixa ideal",
+        },
+        {
+            "key": "alto_inferior",
+            "name": "Alto (Inferior)",
+            "nameEn": "Low Alert (Alto)",
+            "color": "#f59e0b",
+            "badgeClass": "badge-warning",
+            "range": f"{tolerance_bands['severo_inferior'] / 1_000_000:.2f} – {tolerance_bands['baixo_inferior'] / 1_000_000:.2f} Mm³",
+            "descEn": "Low inventory: transport system alert, balancing injections needed",
+            "descPt": "Inventário reduzido: alerta no sistema, compras de gás pela transportadora",
+        },
+        {
+            "key": "severo_inferior",
+            "name": "Severo (Inferior)",
+            "nameEn": "Critical Low (Severo)",
+            "color": "#ef4444",
+            "badgeClass": "badge-danger",
+            "range": f"≤ {tolerance_bands['severo_inferior'] / 1_000_000:.2f} Mm³",
+            "descEn": "Critical underpack: risk of system depressurization and supply curtailment",
+            "descPt": "Empacotamento criticamente baixo: risco de despressurização e corte",
+        },
+    ]
+
+    now = dt.datetime.now(dt.UTC)
     return {
         "generated": now.strftime("%Y-%m-%d %H:%M UTC"),
         "generatedIso": now.isoformat(),
@@ -201,6 +429,9 @@ def load_payload(*, snapshot_at: pd.Timestamp | None = None) -> dict:
         },
         "linepackHistory": lp_hist_series,
         "linepackHistoryRows": lp_hist_rows,
+        "toleranceBands": tolerance_bands,
+        "toleranceBandsList": bands_list,
+        "kpiZone": current_zone,
         "zoneSeries": zone_series,
         "kpiLinepackM3": latest_lp,
         "kpiLinepackMm3": None if latest_lp is None else round(latest_lp / 1_000_000, 3),
@@ -286,6 +517,29 @@ table.lp-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
 .toolbar button:hover, .filter-bar .btn-clear:hover { background: var(--accent-soft); }
 footer { margin-top: 16px; color: var(--muted); font-size: 11px; line-height: 1.6; font-weight: 200; }
 footer a { color: var(--accent); }
+.zone-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: 550; line-height: 1.3; }
+.zone-badge::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.badge-target { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+.badge-success { background: rgba(16, 185, 129, 0.12); color: #10b981; }
+.badge-warning { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+.badge-danger { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+.badge-unknown { background: rgba(156, 163, 175, 0.15); color: #9ca3af; }
+.zone-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid transparent; }
+.zone-pill.badge-target { background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.3); color: #10b981; }
+.zone-pill.badge-success { background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.25); color: #10b981; }
+.zone-pill.badge-warning { background: rgba(245, 158, 11, 0.12); border-color: rgba(245, 158, 11, 0.3); color: #f59e0b; }
+.zone-pill.badge-danger { background: rgba(239, 68, 68, 0.14); border-color: rgba(239, 68, 68, 0.35); color: #ef4444; }
+.legend-band { display: inline-flex; align-items: center; font-size: 11px; }
+.legend-band::before { content: ""; display: inline-block; width: 10px; height: 8px; border-radius: 2px; background: var(--band-color, #888); margin-right: 4px; }
+.faixas-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 6px; }
+.faixas-table th, .faixas-table td { padding: 6px 10px; border-bottom: 1px solid var(--border); text-align: left; }
+.faixas-table th { background: var(--bg); color: var(--muted); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: .03em; }
+.faixas-table td.range { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+.faixas-table tr:hover td { background: var(--accent-soft); }
+.hist-filter-group { display: inline-flex; gap: 4px; margin-left: auto; }
+.hist-filter-btn { border: 1px solid var(--border-strong); background: var(--bg); color: var(--muted); font-size: 11px; padding: 3px 8px; border-radius: 4px; cursor: pointer; font-family: var(--font); }
+.hist-filter-btn:hover { background: var(--accent-soft); color: var(--text); }
+.hist-filter-btn.active { background: var(--accent-soft); border-color: var(--accent); color: var(--text); font-weight: 600; }
 __SHARED_TYPO_WEIGHT_CSS__
 </style>
 </head>
@@ -306,14 +560,32 @@ __SHARED_TYPO_WEIGHT_CSS__
 </div>
   <div class="kpi-row">
     <div class="kpi"><div class="label" data-i18n="magoKpiLinepack">Integrated line pack</div><div class="val" id="kpi-lp">—</div></div>
+    <div class="kpi"><div class="label" data-i18n="magoKpiZone">Operating Zone</div><div class="val" id="kpi-zone">—</div></div>
     <div class="kpi"><div class="label" data-i18n="magoKpiSnapshot">Snapshot (UTC)</div><div class="val" id="kpi-snap">—</div></div>
   </div>
 
   <section class="panel panel-tight">
-    <h2 data-i18n="magoLinepackTitle">Line pack — integrated mesh</h2>
-    <p class="sub compact" data-i18n="magoLinepackSub">Hourly actual (solid) and short-horizon forecast (dashed) from the latest Mago snapshot.</p>
+    <div class="panel-head-row">
+      <div>
+        <h2 data-i18n="magoLinepackTitle">Line pack — integrated mesh</h2>
+        <p class="sub compact" data-i18n="magoLinepackSub">Hourly actual (solid) and short-horizon forecast (dashed) with TAG commercial tolerance risk bands.</p>
+      </div>
+      <div id="linepack-zone-pill" class="zone-pill">—</div>
+    </div>
     <div class="chart-box chart-sm"><div id="chart-lp"></div></div>
-    <div class="legend"><span style="color:var(--tso-tag,#0066cc)">Actual</span><span class="dash" style="color:#888">Forecast</span></div>
+    <div class="legend">
+      <span style="color:var(--tso-tag,#0066cc)" data-i18n="magoLegendActual">Actual</span>
+      <span class="dash" style="color:#888" data-i18n="magoLegendForecast">Forecast</span>
+      <span class="legend-band" style="--band-color:#ef4444" data-i18n="magoLegendSev">Severo (Critical)</span>
+      <span class="legend-band" style="--band-color:#f59e0b" data-i18n="magoLegendAlt">Alto (Alert)</span>
+      <span class="legend-band" style="--band-color:#10b981" data-i18n="magoLegendMarg">Marginal (Target)</span>
+    </div>
+  </section>
+
+  <section class="panel panel-tight" id="faixas-panel">
+    <h2 data-i18n="magoFaixasTitle">Operating Risk & Imbalance Tolerance Bands</h2>
+    <p class="sub compact" data-i18n="magoFaixasSub">Commercial balancing tolerance thresholds established for TAG's integrated pipeline system. Exceeding marginal thresholds incurs imbalance penalties or triggers operational balancing actions.</p>
+    <div id="faixas-grid"></div>
   </section>
 
   <details class="panel-fold">
@@ -323,6 +595,10 @@ __SHARED_TYPO_WEIGHT_CSS__
       <div class="chart-box chart-sm"><div id="chart-lp-hist"></div></div>
       <div class="toolbar">
         <button type="button" id="btn-lp-csv" data-i18n="magoLpCsv">Download line pack CSV</button>
+        <div class="hist-filter-group">
+          <button type="button" id="btn-hist-all" class="hist-filter-btn active" data-i18n="magoHistAll">All Hours</button>
+          <button type="button" id="btn-hist-alerts" class="hist-filter-btn" data-i18n="magoHistAlerts">Alerts & Breaches Only (Alto & Severo)</button>
+        </div>
       </div>
       <div class="data-table-wrap">
         <table class="lp-table" id="lp-table">
@@ -330,6 +606,7 @@ __SHARED_TYPO_WEIGHT_CSS__
             <th data-col="observedAt" data-i18n="magoColObserved">Observed (UTC)</th>
             <th data-col="valueMm3" class="num" data-i18n="magoColMm3">Mm³</th>
             <th data-col="valueM3" class="num" data-i18n="magoColM3">m³</th>
+            <th data-col="zone" data-i18n="magoColZone">Operating Zone</th>
             <th data-col="snapshotAt" data-i18n="magoColSnapshot">Source snapshot</th>
           </tr></thead>
           <tbody id="lp-tbody"></tbody>
@@ -420,8 +697,36 @@ GB_I18N.en.magoColMm3 = "Mm³";
 GB_I18N.pt.magoColMm3 = "Mm³";
 GB_I18N.en.magoColM3 = "m³";
 GB_I18N.pt.magoColM3 = "m³";
+GB_I18N.en.magoColZone = "Operating Zone";
+GB_I18N.pt.magoColZone = "Faixa Operacional";
 GB_I18N.en.magoColSnapshot = "Source snapshot";
 GB_I18N.pt.magoColSnapshot = "Snapshot de origem";
+GB_I18N.en.magoKpiZone = "Operating Zone";
+GB_I18N.pt.magoKpiZone = "Faixa Operacional";
+GB_I18N.en.magoFaixasTitle = "Operating Risk & Imbalance Tolerance Bands";
+GB_I18N.pt.magoFaixasTitle = "Faixas de Tolerância e Risco Operacional";
+GB_I18N.en.magoFaixasSub = "TAG commercial balancing tolerance thresholds. Exceeding marginal thresholds incurs imbalance penalties or triggers operational balancing actions.";
+GB_I18N.pt.magoFaixasSub = "Limites comerciais de tolerância da TAG. Desvios fora da faixa marginal geram penalidades de desbalanceamento ou ações operacionais de compra/venda de gás.";
+GB_I18N.en.magoHistAll = "All Hours";
+GB_I18N.pt.magoHistAll = "Todas as Horas";
+GB_I18N.en.magoHistAlerts = "Alerts & Breaches Only (Alto & Severo)";
+GB_I18N.pt.magoHistAlerts = "Apenas Alertas e Violações (Alto e Severo)";
+GB_I18N.en.magoFaixaTier = "Operational Risk Tier";
+GB_I18N.pt.magoFaixaTier = "Nível de Risco Operacional";
+GB_I18N.en.magoFaixaRange = "Line Pack Threshold";
+GB_I18N.pt.magoFaixaRange = "Faixa de Empacotamento";
+GB_I18N.en.magoFaixaBalancing = "Commercial & Physical Balancing Consequence";
+GB_I18N.pt.magoFaixaBalancing = "Consequência Comercial e Operacional";
+GB_I18N.en.magoLegendActual = "Actual";
+GB_I18N.pt.magoLegendActual = "Realizado";
+GB_I18N.en.magoLegendForecast = "Forecast";
+GB_I18N.pt.magoLegendForecast = "Estimativa";
+GB_I18N.en.magoLegendSev = "Severo (Critical)";
+GB_I18N.pt.magoLegendSev = "Severo (Crítico)";
+GB_I18N.en.magoLegendAlt = "Alto (Alert)";
+GB_I18N.pt.magoLegendAlt = "Alto (Alerta)";
+GB_I18N.en.magoLegendMarg = "Marginal (Target)";
+GB_I18N.pt.magoLegendMarg = "Marginal (Ideal)";
 
 let DATA = {};
 let LP = {};
@@ -434,6 +739,7 @@ let selectedZones = new Set();
 let granularity = "state";
 let chartMode = "line";
 let lpSort = { col: "observedAt", dir: -1 };
+let lpFilter = "all";
 
 function fmtMm3(v) {
   if (v === null || v === undefined || !isFinite(v)) return "—";
@@ -444,6 +750,20 @@ function setKpis() {
   document.getElementById("kpi-lp").textContent = DATA.kpiLinepackMm3 != null
     ? DATA.kpiLinepackMm3.toFixed(2) + " Mm³" : fmtMm3(DATA.kpiLinepackM3);
   document.getElementById("kpi-snap").textContent = DATA.snapshotAt || "—";
+  const z = DATA.kpiZone;
+  const kpiZoneEl = document.getElementById("kpi-zone");
+  const pillEl = document.getElementById("linepack-zone-pill");
+  if (z) {
+    const lang = document.documentElement.getAttribute("data-lang") || "en";
+    const label = lang === "pt" ? (z.namePt || z.name) : z.name;
+    if (kpiZoneEl) {
+      kpiZoneEl.innerHTML = `<span class="zone-badge ${escapeHtml(z.badgeClass || '')}">${escapeHtml(label)}</span>`;
+    }
+    if (pillEl) {
+      pillEl.className = "zone-pill " + (z.badgeClass || "");
+      pillEl.textContent = label;
+    }
+  }
 }
 
 function chartSvg(tag, attrs) {
@@ -457,7 +777,7 @@ function tsMs(iso) {
   return d.getTime();
 }
 
-function drawLines(hostId, seriesList, yFmt) {
+function drawLines(hostId, seriesList, yFmt, bands) {
   const host = document.getElementById(hostId);
   host.innerHTML = "";
   const usable = seriesList.filter(s => (s.points || []).length >= 2);
@@ -470,12 +790,58 @@ function drawLines(hostId, seriesList, yFmt) {
   const ys = allPts.map(p => p.y).filter(v => v != null && isFinite(v));
   const minX = Math.min(...xs), maxX = Math.max(...xs);
   let lo = Math.min(...ys), hi = Math.max(...ys);
-  const pad = (hi - lo) * 0.08 || 1; lo -= pad; hi += pad;
-  const W = Math.max(640, host.clientWidth || 640), H = hostId === "chart-zones" ? 240 : 220, ML = 52, MR = 10, MT = 12, MB = 26;
-  const x = v => ML + (W - ML - MR) * ((v - minX) / (maxX - minX || 1));
-  const y = v => MT + (H - MT - MB) * (1 - (v - lo) / (hi - lo || 1));
+  if (bands) {
+    const bVals = Object.values(bands).filter(v => v != null && isFinite(v));
+    if (bVals.length) {
+      lo = Math.min(lo, ...bVals);
+      hi = Math.max(hi, ...bVals);
+    }
+  }
+  const pad = (hi - lo) * 0.06 || 1; lo -= pad; hi += pad;
+  const W = Math.max(640, host.clientWidth || 640), H = hostId === "chart-zones" ? 240 : 220;
+  const ML = 52, MR = bands ? 58 : 10, MT = 12, MB = 26;
+  const plotLeft = ML, plotWidth = W - ML - MR, plotTop = MT, plotBottom = H - MB;
+  const x = v => ML + plotWidth * ((v - minX) / (maxX - minX || 1));
+  const y = v => MT + (plotBottom - plotTop) * (1 - (v - lo) / (hi - lo || 1));
   const svg = chartSvg("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: "img" });
   svg.style.width = "100%"; svg.style.height = H + "px";
+
+  if (bands) {
+    const sevSup = bands.severo_superior;
+    const bSup = bands.baixo_superior;
+    const mSup = bands.marginal_superior;
+    const mInf = bands.marginal_inferior;
+    const bInf = bands.baixo_inferior;
+    const sevInf = bands.severo_inferior;
+
+    const zoneRects = [
+      { topVal: hi, botVal: sevSup, color: "rgba(239, 68, 68, 0.09)" },
+      { topVal: sevSup, botVal: bSup, color: "rgba(245, 158, 11, 0.08)" },
+      { topVal: bSup, botVal: mSup, color: "rgba(16, 185, 129, 0.05)" },
+      { topVal: mSup, botVal: mInf, color: "rgba(16, 185, 129, 0.12)" },
+      { topVal: mInf, botVal: bInf, color: "rgba(16, 185, 129, 0.05)" },
+      { topVal: bInf, botVal: sevInf, color: "rgba(245, 158, 11, 0.08)" },
+      { topVal: sevInf, botVal: lo, color: "rgba(239, 68, 68, 0.09)" },
+    ];
+
+    zoneRects.forEach(zr => {
+      if (zr.topVal == null || zr.botVal == null) return;
+      const y1 = Math.max(plotTop, Math.min(plotBottom, y(zr.topVal)));
+      const y2 = Math.max(plotTop, Math.min(plotBottom, y(zr.botVal)));
+      const rH = y2 - y1;
+      if (rH > 0) {
+        svg.appendChild(chartSvg("rect", {
+          x: plotLeft,
+          y: y1,
+          width: plotWidth,
+          height: rH,
+          fill: zr.color,
+          stroke: "none",
+        }));
+      }
+    });
+  }
+
   for (let i = 0; i <= 4; i++) {
     const t = lo + (hi - lo) * (i / 4);
     const yy = y(t);
@@ -483,6 +849,67 @@ function drawLines(hostId, seriesList, yFmt) {
     const lb = chartSvg("text", { x: ML - 6, y: yy + 4, "text-anchor": "end", fill: "var(--muted)", "font-size": 11 });
     lb.textContent = yFmt(t); svg.appendChild(lb);
   }
+
+  if (bands) {
+    const guides = [
+      { key: "sev_sup", val: bands.severo_superior, color: "#ef4444", label: "Sev. Sup" },
+      { key: "alt_sup", val: bands.baixo_superior, color: "#f59e0b", label: "Alto Sup" },
+      { key: "marg_sup", val: bands.marginal_superior, color: "#10b981", label: "Marg. Sup" },
+      { key: "marg_inf", val: bands.marginal_inferior, color: "#10b981", label: "Marg. Inf" },
+      { key: "alt_inf", val: bands.baixo_inferior, color: "#f59e0b", label: "Alto Inf" },
+      { key: "sev_inf", val: bands.severo_inferior, color: "#ef4444", label: "Sev. Inf" },
+    ];
+    guides.forEach(g => {
+      if (g.val == null || !isFinite(g.val)) return;
+      const gy = y(g.val);
+      if (gy < plotTop - 2 || gy > plotBottom + 2) return;
+      const line = chartSvg("line", {
+        x1: plotLeft,
+        x2: plotLeft + plotWidth,
+        y1: gy,
+        y2: gy,
+        stroke: g.color,
+        "stroke-width": 1,
+        "stroke-dasharray": "3 3",
+        opacity: 0.65,
+      });
+      const tip = chartSvg("title");
+      tip.textContent = `${g.label}: ${(g.val / 1e6).toFixed(2)} Mm³`;
+      line.appendChild(tip);
+      svg.appendChild(line);
+
+      const rLabel = chartSvg("text", {
+        x: plotLeft + plotWidth + 4,
+        y: gy + 3,
+        fill: g.color,
+        "font-size": 9,
+        "font-weight": 600,
+      });
+      rLabel.textContent = `${(g.val / 1e6).toFixed(1)}M`;
+      const tipText = chartSvg("title");
+      tipText.textContent = `${g.label}: ${(g.val / 1e6).toFixed(2)} Mm³`;
+      rLabel.appendChild(tipText);
+      svg.appendChild(rLabel);
+    });
+  }
+
+  const numTicks = 4;
+  for (let i = 0; i <= numTicks; i++) {
+    const tMs = minX + (maxX - minX) * (i / numTicks);
+    const tx = x(tMs);
+    const d = new Date(tMs);
+    const timeStr = (d.getUTCMonth() + 1) + "/" + d.getUTCDate() + " " + String(d.getUTCHours()).padStart(2, "0") + "h";
+    const tLabel = chartSvg("text", {
+      x: tx,
+      y: H - 8,
+      "text-anchor": i === 0 ? "start" : (i === numTicks ? "end" : "middle"),
+      fill: "var(--muted)",
+      "font-size": 10,
+    });
+    tLabel.textContent = timeStr;
+    svg.appendChild(tLabel);
+  }
+
   usable.forEach(s => {
     let d = "";
     let started = false;
@@ -596,14 +1023,14 @@ function packLinepack() {
   drawLines("chart-lp", [
     { points: act, color: "var(--tso-tag,#0066cc)", dashed: false },
     { points: fore, color: "#888", dashed: true },
-  ], v => (v / 1e6).toFixed(1));
+  ], v => (v / 1e6).toFixed(1), DATA.toleranceBands);
 }
 
 function packLinepackHistory() {
   const pts = (LP_HIST.times || []).map((t, i) => ({ x: tsMs(t), y: LP_HIST.values[i] }));
   drawLines("chart-lp-hist", [
     { points: pts, color: "var(--tso-tag,#0066cc)", dashed: false },
-  ], v => (v / 1e6).toFixed(2));
+  ], v => (v / 1e6).toFixed(2), DATA.toleranceBands);
 }
 
 function activeZoneSeries() {
@@ -725,8 +1152,45 @@ function syncGranularityUi() {
   renderFilters();
 }
 
+function renderFaixasTable() {
+  const host = document.getElementById("faixas-grid");
+  if (!host) return;
+  const list = DATA.toleranceBandsList || [];
+  if (!list.length) {
+    host.innerHTML = '<div class="chart-empty">No tolerance band data available.</div>';
+    return;
+  }
+  const lang = document.documentElement.getAttribute("data-lang") || "en";
+  const isPt = lang === "pt";
+  const thTier = isPt ? "Nível de Risco Operacional" : "Operational Risk Tier";
+  const thRange = isPt ? "Faixa de Empacotamento" : "Line Pack Threshold";
+  const thBal = isPt ? "Consequência Comercial e Operacional" : "Commercial & Physical Balancing Consequence";
+
+  let html = `<div style="overflow-x:auto"><table class="faixas-table">
+    <thead><tr>
+      <th data-i18n="magoFaixaTier">${thTier}</th>
+      <th data-i18n="magoFaixaRange">${thRange}</th>
+      <th data-i18n="magoFaixaBalancing">${thBal}</th>
+    </tr></thead>
+    <tbody>`;
+  list.forEach(b => {
+    const name = isPt ? b.name : (b.nameEn || b.name);
+    const desc = isPt ? b.descPt : (b.descEn || b.descPt);
+    html += `<tr>
+      <td><span class="zone-badge ${escapeHtml(b.badgeClass || '')}">${escapeHtml(name)}</span></td>
+      <td class="range">${escapeHtml(b.range)}</td>
+      <td>${escapeHtml(desc)}</td>
+    </tr>`;
+  });
+  html += `</tbody></table></div>`;
+  host.innerHTML = html;
+}
+
 function sortedLpRows() {
-  const rows = LP_ROWS.slice();
+  let rows = LP_ROWS.slice();
+  if (lpFilter === "alerts") {
+    rows = rows.filter(r => r.isAlert || r.isCritical);
+  }
   const col = lpSort.col;
   rows.sort((a, b) => {
     const av = a[col], bv = b[col];
@@ -741,23 +1205,38 @@ function sortedLpRows() {
 
 function renderLpTable() {
   const tbody = document.getElementById("lp-tbody");
-  tbody.innerHTML = sortedLpRows().map(r => `
+  if (!tbody) return;
+  const rows = sortedLpRows();
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:1rem;">No records match the active filter.</td></tr>';
+    return;
+  }
+  const lang = document.documentElement.getAttribute("data-lang") || "en";
+  const isPt = lang === "pt";
+  tbody.innerHTML = rows.map(r => {
+    const label = isPt ? (r.zoneLabelPt || r.zoneLabel || r.zone) : (r.zoneLabel || r.zone);
+    const badge = r.zone ? `<span class="zone-badge ${escapeHtml(r.badgeClass || '')}">${escapeHtml(label || '')}</span>` : '—';
+    return `
     <tr>
       <td>${escapeHtml(r.observedAt)}</td>
       <td class="num">${r.valueMm3 != null ? r.valueMm3.toFixed(4) : "—"}</td>
       <td class="num">${r.valueM3 != null ? r.valueM3.toFixed(2) : "—"}</td>
+      <td>${badge}</td>
       <td>${escapeHtml(r.snapshotAt)}</td>
-    </tr>`).join("");
+    </tr>`;
+  }).join("");
 }
 
 function downloadLpCsv() {
-  const header = ["observed_utc", "mm3", "m3", "source_snapshot_utc"];
+  const header = ["observed_utc", "mm3", "m3", "operating_zone", "is_alert", "source_snapshot_utc"];
   const lines = [header.map(csvEscape).join(",")];
   sortedLpRows().forEach(r => {
     lines.push([
       r.observedAt,
       r.valueMm3 != null ? r.valueMm3 : "",
       r.valueM3 != null ? r.valueM3 : "",
+      r.zone || "",
+      r.isAlert ? "true" : "false",
       r.snapshotAt,
     ].map(csvEscape).join(","));
   });
@@ -798,6 +1277,7 @@ function paintAsof() {
 function paintPage() {
   setKpis();
   syncGranularityUi();
+  renderFaixasTable();
   packLinepack();
   packLinepackHistory();
   packZones();
@@ -885,10 +1365,29 @@ async function init() {
     });
   });
 
+  const btnAll = document.getElementById("btn-hist-all");
+  const btnAlerts = document.getElementById("btn-hist-alerts");
+  if (btnAll && btnAlerts) {
+    btnAll.addEventListener("click", () => {
+      lpFilter = "all";
+      btnAll.classList.add("active");
+      btnAlerts.classList.remove("active");
+      renderLpTable();
+    });
+    btnAlerts.addEventListener("click", () => {
+      lpFilter = "alerts";
+      btnAlerts.classList.add("active");
+      btnAll.classList.remove("active");
+      renderLpTable();
+    });
+  }
+
   initThemeToggle("theme-toggle", () => { packLinepack(); packLinepackHistory(); packZones(); });
   initLangToggle("lang-toggle", () => {
     renderFilters();
     setKpis();
+    renderFaixasTable();
+    renderLpTable();
     applyI18n();
   });
   initCrossLinks();
@@ -941,7 +1440,7 @@ def write_dashboard(out_path: Path | str = DEFAULT_OUT) -> Path:
     )
     out_path = Path(out_path)
     out_path.write_text(html, encoding="utf-8")
-    print(f"Wrote {out_path} ({len(html):,} bytes), payload → {payload_href}")
+    print(f"Wrote {out_path} ({len(html):,} bytes), payload -> {payload_href}")
     return out_path
 
 

@@ -13,9 +13,9 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from collections.abc import Iterable
 from dataclasses import dataclass
-from datetime import date, datetime, timezone
-from typing import Iterable
+from datetime import UTC, date, datetime
 
 API_BASE = "https://api-mago-prod-lb.ntag.com.br"
 
@@ -30,13 +30,31 @@ TAG_LINEPACK_INTEGRATED = "MALHA-INT-1MIN"
 TAG_LINEPACK_NORTH = "MALHA-NOR-1MIN"
 TAG_LINEPACK_FORECAST = "Previsao - EMPACOTAMENTO - MalhaIntegrada"
 
+FAIXA_TAG_MAP: dict[str, tuple[str, str]] = {
+    "Comercial_Faixa_Severo_Superior_MalhaIntegrada": ("severo_superior", "integrated"),
+    "Comercial_Faixa_Baixo_Superior_MalhaIntegrada": ("baixo_superior", "integrated"),
+    "Comercial_Faixa_Marginal_Superior_MalhaIntegrada": ("marginal_superior", "integrated"),
+    "Comercial_Faixa_Marginal_Inferior_MalhaIntegrada": ("marginal_inferior", "integrated"),
+    "Comercial_Faixa_Baixo_Inferior_MalhaIntegrada": ("baixo_inferior", "integrated"),
+    "Comercial_Faixa_Severo_Inferior_MalhaIntegrada": ("severo_inferior", "integrated"),
+}
+
+DEFAULT_FAIXAS_INTEGRATED: dict[str, float] = {
+    "severo_superior": 76_500_000.0,
+    "baixo_superior": 72_500_000.0,
+    "marginal_superior": 71_500_000.0,
+    "marginal_inferior": 69_500_000.0,
+    "baixo_inferior": 68_500_000.0,
+    "severo_inferior": 65_500_000.0,
+}
+
 HEADERS = {
     "Accept": "application/json",
     "Origin": "https://mago.ntag.com.br",
     "Referer": "https://mago.ntag.com.br/",
     "User-Agent": (
-        "Mozilla/5.0 (compatible; gasbrazil-mago-pipeline/1.0; "
-        "+https://gasbrazil.com/mago/)"
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36"
     ),
 }
 
@@ -58,7 +76,7 @@ class MagoObject:
         key = str(row.get("Key") or "")
         lm_raw = row.get("LastModified")
         if isinstance(lm_raw, datetime):
-            lm = lm_raw if lm_raw.tzinfo else lm.replace(tzinfo=timezone.utc)
+            lm = lm_raw if lm_raw.tzinfo else lm_raw.replace(tzinfo=UTC)
         else:
             lm = datetime.fromisoformat(str(lm_raw).replace("Z", "+00:00"))
         snap, cal = parse_snapshot_key(key)
@@ -77,7 +95,7 @@ def parse_snapshot_key(key: str) -> tuple[datetime | None, date | None]:
     if not m:
         return None, None
     dd, mm, yyyy, hh, mi, ss = (int(x) for x in m.groups())
-    snap = datetime(yyyy, mm, dd, hh, mi, ss, tzinfo=timezone.utc)
+    snap = datetime(yyyy, mm, dd, hh, mi, ss, tzinfo=UTC)
     return snap, date(yyyy, mm, dd)
 
 
@@ -190,6 +208,9 @@ def classify_tag(tag: str) -> tuple[str | None, str | None, str | None]:
         return "linepack_actual", "north", None
     if tag == TAG_LINEPACK_FORECAST:
         return "linepack_forecast", "integrated", None
+    if tag in FAIXA_TAG_MAP:
+        band, mesh = FAIXA_TAG_MAP[tag]
+        return "linepack_tolerance_band", mesh, band
     m = ZONE_TAG_PATTERN.match(tag)
     if m:
         return "zone_consumption_forecast", None, m.group(1)
