@@ -12,8 +12,8 @@ import os
 import re
 import shutil
 import time
+from collections.abc import Callable, Iterable
 from pathlib import Path
-from typing import Callable, Iterable
 from urllib.parse import quote
 
 import pandas as pd
@@ -348,7 +348,35 @@ def published_teaser_markers(html_path: Path | str) -> dict[str, str]:
     return out
 
 
+def write_pipeline_metadata(domain: str, metadata: dict) -> Path:
+    """Write structured JSON metadata for a domain (e.g. generated timestamp, kpis)."""
+    if domain not in ARTIFACT_DOMAINS:
+        raise KeyError(f"Unknown artifact domain {domain!r}; known: {ARTIFACT_DOMAINS}")
+    dest = REPO_ROOT / domain / "metadata.json"
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    tmp = dest.with_name(dest.name + ".tmp")
+    import json
+
+    tmp.write_text(json.dumps(sanitize_for_json(metadata), indent=2), encoding="utf-8")
+    _atomic_replace(tmp, dest)
+    return dest
+
+
+def read_pipeline_metadata(domain: str) -> dict | None:
+    """Read structured JSON metadata for a domain if present."""
+    path = REPO_ROOT / domain / "metadata.json"
+    if not path.exists():
+        return None
+    import json
+
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+
+
 def _upload_public_artifact(
+
     local: Path,
     key: str,
     *,

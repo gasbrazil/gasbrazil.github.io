@@ -54,8 +54,8 @@ def test_desk_rebuilds_when_lake_bucket_configured_without_local_parquet(
     """Regression: #17 gated rebuild on local parquet only, so scheduled CI
     runs (empty lake/) reused the last published payload forever."""
     desk = _load_desk_dashboard()
-    import data_kit as dk
     import dashboard_kit as kit
+    import data_kit as dk
 
     fake_desk = tmp_path / "desk"
     fake_desk.mkdir()
@@ -98,8 +98,8 @@ def test_desk_rebuilds_when_lake_bucket_configured_without_local_parquet(
 
 def test_desk_reuses_published_payload_when_offline(tmp_path, monkeypatch):
     desk = _load_desk_dashboard()
-    import data_kit as dk
     import dashboard_kit as kit
+    import data_kit as dk
 
     fake_desk = tmp_path / "desk"
     fake_desk.mkdir()

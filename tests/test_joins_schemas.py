@@ -1,9 +1,8 @@
 from __future__ import annotations
 
+import joins
 import pandas as pd
 import pytest
-
-import joins
 import schemas
 
 
@@ -66,3 +65,44 @@ def test_schema_rejects_hourly_hour_out_of_range():
     })
     with pytest.raises(ValueError, match="0–23"):
         schemas.validate_pld_hourly(df)
+
+
+def test_schema_validates_contratos_and_rejects_bad_capacity():
+    valid = pd.DataFrame({
+        "Transporter (TSO)": ["TAG"],
+        "Contract Number": ["CTR-001"],
+        "Status": ["Active"],
+        "Shipper": ["Petrobras"],
+        "Start Date": ["2026-01-01"],
+        "End Date": ["2026-12-31"],
+        "Contracted Capacity (000 m3/d)": [1500.5],
+        "Allocated Tariff (R$/MMBtu)": [4.2],
+    })
+    schemas.validate_contratos(valid)
+
+    bad = valid.copy()
+    bad["Contracted Capacity (000 m3/d)"] = ["not-a-number"]
+    with pytest.raises(ValueError, match="non-numeric"):
+        schemas.validate_contratos(bad)
+
+
+def test_schema_validates_tag_mago_series():
+    valid = pd.DataFrame({
+        "snapshot_at": ["2026-09-19T08:08:24Z"],
+        "observed_at": ["2026-09-19T00:00:00Z"],
+        "series": ["linepack_actual"],
+        "mesh": ["integrated"],
+        "zone": [None],
+        "tag": ["MALHA-INT-1MIN"],
+        "value": [68000000.0],
+        "unit": ["m3"],
+        "source": ["mago"],
+    })
+    schemas.validate_tag_mago_series(valid)
+
+    bad = valid.copy()
+    bad["series"] = ["invalid_series_name"]
+    with pytest.raises(ValueError, match="unexpected series"):
+        schemas.validate_tag_mago_series(bad)
+
+

@@ -3,9 +3,8 @@ from __future__ import annotations
 import gzip
 import json
 
-import pandas as pd
-
 import data_kit as dk
+import pandas as pd
 
 
 def test_atomic_parquet_publish(tmp_path, monkeypatch):

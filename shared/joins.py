@@ -5,11 +5,8 @@ First-class helpers so hub teasers and the API stop inventing ad-hoc merges.
 """
 from __future__ import annotations
 
-from typing import Optional
-
 import numpy as np
 import pandas as pd
-
 import transforms as xf
 
 
@@ -29,8 +26,8 @@ def join_pld_cmo(
     pld: pd.DataFrame,
     ons: pd.DataFrame,
     *,
-    date_from: Optional[pd.Timestamp] = None,
-    date_to: Optional[pd.Timestamp] = None,
+    date_from: pd.Timestamp | None = None,
+    date_to: pd.Timestamp | None = None,
 ) -> pd.DataFrame:
     """Daily PLD vs ONS CMO by submarket.
 
@@ -91,8 +88,8 @@ def join_pld_cmo_cvu(
     ons: pd.DataFrame,
     *,
     cvu_series: str = "cvu_gas_med",
-    date_from: Optional[pd.Timestamp] = None,
-    date_to: Optional[pd.Timestamp] = None,
+    date_from: pd.Timestamp | None = None,
+    date_to: pd.Timestamp | None = None,
     how: str = "left",
 ) -> pd.DataFrame:
     """Daily PLD vs ONS CMO vs gas-fleet CVU rollup by submarket.

@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import json
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pandas as pd
@@ -11,14 +11,13 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "mago"))
 
-import mago_client  # noqa: E402
 import mago_pipeline as mp  # noqa: E402
 from mago_client import classify_tag, parse_snapshot_key, rows_from_snapshot  # noqa: E402
 
 
 def test_parse_snapshot_key():
     snap, cal = parse_snapshot_key("EMPACOTAMENTOS_19_09_2026_23_08_26.json")
-    assert snap == datetime(2026, 9, 19, 23, 8, 26, tzinfo=timezone.utc)
+    assert snap == datetime(2026, 9, 19, 23, 8, 26, tzinfo=UTC)
     assert cal.isoformat() == "2026-09-19"
 
 
@@ -32,7 +31,7 @@ def test_classify_tags():
 
 
 def test_rows_from_snapshot():
-    snap = datetime(2026, 9, 19, 12, 0, 0, tzinfo=timezone.utc)
+    snap = datetime(2026, 9, 19, 12, 0, 0, tzinfo=UTC)
     payload = {
         "Items": [
             {
@@ -68,8 +67,8 @@ def test_build_from_mock(tmp_path, monkeypatch):
     monkeypatch.setattr(mp, "PARQUET_PATH", tmp_path / "data" / "tag_mago_series.parquet")
 
     mp.RAW_DIR.mkdir(parents=True)
-    snap = datetime(2026, 9, 19, 8, 8, 24, tzinfo=timezone.utc)
     name = "EMPACOTAMENTOS_19_09_2026_08_08_24.json"
+
     payload = {
         "Items": [
             {
@@ -99,6 +98,17 @@ def test_build_from_mock(tmp_path, monkeypatch):
     assert set(df["series"].unique()) >= {"linepack_actual", "zone_consumption_forecast"}
 
 
+def _load_mago_dashboard():
+    import importlib.util
+
+    path = ROOT / "mago" / "dashboard.py"
+    spec = importlib.util.spec_from_file_location("mago_dashboard_under_test", path)
+    mod = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(mod)
+    return mod
+
+
 def test_load_payload_groups_and_history(tmp_path, monkeypatch):
     monkeypatch.setattr(mp, "HERE", tmp_path)
     monkeypatch.setattr(mp, "RAW_DIR", tmp_path / "raw" / "snapshots")
@@ -106,13 +116,13 @@ def test_load_payload_groups_and_history(tmp_path, monkeypatch):
     monkeypatch.setattr(mp, "DATA_DIR", tmp_path / "data")
     monkeypatch.setattr(mp, "PARQUET_PATH", tmp_path / "data" / "tag_mago_series.parquet")
 
-    import dashboard as md  # noqa: E402
-
+    md = _load_mago_dashboard()
     monkeypatch.setattr(md, "PARQUET_PATH", mp.PARQUET_PATH)
 
+
     mp.RAW_DIR.mkdir(parents=True)
-    snap = datetime(2026, 9, 19, 8, 8, 24, tzinfo=timezone.utc)
     name = "EMPACOTAMENTOS_19_09_2026_08_08_24.json"
+
     payload = {
         "Items": [
             {

@@ -11,8 +11,18 @@ on:
       - "poc/**"
       - "pld/**"
       - "flows/**"
+      - "ons/**"
+      - "contratos/**"
+      - "supply/**"
+      - "precos/**"
+      - "mago/**"
+      - "desk/**"
+      - "build_home.py"
+      - "build_wiki.py"
       - ".github/workflows/ci.yml"
       - "pytest.ini"
+      - "pyproject.toml"
+
 
 permissions:
   contents: read
@@ -33,5 +43,8 @@ jobs:
           cache-dependency-glob: "tests/requirements.txt"
       - name: Install
         run: uv pip install -r tests/requirements.txt -c shared/constraints.txt
+      - name: Lint with ruff
+        run: uvx ruff check shared api tests
       - name: Run tests
         run: python -m pytest -q
+

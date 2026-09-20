@@ -8,7 +8,8 @@ Import as ``import schemas`` after ``sys.path`` includes ``shared/``.
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Iterable
+from collections.abc import Iterable
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -151,14 +152,14 @@ TAG_MAGO_SERIES_KINDS = (
 )
 
 
-def _require(df: "pd.DataFrame", columns: tuple[str, ...], label: str) -> None:
+def _require(df: pd.DataFrame, columns: tuple[str, ...], label: str) -> None:
     import data_kit as dk  # noqa: PLC0415 — shared/ on sys.path
 
     dk.require_columns(df, columns, label=label)
 
 
 def _assert_allowed(
-    df: "pd.DataFrame",
+    df: pd.DataFrame,
     col: str,
     allowed: Iterable[str],
     *,
@@ -176,7 +177,7 @@ def _assert_allowed(
         raise ValueError(f"{label}: unexpected {col} values {bad}; allowed {sorted(allowed)}")
 
 
-def _assert_numeric(df: "pd.DataFrame", col: str, *, label: str) -> None:
+def _assert_numeric(df: pd.DataFrame, col: str, *, label: str) -> None:
     import pandas as pd
 
     if col not in df.columns or df.empty:
@@ -188,33 +189,33 @@ def _assert_numeric(df: "pd.DataFrame", col: str, *, label: str) -> None:
         raise ValueError(f"{label}: {n} non-numeric value(s) in {col!r}")
 
 
-def validate_flows_points(df: "pd.DataFrame") -> None:
+def validate_flows_points(df: pd.DataFrame) -> None:
     _require(df, FLOWS_POINTS_COLUMNS, "flows_points")
     _assert_allowed(df, "source", FLOWS_POINT_SOURCES, label="flows_points")
     _assert_numeric(df, "value", label="flows_points")
 
 
-def validate_flows_ledger(df: "pd.DataFrame") -> None:
+def validate_flows_ledger(df: pd.DataFrame) -> None:
     _require(df, FLOWS_LEDGER_COLUMNS, "flows_ledger")
     _assert_numeric(df, "value", label="flows_ledger")
 
 
-def validate_ons_daily(df: "pd.DataFrame") -> None:
+def validate_ons_daily(df: pd.DataFrame) -> None:
     _require(df, ONS_DAILY_COLUMNS, "ons_daily")
     _assert_numeric(df, "value", label="ons_daily")
 
 
-def validate_ons_entities(df: "pd.DataFrame") -> None:
+def validate_ons_entities(df: pd.DataFrame) -> None:
     _require(df, ONS_ENTITIES_COLUMNS, "ons_entities")
 
 
-def validate_pld_daily(df: "pd.DataFrame") -> None:
+def validate_pld_daily(df: pd.DataFrame) -> None:
     _require(df, PLD_DAILY_COLUMNS, "pld_daily")
     _assert_allowed(df, "submarket", SUBMARKET_CODES, label="pld_daily", casefold=False)
     _assert_numeric(df, "pld", label="pld_daily")
 
 
-def validate_pld_hourly(df: "pd.DataFrame") -> None:
+def validate_pld_hourly(df: pd.DataFrame) -> None:
     import pandas as pd
 
     _require(df, PLD_HOURLY_COLUMNS, "pld_hourly")
@@ -228,31 +229,32 @@ def validate_pld_hourly(df: "pd.DataFrame") -> None:
             raise ValueError("pld_hourly: hour must be in 0–23")
 
 
-def validate_supply_monthly(df: "pd.DataFrame") -> None:
+def validate_supply_monthly(df: pd.DataFrame) -> None:
     _require(df, SUPPLY_MONTHLY_COLUMNS, "supply_monthly")
     for col in ("production", "available"):
         _assert_numeric(df, col, label="supply_monthly")
 
 
-def validate_anp_prices(df: "pd.DataFrame") -> None:
+def validate_anp_prices(df: pd.DataFrame) -> None:
     _require(df, ANP_PRICES_COLUMNS, "anp_prices")
     _assert_allowed(df, "segment", ANP_PRICE_SEGMENTS, label="anp_prices")
     _assert_numeric(df, "price_brl_mmbtu", label="anp_prices")
 
 
-def validate_poc_results(df: "pd.DataFrame") -> None:
+def validate_poc_results(df: pd.DataFrame) -> None:
     _require(df, POC_RESULTS_COLUMNS, "poc_results")
     _assert_numeric(df, "Price", label="poc_results")
 
 
-def validate_contratos(df: "pd.DataFrame") -> None:
+def validate_contratos(df: pd.DataFrame) -> None:
     _require(df, CONTRATOS_COLUMNS, "contratos")
+    _assert_numeric(df, "Contracted Capacity (000 m3/d)", label="contratos")
 
 
-def validate_tag_mago_series(df: "pd.DataFrame") -> None:
+def validate_tag_mago_series(df: pd.DataFrame) -> None:
     _require(df, TAG_MAGO_SERIES_COLUMNS, "tag_mago_series")
     _assert_allowed(df, "series", TAG_MAGO_SERIES_KINDS, label="tag_mago_series")
     _assert_numeric(df, "value", label="tag_mago_series")
     if "source" in df.columns and not df.empty:
         _assert_allowed(df, "source", ("mago",), label="tag_mago_series")
-    _assert_numeric(df, "Contracted Capacity (000 m3/d)", label="contratos")
+
