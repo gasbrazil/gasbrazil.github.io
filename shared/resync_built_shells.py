@@ -123,7 +123,10 @@ def resync_decode_js(html: str) -> str:
 
 
 def resync_i18n_js(html: str) -> str:
-    pattern = r"const LANG_KEY = \"gasbrazil-lang\";[\s\S]*?if \(onChange\) onChange\(next\);\s*\}\);\s*\}"
+    if "/* __GB_I18N_END__ */" in html:
+        pattern = r"const LANG_KEY = \"gasbrazil-lang\";[\s\S]*?/\* __GB_I18N_END__ \*/"
+    else:
+        pattern = r"const LANG_KEY = \"gasbrazil-lang\";[\s\S]*?if \(onChange\) onChange\(next\);\s*\}\);\s*\}"
     replacement = kit.JS_I18N.strip()
     return re.sub(pattern, lambda _: replacement, html, count=1)
 
@@ -161,6 +164,19 @@ def resync_boot_resilience(html: str) -> str:
     return html
 
 
+def resync_footer_shortcuts(html: str) -> str:
+    if 'id="link-shortcuts"' in html:
+        return html
+    btn = ' &middot; <button type="button" class="footer-link-btn" id="link-shortcuts" data-i18n="shortcutsBtn">Shortcuts (?)</button>'
+    if 'data-i18n="footerAbout"' in html:
+        return re.sub(r'(<a [^>]*data-i18n="footerAbout"[^>]*>.*?</a>)', r'\1' + btn, html, count=1)
+    if 'mailto:eb@gasbrazil.com' in html:
+        return re.sub(r'(\s*&middot;\s*(?:Contact: )?<a href="mailto:eb@gasbrazil.com")', btn + r'\1', html, count=1)
+    if '</footer>' in html:
+        return html.replace('</footer>', f'{btn}\n</footer>')
+    return html
+
+
 def resync_site(site_id: str) -> None:
     path = ROOT / site_id / "index.html"
     html = path.read_text(encoding="utf-8")
@@ -173,6 +189,7 @@ def resync_site(site_id: str) -> None:
     html = resync_decode_js(html)
     html = resync_i18n_js(html)
     html = resync_boot_resilience(html)
+    html = resync_footer_shortcuts(html)
     path.write_text(html, encoding="utf-8")
     print(f"resynced {path.relative_to(ROOT)}")
 

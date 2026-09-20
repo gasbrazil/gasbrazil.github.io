@@ -434,6 +434,7 @@ def _footer(home_href: str = "./") -> str:
   &copy; <span id="year"></span> GasBrazil
   &middot; <a href="{home_href}wiki/" data-i18n="navWiki">Wiki</a>
   &middot; <a href="{home_href}about/" data-i18n="footerAbout">About &amp; methodology</a>
+  &middot; <button type="button" class="footer-link-btn" id="link-shortcuts" data-i18n="shortcutsBtn">Shortcuts (?)</button>
   &middot; <span data-i18n="contact">Contact</span>: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
 </footer>
 <script>

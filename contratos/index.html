@@ -1499,6 +1499,227 @@ select optgroup {
   transform: scale(0.98);
 }
 
+/* Phase 3: Toast notifications */
+.gb-toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+  max-width: calc(100vw - 48px);
+}
+.gb-toast {
+  padding: 9px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--panel);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  font-weight: 500;
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--elevate-lg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity .2s ease, transform .2s ease;
+  pointer-events: auto;
+}
+.gb-toast.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+[data-theme="dark"] .gb-toast {
+  border-color: rgba(255, 223, 0, .45);
+  box-shadow: var(--elevate-lg), 0 0 0 1px rgba(255, 223, 0, .15);
+}
+
+/* Phase 3: Table copy affordance */
+.table-wrap {
+  position: relative;
+}
+.table-copy-btn {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-family: var(--font-ui);
+  font-weight: 500;
+  color: var(--muted2);
+  background: color-mix(in srgb, var(--panel) 90%, transparent);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  opacity: 0.65;
+  transition: opacity .15s ease, background .15s ease, border-color .15s ease, transform .1s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.table-wrap:hover .table-copy-btn,
+.table-copy-btn:focus-visible {
+  opacity: 1;
+}
+.table-copy-btn:hover {
+  opacity: 1;
+  color: var(--text);
+  border-color: var(--border-strong);
+  background: var(--panel-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--elevate-sm);
+}
+.table-copy-btn:active {
+  transform: translateY(0);
+}
+[data-theme="dark"] .table-copy-btn:hover {
+  border-color: rgba(255, 223, 0, .4);
+}
+
+/* Phase 3: Active table filter highlighting */
+th.has-filter .th-filter {
+  border-color: var(--accent);
+  background: var(--panel-hover);
+}
+[data-theme="dark"] th.has-filter .th-filter {
+  border-color: var(--brz-yellow);
+}
+th.has-filter .th-label {
+  color: var(--accent);
+  font-weight: 600;
+}
+[data-theme="dark"] th.has-filter .th-label {
+  color: var(--brz-yellow);
+}
+
+/* Phase 3: Keyboard Shortcuts Modal */
+.shortcuts-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9998;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+}
+.shortcuts-modal-backdrop[hidden] {
+  display: none !important;
+}
+.shortcuts-modal-card {
+  background: var(--panel);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--elevate-lg);
+  max-width: 560px;
+  width: 100%;
+  padding: 20px 24px;
+  box-sizing: border-box;
+  animation: gb-shortcuts-pop 0.18s ease-out;
+}
+@keyframes gb-shortcuts-pop {
+  from { opacity: 0; transform: scale(0.96) translateY(6px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.shortcuts-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.shortcuts-modal-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+}
+.shortcuts-modal-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+.shortcuts-modal-close:hover {
+  color: var(--text);
+  background: var(--accent-soft);
+}
+.shortcuts-modal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+@media (max-width: 540px) {
+  .shortcuts-modal-grid { grid-template-columns: 1fr; gap: 14px; }
+}
+.shortcuts-sec-title {
+  margin: 0 0 10px;
+  font-family: var(--font-display);
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--muted);
+}
+.shortcut-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 12.5px;
+  color: var(--text);
+}
+.shortcut-row kbd {
+  display: inline-block;
+  padding: 2px 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  box-shadow: 0 1px 0 var(--border-strong);
+  min-width: 14px;
+  text-align: center;
+}
+.footer-link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--accent);
+  font: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color .25s ease, border-color .25s ease;
+}
+.footer-link-btn:hover {
+  color: var(--text);
+  border-bottom-color: var(--brz-yellow);
+}
+[data-theme="dark"] .footer-link-btn:hover {
+  color: var(--brz-yellow);
+}
+
 /* Everything below is this dashboard's own layout/components -- the palette
    (neutral tokens + the shared Brazilian-flag accent) now lives entirely in
    shared/theme.css (see ADR-001, Decision 2 Option C). Token names are
@@ -1833,7 +2054,7 @@ main h3,
 <div class="method-row"><span class="method-label" data-i18n="methodAssump">Key assumption</span><span data-i18n="methodAssump_contratos">Master rows enable later nominations; they are not firm capacity bookings.</span></div>
 <div class="method-row"><span class="method-label" data-i18n="methodLimits">Limits</span><span data-i18n="aboutCoverBody">POC Contracts include Transport and Master rows. Legacy and access-connection contracts are not in the public GraphQL feed yet.</span></div>
 </details>
-  &copy; <span id="year"></span> GasBrazil.com &middot; Data: Portal de Oferta de Capacidade (public API) &middot; Contact: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
+  &copy; <span id="year"></span> GasBrazil.com &middot; Data: Portal de Oferta de Capacidade (public API) &middot; <button type="button" class="footer-link-btn" id="link-shortcuts" data-i18n="shortcutsBtn">Shortcuts (?)</button> &middot; Contact: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
   <br><span id="coverage-note">Active Transport &amp; Master contracts</span><button class="infodot" type="button" aria-label="About contract coverage" data-info="Covers the &quot;Transport Contract&quot; and &quot;Master Contract&quot; contract types. &quot;Legacy Transport Contract&quot; and &quot;Access Connection&quot; are small, separately-sourced categories on the source site and are not yet included. Concluded contracts are excluded from the view.">i</button>
 </footer>
 </div>
@@ -3817,7 +4038,18 @@ const GB_I18N = {
     bootErrorTitle: "Unable to load dashboard data",
     bootErrorBody: "A network issue prevented the latest data from loading. Please check your connection and try again.",
     bootErrorDetails: "Technical details",
-    bootRetry: "Retry"
+    bootRetry: "Retry",
+    copyTable: "Copy table (TSV)",
+    tableCopied: "Copied {n} rows to clipboard (TSV for Excel)",
+    shortcutsTitle: "Keyboard Shortcuts",
+    shortcutsGeneral: "General",
+    shortcutsGoTo: "Go To (press \"g\" then key)",
+    shortcutHelp: "Show keyboard shortcuts",
+    shortcutFilter: "Focus search or table filter",
+    shortcutTheme: "Toggle dark / light theme",
+    shortcutLang: "Toggle EN / PT language",
+    shortcutEsc: "Clear filter or close menu",
+    shortcutsBtn: "Shortcuts (?)"
   },
   pt: {
     themeDark: "Mudar para o modo escuro",
@@ -3950,7 +4182,18 @@ const GB_I18N = {
     bootErrorTitle: "Não foi possível carregar os dados do painel",
     bootErrorBody: "Ocorreu uma falha de rede ao carregar os dados mais recentes. Verifique sua conexão e tente novamente.",
     bootErrorDetails: "Detalhes técnicos",
-    bootRetry: "Tentar novamente"
+    bootRetry: "Tentar novamente",
+    copyTable: "Copiar tabela (TSV)",
+    tableCopied: "{n} linhas copiadas para a área de transferência (TSV para Excel)",
+    shortcutsTitle: "Atalhos de Teclado",
+    shortcutsGeneral: "Geral",
+    shortcutsGoTo: "Navegação (pressione \"g\" e a tecla)",
+    shortcutHelp: "Mostrar atalhos de teclado",
+    shortcutFilter: "Focar busca ou filtro da tabela",
+    shortcutTheme: "Alternar modo claro / escuro",
+    shortcutLang: "Alternar idioma EN / PT",
+    shortcutEsc: "Limpar filtro ou fechar menu",
+    shortcutsBtn: "Atalhos (?)"
   }
 };
 function currentLang() {
@@ -3973,6 +4216,10 @@ function applyI18n() {
     const key = el.getAttribute("data-i18n-placeholder");
     if (key) el.setAttribute("placeholder", t(key));
   });
+  document.querySelectorAll("[data-i18n-title]").forEach(el => {
+    const key = el.getAttribute("data-i18n-title");
+    if (key) el.setAttribute("title", t(key));
+  });
   const langBtn = document.getElementById("lang-toggle");
   if (langBtn) {
     langBtn.textContent = currentLang() === "pt" ? "EN" : "PT";
@@ -3993,6 +4240,272 @@ function initLangToggle(buttonId, onChange) {
     if (onChange) onChange(next);
   });
 }
+
+// Phase 3: Trader productivity tools (toasts, clipboard copy, shortcuts)
+function gbShowToast(msg, durationMs = 2200) {
+  let container = document.getElementById("gb-toast-container");
+  if (!container) {
+    container = document.createElement("div");
+    container.id = "gb-toast-container";
+    container.className = "gb-toast-container";
+    container.setAttribute("aria-live", "polite");
+    document.body.appendChild(container);
+  }
+  const toast = document.createElement("div");
+  toast.className = "gb-toast";
+  toast.textContent = msg;
+  container.appendChild(toast);
+  toast.offsetHeight;
+  toast.classList.add("is-visible");
+  setTimeout(() => {
+    toast.classList.remove("is-visible");
+    setTimeout(() => toast.remove(), 250);
+  }, durationMs);
+}
+
+async function gbCopyTableAsTsv(tableOrWrap) {
+  const table = (tableOrWrap && tableOrWrap.tagName === "TABLE")
+    ? tableOrWrap
+    : (tableOrWrap ? tableOrWrap.querySelector("table") : document.querySelector("table"));
+  if (!table) return false;
+
+  const rows = [];
+  const headers = [];
+  const ths = table.querySelectorAll("thead th");
+  ths.forEach(th => {
+    if (th.classList.contains("no-export") || th.hidden) return;
+    const labelEl = th.querySelector(".th-label") || th;
+    let text = (labelEl.childNodes[0] ? labelEl.childNodes[0].textContent : labelEl.textContent) || "";
+    text = text.replace(/[\t\r\n]/g, " ").trim();
+    headers.push(text);
+  });
+  if (headers.length) rows.push(headers.join("\t"));
+
+  const trs = table.querySelectorAll("tbody tr");
+  let rowCount = 0;
+  trs.forEach(tr => {
+    if (tr.hidden || tr.style.display === "none" || tr.classList.contains("no-export")) return;
+    const cells = [];
+    tr.querySelectorAll("td").forEach(td => {
+      if (td.classList.contains("no-export") || td.hidden) return;
+      let text = (td.textContent || "").replace(/[\t\r\n]/g, " ").trim();
+      cells.push(text);
+    });
+    if (cells.length) {
+      rows.push(cells.join("\t"));
+      rowCount++;
+    }
+  });
+
+  const tsv = rows.join("\n");
+  let ok = false;
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(tsv);
+      ok = true;
+    }
+  } catch (e) {}
+  if (!ok) {
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = tsv;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      ok = document.execCommand("copy");
+      ta.remove();
+    } catch (e) {}
+  }
+  const tmpl = (typeof t === "function") ? t("tableCopied") : "Copied {n} rows to clipboard (TSV for Excel)";
+  const msg = ok ? tmpl.replace("{n}", rowCount) : "Failed to copy table";
+  if (typeof gbShowToast === "function") gbShowToast(msg);
+  return ok;
+}
+
+function gbBindTableCopyButtons() {
+  document.querySelectorAll(".table-wrap").forEach(wrap => {
+    if (wrap.querySelector(".table-copy-btn")) return;
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "table-copy-btn";
+    btn.setAttribute("data-i18n-title", "copyTable");
+    btn.title = (typeof t === "function") ? t("copyTable") : "Copy table (TSV)";
+    btn.innerHTML = '&#x1F4CB; TSV';
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      gbCopyTableAsTsv(wrap);
+    });
+    wrap.appendChild(btn);
+  });
+}
+
+function toggleShortcutsModal() {
+  let modal = document.getElementById("gb-shortcuts-modal");
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "gb-shortcuts-modal";
+    modal.className = "shortcuts-modal-backdrop";
+    modal.setAttribute("role", "dialog");
+    modal.setAttribute("aria-modal", "true");
+    modal.setAttribute("aria-labelledby", "gb-shortcuts-title");
+
+    modal.innerHTML =
+      '<div class="shortcuts-modal-card">' +
+        '<div class="shortcuts-modal-head">' +
+          '<h3 id="gb-shortcuts-title" class="shortcuts-modal-title" data-i18n="shortcutsTitle">Keyboard Shortcuts</h3>' +
+          '<button type="button" class="shortcuts-modal-close" aria-label="Close">&times;</button>' +
+        '</div>' +
+        '<div class="shortcuts-modal-grid">' +
+          '<div class="shortcuts-section">' +
+            '<h4 class="shortcuts-sec-title" data-i18n="shortcutsGeneral">General</h4>' +
+            '<div class="shortcut-row"><kbd>?</kbd> <span data-i18n="shortcutHelp">Show this help dialog</span></div>' +
+            '<div class="shortcut-row"><kbd>/</kbd> or <kbd>f</kbd> <span data-i18n="shortcutFilter">Focus search / table filter</span></div>' +
+            '<div class="shortcut-row"><kbd>t</kbd> <span data-i18n="shortcutTheme">Toggle light / dark theme</span></div>' +
+            '<div class="shortcut-row"><kbd>l</kbd> or <kbd>p</kbd> <span data-i18n="shortcutLang">Toggle EN / PT language</span></div>' +
+            '<div class="shortcut-row"><kbd>Esc</kbd> <span data-i18n="shortcutEsc">Clear filter or close menu</span></div>' +
+          '</div>' +
+          '<div class="shortcuts-section">' +
+            '<h4 class="shortcuts-sec-title" data-i18n="shortcutsGoTo">Go To (press "g" then key)</h4>' +
+            '<div class="shortcut-row"><kbd>g</kbd> <kbd>h</kbd> <span>Home (Hub)</span></div>' +
+            '<div class="shortcut-row"><kbd>g</kbd> <kbd>d</kbd> <span>The Desk</span></div>' +
+            '<div class="shortcut-row"><kbd>g</kbd> <kbd>o</kbd> <span>ONS Balances</span></div>' +
+            '<div class="shortcut-row"><kbd>g</kbd> <kbd>p</kbd> <span>POC Results</span></div>' +
+            '<div class="shortcut-row"><kbd>g</kbd> <kbd>c</kbd> <span>POC Contracts</span></div>' +
+            '<div class="shortcut-row"><kbd>g</kbd> <kbd>f</kbd> <span>Pipeline Flows</span></div>' +
+            '<div class="shortcut-row"><kbd>g</kbd> <kbd>s</kbd> <span>Gas Supply</span></div>' +
+            '<div class="shortcut-row"><kbd>g</kbd> <kbd>l</kbd> <span>PLD Prices</span></div>' +
+            '<div class="shortcut-row"><kbd>g</kbd> <kbd>r</kbd> <span>ANP Prices</span></div>' +
+            '<div class="shortcut-row"><kbd>g</kbd> <kbd>m</kbd> <span>TAG Mago</span></div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(modal);
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal || e.target.closest(".shortcuts-modal-close")) {
+        modal.hidden = true;
+      }
+    });
+    if (typeof applyI18n === "function") applyI18n();
+  }
+  modal.hidden = !modal.hidden;
+}
+
+function initGlobalShortcuts() {
+  let gPressed = false;
+  let gTimer = null;
+
+  document.addEventListener("keydown", (e) => {
+    const tag = (e.target && e.target.tagName) || "";
+    const isInput = tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (e.target && e.target.isContentEditable);
+
+    if (e.key === "Escape") {
+      const modal = document.getElementById("gb-shortcuts-modal");
+      if (modal && !modal.hidden) {
+        modal.hidden = true;
+        e.preventDefault();
+        return;
+      }
+      if (isInput && e.target.classList && e.target.classList.contains("th-filter")) {
+        e.target.value = "";
+        e.target.dispatchEvent(new Event("input", { bubbles: true }));
+        e.target.blur();
+        e.preventDefault();
+        return;
+      }
+    }
+
+    if (isInput) return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+    if (e.key === "?" || (e.shiftKey && e.key === "/")) {
+      e.preventDefault();
+      toggleShortcutsModal();
+      return;
+    }
+
+    if (e.key === "/" || e.key === "f") {
+      const firstFilter = document.querySelector(".th-filter, input[type='search'], .analysis-filter, #f-search");
+      if (firstFilter) {
+        e.preventDefault();
+        firstFilter.focus();
+        firstFilter.select();
+      }
+      return;
+    }
+
+    if (e.key === "t" || e.key === "T") {
+      const themeBtn = document.getElementById("theme-toggle");
+      if (themeBtn) {
+        e.preventDefault();
+        themeBtn.click();
+        const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+        gbShowToast(isDark ? "Theme: Dark" : "Theme: Light");
+      }
+      return;
+    }
+
+    if (e.key === "l" || e.key === "L" || e.key === "p" || e.key === "P") {
+      const langBtn = document.getElementById("lang-toggle");
+      if (langBtn) {
+        e.preventDefault();
+        langBtn.click();
+        const lang = document.documentElement.getAttribute("data-lang");
+        gbShowToast(lang === "pt" ? "Idioma: Português" : "Language: English");
+      }
+      return;
+    }
+
+    if (e.key === "g" || e.key === "G") {
+      gPressed = true;
+      clearTimeout(gTimer);
+      gTimer = setTimeout(() => { gPressed = false; }, 1200);
+      return;
+    }
+
+    if (gPressed) {
+      gPressed = false;
+      clearTimeout(gTimer);
+      const routes = {
+        "h": "/",
+        "d": "/desk/",
+        "o": "/ons/",
+        "p": "/poc/",
+        "c": "/contratos/",
+        "f": "/flows/",
+        "s": "/supply/",
+        "l": "/pld/",
+        "r": "/precos/",
+        "m": "/mago/",
+        "w": "/wiki/",
+        "a": "/about/"
+      };
+      const dest = routes[e.key.toLowerCase()];
+      if (dest) {
+        e.preventDefault();
+        gbShowToast("Navigating…");
+        window.location.href = dest;
+      }
+    }
+  });
+
+  const scLink = document.getElementById("link-shortcuts");
+  if (scLink) {
+    scLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      toggleShortcutsModal();
+    });
+  }
+
+  gbBindTableCopyButtons();
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initGlobalShortcuts);
+} else {
+  initGlobalShortcuts();
+}
+/* __GB_I18N_END__ */
 
 function formatRefreshedLocal(iso, fallback, locale) {
   try {

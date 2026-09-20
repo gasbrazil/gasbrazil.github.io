@@ -465,3 +465,34 @@ assert(tt.style.display === "none", "pointercancel (scroll takeover) hides toolt
 console.log("ok");
 """
 
+
+def test_phase3_theme_css_shortcuts_and_table_tools():
+    css = kit.render_theme_css()
+    assert ".gb-toast" in css
+    assert ".table-copy-btn" in css
+    assert "th.has-filter" in css
+    assert ".shortcuts-modal-card" in css
+    assert ".shortcut-row" in css
+    assert ".footer-link-btn" in css
+
+
+def test_phase3_i18n_strings_and_modal_markup():
+    assert "shortcutsTitle:" in kit.JS_I18N
+    assert "copyTable:" in kit.JS_I18N
+    assert "tableCopied:" in kit.JS_I18N
+    assert "shortcutsBtn:" in kit.JS_I18N
+
+
+def test_phase3_global_shortcuts_and_table_tsv_functions():
+    assert "function gbShowToast(" in kit.JS_I18N
+    assert "function gbCopyTableAsTsv(" in kit.JS_I18N
+    assert "function gbBindTableCopyButtons(" in kit.JS_I18N
+    assert "function toggleShortcutsModal(" in kit.JS_I18N
+    assert "function initGlobalShortcuts(" in kit.JS_I18N
+    assert "/* __GB_I18N_END__ */" in kit.JS_I18N
+
+
+def test_build_sort_filter_th_has_filter_class():
+    assert 'th.classList.add("has-filter")' in kit.JS_TABLE_SORT
+    assert 'th.classList.toggle("has-filter", !!filterInput.value)' in kit.JS_TABLE_SORT
+
