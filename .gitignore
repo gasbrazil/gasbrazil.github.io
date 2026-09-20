@@ -41,6 +41,10 @@ supply/data/
 pld/raw/
 pld/data/
 
+# mago/: TAG hourly JSON snapshots (CI cache) and derived parquet on R2.
+mago/raw/
+mago/data/
+
 # precos/: ANP Resolution 52/2011 PPG CSVs and derived parquet — rebuildable;
 # CI caches raw/. precos/index.html is committed; payload on R2.
 precos/raw/

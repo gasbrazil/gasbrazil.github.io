@@ -598,7 +598,7 @@ ABOUT_TEMPLATE = """__HEAD__
     <p data-i18n="aboutCoverPld">PLD: CCEE daily averages and hourly prices by submarket; peak is hours 18–20 on weekdays. Optional ONS CMO and median gas CVU when lake data is present.</p>
     <p data-i18n="aboutCoverDesk">The Desk: cross-product headline series. Full history and filters live on each product page.</p>
     <p>
-      <a href="../ons/">ONS</a> · <a href="../poc/">POC</a> · <a href="../contratos/">Contratos</a> · <a href="../flows/">Flows</a> · <a href="../supply/">Supply</a> · <a href="../precos/">ANP Prices</a> · <a href="../pld/">PLD</a> · <a href="../desk/">The Desk</a> ·
+      <a href="../ons/">ONS</a> · <a href="../poc/">POC</a> · <a href="../contratos/">Contratos</a> · <a href="../flows/">Flows</a> · <a href="../mago/">TAG Mago</a> · <a href="../supply/">Supply</a> · <a href="../precos/">ANP Prices</a> · <a href="../pld/">PLD</a> · <a href="../desk/">The Desk</a> ·
       <a href="../ons/wiki-html/">ONS wiki</a>
     </p>
   </div>
@@ -624,6 +624,7 @@ NOTFOUND_TEMPLATE = """__HEAD__
     <a class="card" href="poc/"><div class="name"><span class="dot" aria-hidden="true"></span><span data-i18n="cardPoc">POC Results</span></div></a>
     <a class="card" href="contratos/"><div class="name"><span class="dot" aria-hidden="true"></span><span data-i18n="cardContratos">POC Contracts</span></div></a>
     <a class="card" href="flows/"><div class="name"><span class="dot" aria-hidden="true"></span><span data-i18n="cardFlows">Pipeline Flows</span></div></a>
+    <a class="card" href="mago/"><div class="name"><span class="dot" aria-hidden="true"></span><span data-i18n="cardMago">TAG Mago</span></div></a>
     <a class="card" href="supply/"><div class="name"><span class="dot" aria-hidden="true"></span><span data-i18n="cardSupply">Gas Supply</span></div></a>
     <a class="card" href="precos/"><div class="name"><span class="dot" aria-hidden="true"></span><span data-i18n="cardPrecos">ANP Prices</span></div></a>
     <a class="card" href="pld/"><div class="name"><span class="dot" aria-hidden="true"></span><span data-i18n="cardPld">PLD Prices</span></div></a>
@@ -755,7 +756,7 @@ def write_robots_and_sitemap() -> None:
         encoding="utf-8",
     )
     today = dt.date.today().isoformat()
-    urls = ["/", "/ons/", "/poc/", "/contratos/", "/flows/", "/supply/", "/precos/", "/pld/", "/desk/", "/wiki/", "/about/"]
+    urls = ["/", "/ons/", "/poc/", "/contratos/", "/flows/", "/mago/", "/supply/", "/precos/", "/pld/", "/desk/", "/wiki/", "/about/"]
     body = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     for u in urls:
         body += f"  <url><loc>https://gasbrazil.com{u}</loc><lastmod>{today}</lastmod></url>\n"

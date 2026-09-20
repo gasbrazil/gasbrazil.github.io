@@ -1,0 +1,76 @@
+name: Refresh TAG Mago dashboard
+
+# Mago publishes hourly EMPACOTAMENTOS JSON snapshots (line pack + zone
+# forecasts). Poll several times per day so GasBrazil stays near real time.
+on:
+  schedule:
+    - cron: "25 */6 * * *"
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths:
+      - "mago/**"
+      - "shared/**"
+      - ".github/workflows/mago.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: mago-refresh
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_ENDPOINT_URL: ${{ secrets.R2_ENDPOINT_URL }}
+      GASBRAZIL_LAKE_BUCKET: ${{ secrets.GASBRAZIL_LAKE_BUCKET }}
+      GASBRAZIL_ARTIFACTS_BUCKET: ${{ secrets.GASBRAZIL_ARTIFACTS_BUCKET }}
+      GASBRAZIL_DATA_BASE_URL: ${{ secrets.GASBRAZIL_DATA_BASE_URL }}
+      GASBRAZIL_DATA_CACHE_BUST: ${{ github.run_id }}
+    defaults:
+      run:
+        working-directory: mago
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5.4.2
+        with:
+          enable-cache: true
+          python-version: "3.12"
+          cache-dependency-glob: "mago/requirements.txt"
+
+      - run: uv pip install -r requirements.txt -c ../shared/constraints.txt
+
+      - name: Cache key for this month
+        id: ym
+        run: echo "ym=$(date -u +%Y-%m)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore Mago raw snapshots
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: mago/raw
+          key: mago-raw-${{ steps.ym.outputs.ym }}
+          restore-keys: |
+            mago-raw-
+
+      - name: Fetch recent Mago snapshots
+        run: uv run python mago_pipeline.py fetch --days 14
+
+      - name: Build parquet + dashboard
+        run: |
+          uv run python mago_pipeline.py build
+          uv run python dashboard.py
+
+      - name: Commit dashboard artifacts
+        working-directory: .
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add mago/index.html mago/payload.json.gz mago/data/tag_mago_series.parquet 2>/dev/null || true
+          git diff --staged --quiet || git commit -m "chore(mago): refresh TAG Mago dashboard"
+          git push
