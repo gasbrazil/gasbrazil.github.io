@@ -1520,7 +1520,7 @@ main h3,
       <div class="kpi-label" data-i18n="cardDesk">The Desk</div>
       <div class="kpi-role">Cross-product snapshot</div>
       <div class="kpi-val" data-en="3266 MWmed gas · PLD SE 77.12" data-pt="3266 MWmed a gás · PLD SE 77.12">3266 MWmed gas · PLD SE 77.12</div>
-      <div class="kpi-when" data-refresh="2026-09-20 17:56 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-20 18:04 UTC"></div>
     </a>
     <a class="kpi-cell" href="ons/" data-slug="ons">
       <div class="kpi-label" data-i18n="cardOns">ONS Balances</div>
@@ -2069,7 +2069,7 @@ initLangToggle("lang-toggle");
 </html>
 
 <script>
-const TEASERS_URL = "hub/teasers.json.gz";
+const TEASERS_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/hub/teasers.json.gz?v=35528005107";
 function paintRefreshLabels() {
   document.querySelectorAll(".kpi-when[data-refresh]").forEach(el => {
     const when = el.getAttribute("data-refresh");
