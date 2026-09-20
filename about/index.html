@@ -1007,6 +1007,20 @@ th.num .th-filter { text-align: right; }
   width: auto; flex: none; box-sizing: border-box;
 }
 .langBtn:hover, #lang-toggle:hover { background: var(--accent-soft); }
+
+/* Shared “clear all selections” control for dashboard pickers/chips. */
+.btn-clear {
+  font-size: 12px;
+  color: var(--muted2);
+  background: var(--panel);
+  border: 1px solid var(--border-strong);
+  border-radius: 5px;
+  padding: 4px 12px;
+  cursor: pointer;
+  font-family: var(--font);
+  font-weight: 400;
+}
+.btn-clear:hover { background: var(--accent-soft); color: var(--text); }
 #theme-toggle {
   display: inline-flex; align-items: center; justify-content: center;
   min-width: 34px; height: 34px; padding: 5px 9px; line-height: 0;
@@ -1625,6 +1639,7 @@ const GB_I18N = {
     contact: "Contact",
     copyLink: "Copy link",
     linkCopied: "Copied",
+    clearAllSelections: "Clear all",
     tagline: "Analytical Firepower for Brazil's Energy Markets",
     hubDashboards: "Live dashboards",
     hubHint: "Every card below opens a live dashboard — pick a product to explore.",
@@ -1752,6 +1767,7 @@ const GB_I18N = {
     contact: "Contato",
     copyLink: "Copiar link",
     linkCopied: "Copiado",
+    clearAllSelections: "Limpar tudo",
     tagline: "Potência analítica para os mercados de energia do Brasil",
     hubDashboards: "Painéis ao vivo",
     hubHint: "Cada cartão abaixo abre um painel ao vivo — escolha um produto para explorar.",
