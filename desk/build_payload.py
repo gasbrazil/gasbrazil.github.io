@@ -492,6 +492,98 @@ def _util_table(
         return empty
 
 
+def _ons_subsystem_daily(
+    ons: Optional[pd.DataFrame],
+    series: str,
+    subsystem: str,
+    *,
+    days: int = COMPARE_DAYS,
+) -> tuple[list[str], list[Optional[float]]]:
+    if ons is None or ons.empty:
+        return [], []
+    need = {"date", "subsystem", "series", "value"}
+    if not need.issubset(ons.columns):
+        return [], []
+    o = ons.copy()
+    o["date"] = pd.to_datetime(o["date"], errors="coerce")
+    o = o.dropna(subset=["date"])
+    o = o[o["series"].astype(str) == series]
+    if "entity" in o.columns:
+        o = o[o["entity"].astype(str).fillna("") == ""]
+    o = o[o["subsystem"].astype(str).str.upper() == subsystem.upper()]
+    if o.empty:
+        return [], []
+    daily = o.sort_values("date").drop_duplicates("date", keep="last")
+    last = daily["date"].max()
+    if pd.isna(last):
+        return [], []
+    from_d = last - pd.Timedelta(days=days)
+    daily = daily[daily["date"] >= from_d]
+    dates = [d.strftime("%Y-%m-%d") for d in daily["date"]]
+    nd = 2 if series != "thermal_gas" else 1
+    values = [_num(v, nd) for v in daily["value"]]
+    return dates, values
+
+
+def _sin_avg_from_compare(
+    dates: list[str],
+    by_sm: dict,
+    field: str,
+    sms: tuple[str, ...] = ("SE", "S", "NE", "N"),
+) -> list[Optional[float]]:
+    if not dates:
+        return []
+    out: list[Optional[float]] = []
+    for i in range(len(dates)):
+        nums: list[float] = []
+        for sm in sms:
+            block = by_sm.get(sm) or {}
+            arr = block.get(field) or []
+            if i < len(arr) and arr[i] is not None:
+                nums.append(float(arr[i]))
+        out.append(_num(sum(nums) / len(nums), 2) if nums else None)
+    return out
+
+
+def _flows_national_daily(
+    flows: Optional[pd.DataFrame],
+    *,
+    days: int = COMPARE_DAYS,
+) -> tuple[list[str], list[Optional[float]]]:
+    if flows is None or flows.empty:
+        return [], []
+    need = {"date", "variable", "value"}
+    if not need.issubset(flows.columns):
+        return [], []
+    f = flows.copy()
+    f["date"] = pd.to_datetime(f["date"], errors="coerce")
+    f = f.dropna(subset=["date"])
+    present = set(f["variable"].astype(str).unique())
+    var = None
+    for candidate in (
+        "Actual Volume (thousand m3)",
+        "Volume Realizado (mil m³)",
+        "Volume Realizado",
+    ):
+        if candidate in present:
+            var = candidate
+            break
+    if var is None:
+        return [], []
+    realized = f[f["variable"].astype(str) == var]
+    if realized.empty:
+        return [], []
+    daily = realized.groupby("date", as_index=False)["value"].sum().sort_values("date")
+    last = daily["date"].max()
+    if pd.isna(last):
+        return [], []
+    from_d = last - pd.Timedelta(days=days)
+    daily = daily[daily["date"] >= from_d]
+    dates = [d.strftime("%Y-%m-%d") for d in daily["date"]]
+    values = [_num(v, 1) for v in daily["value"]]
+    return dates, values
+
+
 def _ons_national_daily(
     ons: Optional[pd.DataFrame],
     series: str,
@@ -549,6 +641,7 @@ def _poc_daily_avg_m3(poc: Optional[pd.DataFrame], *, gus_only: bool = False) ->
 def _analysis_series(
     ons: Optional[pd.DataFrame],
     poc: Optional[pd.DataFrame],
+    flows: Optional[pd.DataFrame],
     compare: dict,
     poc_anp: dict,
 ) -> list[dict]:
@@ -556,47 +649,105 @@ def _analysis_series(
     out: list[dict] = []
     dates = compare.get("dates") or []
     by = compare.get("bySubmarket") or {}
-    for sm in ("SE", "S", "NE", "N"):
-        block = by.get(sm) or {}
-        for field, label, unit in (
-            ("pld", f"PLD {sm}", "R$/MWh"),
-            ("cmo", f"CMO {sm}", "R$/MWh"),
-            ("cvu", f"CVU gas med {sm}", "R$/MWh"),
-        ):
+    sms = ("SE", "S", "NE", "N")
+
+    power_groups = (
+        ("pld", "PLD", "R$/MWh"),
+        ("cmo", "CMO", "R$/MWh"),
+        ("cvu", "CVU gas med", "R$/MWh"),
+    )
+    for field, group, unit in power_groups:
+        for sm in sms:
+            block = by.get(sm) or {}
             vals = block.get(field)
             if not vals or not any(v is not None for v in vals):
                 continue
             out.append({
                 "id": f"{field}_{sm.lower()}",
-                "label": label,
-                "group": "Power",
+                "label": f"{group} {sm}",
+                "group": group,
+                "region": sm,
                 "freq": "daily",
                 "unit": unit,
                 "timeline": dates,
                 "values": vals,
+            })
+        sin_vals = _sin_avg_from_compare(dates, by, field, sms)
+        if sin_vals and any(v is not None for v in sin_vals):
+            out.append({
+                "id": f"{field}_sin",
+                "label": f"{group} SIN (avg submarkets)",
+                "group": group,
+                "region": "SIN",
+                "freq": "daily",
+                "unit": unit,
+                "timeline": dates,
+                "values": sin_vals,
             })
 
     gen_d, gen_v = _ons_national_daily(ons, "thermal_gas")
     if gen_d:
         out.append({
             "id": "ons_gas_gen_sin",
-            "label": "Gas generation (national)",
-            "group": "ONS",
+            "label": "Gas generation SIN (total)",
+            "group": "Gas generation",
+            "region": "SIN",
             "freq": "daily",
             "unit": "MWmed",
             "timeline": gen_d,
             "values": gen_v,
         })
+    for sm in sms:
+        g_d, g_v = _ons_subsystem_daily(ons, "thermal_gas", sm)
+        if g_d:
+            out.append({
+                "id": f"ons_gas_gen_{sm.lower()}",
+                "label": f"Gas generation {sm}",
+                "group": "Gas generation",
+                "region": sm,
+                "freq": "daily",
+                "unit": "MWmed",
+                "timeline": g_d,
+                "values": g_v,
+            })
+
     gas_d, gas_v = _ons_national_daily(ons, "gas_consumption_m3")
     if gas_d:
         out.append({
             "id": "ons_est_gas_sin",
-            "label": "Est. gas consumption (national)",
-            "group": "ONS",
+            "label": "Est. gas consumption SIN (total)",
+            "group": "Gas consumption",
+            "region": "SIN",
             "freq": "daily",
             "unit": "m³/d",
             "timeline": gas_d,
             "values": gas_v,
+        })
+    for sm in sms:
+        c_d, c_v = _ons_subsystem_daily(ons, "gas_consumption_m3", sm)
+        if c_d:
+            out.append({
+                "id": f"ons_est_gas_{sm.lower()}",
+                "label": f"Est. gas consumption {sm}",
+                "group": "Gas consumption",
+                "region": sm,
+                "freq": "daily",
+                "unit": "m³/d",
+                "timeline": c_d,
+                "values": c_v,
+            })
+
+    flow_d, flow_v = _flows_national_daily(flows)
+    if flow_d:
+        out.append({
+            "id": "flows_vol_sin",
+            "label": "Pipeline realized volume SIN (total)",
+            "group": "Flows",
+            "region": "SIN",
+            "freq": "daily",
+            "unit": "000 m³/d",
+            "timeline": flow_d,
+            "values": flow_v,
         })
 
     gus_d, gus_v = _poc_daily_avg_m3(poc, gus_only=True)
@@ -634,7 +785,7 @@ def _analysis_series(
         out.append({
             "id": f"monthly_{field}",
             "label": label,
-            "group": "Prices",
+            "group": "ANP & prices",
             "freq": "monthly",
             "unit": unit,
             "timeline": months,
@@ -743,7 +894,7 @@ def build_payload() -> dict:
     for key in ("poc", "anpSantos", "anpNonThermalSe"):
         if key in poc_anp and isinstance(poc_anp[key], list):
             poc_anp[key] = [_mmbtu_to_m3(v) for v in poc_anp[key]]
-    analysis_series = _analysis_series(ons, poc, compare, poc_anp)
+    analysis_series = _analysis_series(ons, poc, flows, compare, poc_anp)
     util = _util_table(contratos, flows)
     for block in (compare, poc_anp, util):
         if block.get("note"):

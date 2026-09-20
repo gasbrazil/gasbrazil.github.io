@@ -76,6 +76,19 @@ a.kpi-cell:hover .lbl { color: var(--text); }
 .series-btn:hover { background: var(--accent-soft); }
 .series-btn.active { border-color: var(--border-strong); }
 .series-btn .sw { width: 9px; height: 9px; border-radius: 2px; flex: none; background: var(--border-strong); }
+.desk-tabbar { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; margin: 0 0 var(--gap); border-bottom: 1px solid var(--border); padding-bottom: 0; flex-wrap: wrap; }
+.desk-tab-actions { display: flex; align-items: center; gap: 8px; padding-bottom: 6px; }
+.desk-tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+.desk-tabs button { border: 0; border-bottom: 2px solid transparent; background: none; color: var(--muted2); font: 400 13px var(--font); padding: 8px 14px 10px; cursor: pointer; border-radius: 5px 5px 0 0; }
+.desk-tabs button[aria-pressed="true"] { color: var(--text); background: var(--panel); border-bottom-color: var(--accent); }
+.desk-tabs button:hover { background: var(--accent-soft); }
+.desk-tabs button[aria-pressed="true"]:hover { background: var(--panel-grad-hover, var(--panel)); }
+.analysis-tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 0 0 12px; }
+.analysis-group { margin: 0 0 14px; }
+.analysis-group-title { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 400; margin: 0 0 6px; }
+.analysis-group .series-picker { margin-bottom: 0; }
+.btn-clear { font-size: 12px; color: var(--muted2); background: var(--panel); border: 1px solid var(--border-strong); border-radius: 5px; padding: 4px 12px; cursor: pointer; font-family: var(--font); font-weight: 400; }
+.btn-clear:hover { background: var(--accent-soft); color: var(--text); }
 .chart-host svg { display: block; overflow: hidden; }
 .chart-empty { color: var(--muted); font-size: 13px; padding: 44px 0; text-align: center; }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; font-size: 12px; color: var(--muted2); }
@@ -139,6 +152,12 @@ __SHARED_TYPO_WEIGHT_CSS__
 </div>
 <div class="kpi-row" id="kpi-row"></div>
 
+<div class="desk-tabbar">
+  <div class="desk-tabs" id="desk-tabs" role="tablist" aria-label="Desk views"></div>
+  <div class="desk-tab-actions">__SHARED_SHARE_BUTTON__</div>
+</div>
+
+<div id="desk-view-overview">
 <div class="desk-grid">
   <section class="panel" aria-labelledby="compare-title">
     <p class="panel-title" id="compare-title" data-i18n="deskCompareTitle">PLD · CMO · CVU</p>
@@ -151,7 +170,6 @@ __SHARED_TYPO_WEIGHT_CSS__
           <option value="N">N</option>
         </select>
       </label>
-      __SHARED_SHARE_BUTTON__
     </div>
     <div class="series-picker" id="picker-compare"></div>
     <div class="chart-host" id="main-chart"></div>
@@ -200,33 +218,35 @@ __SHARED_TYPO_WEIGHT_CSS__
   <div class="chart-host" id="poc-anp-chart"></div>
 </section>
 
-<section class="panel" aria-labelledby="analysis-title">
-  <p class="panel-title" id="analysis-title" data-i18n="deskAnalysisTitle">Analysis</p>
-  <p class="panel-note" data-i18n="deskAnalysisNote">Pick any series to compare on one timeline. Monthly values repeat across their calendar month; the chart is indexed to 100 at the start of the range.</p>
-  <div class="compare-tools">
-    <label class="sm-pick"><span data-i18n="deskAnalysisRange">Range</span>
-      <select id="analysis-range">
-        <option value="90d">90 days</option>
-        <option value="1y">1 year</option>
-      </select>
-    </label>
-  </div>
-  <div class="series-picker" id="picker-analysis"></div>
-  <div class="chart-host" id="analysis-chart"></div>
-  <div class="table-wrap">
-    <table class="util" id="analysis-table">
-      <thead><tr id="analysis-thead"></tr></thead>
-      <tbody id="analysis-body"></tbody>
-    </table>
-  </div>
-</section>
-
 <section class="panel" aria-labelledby="util-title">
   <p class="panel-title" id="util-title" data-i18n="deskUtilTitle">Capacity vs flows</p>
   <div class="table-wrap">
     <table class="util" id="util-table">
       <thead><tr id="util-thead"></tr></thead>
       <tbody id="util-body"></tbody>
+    </table>
+  </div>
+</section>
+</div>
+
+<section class="panel" id="desk-view-analysis" aria-labelledby="analysis-title" hidden>
+  <p class="panel-title" id="analysis-title" data-i18n="deskAnalysisTitle">Analysis</p>
+  <p class="panel-note" data-i18n="deskAnalysisNote">Compare any site-wide series on one timeline. Monthly values repeat across their calendar month; the chart is indexed to 100 at the start of the range.</p>
+  <div class="analysis-tools">
+    <label class="sm-pick"><span data-i18n="deskAnalysisRange">Range</span>
+      <select id="analysis-range">
+        <option value="90d">90 days</option>
+        <option value="1y">1 year</option>
+      </select>
+    </label>
+    <button type="button" class="btn-clear" id="analysis-clear" data-i18n="deskAnalysisClear">Clear all</button>
+  </div>
+  <div id="picker-analysis"></div>
+  <div class="chart-host" id="analysis-chart"></div>
+  <div class="table-wrap">
+    <table class="util" id="analysis-table">
+      <thead><tr id="analysis-thead"></tr></thead>
+      <tbody id="analysis-body"></tbody>
     </table>
   </div>
 </section>
@@ -299,8 +319,11 @@ GB_I18N.en.deskKpiPoc = "POC 7d";
 GB_I18N.en.deskKpiFlows = "Flows 7d";
 GB_I18N.en.deskKpiSantos = "Santos";
 GB_I18N.en.deskAnalysisTitle = "Analysis";
-GB_I18N.en.deskAnalysisNote = "Pick any series to compare on one timeline. Monthly values repeat across their calendar month; the chart is indexed to 100 at the start of the range.";
+GB_I18N.en.deskAnalysisNote = "Compare any site-wide series on one timeline. Monthly values repeat across their calendar month; the chart is indexed to 100 at the start of the range.";
 GB_I18N.en.deskAnalysisRange = "Range";
+GB_I18N.en.deskAnalysisClear = "Clear all";
+GB_I18N.en.deskTabOverview = "Overview";
+GB_I18N.en.deskTabAnalysis = "Analysis";
 
 GB_I18N.pt.deskCompareTitle = "PLD · CMO · CVU";
 GB_I18N.pt.deskSubmarket = "Submercado";
@@ -343,8 +366,11 @@ GB_I18N.pt.deskKpiPoc = "POC 7d";
 GB_I18N.pt.deskKpiFlows = "Fluxos 7d";
 GB_I18N.pt.deskKpiSantos = "Santos";
 GB_I18N.pt.deskAnalysisTitle = "Análise";
-GB_I18N.pt.deskAnalysisNote = "Escolha séries para comparar na mesma linha do tempo. Valores mensais se repetem no mês; o gráfico usa índice 100 no início do intervalo.";
+GB_I18N.pt.deskAnalysisNote = "Compare séries de todo o site na mesma linha do tempo. Valores mensais se repetem no mês; o gráfico usa índice 100 no início do intervalo.";
 GB_I18N.pt.deskAnalysisRange = "Intervalo";
+GB_I18N.pt.deskAnalysisClear = "Limpar tudo";
+GB_I18N.pt.deskTabOverview = "Visão geral";
+GB_I18N.pt.deskTabAnalysis = "Análise";
 
 const COMPARE_META = [
   { key: "pld", labelKey: "deskSeriesPld", field: "pld" },
@@ -356,6 +382,13 @@ const POC_ANP_META = [
   { key: "anpSantos", labelKey: "deskSeriesAnpSantos", field: "anpSantos" },
   { key: "anpNtSe", labelKey: "deskSeriesAnpNtSe", field: "anpNonThermalSe" },
 ];
+const DESK_VIEWS = [
+  { id: "overview", labelKey: "deskTabOverview" },
+  { id: "analysis", labelKey: "deskTabAnalysis" },
+];
+const ANALYSIS_GROUP_ORDER = [
+  "PLD", "CMO", "CVU", "Gas generation", "Gas consumption", "Flows", "POC", "ANP & prices",
+];
 
 let DATA = null;
 let chartResizeTimer = null;
@@ -365,8 +398,8 @@ let pickedPocAnp = new Set();
 let compareSlots = new Map();
 let pocAnpSlots = new Map();
 let pickedAnalysis = new Set(["pld_se", "poc_gus_m3", "ons_gas_gen_sin"]);
-let analysisSlots = new Map();
 let analysisRange = "90d";
+let deskTab = "overview";
 let utilSortState = { col: "tso", dir: 1 };
 const utilDefaultSort = { col: "tso", dir: 1 };
 let utilFilters = {};
@@ -389,6 +422,40 @@ function compareSeriesColor(key) {
 }
 function pocAnpSeriesColor(key) {
   return deskSeriesColor(key, DESK_POC_ANP_SERIES);
+}
+
+function analysisColorIndex(id) {
+  const m = String(id).match(/^(pld|cmo|cvu)_(se|s|ne|n|sin)$/);
+  if (m) {
+    const metricOff = { pld: 0, cmo: 2, cvu: 4 }[m[1]] || 0;
+    const smOff = { se: 0, s: 1, ne: 2, n: 3, sin: 4 }[m[2]] || 0;
+    return (metricOff + smOff) % 8;
+  }
+  const ons = String(id).match(/^ons_(gas_gen|est_gas)_(se|s|ne|n|sin)$/);
+  if (ons) {
+    const base = ons[1] === "gas_gen" ? 1 : 3;
+    const smOff = { se: 0, s: 1, ne: 2, n: 3, sin: 4 }[ons[2]] || 0;
+    return (base + smOff) % 8;
+  }
+  const fixed = {
+    poc_gus_m3: 0,
+    poc_all_m3: 1,
+    flows_vol_sin: 6,
+    monthly_poc: 2,
+    monthly_anpSantos: 3,
+    monthly_anpNonThermalSe: 4,
+  };
+  if (fixed[id] != null) return fixed[id] % 8;
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+  return h % 8;
+}
+
+function analysisSeriesColor(id) {
+  const pal = chartPalette();
+  if (!pal.length) return "var(--accent)";
+  const idx = analysisColorIndex(id);
+  return pal[idx % pal.length] || "var(--accent)";
 }
 
 function fmtNum(v, d) {
@@ -464,12 +531,19 @@ function applyDeskQuery() {
   }
   const ar = gbValidEnum(sp.get("arange"), ["90d", "1y"]);
   if (ar) analysisRange = ar;
+  const tv = gbValidEnum(sp.get("tab"), ["overview", "analysis"]);
+  if (tv) {
+    deskTab = tv;
+  } else {
+    try {
+      const saved = localStorage.getItem("desk-tab");
+      if (saved === "analysis" || saved === "overview") deskTab = saved;
+    } catch (e) {}
+  }
   const ids = (DATA.analysisSeries || []).map(s => s.id);
   const apick = gbValidList(sp.get("analysis"), ids);
   if (apick) {
     pickedAnalysis = new Set(apick);
-    analysisSlots = new Map();
-    apick.forEach(k => colorOf(analysisSlots, k));
   }
 }
 function writeDeskQuery() {
@@ -480,7 +554,39 @@ function writeDeskQuery() {
     poc: [...pickedPocAnp],
     analysis: [...pickedAnalysis],
     arange: analysisRange,
+    tab: deskTab === "overview" ? null : deskTab,
   });
+  try { localStorage.setItem("desk-tab", deskTab); } catch (e) {}
+}
+
+function buildDeskTabs() {
+  const host = document.getElementById("desk-tabs");
+  if (!host) return;
+  host.innerHTML = "";
+  DESK_VIEWS.forEach(v => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.role = "tab";
+    btn.dataset.tab = v.id;
+    btn.textContent = t(v.labelKey);
+    btn.setAttribute("aria-pressed", deskTab === v.id ? "true" : "false");
+    btn.addEventListener("click", () => setDeskTab(v.id));
+    host.appendChild(btn);
+  });
+}
+
+function setDeskTab(id) {
+  if (!DESK_VIEWS.some(v => v.id === id)) id = "overview";
+  deskTab = id;
+  const ov = document.getElementById("desk-view-overview");
+  const an = document.getElementById("desk-view-analysis");
+  if (ov) ov.hidden = deskTab !== "overview";
+  if (an) an.hidden = deskTab !== "analysis";
+  document.querySelectorAll("#desk-tabs button").forEach(btn => {
+    btn.setAttribute("aria-pressed", btn.dataset.tab === deskTab ? "true" : "false");
+  });
+  if (deskTab === "analysis") renderAnalysis();
+  writeDeskQuery();
 }
 
 function paintAsof() {
@@ -909,20 +1015,82 @@ function buildAnalysisPicker() {
   const host = document.getElementById("picker-analysis");
   if (!host) return;
   host.innerHTML = "";
+  const byGroup = new Map();
   analysisCatalog().forEach(s => {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "series-btn" + (pickedAnalysis.has(s.id) ? " active" : "");
-    btn.title = s.unit;
-    btn.innerHTML = '<span class="sw"></span>' + escapeHtml(s.label);
-    if (pickedAnalysis.has(s.id)) btn.querySelector(".sw").style.background = colorOf(analysisSlots, s.id);
-    btn.addEventListener("click", () => {
-      if (pickedAnalysis.has(s.id)) { pickedAnalysis.delete(s.id); analysisSlots.delete(s.id); }
-      else { pickedAnalysis.add(s.id); colorOf(analysisSlots, s.id); }
-      renderAnalysis();
-      writeDeskQuery();
+    const g = s.group || "Other";
+    if (!byGroup.has(g)) byGroup.set(g, []);
+    byGroup.get(g).push(s);
+  });
+  const regionOrder = { SIN: 0, SE: 1, S: 2, NE: 3, N: 4 };
+  const sortSeries = (a, b) => {
+    const ra = regionOrder[a.region] != null ? regionOrder[a.region] : 9;
+    const rb = regionOrder[b.region] != null ? regionOrder[b.region] : 9;
+    if (ra !== rb) return ra - rb;
+    return String(a.label).localeCompare(String(b.label));
+  };
+  ANALYSIS_GROUP_ORDER.forEach(g => {
+    const items = byGroup.get(g);
+    if (!items || !items.length) return;
+    items.sort(sortSeries);
+    const section = document.createElement("div");
+    section.className = "analysis-group";
+    const title = document.createElement("p");
+    title.className = "analysis-group-title";
+    title.textContent = g;
+    section.appendChild(title);
+    const row = document.createElement("div");
+    row.className = "series-picker";
+    items.forEach(s => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "series-btn" + (pickedAnalysis.has(s.id) ? " active" : "");
+      btn.title = s.unit;
+      btn.innerHTML = '<span class="sw"></span>' + escapeHtml(s.label);
+      if (pickedAnalysis.has(s.id)) {
+        btn.querySelector(".sw").style.background = analysisSeriesColor(s.id);
+      }
+      btn.addEventListener("click", () => {
+        if (pickedAnalysis.has(s.id)) pickedAnalysis.delete(s.id);
+        else pickedAnalysis.add(s.id);
+        renderAnalysis();
+        writeDeskQuery();
+      });
+      row.appendChild(btn);
     });
-    host.appendChild(btn);
+    section.appendChild(row);
+    host.appendChild(section);
+    byGroup.delete(g);
+  });
+  byGroup.forEach((items, g) => {
+    if (!items.length) return;
+    items.sort(sortSeries);
+    const section = document.createElement("div");
+    section.className = "analysis-group";
+    const title = document.createElement("p");
+    title.className = "analysis-group-title";
+    title.textContent = g;
+    section.appendChild(title);
+    const row = document.createElement("div");
+    row.className = "series-picker";
+    items.forEach(s => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "series-btn" + (pickedAnalysis.has(s.id) ? " active" : "");
+      btn.title = s.unit;
+      btn.innerHTML = '<span class="sw"></span>' + escapeHtml(s.label);
+      if (pickedAnalysis.has(s.id)) {
+        btn.querySelector(".sw").style.background = analysisSeriesColor(s.id);
+      }
+      btn.addEventListener("click", () => {
+        if (pickedAnalysis.has(s.id)) pickedAnalysis.delete(s.id);
+        else pickedAnalysis.add(s.id);
+        renderAnalysis();
+        writeDeskQuery();
+      });
+      row.appendChild(btn);
+    });
+    section.appendChild(row);
+    host.appendChild(section);
   });
 }
 
@@ -959,7 +1127,7 @@ function renderAnalysisChart(days, seriesList) {
     const norm = (base != null && base !== 0)
       ? vals.map(v => v == null ? null : Math.round((v / base) * 1000) / 10)
       : vals;
-    return { label: s.label + " (index)", values: norm, color: colorOf(analysisSlots, s.id) };
+    return { label: s.label + " (index)", values: norm, color: analysisSeriesColor(s.id) };
   });
   drawLineChart("analysis-chart", days, indexed, t("deskEmptyChart"));
 }
@@ -1069,9 +1237,11 @@ function renderAll() {
   buildPickers();
   renderCompareChart();
   renderPocAnpChart();
-  renderAnalysis();
+  if (deskTab === "analysis") renderAnalysis();
   renderUtil();
   renderSpark();
+  buildDeskTabs();
+  setDeskTab(deskTab);
   applyI18n();
 }
 
@@ -1121,12 +1291,20 @@ async function init() {
     const c0 = DATA.compareSe || {};
     compareSm = c0.defaultSubmarket || "SE";
     applyDeskQuery();
-    pickedAnalysis.forEach(k => colorOf(analysisSlots, k));
     const arSel = document.getElementById("analysis-range");
     if (arSel) {
       arSel.value = analysisRange;
       arSel.addEventListener("change", () => {
         analysisRange = arSel.value;
+        renderAnalysis();
+        writeDeskQuery();
+      });
+    }
+    const clearBtn = document.getElementById("analysis-clear");
+    if (clearBtn && clearBtn.dataset.bound !== "1") {
+      clearBtn.dataset.bound = "1";
+      clearBtn.addEventListener("click", () => {
+        pickedAnalysis.clear();
         renderAnalysis();
         writeDeskQuery();
       });
