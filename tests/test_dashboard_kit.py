@@ -160,6 +160,9 @@ def test_desk_analysis_section_in_source():
     assert 'id="picker-analysis"' in src
     assert "analysisSeries" in src
     assert "renderAnalysis" in src
+    assert "analysisSeriesColor" in src
+    assert 'id="analysis-clear"' in src
+    assert "desk-tabs" in src
 
 
 def test_flows_init_handles_load_errors():

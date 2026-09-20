@@ -117,3 +117,22 @@ def test_util_table_omits_tariff_when_column_missing():
     )
     out = desk._util_table(contratos, flows)
     assert out["rows"][0]["tariffM3"] is None
+
+
+def test_analysis_series_groups_include_sin_and_regions():
+    desk = _load_desk_payload()
+    compare = {
+        "dates": ["2026-01-01", "2026-01-02"],
+        "bySubmarket": {
+            "SE": {"pld": [10.0, 11.0], "cmo": [20.0, 21.0], "cvu": [30.0, 31.0]},
+            "S": {"pld": [12.0, 13.0], "cmo": [22.0, 23.0], "cvu": [32.0, 33.0]},
+            "NE": {"pld": [14.0, 15.0], "cmo": [24.0, 25.0], "cvu": [34.0, 35.0]},
+            "N": {"pld": [16.0, 17.0], "cmo": [26.0, 27.0], "cvu": [36.0, 37.0]},
+        },
+    }
+    series = desk._analysis_series(None, None, None, compare, {"months": [], "poc": []})
+    by_id = {s["id"]: s for s in series}
+    assert by_id["pld_se"]["group"] == "PLD"
+    assert by_id["cmo_sin"]["group"] == "CMO"
+    assert by_id["cmo_sin"]["values"][0] == 23.0
+    assert by_id["cvu_n"]["region"] == "N"
