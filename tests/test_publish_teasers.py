@@ -24,3 +24,28 @@ def test_collect_skips_bad_numbers(tmp_path, monkeypatch):
     monkeypatch.setattr(pt, "ROOT", tmp_path)
     payload = pt.collect()
     assert "pld" not in payload["items"]
+
+
+def test_collect_reads_structured_metadata_json(tmp_path, monkeypatch):
+    import json
+
+    import data_kit as dk
+
+    ons = tmp_path / "ons"
+    ons.mkdir()
+    # Structured metadata
+    meta = {
+        "generated": "2026-09-20 18:00 UTC",
+        "kpi_gas_mwmed": 3456,
+    }
+    (ons / "metadata.json").write_text(json.dumps(meta), encoding="utf-8")
+    # HTML file with older/different marker
+    (ons / "index.html").write_text("kpi_gas_mwmed: 9999\n", encoding="utf-8")
+
+    monkeypatch.setattr(pt, "ROOT", tmp_path)
+    monkeypatch.setattr(dk, "REPO_ROOT", tmp_path)
+
+    payload = pt.collect()
+    assert payload["items"]["ons"]["kpiEn"] == "3,456 MWmed gas"
+    assert payload["items"]["ons"]["when"] == "2026-09-20 18:00 UTC"
+

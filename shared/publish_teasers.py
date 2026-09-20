@@ -47,12 +47,31 @@ def _intish(raw: str | None) -> int | None:
     return int(v)
 
 
+def _domain_meta(domain: str) -> dict:
+    meta = {}
+    json_meta = dk.read_pipeline_metadata(domain)
+    if json_meta:
+        meta.update(json_meta)
+    html = _read(ROOT / domain / "index.html")
+    if html:
+        for k in (
+            "kpi_gas_mwmed", "generated", "kpi_price_7d", "kpi_trades_7d", "kpi_when",
+            "kpi_contracts", "kpi_capacity", "kpi_total_7d", "kpi_production", "data_through",
+            "kpi_santos", "kpi_se", "latest_date", "kpi_pld_se", "kpi_gen_gas", "kpi_linepack",
+            "kpi_snapshot",
+        ):
+            v = _marker(html, k)
+            if v is not None and k not in meta:
+                meta[k] = v
+    return meta
+
+
 def collect() -> dict:
     items: dict = {}
-    ons = _read(ROOT / "ons" / "index.html")
+    ons = _domain_meta("ons")
     if ons:
-        g = _intish(_marker(ons, "kpi_gas_mwmed"))
-        when = _marker(ons, "generated")
+        g = _intish(str(ons.get("kpi_gas_mwmed"))) if ons.get("kpi_gas_mwmed") is not None else None
+        when = ons.get("generated")
         if g is not None:
             n = f"{g:,}"
             items["ons"] = {
@@ -61,11 +80,11 @@ def collect() -> dict:
                 "when": when or "",
             }
 
-    poc = _read(ROOT / "poc" / "index.html")
+    poc = _domain_meta("poc")
     if poc:
-        price = _floatish(_marker(poc, "kpi_price_7d"))
-        trades = _marker(poc, "kpi_trades_7d")
-        when = _marker(poc, "kpi_when") or _marker(poc, "generated")
+        price = _floatish(str(poc.get("kpi_price_7d"))) if poc.get("kpi_price_7d") is not None else None
+        trades = poc.get("kpi_trades_7d")
+        when = poc.get("kpi_when") or poc.get("generated")
         if price is not None:
             items["poc"] = {
                 "kpiEn": f"{price:.2f} R$/MMBtu · {trades or '?'} trades (7d)",
@@ -73,11 +92,11 @@ def collect() -> dict:
                 "when": when or "",
             }
 
-    con = _read(ROOT / "contratos" / "index.html")
+    con = _domain_meta("contratos")
     if con:
-        n = _intish(_marker(con, "kpi_contracts"))
-        cap = _marker(con, "kpi_capacity")
-        when = _marker(con, "generated")
+        n = _intish(str(con.get("kpi_contracts"))) if con.get("kpi_contracts") is not None else None
+        cap = con.get("kpi_capacity")
+        when = con.get("generated")
         if n is not None:
             items["contratos"] = {
                 "kpiEn": f"{n:,} contracts · {cap or '—'} thousand m³/d",
@@ -85,10 +104,10 @@ def collect() -> dict:
                 "when": when or "",
             }
 
-    flows = _read(ROOT / "flows" / "index.html")
+    flows = _domain_meta("flows")
     if flows:
-        total = _floatish(_marker(flows, "kpi_total_7d"))
-        when = _marker(flows, "generated")
+        total = _floatish(str(flows.get("kpi_total_7d"))) if flows.get("kpi_total_7d") is not None else None
+        when = flows.get("generated")
         if total is not None:
             vol = f"{total/1000:.1f}M" if total >= 1000 else f"{total:.0f}"
             items["flows"] = {
@@ -97,11 +116,11 @@ def collect() -> dict:
                 "when": when or "",
             }
 
-    supply = _read(ROOT / "supply" / "index.html")
+    supply = _domain_meta("supply")
     if supply:
-        prod = _floatish(_marker(supply, "kpi_production"))
-        through = _marker(supply, "data_through")
-        when = _marker(supply, "generated")
+        prod = _floatish(str(supply.get("kpi_production"))) if supply.get("kpi_production") is not None else None
+        through = supply.get("data_through")
+        when = supply.get("generated")
         if prod is not None:
             vol = (
                 f"{prod/1_000_000:.1f}M" if prod >= 1_000_000
@@ -114,11 +133,11 @@ def collect() -> dict:
                 "when": when or "",
             }
 
-    precos = _read(ROOT / "precos" / "index.html")
+    precos = _domain_meta("precos")
     if precos:
-        s = _floatish(_marker(precos, "kpi_santos"))
-        through = _marker(precos, "data_through")
-        when = _marker(precos, "generated")
+        s = _floatish(str(precos.get("kpi_santos"))) if precos.get("kpi_santos") is not None else None
+        through = precos.get("data_through")
+        when = precos.get("generated")
         if s is not None:
             bit = f" · {through}" if through else ""
             items["precos"] = {
@@ -127,11 +146,11 @@ def collect() -> dict:
                 "when": when or "",
             }
 
-    pld = _read(ROOT / "pld" / "index.html")
+    pld = _domain_meta("pld")
     if pld:
-        se = _floatish(_marker(pld, "kpi_se"))
-        day = _marker(pld, "latest_date")
-        when = _marker(pld, "generated")
+        se = _floatish(str(pld.get("kpi_se"))) if pld.get("kpi_se") is not None else None
+        day = pld.get("latest_date")
+        when = pld.get("generated")
         if se is not None:
             bit = f" · {day}" if day else ""
             items["pld"] = {
@@ -140,11 +159,11 @@ def collect() -> dict:
                 "when": when or "",
             }
 
-    desk = _read(ROOT / "desk" / "index.html")
+    desk = _domain_meta("desk")
     if desk:
-        se = _floatish(_marker(desk, "kpi_pld_se"))
-        gas = _floatish(_marker(desk, "kpi_gen_gas"))
-        when = _marker(desk, "generated") or _marker(desk, "data_through")
+        se = _floatish(str(desk.get("kpi_pld_se"))) if desk.get("kpi_pld_se") is not None else None
+        gas = _floatish(str(desk.get("kpi_gen_gas"))) if desk.get("kpi_gen_gas") is not None else None
+        when = desk.get("generated") or desk.get("data_through")
         if se is not None or gas is not None:
             parts_en, parts_pt = [], []
             if gas is not None:
@@ -159,17 +178,18 @@ def collect() -> dict:
                 "when": when or "",
             }
 
-    mago = _read(ROOT / "mago" / "index.html")
+    mago = _domain_meta("mago")
     if mago:
-        lp = _floatish(_marker(mago, "kpi_linepack"))
-        when = _marker(mago, "generated")
-        snap = _marker(mago, "kpi_snapshot")
+        lp = _floatish(str(mago.get("kpi_linepack"))) if mago.get("kpi_linepack") is not None else None
+        when = mago.get("generated")
+        snap = mago.get("kpi_snapshot")
         if lp is not None:
             items["mago"] = {
                 "kpiEn": f"{lp:.2f} Mm³ line pack",
                 "kpiPt": f"{lp:.2f} Mm³ empacotamento",
                 "when": when or snap or "",
             }
+
 
     return {
         "generated": dt.datetime.now(dt.UTC).strftime("%Y-%m-%d %H:%M UTC"),
