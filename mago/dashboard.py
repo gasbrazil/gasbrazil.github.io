@@ -224,7 +224,8 @@ TEMPLATE = r"""<!doctype html>
 __FONT_PRELOAD__
 <!-- home-page teaser marker, read by ../build_home.py:
      generated: __GENERATED__
-     kpi_linepack: __KPI_LINEPACK__ -->
+     kpi_linepack: __KPI_LINEPACK__
+     kpi_snapshot: __KPI_SNAPSHOT__ -->
 <script>__SHARED_JS_BOOT__</script>
 <style>
 __SHARED_THEME_CSS__
@@ -352,6 +353,8 @@ __SHARED_TYPO_WEIGHT_CSS__
 </div>
 <script>
 const PAYLOAD_URL = "__PAYLOAD_URL__";
+/** Public R2 artifact (same bucket as other GasBrazil dashboards). Used when the shell still points at a sibling payload.json.gz that is not on Pages. */
+const MAGO_PAYLOAD_R2 = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/mago/payload.json.gz";
 __SHARED_JS_DECODE__
 __SHARED_JS_ESCAPE_HTML__
 __SHARED_JS_CSV__
@@ -752,9 +755,44 @@ function paintPage() {
   paintAsof();
 }
 
+function showPayloadError() {
+  const banner = document.createElement("div");
+  banner.className = "panel";
+  banner.setAttribute("role", "alert");
+  banner.innerHTML = '<p class="sub" style="color:var(--text);margin:0">Could not load TAG Mago data. The dashboard payload may not be published yet — it refreshes automatically every few hours. If this persists, check that the Mago CI workflow completed on <code>main</code>.</p>';
+  const wrap = document.querySelector(".wrap");
+  if (wrap && wrap.firstChild) wrap.insertBefore(banner, wrap.children[1] || wrap.firstChild);
+}
+
+async function fetchMagoPayloadJson() {
+  const urls = [PAYLOAD_URL];
+  if (!/^https?:/i.test(String(PAYLOAD_URL || ""))) urls.push(MAGO_PAYLOAD_R2);
+  let lastErr;
+  for (const u of urls) {
+    try {
+      return await inflateGzipUrl(u);
+    } catch (e) {
+      lastErr = e;
+    }
+  }
+  throw lastErr || new Error("payload unavailable");
+}
+
 async function init() {
   document.getElementById("year").textContent = new Date().getFullYear();
-  const json = await inflateGzipUrl(PAYLOAD_URL);
+  let json;
+  try {
+    json = await fetchMagoPayloadJson();
+  } catch (e) {
+    console.error(e);
+    showPayloadError();
+    applyI18n();
+    initThemeToggle("theme-toggle", () => {});
+    initLangToggle("lang-toggle", () => applyI18n());
+    initCrossLinks();
+    gbCopyLink("btn-share");
+    return;
+  }
   DATA = parseDashboardJson(json);
   LP = DATA.linepack || {};
   LP_HIST = DATA.linepackHistory || {};
@@ -821,12 +859,16 @@ def write_dashboard(out_path: Path | str = DEFAULT_OUT) -> Path:
     payload = load_payload(snapshot_at=snap_param)
     here = Path(__file__).resolve().parent
     _path, payload_href = dk.write_and_publish_artifact("mago", payload, here)
+    if payload_href == "payload.json.gz":
+        payload_href = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/mago/payload.json.gz"
     kpi_lp = payload.get("kpiLinepackMm3")
+    snap = payload.get("snapshotAt") or ""
     html = kit.render(
         TEMPLATE,
         PAYLOAD_URL=payload_href,
         GENERATED=payload["generated"],
         KPI_LINEPACK="" if kpi_lp is None else f"{kpi_lp:.2f}",
+        KPI_SNAPSHOT=snap,
         SHARED_THEME_CSS=kit.render_theme_css(),
         SHARED_TYPO_WEIGHT_CSS=kit.typo_weight_css(),
         SHARED_JS_DECODE=kit.JS_DECODE,

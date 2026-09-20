@@ -136,6 +136,9 @@ def collect_status() -> dict:
         "desk_kpi": None,
         "desk_kpi_pt": None,
         "desk_when": None,
+        "mago_kpi": None,
+        "mago_kpi_pt": None,
+        "mago_when": None,
         "supply_spark": "",
         "pld_spark": "",
         "poc_spark": "",
@@ -493,6 +496,12 @@ HOME_TEMPLATE = """__HEAD__
       <div class="kpi-val" data-en="__FLOWS_KPI__" data-pt="__FLOWS_KPI_PT__">__FLOWS_KPI__</div>
       <div class="kpi-when" data-refresh="__FLOWS_WHEN__"></div>
     </a>
+    <a class="kpi-cell" href="mago/" data-slug="mago">
+      <div class="kpi-label" data-i18n="cardMago">TAG Mago</div>
+      <div class="kpi-role" data-i18n="cardMagoDesc">TAG operational line pack and zone consumption forecasts.</div>
+      <div class="kpi-val" data-en="__MAGO_KPI__" data-pt="__MAGO_KPI_PT__">__MAGO_KPI__</div>
+      <div class="kpi-when" data-refresh="__MAGO_WHEN__"></div>
+    </a>
     <a class="kpi-cell" href="supply/" data-slug="supply">
       <div class="kpi-label" data-i18n="cardSupply">Gas Supply</div>
       <div class="kpi-role">National balance</div>
@@ -682,6 +691,9 @@ def write_home(out_path: Path | str = DEFAULT_OUT) -> Path:
     html = html.replace("__DESK_KPI__", st.get("desk_kpi") or "")
     html = html.replace("__DESK_KPI_PT__", st.get("desk_kpi_pt") or st.get("desk_kpi") or "")
     html = html.replace("__DESK_WHEN__", st.get("desk_when") or "")
+    html = html.replace("__MAGO_KPI__", st.get("mago_kpi") or "")
+    html = html.replace("__MAGO_KPI_PT__", st.get("mago_kpi_pt") or st.get("mago_kpi") or "")
+    html = html.replace("__MAGO_WHEN__", st.get("mago_when") or "")
     html = html.replace("__POC_SPARK__", st.get("poc_spark") or "")
     html = html.replace("__SUPPLY_SPARK__", st.get("supply_spark") or "")
     html = html.replace("__PLD_SPARK__", st.get("pld_spark") or "")

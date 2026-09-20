@@ -68,9 +68,31 @@ jobs:
 
       - name: Commit dashboard artifacts
         working-directory: .
+        env:
+          GASBRAZIL_DATA_BASE_URL: ${{ secrets.GASBRAZIL_DATA_BASE_URL }}
+          GASBRAZIL_DATA_CACHE_BUST: ${{ github.run_id }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add mago/index.html mago/payload.json.gz mago/data/tag_mago_series.parquet 2>/dev/null || true
+          git add mago/index.html
           git diff --staged --quiet || git commit -m "chore(mago): refresh TAG Mago dashboard"
-          git push
+          git push || bash .github/scripts/push-with-rebase.sh
+
+      - name: Refresh home hub (TAG Mago card)
+        working-directory: .
+        env:
+          GASBRAZIL_DATA_BASE_URL: ${{ secrets.GASBRAZIL_DATA_BASE_URL }}
+          GASBRAZIL_DATA_CACHE_BUST: ${{ github.run_id }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT_URL: ${{ secrets.R2_ENDPOINT_URL }}
+          GASBRAZIL_ARTIFACTS_BUCKET: ${{ secrets.GASBRAZIL_ARTIFACTS_BUCKET }}
+        run: |
+          uv pip install -r poc/requirements.txt -c shared/constraints.txt
+          uv run python build_home.py
+          uv run python shared/publish_teasers.py
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html about/index.html 404.html robots.txt sitemap.xml hub/teasers.json.gz 2>/dev/null || true
+          git diff --staged --quiet || git commit -m "home: refresh hub after TAG Mago update"
+          git push || bash .github/scripts/push-with-rebase.sh

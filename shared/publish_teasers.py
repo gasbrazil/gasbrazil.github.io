@@ -159,6 +159,18 @@ def collect() -> dict:
                 "when": when or "",
             }
 
+    mago = _read(ROOT / "mago" / "index.html")
+    if mago:
+        lp = _floatish(_marker(mago, "kpi_linepack"))
+        when = _marker(mago, "generated")
+        snap = _marker(mago, "kpi_snapshot")
+        if lp is not None:
+            items["mago"] = {
+                "kpiEn": f"{lp:.2f} Mm³ line pack",
+                "kpiPt": f"{lp:.2f} Mm³ empacotamento",
+                "when": when or snap or "",
+            }
+
     return {
         "generated": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
         "items": items,
@@ -178,6 +190,7 @@ def status_from_teasers(payload: dict | None = None) -> dict:
         "pld": ("pld_kpi", "pld_kpi_pt", "pld_when"),
         "precos": ("precos_kpi", "precos_kpi_pt", "precos_when"),
         "desk": ("desk_kpi", "desk_kpi_pt", "desk_when"),
+        "mago": ("mago_kpi", "mago_kpi_pt", "mago_when"),
     }
     out: dict = {}
     for slug, (en, pt, when) in mapping.items():
