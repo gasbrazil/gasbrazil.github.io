@@ -12,8 +12,8 @@ import os
 import re
 import shutil
 import time
+from collections.abc import Callable, Iterable
 from pathlib import Path
-from typing import Callable, Iterable
 from urllib.parse import quote
 
 import pandas as pd

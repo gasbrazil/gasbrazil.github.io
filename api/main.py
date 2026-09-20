@@ -14,13 +14,25 @@ from __future__ import annotations
 
 import os
 import sys
+import threading
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import pandas as pd
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+
+from api.models import (
+    FlowsPointsResponse,
+    HealthResponse,
+    OnsBalancesResponse,
+    PldDailyResponse,
+    PldHourlyResponse,
+    PowerPldCmoResponse,
+    PrecosPricesResponse,
+    SupplyMonthlyResponse,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "shared"))
@@ -69,6 +81,7 @@ _FALLBACKS = {
 }
 
 _CACHE: dict[str, tuple[float, int, pd.DataFrame]] = {}
+_CACHE_LOCK = threading.Lock()
 _CRITICAL = ("pld_daily", "ons_daily", "flows_points")
 
 
@@ -94,12 +107,16 @@ def _load(name: str) -> pd.DataFrame:
     hit = _CACHE.get(name)
     if hit and hit[0] == mtime and hit[1] == size:
         return hit[2]
-    df = pd.read_parquet(path)
-    _CACHE[name] = (mtime, size, df)
-    return df
+    with _CACHE_LOCK:
+        hit = _CACHE.get(name)
+        if hit and hit[0] == mtime and hit[1] == size:
+            return hit[2]
+        df = pd.read_parquet(path)
+        _CACHE[name] = (mtime, size, df)
+        return df
 
 
-def _parse_day(s: Optional[str]) -> Optional[pd.Timestamp]:
+def _parse_day(s: str | None) -> pd.Timestamp | None:
     if not s:
         return None
     try:
@@ -108,9 +125,11 @@ def _parse_day(s: Optional[str]) -> Optional[pd.Timestamp]:
         raise HTTPException(400, f"Invalid date {s!r}") from exc
 
 
-def _records(df: pd.DataFrame, limit: int) -> list[dict[str, Any]]:
+def _records(df: pd.DataFrame, limit: int, offset: int = 0) -> list[dict[str, Any]]:
+    if offset > 0:
+        df = df.iloc[offset:]
     if len(df) > limit:
-        df = df.head(limit)
+        df = df.iloc[:limit]
     out = df.copy()
     for c in out.columns:
         if pd.api.types.is_datetime64_any_dtype(out[c]):
@@ -118,7 +137,8 @@ def _records(df: pd.DataFrame, limit: int) -> list[dict[str, Any]]:
     return out.astype(object).where(pd.notna(out), None).to_dict(orient="records")
 
 
-@app.get("/health")
+
+@app.get("/health", response_model=HealthResponse)
 def health() -> JSONResponse:
     present = {name: _resolve_path(name) is not None for name in dk.LAKE_PATHS}
     ok = all(present.get(n) for n in _CRITICAL)
@@ -131,15 +151,16 @@ def health() -> JSONResponse:
     return JSONResponse(body, status_code=200 if ok else 503)
 
 
-@app.get("/v1/flows/points")
+@app.get("/v1/flows/points", response_model=FlowsPointsResponse)
 def flows_points(
-    tso: Optional[str] = None,
-    point_code: Optional[str] = None,
-    variable: Optional[str] = None,
-    source: Optional[str] = None,
-    date_from: Optional[str] = Query(None, alias="from"),
-    date_to: Optional[str] = Query(None, alias="to"),
+    tso: str | None = None,
+    point_code: str | None = None,
+    variable: str | None = None,
+    source: str | None = None,
+    date_from: str | None = Query(None, alias="from"),
+    date_to: str | None = Query(None, alias="to"),
     limit: int = Query(5000, ge=1, le=50000),
+    offset: int = Query(0, ge=0),
 ) -> dict[str, Any]:
     df = _load("flows_points")
     d0, d1 = _parse_day(date_from), _parse_day(date_to)
@@ -156,15 +177,16 @@ def flows_points(
     if source and "source" in df.columns:
         df = df[df["source"].astype(str).str.casefold() == source.casefold()]
     df = df.sort_values(["date", "tso", "point_code"])
-    return {"count": int(len(df)), "limit": limit, "rows": _records(df, limit)}
+    return {"count": int(len(df)), "limit": limit, "offset": offset, "rows": _records(df, limit, offset)}
 
 
-@app.get("/v1/pld/daily")
+@app.get("/v1/pld/daily", response_model=PldDailyResponse)
 def pld_daily(
-    submarket: Optional[str] = None,
-    date_from: Optional[str] = Query(None, alias="from"),
-    date_to: Optional[str] = Query(None, alias="to"),
+    submarket: str | None = None,
+    date_from: str | None = Query(None, alias="from"),
+    date_to: str | None = Query(None, alias="to"),
     limit: int = Query(5000, ge=1, le=50000),
+    offset: int = Query(0, ge=0),
 ) -> dict[str, Any]:
     df = _load("pld_daily")
     d0, d1 = _parse_day(date_from), _parse_day(date_to)
@@ -176,16 +198,17 @@ def pld_daily(
         sm = submarket.upper()
         df = df[df["submarket"].astype(str).str.upper() == sm]
     df = df.sort_values(["date", "submarket"])
-    return {"count": int(len(df)), "limit": limit, "rows": _records(df, limit)}
+    return {"count": int(len(df)), "limit": limit, "offset": offset, "rows": _records(df, limit, offset)}
 
 
-@app.get("/v1/pld/hourly")
+@app.get("/v1/pld/hourly", response_model=PldHourlyResponse)
 def pld_hourly(
-    submarket: Optional[str] = None,
-    tou: Optional[str] = Query(None, description="peak | offpeak (ANEEL-style TOU v1)"),
-    date_from: Optional[str] = Query(None, alias="from"),
-    date_to: Optional[str] = Query(None, alias="to"),
+    submarket: str | None = None,
+    tou: str | None = Query(None, description="peak | offpeak (ANEEL-style TOU v1)"),
+    date_from: str | None = Query(None, alias="from"),
+    date_to: str | None = Query(None, alias="to"),
     limit: int = Query(5000, ge=1, le=50000),
+    offset: int = Query(0, ge=0),
 ) -> dict[str, Any]:
     df = _load("pld_hourly")
     d0, d1 = _parse_day(date_from), _parse_day(date_to)
@@ -207,16 +230,18 @@ def pld_hourly(
     return {
         "count": int(len(df)),
         "limit": limit,
+        "offset": offset,
         "tou": xf.PLD_TOU["version"],
-        "rows": _records(df, limit),
+        "rows": _records(df, limit, offset),
     }
 
 
-@app.get("/v1/supply/monthly")
+@app.get("/v1/supply/monthly", response_model=SupplyMonthlyResponse)
 def supply_monthly(
-    date_from: Optional[str] = Query(None, alias="from"),
-    date_to: Optional[str] = Query(None, alias="to"),
+    date_from: str | None = Query(None, alias="from"),
+    date_to: str | None = Query(None, alias="to"),
     limit: int = Query(500, ge=1, le=5000),
+    offset: int = Query(0, ge=0),
 ) -> dict[str, Any]:
     df = _load("supply_monthly")
     # month is YYYY-MM string in the store
@@ -225,15 +250,16 @@ def supply_monthly(
     if date_to:
         df = df[df["month"].astype(str) <= date_to[:7]]
     df = df.sort_values("month")
-    return {"count": int(len(df)), "limit": limit, "rows": _records(df, limit)}
+    return {"count": int(len(df)), "limit": limit, "offset": offset, "rows": _records(df, limit, offset)}
 
 
-@app.get("/v1/precos/prices")
+@app.get("/v1/precos/prices", response_model=PrecosPricesResponse)
 def precos_prices(
-    segment: Optional[str] = None,
-    date_from: Optional[str] = Query(None, alias="from"),
-    date_to: Optional[str] = Query(None, alias="to"),
+    segment: str | None = None,
+    date_from: str | None = Query(None, alias="from"),
+    date_to: str | None = Query(None, alias="to"),
     limit: int = Query(5000, ge=1, le=50000),
+    offset: int = Query(0, ge=0),
 ) -> dict[str, Any]:
     df = _load("anp_prices")
     if date_from:
@@ -244,16 +270,17 @@ def precos_prices(
         df = df[df["segment"].astype(str).str.casefold() == segment.casefold()]
     sort_cols = [c for c in ("month", "segment", "category", "region") if c in df.columns]
     df = df.sort_values(sort_cols)
-    return {"count": int(len(df)), "limit": limit, "rows": _records(df, limit)}
+    return {"count": int(len(df)), "limit": limit, "offset": offset, "rows": _records(df, limit, offset)}
 
 
-@app.get("/v1/ons/balances")
+@app.get("/v1/ons/balances", response_model=OnsBalancesResponse)
 def ons_balances(
-    subsystem: Optional[str] = None,
-    series: Optional[str] = None,
-    date_from: Optional[str] = Query(None, alias="from"),
-    date_to: Optional[str] = Query(None, alias="to"),
+    subsystem: str | None = None,
+    series: str | None = None,
+    date_from: str | None = Query(None, alias="from"),
+    date_to: str | None = Query(None, alias="to"),
     limit: int = Query(5000, ge=1, le=50000),
+    offset: int = Query(0, ge=0),
 ) -> dict[str, Any]:
     df = _load("ons_daily")
     if "date" not in df.columns:
@@ -275,15 +302,16 @@ def ons_balances(
             df = sub
     sort_cols = [c for c in ("date", "subsystem", "series") if c in df.columns]
     df = df.sort_values(sort_cols)
-    return {"count": int(len(df)), "limit": limit, "rows": _records(df, limit)}
+    return {"count": int(len(df)), "limit": limit, "offset": offset, "rows": _records(df, limit, offset)}
 
 
-@app.get("/v1/power/pld-cmo")
+@app.get("/v1/power/pld-cmo", response_model=PowerPldCmoResponse)
 def power_pld_cmo(
-    submarket: Optional[str] = None,
-    date_from: Optional[str] = Query(None, alias="from"),
-    date_to: Optional[str] = Query(None, alias="to"),
+    submarket: str | None = None,
+    date_from: str | None = Query(None, alias="from"),
+    date_to: str | None = Query(None, alias="to"),
     limit: int = Query(5000, ge=1, le=50000),
+    offset: int = Query(0, ge=0),
 ) -> dict[str, Any]:
     """Cross-product join: CCEE PLD vs ONS CMO by submarket/day."""
     try:
@@ -301,6 +329,8 @@ def power_pld_cmo(
     return {
         "count": int(len(joined)),
         "limit": limit,
+        "offset": offset,
         "transform": "pld_ons_submarket_map",
-        "rows": _records(joined, limit),
+        "rows": _records(joined, limit, offset),
     }
+

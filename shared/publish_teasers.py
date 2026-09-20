@@ -172,7 +172,7 @@ def collect() -> dict:
             }
 
     return {
-        "generated": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
+        "generated": dt.datetime.now(dt.UTC).strftime("%Y-%m-%d %H:%M UTC"),
         "items": items,
     }
 

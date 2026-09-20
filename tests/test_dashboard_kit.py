@@ -3,9 +3,8 @@ from __future__ import annotations
 import html
 from pathlib import Path
 
-import pytest
-
 import dashboard_kit as kit
+import pytest
 
 
 def test_js_boot_binds_flagbar_header_glow():
