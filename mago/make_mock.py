@@ -39,10 +39,10 @@ def build_snapshot(snapshot_at: datetime) -> dict:
         items.append(_item(TAG_LINEPACK_FORECAST, ts, base_lp + 20_000 + h * 500))
     for zone in ZONES:
         zbase = 90.0 + (hash(zone) % 17)
-        for h in range(145):
-            ts = day_start + timedelta(hours=h)
+        for d in range(7):
+            ts = day_start + timedelta(days=d)
             items.append(
-                _item(f"Previsao - ZONA_{zone} - Diario", ts, round(zbase + (h % 24) * 0.15, 4))
+                _item(f"Previsao - ZONA_{zone} - Diario", ts, round(zbase + d * 0.4, 4))
             )
     return {"Items": items}
 
