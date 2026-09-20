@@ -609,7 +609,18 @@ const GB_I18N = {
     bootErrorTitle: "Unable to load dashboard data",
     bootErrorBody: "A network issue prevented the latest data from loading. Please check your connection and try again.",
     bootErrorDetails: "Technical details",
-    bootRetry: "Retry"
+    bootRetry: "Retry",
+    copyTable: "Copy table (TSV)",
+    tableCopied: "Copied {n} rows to clipboard (TSV for Excel)",
+    shortcutsTitle: "Keyboard Shortcuts",
+    shortcutsGeneral: "General",
+    shortcutsGoTo: "Go To (press \"g\" then key)",
+    shortcutHelp: "Show keyboard shortcuts",
+    shortcutFilter: "Focus search or table filter",
+    shortcutTheme: "Toggle dark / light theme",
+    shortcutLang: "Toggle EN / PT language",
+    shortcutEsc: "Clear filter or close menu",
+    shortcutsBtn: "Shortcuts (?)"
   },
   pt: {
     themeDark: "Mudar para o modo escuro",
@@ -742,7 +753,18 @@ const GB_I18N = {
     bootErrorTitle: "Não foi possível carregar os dados do painel",
     bootErrorBody: "Ocorreu uma falha de rede ao carregar os dados mais recentes. Verifique sua conexão e tente novamente.",
     bootErrorDetails: "Detalhes técnicos",
-    bootRetry: "Tentar novamente"
+    bootRetry: "Tentar novamente",
+    copyTable: "Copiar tabela (TSV)",
+    tableCopied: "{n} linhas copiadas para a área de transferência (TSV para Excel)",
+    shortcutsTitle: "Atalhos de Teclado",
+    shortcutsGeneral: "Geral",
+    shortcutsGoTo: "Navegação (pressione \"g\" e a tecla)",
+    shortcutHelp: "Mostrar atalhos de teclado",
+    shortcutFilter: "Focar busca ou filtro da tabela",
+    shortcutTheme: "Alternar modo claro / escuro",
+    shortcutLang: "Alternar idioma EN / PT",
+    shortcutEsc: "Limpar filtro ou fechar menu",
+    shortcutsBtn: "Atalhos (?)"
   }
 };
 function currentLang() {
@@ -765,6 +787,10 @@ function applyI18n() {
     const key = el.getAttribute("data-i18n-placeholder");
     if (key) el.setAttribute("placeholder", t(key));
   });
+  document.querySelectorAll("[data-i18n-title]").forEach(el => {
+    const key = el.getAttribute("data-i18n-title");
+    if (key) el.setAttribute("title", t(key));
+  });
   const langBtn = document.getElementById("lang-toggle");
   if (langBtn) {
     langBtn.textContent = currentLang() === "pt" ? "EN" : "PT";
@@ -785,6 +811,272 @@ function initLangToggle(buttonId, onChange) {
     if (onChange) onChange(next);
   });
 }
+
+// Phase 3: Trader productivity tools (toasts, clipboard copy, shortcuts)
+function gbShowToast(msg, durationMs = 2200) {
+  let container = document.getElementById("gb-toast-container");
+  if (!container) {
+    container = document.createElement("div");
+    container.id = "gb-toast-container";
+    container.className = "gb-toast-container";
+    container.setAttribute("aria-live", "polite");
+    document.body.appendChild(container);
+  }
+  const toast = document.createElement("div");
+  toast.className = "gb-toast";
+  toast.textContent = msg;
+  container.appendChild(toast);
+  toast.offsetHeight;
+  toast.classList.add("is-visible");
+  setTimeout(() => {
+    toast.classList.remove("is-visible");
+    setTimeout(() => toast.remove(), 250);
+  }, durationMs);
+}
+
+async function gbCopyTableAsTsv(tableOrWrap) {
+  const table = (tableOrWrap && tableOrWrap.tagName === "TABLE")
+    ? tableOrWrap
+    : (tableOrWrap ? tableOrWrap.querySelector("table") : document.querySelector("table"));
+  if (!table) return false;
+
+  const rows = [];
+  const headers = [];
+  const ths = table.querySelectorAll("thead th");
+  ths.forEach(th => {
+    if (th.classList.contains("no-export") || th.hidden) return;
+    const labelEl = th.querySelector(".th-label") || th;
+    let text = (labelEl.childNodes[0] ? labelEl.childNodes[0].textContent : labelEl.textContent) || "";
+    text = text.replace(/[\t\r\n]/g, " ").trim();
+    headers.push(text);
+  });
+  if (headers.length) rows.push(headers.join("\t"));
+
+  const trs = table.querySelectorAll("tbody tr");
+  let rowCount = 0;
+  trs.forEach(tr => {
+    if (tr.hidden || tr.style.display === "none" || tr.classList.contains("no-export")) return;
+    const cells = [];
+    tr.querySelectorAll("td").forEach(td => {
+      if (td.classList.contains("no-export") || td.hidden) return;
+      let text = (td.textContent || "").replace(/[\t\r\n]/g, " ").trim();
+      cells.push(text);
+    });
+    if (cells.length) {
+      rows.push(cells.join("\t"));
+      rowCount++;
+    }
+  });
+
+  const tsv = rows.join("\n");
+  let ok = false;
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(tsv);
+      ok = true;
+    }
+  } catch (e) {}
+  if (!ok) {
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = tsv;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      ok = document.execCommand("copy");
+      ta.remove();
+    } catch (e) {}
+  }
+  const tmpl = (typeof t === "function") ? t("tableCopied") : "Copied {n} rows to clipboard (TSV for Excel)";
+  const msg = ok ? tmpl.replace("{n}", rowCount) : "Failed to copy table";
+  if (typeof gbShowToast === "function") gbShowToast(msg);
+  return ok;
+}
+
+function gbBindTableCopyButtons() {
+  document.querySelectorAll(".table-wrap").forEach(wrap => {
+    if (wrap.querySelector(".table-copy-btn")) return;
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "table-copy-btn";
+    btn.setAttribute("data-i18n-title", "copyTable");
+    btn.title = (typeof t === "function") ? t("copyTable") : "Copy table (TSV)";
+    btn.innerHTML = '&#x1F4CB; TSV';
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      gbCopyTableAsTsv(wrap);
+    });
+    wrap.appendChild(btn);
+  });
+}
+
+function toggleShortcutsModal() {
+  let modal = document.getElementById("gb-shortcuts-modal");
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "gb-shortcuts-modal";
+    modal.className = "shortcuts-modal-backdrop";
+    modal.setAttribute("role", "dialog");
+    modal.setAttribute("aria-modal", "true");
+    modal.setAttribute("aria-labelledby", "gb-shortcuts-title");
+
+    modal.innerHTML =
+      '<div class="shortcuts-modal-card">' +
+        '<div class="shortcuts-modal-head">' +
+          '<h3 id="gb-shortcuts-title" class="shortcuts-modal-title" data-i18n="shortcutsTitle">Keyboard Shortcuts</h3>' +
+          '<button type="button" class="shortcuts-modal-close" aria-label="Close">&times;</button>' +
+        '</div>' +
+        '<div class="shortcuts-modal-grid">' +
+          '<div class="shortcuts-section">' +
+            '<h4 class="shortcuts-sec-title" data-i18n="shortcutsGeneral">General</h4>' +
+            '<div class="shortcut-row"><kbd>?</kbd> <span data-i18n="shortcutHelp">Show this help dialog</span></div>' +
+            '<div class="shortcut-row"><kbd>/</kbd> or <kbd>f</kbd> <span data-i18n="shortcutFilter">Focus search / table filter</span></div>' +
+            '<div class="shortcut-row"><kbd>t</kbd> <span data-i18n="shortcutTheme">Toggle light / dark theme</span></div>' +
+            '<div class="shortcut-row"><kbd>l</kbd> or <kbd>p</kbd> <span data-i18n="shortcutLang">Toggle EN / PT language</span></div>' +
+            '<div class="shortcut-row"><kbd>Esc</kbd> <span data-i18n="shortcutEsc">Clear filter or close menu</span></div>' +
+          '</div>' +
+          '<div class="shortcuts-section">' +
+            '<h4 class="shortcuts-sec-title" data-i18n="shortcutsGoTo">Go To (press "g" then key)</h4>' +
+            '<div class="shortcut-row"><kbd>g</kbd> <kbd>h</kbd> <span>Home (Hub)</span></div>' +
+            '<div class="shortcut-row"><kbd>g</kbd> <kbd>d</kbd> <span>The Desk</span></div>' +
+            '<div class="shortcut-row"><kbd>g</kbd> <kbd>o</kbd> <span>ONS Balances</span></div>' +
+            '<div class="shortcut-row"><kbd>g</kbd> <kbd>p</kbd> <span>POC Results</span></div>' +
+            '<div class="shortcut-row"><kbd>g</kbd> <kbd>c</kbd> <span>POC Contracts</span></div>' +
+            '<div class="shortcut-row"><kbd>g</kbd> <kbd>f</kbd> <span>Pipeline Flows</span></div>' +
+            '<div class="shortcut-row"><kbd>g</kbd> <kbd>s</kbd> <span>Gas Supply</span></div>' +
+            '<div class="shortcut-row"><kbd>g</kbd> <kbd>l</kbd> <span>PLD Prices</span></div>' +
+            '<div class="shortcut-row"><kbd>g</kbd> <kbd>r</kbd> <span>ANP Prices</span></div>' +
+            '<div class="shortcut-row"><kbd>g</kbd> <kbd>m</kbd> <span>TAG Mago</span></div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(modal);
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal || e.target.closest(".shortcuts-modal-close")) {
+        modal.hidden = true;
+      }
+    });
+    if (typeof applyI18n === "function") applyI18n();
+  }
+  modal.hidden = !modal.hidden;
+}
+
+function initGlobalShortcuts() {
+  let gPressed = false;
+  let gTimer = null;
+
+  document.addEventListener("keydown", (e) => {
+    const tag = (e.target && e.target.tagName) || "";
+    const isInput = tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (e.target && e.target.isContentEditable);
+
+    if (e.key === "Escape") {
+      const modal = document.getElementById("gb-shortcuts-modal");
+      if (modal && !modal.hidden) {
+        modal.hidden = true;
+        e.preventDefault();
+        return;
+      }
+      if (isInput && e.target.classList && e.target.classList.contains("th-filter")) {
+        e.target.value = "";
+        e.target.dispatchEvent(new Event("input", { bubbles: true }));
+        e.target.blur();
+        e.preventDefault();
+        return;
+      }
+    }
+
+    if (isInput) return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+    if (e.key === "?" || (e.shiftKey && e.key === "/")) {
+      e.preventDefault();
+      toggleShortcutsModal();
+      return;
+    }
+
+    if (e.key === "/" || e.key === "f") {
+      const firstFilter = document.querySelector(".th-filter, input[type='search'], .analysis-filter, #f-search");
+      if (firstFilter) {
+        e.preventDefault();
+        firstFilter.focus();
+        firstFilter.select();
+      }
+      return;
+    }
+
+    if (e.key === "t" || e.key === "T") {
+      const themeBtn = document.getElementById("theme-toggle");
+      if (themeBtn) {
+        e.preventDefault();
+        themeBtn.click();
+        const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+        gbShowToast(isDark ? "Theme: Dark" : "Theme: Light");
+      }
+      return;
+    }
+
+    if (e.key === "l" || e.key === "L" || e.key === "p" || e.key === "P") {
+      const langBtn = document.getElementById("lang-toggle");
+      if (langBtn) {
+        e.preventDefault();
+        langBtn.click();
+        const lang = document.documentElement.getAttribute("data-lang");
+        gbShowToast(lang === "pt" ? "Idioma: Português" : "Language: English");
+      }
+      return;
+    }
+
+    if (e.key === "g" || e.key === "G") {
+      gPressed = true;
+      clearTimeout(gTimer);
+      gTimer = setTimeout(() => { gPressed = false; }, 1200);
+      return;
+    }
+
+    if (gPressed) {
+      gPressed = false;
+      clearTimeout(gTimer);
+      const routes = {
+        "h": "/",
+        "d": "/desk/",
+        "o": "/ons/",
+        "p": "/poc/",
+        "c": "/contratos/",
+        "f": "/flows/",
+        "s": "/supply/",
+        "l": "/pld/",
+        "r": "/precos/",
+        "m": "/mago/",
+        "w": "/wiki/",
+        "a": "/about/"
+      };
+      const dest = routes[e.key.toLowerCase()];
+      if (dest) {
+        e.preventDefault();
+        gbShowToast("Navigating…");
+        window.location.href = dest;
+      }
+    }
+  });
+
+  const scLink = document.getElementById("link-shortcuts");
+  if (scLink) {
+    scLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      toggleShortcutsModal();
+    });
+  }
+
+  gbBindTableCopyButtons();
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initGlobalShortcuts);
+} else {
+  initGlobalShortcuts();
+}
+/* __GB_I18N_END__ */
 """
 
 # CSV escaping + a generic "download this text as a file" trigger. Column/row
@@ -869,8 +1161,10 @@ function buildSortFilterTh(col, sortState, defaultSort, filters, onChange, extra
   filterInput.setAttribute("data-i18n-placeholder", "filterPlaceholder");
   filterInput.placeholder = (typeof t === "function") ? t("filterPlaceholder") : "Filter…";
   filterInput.value = filters[col.key] || "";
+  if (filterInput.value) th.classList.add("has-filter");
   filterInput.addEventListener("input", () => {
     filters[col.key] = filterInput.value.toLowerCase();
+    th.classList.toggle("has-filter", !!filterInput.value);
     onChange(sortState, filters);
   });
   th.appendChild(filterInput);
