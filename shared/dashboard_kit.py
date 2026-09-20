@@ -150,6 +150,61 @@ def render_theme_css(font_path: Path | str = DEFAULT_FONT_PATH) -> str:
     return THEME_CSS.replace("__FONT_FACE__", embed_font_face(font_path))
 
 
+def typo_weight_css() -> str:
+    """Appended after each page's local CSS so titles/labels stay semibold on Plex."""
+    return TYPO_WEIGHT_CSS
+
+
+TYPO_WEIGHT_CSS = """
+/* Shared header/label weight — last in cascade (Pacaembu-era density on Plex UI). */
+.wrap h1,
+.wrap h2,
+.wrap h3,
+header.dash-head h1,
+.panel-title,
+.kpi-title,
+.kpi-label,
+.kpi-header .kpi-title,
+.sources-label,
+.sources-block .label,
+.filter-label,
+.asof-strip .asof-label,
+.band-label,
+.level-btn,
+.view-toggle .level-btn,
+.tab,
+.tabs > button,
+.tabs button,
+.chip,
+.pill,
+.pick h3,
+.tile .cap,
+.tile .lbl,
+button[aria-pressed],
+[role="tab"],
+.tool-row label,
+.controls label,
+.chart-toolbar label,
+.hub-section-title,
+.tagline,
+.prose h2,
+.prose h3,
+aside nav a,
+aside nav .label,
+.hub-page-title,
+.card .name,
+.navlink,
+.masthead h1,
+header.top h1,
+main h1,
+main h2,
+main h3,
+.nav-trail a {
+  font-weight: 600;
+}
+"""
+
+
 def render(template: str, **replacements: str) -> str:
     """Single-pass placeholder substitution.
 

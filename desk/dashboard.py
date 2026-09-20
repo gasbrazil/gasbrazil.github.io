@@ -113,6 +113,7 @@ footer a { color: var(--accent); }
 @media (max-width: 720px) {
   .sources, .series-picker { flex-direction: column; align-items: stretch; }
 }
+__SHARED_TYPO_WEIGHT_CSS__
 </style>
 </head>
 <body>
@@ -1209,6 +1210,7 @@ def write_dashboard(out_path: Path | str = DEFAULT_OUT) -> Path:
         KPI_GEN_GAS=kpi_gas,
         DATA_THROUGH=data_through,
         SHARED_THEME_CSS=kit.render_theme_css(),
+        SHARED_TYPO_WEIGHT_CSS=kit.typo_weight_css(),
         SHARED_JS_DECODE=kit.JS_DECODE,
         SHARED_JS_ESCAPE_HTML=kit.JS_ESCAPE_HTML,
         SHARED_JS_TABLE_SORT=kit.JS_TABLE_SORT,

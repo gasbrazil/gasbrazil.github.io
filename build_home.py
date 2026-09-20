@@ -404,6 +404,7 @@ def _head(title: str, description: str, path: str) -> str:
 <style>
 __SHARED_THEME_CSS__
 {SHARED_PAGE_CSS}
+__SHARED_TYPO_WEIGHT_CSS__
 </style>
 </head>
 """
@@ -637,6 +638,7 @@ def _kit_render(template: str, **extra: str) -> str:
     return kit.render(
         template,
         SHARED_THEME_CSS=kit.render_theme_css(),
+        SHARED_TYPO_WEIGHT_CSS=kit.typo_weight_css(),
         SHARED_JS_THEME_TOGGLE=kit.JS_THEME_TOGGLE,
         SHARED_JS_I18N=kit.JS_I18N,
         SHARED_JS_BOOT=kit.JS_BOOT,

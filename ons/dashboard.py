@@ -402,6 +402,7 @@ def write_dashboard(df: pd.DataFrame, dest: Path,
         GENERATED=payload["generated"],
         KPI_GAS_MWMED=_hub_kpi_gas_mwmed(payload),
         SHARED_THEME_CSS=kit.render_theme_css(),
+        SHARED_TYPO_WEIGHT_CSS=kit.typo_weight_css(),
         SHARED_JS_DECODE=kit.JS_DECODE,
         SHARED_JS_ESCAPE_HTML=kit.JS_ESCAPE_HTML,
         SHARED_JS_XLSX=kit.JS_XLSX_ENGINE,
@@ -628,6 +629,7 @@ table.data thead th.sortable:hover{background:var(--accent-soft)}
   .tabs{width:100%;overflow-x:auto}
   button,select,input{width:100%}
 }
+__SHARED_TYPO_WEIGHT_CSS__
 </style>
 </head>
 <body>

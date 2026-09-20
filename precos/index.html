@@ -304,7 +304,7 @@ header.dash-head .nav-trail,
 th,
 b,
 strong {
-  font-weight: 500;
+  font-weight: 600;
 }
 strong, b, th { font-weight: 600; }
 td.num, th.num {
@@ -407,7 +407,7 @@ header.dash-head.flag-glow::after,
   border-bottom: 1px solid var(--border);
 }
 .asof-strip .asof-label {
-  text-transform: uppercase; letter-spacing: .06em; font-weight: 400;
+  text-transform: uppercase; letter-spacing: .06em; font-weight: 600;
   color: var(--muted); font-size: 10px;
 }
 .asof-strip .asof-val { font-weight: 300; color: var(--muted2); font-variant-numeric: tabular-nums; }
@@ -525,32 +525,32 @@ main.hub .brand-lockup .wordmark,
   vertical-align: baseline;
   transition: color .15s ease;
 }
-/* Solid flag-blue dot; on hover it shifts to flag yellow (no caret morph). */
+/* Solid flag-blue dot; on hover only the dot shifts to flag yellow. */
 .brand-mark-dot,
 .wordmark .dot {
   display: inline-block;
-  width: 0.48em;
-  height: 0.48em;
-  min-width: 0.48em;
-  min-height: 0.48em;
+  width: 0.36em;
+  height: 0.36em;
+  min-width: 0.36em;
+  min-height: 0.36em;
   border-radius: 50%;
   background: var(--accent);
   flex-shrink: 0;
-  vertical-align: -0.06em;
+  vertical-align: -0.05em;
   transition: background-color .15s ease;
 }
 .masthead-ident .brand-mark-dot {
-  width: 7px;
-  height: 7px;
-  min-width: 7px;
-  min-height: 7px;
+  width: 5.5px;
+  height: 5.5px;
+  min-width: 5.5px;
+  min-height: 5.5px;
 }
 main.hub .brand-mark-dot,
 .hub-header .brand-mark-dot {
-  width: 11px;
-  height: 11px;
-  min-width: 11px;
-  min-height: 11px;
+  width: 8px;
+  height: 8px;
+  min-width: 8px;
+  min-height: 8px;
 }
 .brand-mark .dd-caret {
   display: none;
@@ -584,12 +584,21 @@ main.hub .brand-mark-dot,
   color: var(--text); text-decoration: none; white-space: nowrap;
   transition: color .15s ease;
 }
-.masthead-brand:hover,
+.masthead-brand:hover { color: var(--accent); }
+[data-theme="dark"] .masthead-brand:hover { color: var(--text); }
+/* Menu hover: yellow dot only — keep GasBrazil text at normal color. */
 .products-dd:hover .masthead-brand,
-.products-dd:hover .wordmark a { color: var(--accent); }
-[data-theme="dark"] .masthead-brand:hover,
+.products-dd:hover .wordmark a,
+.products-dd:focus-within .masthead-brand,
+.products-dd:focus-within .wordmark a {
+  color: var(--text);
+}
 [data-theme="dark"] .products-dd:hover .masthead-brand,
-[data-theme="dark"] .products-dd:hover .wordmark a { color: var(--brz-yellow); }
+[data-theme="dark"] .products-dd:hover .wordmark a,
+[data-theme="dark"] .products-dd:focus-within .masthead-brand,
+[data-theme="dark"] .products-dd:focus-within .wordmark a {
+  color: var(--text);
+}
 .masthead h1 {
   font-family: var(--font-display);
   font-size: 14px; margin: 0; letter-spacing: -.01em; font-weight: 600;
@@ -663,7 +672,7 @@ main.hub .brand-mark-dot,
 }
 .sources-label {
   font-size: 11px; text-transform: uppercase; letter-spacing: .06em;
-  color: var(--muted); font-weight: 300; margin-right: 2px;
+  color: var(--muted); font-weight: 600; margin-right: 2px;
 }
 .sources a {
   font-size: 11.5px; color: var(--muted2); text-decoration: none;
@@ -1217,7 +1226,6 @@ select optgroup {
   background-color: var(--panel);
   color: var(--text);
 }
-
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; font-weight: 300; }
 /* Single-row header: wordmark-menu · title … Wiki/About · PT · theme */
@@ -1275,6 +1283,52 @@ footer a { color: var(--accent); }
   .toolbar, .sources, .series-picker { flex-direction: column; align-items: stretch; }
   .toolbar button { width: 100%; }
   .count { margin-left: 0; }
+}
+/* Shared header/label weight — last in cascade (Pacaembu-era density on Plex UI). */
+.wrap h1,
+.wrap h2,
+.wrap h3,
+header.dash-head h1,
+.panel-title,
+.kpi-title,
+.kpi-label,
+.kpi-header .kpi-title,
+.sources-label,
+.sources-block .label,
+.filter-label,
+.asof-strip .asof-label,
+.band-label,
+.level-btn,
+.view-toggle .level-btn,
+.tab,
+.tabs > button,
+.tabs button,
+.chip,
+.pill,
+.pick h3,
+.tile .cap,
+.tile .lbl,
+button[aria-pressed],
+[role="tab"],
+.tool-row label,
+.controls label,
+.chart-toolbar label,
+.hub-section-title,
+.tagline,
+.prose h2,
+.prose h3,
+aside nav a,
+aside nav .label,
+.hub-page-title,
+.card .name,
+.navlink,
+.masthead h1,
+header.top h1,
+main h1,
+main h2,
+main h3,
+.nav-trail a {
+  font-weight: 600;
 }
 </style>
 </head>

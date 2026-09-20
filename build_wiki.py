@@ -156,7 +156,7 @@ footer.site a{color:var(--muted)}
   .wrap{flex-direction:column}
   aside{position:static;width:auto;flex:none;max-height:none}
 }
-"""
+""" + kit.typo_weight_css()
 
 THEME_JS = """
 (function(){

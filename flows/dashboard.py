@@ -323,6 +323,7 @@ tbody tr:hover { background: var(--accent-soft); }
 .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 footer { margin-top: 22px; color: var(--muted); font-size: 11.5px; line-height: 1.7; }
 footer a { color: var(--accent); }
+__SHARED_TYPO_WEIGHT_CSS__
 </style>
 </head>
 <body>
@@ -1663,6 +1664,7 @@ def write_dashboard(out_path=DEFAULT_OUT):
         KPI_TOTAL_7D=kpi_total_7d,
         N_POINTS=n_points,
         SHARED_THEME_CSS=kit.render_theme_css(),
+        SHARED_TYPO_WEIGHT_CSS=kit.typo_weight_css(),
         SHARED_JS_DECODE=kit.JS_DECODE,
         SHARED_JS_ESCAPE_HTML=kit.JS_ESCAPE_HTML,
         SHARED_JS_THEME_TOGGLE=kit.JS_THEME_TOGGLE,
