@@ -97,3 +97,18 @@ def test_build_from_mock(tmp_path, monkeypatch):
     df = pd.read_parquet(mp.PARQUET_PATH)
     assert len(df) >= 20
     assert set(df["series"].unique()) >= {"linepack_actual", "zone_consumption_forecast"}
+
+
+def test_load_payload_groups_and_history(tmp_path, monkeypatch):
+    sys.path.insert(0, str(ROOT / "mago"))
+    import dashboard as md  # noqa: E402
+
+    monkeypatch.setattr(md, "PARQUET_PATH", mp.PARQUET_PATH)
+    mp.RAW_DIR.mkdir(parents=True, exist_ok=True)
+    if not mp.PARQUET_PATH.exists():
+        mp.cmd_build()
+    payload = md.load_payload()
+    assert "total" in payload["groups"]
+    assert payload["groupSeries"]["BA"]["times"]
+    assert len(payload["linepackHistoryRows"]) >= 1
+    assert payload["linepackHistory"]["times"]
