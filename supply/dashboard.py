@@ -170,6 +170,7 @@ footer a { color: var(--accent); }
   .toolbar button { width: 100%; }
   .count { margin-left: 0; }
 }
+__SHARED_TYPO_WEIGHT_CSS__
 </style>
 </head>
 <body>
@@ -614,6 +615,7 @@ def write_dashboard(out_path: Path | str = DEFAULT_OUT) -> Path:
         KPI_PRODUCTION="" if kpi_prod is None else str(kpi_prod),
         DATA_THROUGH=payload.get("dataThrough") or "",
         SHARED_THEME_CSS=kit.render_theme_css(),
+        SHARED_TYPO_WEIGHT_CSS=kit.typo_weight_css(),
         SHARED_JS_DECODE=kit.JS_DECODE,
         SHARED_JS_ESCAPE_HTML=kit.JS_ESCAPE_HTML,
         SHARED_JS_THEME_TOGGLE=kit.JS_THEME_TOGGLE,

@@ -224,6 +224,7 @@ footer a { color: var(--accent); }
   .toolbar select, .toolbar input, .toolbar button { width: 100%; }
   .count { margin-left: 0; }
 }
+__SHARED_TYPO_WEIGHT_CSS__
 </style>
 </head>
 <body>
@@ -1676,6 +1677,7 @@ def write_dashboard(out_path=DEFAULT_OUT):
         KPI_CONTRACTS=kpi_contracts,
         KPI_CAPACITY=kpi_capacity,
         SHARED_THEME_CSS=kit.render_theme_css(),
+        SHARED_TYPO_WEIGHT_CSS=kit.typo_weight_css(),
         SHARED_JS_DECODE=kit.JS_DECODE,
         SHARED_JS_ESCAPE_HTML=kit.JS_ESCAPE_HTML,
         SHARED_JS_THEME_TOGGLE=kit.JS_THEME_TOGGLE,

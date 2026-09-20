@@ -309,7 +309,7 @@ header.dash-head .nav-trail,
 th,
 b,
 strong {
-  font-weight: 500;
+  font-weight: 600;
 }
 strong, b, th { font-weight: 600; }
 td.num, th.num {
@@ -412,7 +412,7 @@ header.dash-head.flag-glow::after,
   border-bottom: 1px solid var(--border);
 }
 .asof-strip .asof-label {
-  text-transform: uppercase; letter-spacing: .06em; font-weight: 400;
+  text-transform: uppercase; letter-spacing: .06em; font-weight: 600;
   color: var(--muted); font-size: 10px;
 }
 .asof-strip .asof-val { font-weight: 300; color: var(--muted2); font-variant-numeric: tabular-nums; }
@@ -677,7 +677,7 @@ main.hub .brand-mark-dot,
 }
 .sources-label {
   font-size: 11px; text-transform: uppercase; letter-spacing: .06em;
-  color: var(--muted); font-weight: 300; margin-right: 2px;
+  color: var(--muted); font-weight: 600; margin-right: 2px;
 }
 .sources a {
   font-size: 11.5px; color: var(--muted2); text-decoration: none;
@@ -1403,6 +1403,54 @@ footer.site a {
 }
 footer.site a:hover { color: var(--text); border-bottom-color: var(--brz-yellow); }
 [data-theme="dark"] footer.site a:hover { color: var(--brz-yellow); border-bottom-color: var(--brz-yellow); }
+
+
+/* Shared header/label weight — last in cascade (Pacaembu-era density on Plex UI). */
+.wrap h1,
+.wrap h2,
+.wrap h3,
+header.dash-head h1,
+.panel-title,
+.kpi-title,
+.kpi-label,
+.kpi-header .kpi-title,
+.sources-label,
+.sources-block .label,
+.filter-label,
+.asof-strip .asof-label,
+.band-label,
+.level-btn,
+.view-toggle .level-btn,
+.tab,
+.tabs > button,
+.tabs button,
+.chip,
+.pill,
+.pick h3,
+.tile .cap,
+.tile .lbl,
+button[aria-pressed],
+[role="tab"],
+.tool-row label,
+.controls label,
+.chart-toolbar label,
+.hub-section-title,
+.tagline,
+.prose h2,
+.prose h3,
+aside nav a,
+aside nav .label,
+.hub-page-title,
+.card .name,
+.navlink,
+.masthead h1,
+header.top h1,
+main h1,
+main h2,
+main h3,
+.nav-trail a {
+  font-weight: 600;
+}
 
 </style>
 </head>

@@ -369,6 +369,7 @@ table.data .num { text-align: right; font-variant-numeric: tabular-nums; white-s
 table.data tbody tr:hover { background: var(--accent-soft); }
 footer { margin-top: 22px; color: var(--muted); font-size: 11.5px; line-height: 1.7; font-weight: 200; }
 footer a { color: var(--accent); }
+__SHARED_TYPO_WEIGHT_CSS__
 </style>
 </head>
 <body>
@@ -1191,6 +1192,7 @@ def write_dashboard(out_path: Path | str = DEFAULT_OUT) -> Path:
         KPI_SE="" if kpi_se is None else f"{kpi_se:.2f}",
         LATEST_DATE=payload["latestDate"] or "",
         SHARED_THEME_CSS=kit.render_theme_css(),
+        SHARED_TYPO_WEIGHT_CSS=kit.typo_weight_css(),
         SHARED_JS_DECODE=kit.JS_DECODE,
         SHARED_JS_ESCAPE_HTML=kit.JS_ESCAPE_HTML,
         SHARED_JS_THEME_TOGGLE=kit.JS_THEME_TOGGLE,

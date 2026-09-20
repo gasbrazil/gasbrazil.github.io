@@ -252,7 +252,7 @@ header.dash-head .nav-trail,
 th,
 b,
 strong {
-  font-weight: 500;
+  font-weight: 600;
 }
 strong, b, th { font-weight: 600; }
 td.num, th.num {
@@ -355,7 +355,7 @@ header.dash-head.flag-glow::after,
   border-bottom: 1px solid var(--border);
 }
 .asof-strip .asof-label {
-  text-transform: uppercase; letter-spacing: .06em; font-weight: 400;
+  text-transform: uppercase; letter-spacing: .06em; font-weight: 600;
   color: var(--muted); font-size: 10px;
 }
 .asof-strip .asof-val { font-weight: 300; color: var(--muted2); font-variant-numeric: tabular-nums; }
@@ -620,7 +620,7 @@ main.hub .brand-mark-dot,
 }
 .sources-label {
   font-size: 11px; text-transform: uppercase; letter-spacing: .06em;
-  color: var(--muted); font-weight: 300; margin-right: 2px;
+  color: var(--muted); font-weight: 600; margin-right: 2px;
 }
 .sources a {
   font-size: 11.5px; color: var(--muted2); text-decoration: none;

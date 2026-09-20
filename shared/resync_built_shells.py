@@ -15,6 +15,7 @@ import dashboard_kit as kit
 ROOT = Path(__file__).resolve().parents[1]
 SITES = ("desk", "ons", "pld", "poc", "contratos", "flows", "supply", "precos")
 THEME_START = "/*\n * GasBrazil.com shared design tokens"
+TYPO_MARKER = "/* Shared header/label weight"
 PAGE_CSS_MARKERS: dict[str, str] = {
     "desk": "* { box-sizing: border-box; }",
     "flows": "* { box-sizing: border-box; }",
@@ -46,6 +47,22 @@ def resync_theme(html: str, theme: str, site_id: str) -> str:
     return html[:start] + theme + html[end:]
 
 
+def resync_typo_weights(html: str) -> str:
+    block = kit.typo_weight_css().strip() + "\n"
+    if TYPO_MARKER in html:
+        html = re.sub(
+            r"/\* Shared header/label weight[\s\S]*?\n\}\n",
+            block,
+            html,
+            count=1,
+        )
+        return html
+    pos = html.find("</style>")
+    if pos < 0:
+        raise ValueError("no </style> in shell")
+    return html[:pos] + block + html[pos:]
+
+
 def resync_products_dd(html: str, site_id: str) -> str:
     new_dd = kit.products_dropdown_html(site_id, _brand_link_html())
     pattern = r'<div class="products-dd">[\s\S]*?<span class="crumb-sep"'
@@ -58,6 +75,7 @@ def resync_site(site_id: str) -> None:
     path = ROOT / site_id / "index.html"
     html = path.read_text(encoding="utf-8")
     html = resync_theme(html, kit.render_theme_css(), site_id)
+    html = resync_typo_weights(html)
     html = resync_products_dd(html, site_id)
     path.write_text(html, encoding="utf-8")
     print(f"resynced {path.relative_to(ROOT)}")
