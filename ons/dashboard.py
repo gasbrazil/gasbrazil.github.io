@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """Generate the ONS Balances dashboard from the daily store.
 
 ADR-002 Track B: the large series payload is written to payload.json.gz
@@ -3345,8 +3345,9 @@ async function boot(){
     const text = await inflateGzipUrl(PAYLOAD_URL);
     DATA = JSON.parse(text);
   }catch(err){
-    document.getElementById("boot").innerHTML =
-      "Could not load dashboard data.<br>"+escapeHtml(String(err && err.message || err));
+    console.error(err);
+    document.getElementById("boot").innerHTML = "";
+    showBootError(err, () => boot(), "#boot");
     return;
   }
   document.getElementById("boot").hidden=true;

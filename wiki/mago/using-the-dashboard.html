@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>POC Contracts: Known Limitations &mdash; GasBrazil.com Wiki</title>
+<title>TAG Mago: Using the Dashboard &mdash; GasBrazil.com Wiki</title>
 <link rel="icon" href="/shared/favicon.png">
 <meta name="theme-color" content="#06080c">
 <link rel="preload" href="/shared/fonts/IBMPlexSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
@@ -1463,7 +1463,7 @@ main h3,
     <h1>Wiki</h1>
   </div>
   <div class="row">
-    <a class="navlink" href="/contratos/">&larr; POC Contracts</a>
+    <a class="navlink" href="/mago/">&larr; TAG Mago</a>
     <button id="theme-toggle" class="iconBtn" title="Toggle light/dark" aria-label="Toggle light/dark"></button>
   </div>
 </header>
@@ -1489,12 +1489,12 @@ main h3,
       <a class="" href="/wiki/poc/known-limitations.html">Known Limitations</a>
       <div class="group">POC Contracts</div>
       <a class="" href="/wiki/contratos/using-the-dashboard.html">Using the Dashboard</a>
-      <a class="active" href="/wiki/contratos/known-limitations.html">Known Limitations</a>
+      <a class="" href="/wiki/contratos/known-limitations.html">Known Limitations</a>
       <div class="group">Pipeline Flows</div>
       <a class="" href="/wiki/flows/using-the-dashboard.html">Using the Dashboard</a>
       <a class="" href="/wiki/flows/known-limitations.html">Known Limitations</a>
       <div class="group">TAG Mago</div>
-      <a class="" href="/wiki/mago/using-the-dashboard.html">Using the Dashboard</a>
+      <a class="active" href="/wiki/mago/using-the-dashboard.html">Using the Dashboard</a>
       <a class="" href="/wiki/mago/known-limitations.html">Known Limitations</a>
       <div class="group">Gas Supply</div>
       <a class="" href="/wiki/supply/using-the-dashboard.html">Using the Dashboard</a>
@@ -1502,38 +1502,22 @@ main h3,
       <div class="group">ANP Prices</div>
       <a class="" href="/wiki/precos/using-the-dashboard.html">Using the Dashboard</a>
       <a class="" href="/wiki/precos/known-limitations.html">Known Limitations</a>
-      <a class="back" href="https://github.com/gasbrazil/gasbrazil.github.io/blob/main/contratos/README.md" target="_blank" rel="noopener">README (GitHub) &#8599;</a>
+      <a class="back" href="https://github.com/gasbrazil/gasbrazil.github.io/blob/main/mago/README.md" target="_blank" rel="noopener">README (GitHub) &#8599;</a>
     </nav>
   </aside>
   <main>
     <div class="card">
-<h1>Known Limitations and Assumptions</h1>
-<h2>Two of four contract categories aren't covered yet</h2>
-<p>The source site's UI shows four contract categories; this pipeline covers
-two of them — <strong>Contrato de Transporte</strong> and <strong>Contrato Master</strong>. <strong>Contrato
-de Transporte Legado</strong> ("Legacy Transport") and <strong>Conexão de Acesso</strong>
-("Access Connection") are not served by the same GraphQL field this pipeline
-queries — confirmed by exhaustively querying every value the API's own
-<code>StatusContrato</code> enum accepts (only three exist, all consumed by the two
-categories above) and by introspecting the GraphQL schema directly (nothing
-named legado/conexão/acesso anywhere in it). That data lives behind a
-different, unidentified endpoint and will be added once it's found — it
-isn't a gap in what this pipeline processes from the source it reads, it's
-a source this pipeline doesn't reach yet.</p>
-<h2>Concluded contracts are excluded from the page, not from the data</h2>
-<p>Concluded ("Concluído") transport contracts are filtered out of the shipped
-<code>index.html</code> to keep the client-side payload smaller — the footer's coverage
-note shows the excluded count. The full history, concluded contracts
-included, stays in the repo's committed Parquet store for anyone who needs
-it; it just isn't in what your browser downloads.</p>
-<h2>TSO identity</h2>
-<p>Pipeline id → name mapping (<code>1 = TBG</code>, <code>2 = TAG</code>, <code>3 = NTS</code>) is confirmed
-directly against the source, not inferred.</p>
-<h2>What this page doesn't cover</h2>
-<p>Auction/bid results (what cleared, at what price) are
-<a href="/wiki/poc/using-the-dashboard.html">POC Results</a>' scope, not this page's —
-this page is <em>held positions</em> (who has how much capacity, on what terms),
-POC Results is <em>what happened at auction</em>.</p>
+<h1>Using the Dashboard</h1>
+<p>TAG Mago presents operational line pack and 7-day balancing-zone consumption forecasts from TAG's EMPACOTAMENTOS API snapshots.</p>
+<h2>Key Performance Indicators</h2>
+<ul>
+<li><strong>Integrated Line Pack</strong>: The current total inventory held inside TAG's integrated pipeline network (in m³).</li>
+<li><strong>Snapshot (UTC)</strong>: Timestamp of the latest operational snapshot published by TAG.</li>
+</ul>
+<h2>Integrated Mesh Line Pack Chart</h2>
+<p>Displays hourly actual line pack (solid line) and short-horizon forecasts (dashed line). Enables operators and market participants to monitor pipeline packing and drafting dynamics in real time.</p>
+<h2>Consumption Forecast by Zone</h2>
+<p>TAG's 7-day hourly consumption estimates (in Mm³/d) broken down across balancing zones. Use the interactive zone pills to compare forecasts across zones or isolate specific demand centers.</p>
     </div>
   </main>
 </div>

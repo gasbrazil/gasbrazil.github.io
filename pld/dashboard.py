@@ -1,4 +1,4 @@
-﻿"""
+"""
 Builds the single-file CCEE PLD dashboard from data/pld_daily.parquet
 and, when present, data/pld_hourly.parquet.
 
@@ -1141,8 +1141,14 @@ __SHARED_JS_QUERY_STATE__
 
 async function init() {
   document.getElementById("year").textContent = new Date().getFullYear();
-  const text = await inflateGzipUrl(PAYLOAD_URL);
-  DATA = JSON.parse(text);
+  try {
+    const text = await inflateGzipUrl(PAYLOAD_URL);
+    DATA = JSON.parse(text);
+  } catch (err) {
+    console.error(err);
+    showBootError(err, () => init());
+    return;
+  }
 
   document.getElementById("asof-through").textContent = DATA.latestDate || "—";
   initStalenessBadgeFor("pld", DATA.latestDate);

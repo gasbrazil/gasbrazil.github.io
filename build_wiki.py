@@ -219,6 +219,8 @@ def page_template(title: str, body_html: str, current_out: str, slug: str | None
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{html.escape(title)} &mdash; GasBrazil.com Wiki</title>
+<link rel="icon" href="{kit.embed_favicon()}">
+<meta name="theme-color" content="#06080c">
 {kit.font_preload_html()}
 <script>
 (function(){{
@@ -277,6 +279,9 @@ def main() -> None:
     extensions = ["tables", "fenced_code", "sane_lists"]
     for out_name, src_name, title, slug in PAGES:
         src_path = SRC / src_name
+        if not src_path.exists():
+            print(f"skipping {src_name} (not found)")
+            continue
         text = src_path.read_text(encoding="utf-8")
         text = fix_internal_links(text, out_name)
         body = md.markdown(text, extensions=extensions)

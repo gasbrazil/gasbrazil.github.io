@@ -4,8 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>The Desk: Known Limitations &mdash; GasBrazil.com Wiki</title>
-<link rel="preload" href="/shared/fonts/IBMPlexSans-Regular.ttf" as="font" type="font/ttf" crossorigin>
-<link rel="preload" href="/shared/fonts/Pacaembu-SemiBold.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="icon" href="/shared/favicon.png">
+<meta name="theme-color" content="#06080c">
+<link rel="preload" href="/shared/fonts/IBMPlexSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/shared/fonts/Pacaembu-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
 <script>
 (function(){
   try {
@@ -31,7 +33,7 @@
  * @font-face rules for Pacaembu (wordmark / titles) and IBM Plex Sans (UI)
  * from /shared/fonts/*.ttf (or left blank if that directory is empty).
  */
-@font-face{font-family:'Pacaembu';font-weight:200;font-style:normal;font-display:swap;src:url('/shared/fonts/Pacaembu-ExtraLight.ttf') format('truetype');}@font-face{font-family:'Pacaembu';font-weight:300;font-style:normal;font-display:swap;src:url('/shared/fonts/Pacaembu-Light.ttf') format('truetype');}@font-face{font-family:'Pacaembu';font-weight:400;font-style:normal;font-display:swap;src:url('/shared/fonts/Pacaembu-Regular.ttf') format('truetype');}@font-face{font-family:'Pacaembu';font-weight:600;font-style:normal;font-display:swap;src:url('/shared/fonts/Pacaembu-SemiBold.ttf') format('truetype');}@font-face{font-family:'IBM Plex Sans';font-weight:300;font-style:normal;font-display:swap;src:url('/shared/fonts/IBMPlexSans-Light.ttf') format('truetype');}@font-face{font-family:'IBM Plex Sans';font-weight:400;font-style:normal;font-display:swap;src:url('/shared/fonts/IBMPlexSans-Regular.ttf') format('truetype');}@font-face{font-family:'IBM Plex Sans';font-weight:500;font-style:normal;font-display:swap;src:url('/shared/fonts/IBMPlexSans-Medium.ttf') format('truetype');}@font-face{font-family:'IBM Plex Sans';font-weight:600;font-style:normal;font-display:swap;src:url('/shared/fonts/IBMPlexSans-SemiBold.ttf') format('truetype');}
+@font-face{font-family:'Pacaembu';font-weight:200;font-style:normal;font-display:swap;src:url('/shared/fonts/Pacaembu-ExtraLight.woff2') format('woff2'), url('/shared/fonts/Pacaembu-ExtraLight.ttf') format('truetype');}@font-face{font-family:'Pacaembu';font-weight:300;font-style:normal;font-display:swap;src:url('/shared/fonts/Pacaembu-Light.woff2') format('woff2'), url('/shared/fonts/Pacaembu-Light.ttf') format('truetype');}@font-face{font-family:'Pacaembu';font-weight:400;font-style:normal;font-display:swap;src:url('/shared/fonts/Pacaembu-Regular.woff2') format('woff2'), url('/shared/fonts/Pacaembu-Regular.ttf') format('truetype');}@font-face{font-family:'Pacaembu';font-weight:600;font-style:normal;font-display:swap;src:url('/shared/fonts/Pacaembu-SemiBold.woff2') format('woff2'), url('/shared/fonts/Pacaembu-SemiBold.ttf') format('truetype');}@font-face{font-family:'IBM Plex Sans';font-weight:300;font-style:normal;font-display:swap;src:url('/shared/fonts/IBMPlexSans-Light.woff2') format('woff2'), url('/shared/fonts/IBMPlexSans-Light.ttf') format('truetype');}@font-face{font-family:'IBM Plex Sans';font-weight:400;font-style:normal;font-display:swap;src:url('/shared/fonts/IBMPlexSans-Regular.woff2') format('woff2'), url('/shared/fonts/IBMPlexSans-Regular.ttf') format('truetype');}@font-face{font-family:'IBM Plex Sans';font-weight:500;font-style:normal;font-display:swap;src:url('/shared/fonts/IBMPlexSans-Medium.woff2') format('woff2'), url('/shared/fonts/IBMPlexSans-Medium.ttf') format('truetype');}@font-face{font-family:'IBM Plex Sans';font-weight:600;font-style:normal;font-display:swap;src:url('/shared/fonts/IBMPlexSans-SemiBold.woff2') format('woff2'), url('/shared/fonts/IBMPlexSans-SemiBold.ttf') format('truetype');}
 :root {
   /* Tells the browser which palette its OWN native UI should use -- select
      dropdown popups, date pickers, scrollbars -- so those aren't stuck
@@ -968,6 +970,20 @@ th.num .th-filter { text-align: right; }
   width: auto; flex: none; box-sizing: border-box;
 }
 .langBtn:hover, #lang-toggle:hover { background: var(--accent-soft); }
+
+/* Shared “clear all selections” control for dashboard pickers/chips. */
+.btn-clear {
+  font-size: 12px;
+  color: var(--muted2);
+  background: var(--panel);
+  border: 1px solid var(--border-strong);
+  border-radius: 5px;
+  padding: 4px 12px;
+  cursor: pointer;
+  font-family: var(--font);
+  font-weight: 400;
+}
+.btn-clear:hover { background: var(--accent-soft); color: var(--text); }
 #theme-toggle {
   display: inline-flex; align-items: center; justify-content: center;
   min-width: 34px; height: 34px; padding: 5px 9px; line-height: 0;
@@ -1216,6 +1232,111 @@ select optgroup {
   color: var(--text);
 }
 
+/* Boot states: loading indicator + resilient error boundary */
+.boot-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  color: var(--muted);
+  font-size: 13.5px;
+  gap: 12px;
+}
+.boot-spinner {
+  width: 28px;
+  height: 28px;
+  border: 2.5px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: gb-spin 0.8s linear infinite;
+}
+[data-theme="dark"] .boot-spinner {
+  border-top-color: var(--brz-yellow);
+}
+@keyframes gb-spin {
+  to { transform: rotate(360deg); }
+}
+
+.boot-error-boundary {
+  margin: 20px 0;
+  padding: 20px 24px;
+  background: var(--panel);
+  border: 1px solid var(--neg);
+  border-radius: var(--radius);
+  box-shadow: var(--elevate);
+  max-width: 680px;
+}
+.boot-error-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.boot-error-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--neg);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.boot-error-desc {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.5;
+}
+.boot-error-details {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.boot-error-details summary {
+  cursor: pointer;
+  user-select: none;
+  color: var(--muted2);
+  margin-bottom: 6px;
+}
+.boot-error-details code {
+  display: block;
+  padding: 8px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: ui-monospace, monospace;
+  font-size: 11px;
+  color: var(--neg);
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.btn-retry {
+  align-self: flex-start;
+  margin-top: 6px;
+  padding: 6px 14px;
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #fff;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.1s ease;
+}
+[data-theme="dark"] .btn-retry {
+  background: var(--brz-blue);
+  color: #fff;
+}
+.btn-retry:hover {
+  opacity: 0.9;
+}
+.btn-retry:active {
+  transform: scale(0.98);
+}
+
 :root{ color-scheme: light; }
 :root[data-theme="dark"]{ color-scheme: dark; }
 *{box-sizing:border-box}
@@ -1337,7 +1458,7 @@ main h3,
 <body>
 <header class="top">
   <div class="masthead-ident">
-    <div class="products-dd"><span class="brand-lockup"><a class="masthead-brand" href="/">GasBrazil</a><button type="button" class="dd-trigger brand-mark" aria-haspopup="menu" aria-expanded="false" aria-controls="gb-products-menu" id="gb-products-trigger" data-i18n-aria="navMenu" aria-label="Menu"><span class="brand-mark-dot" aria-hidden="true"></span><span class="dd-caret" aria-hidden="true"></span></button></span><div class="dd-menu" id="gb-products-menu" role="menu" aria-labelledby="gb-products-trigger"><a id="link-desk" href="https://gasbrazil.com/desk/" role="menuitem" data-i18n="navDesk"><span class="chk"></span>The Desk</a><a id="link-ons" href="https://gasbrazil.com/ons/" role="menuitem" data-i18n="navOns"><span class="chk"></span>ONS Balances</a><a id="link-pld" href="https://gasbrazil.com/pld/" role="menuitem" data-i18n="navPld"><span class="chk"></span>PLD Prices</a><a id="link-poc" href="https://gasbrazil.com/poc/" role="menuitem" data-i18n="navPoc"><span class="chk"></span>POC Results</a><a id="link-contratos" href="https://gasbrazil.com/contratos/" role="menuitem" data-i18n="navContratos"><span class="chk"></span>POC Contracts</a><a id="link-flows" href="https://gasbrazil.com/flows/" role="menuitem" data-i18n="navFlows"><span class="chk"></span>Pipeline Flows</a><a id="link-supply" href="https://gasbrazil.com/supply/" role="menuitem" data-i18n="navSupply"><span class="chk"></span>Gas Supply</a><a id="link-precos" href="https://gasbrazil.com/precos/" role="menuitem" data-i18n="navPrecos"><span class="chk"></span>ANP Prices</a></div></div>
+    <div class="products-dd"><span class="brand-lockup"><a class="masthead-brand" href="/">GasBrazil</a><button type="button" class="dd-trigger brand-mark" aria-haspopup="menu" aria-expanded="false" aria-controls="gb-products-menu" id="gb-products-trigger" data-i18n-aria="navMenu" aria-label="Menu"><span class="brand-mark-dot" aria-hidden="true"></span><span class="dd-caret" aria-hidden="true"></span></button></span><div class="dd-menu" id="gb-products-menu" role="menu" aria-labelledby="gb-products-trigger"><a id="link-desk" href="https://gasbrazil.com/desk/" role="menuitem" data-i18n="navDesk"><span class="chk"></span>The Desk</a><a id="link-ons" href="https://gasbrazil.com/ons/" role="menuitem" data-i18n="navOns"><span class="chk"></span>ONS Balances</a><a id="link-pld" href="https://gasbrazil.com/pld/" role="menuitem" data-i18n="navPld"><span class="chk"></span>PLD Prices</a><a id="link-poc" href="https://gasbrazil.com/poc/" role="menuitem" data-i18n="navPoc"><span class="chk"></span>POC Results</a><a id="link-contratos" href="https://gasbrazil.com/contratos/" role="menuitem" data-i18n="navContratos"><span class="chk"></span>POC Contracts</a><a id="link-flows" href="https://gasbrazil.com/flows/" role="menuitem" data-i18n="navFlows"><span class="chk"></span>Pipeline Flows</a><a id="link-mago" href="https://gasbrazil.com/mago/" role="menuitem" data-i18n="navMago"><span class="chk"></span>TAG Mago</a><a id="link-supply" href="https://gasbrazil.com/supply/" role="menuitem" data-i18n="navSupply"><span class="chk"></span>Gas Supply</a><a id="link-precos" href="https://gasbrazil.com/precos/" role="menuitem" data-i18n="navPrecos"><span class="chk"></span>ANP Prices</a></div></div>
     <span class="crumb-sep" aria-hidden="true"></span>
     <h1>Wiki</h1>
   </div>
@@ -1372,6 +1493,9 @@ main h3,
       <div class="group">Pipeline Flows</div>
       <a class="" href="/wiki/flows/using-the-dashboard.html">Using the Dashboard</a>
       <a class="" href="/wiki/flows/known-limitations.html">Known Limitations</a>
+      <div class="group">TAG Mago</div>
+      <a class="" href="/wiki/mago/using-the-dashboard.html">Using the Dashboard</a>
+      <a class="" href="/wiki/mago/known-limitations.html">Known Limitations</a>
       <div class="group">Gas Supply</div>
       <a class="" href="/wiki/supply/using-the-dashboard.html">Using the Dashboard</a>
       <a class="" href="/wiki/supply/known-limitations.html">Known Limitations</a>

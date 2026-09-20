@@ -1,4 +1,4 @@
-﻿"""
+"""
 Builds the single-file POC (Oferta de Capacidade) results dashboard from
 data/poc_results.parquet.
 
@@ -1349,8 +1349,14 @@ __SHARED_JS_ASOF__
 
 async function init() {
   document.getElementById("year").textContent = new Date().getFullYear();
-  const text = await inflateGzipUrl(PAYLOAD_URL);
-  DATA = JSON.parse(text);
+  try {
+    const text = await inflateGzipUrl(PAYLOAD_URL);
+    DATA = JSON.parse(text);
+  } catch (err) {
+    console.error(err);
+    showBootError(err, () => init());
+    return;
+  }
   for (const row of DATA.rows) row["R$/m3"] = brlPerM3(row["Price"]);
   columnOrder = DATA.columns.slice();
   hiddenCols = new Set(DEFAULT_HIDDEN_COLS);

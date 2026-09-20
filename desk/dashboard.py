@@ -1,4 +1,4 @@
-﻿"""
+"""
 Builds the Desk dashboard (cross-product snapshot + spark calculator).
 
 Usage: python dashboard.py [output_path]  (default: index.html)
@@ -1934,9 +1934,7 @@ async function init() {
     });
   } catch (err) {
     console.error(err);
-    const el = document.getElementById("data-notes");
-    el.hidden = false;
-    el.textContent = String(err && err.message || err);
+    showBootError(err, () => init());
   }
 }
 init();

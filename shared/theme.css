@@ -1211,3 +1211,108 @@ select optgroup {
   background-color: var(--panel);
   color: var(--text);
 }
+
+/* Boot states: loading indicator + resilient error boundary */
+.boot-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  color: var(--muted);
+  font-size: 13.5px;
+  gap: 12px;
+}
+.boot-spinner {
+  width: 28px;
+  height: 28px;
+  border: 2.5px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: gb-spin 0.8s linear infinite;
+}
+[data-theme="dark"] .boot-spinner {
+  border-top-color: var(--brz-yellow);
+}
+@keyframes gb-spin {
+  to { transform: rotate(360deg); }
+}
+
+.boot-error-boundary {
+  margin: 20px 0;
+  padding: 20px 24px;
+  background: var(--panel);
+  border: 1px solid var(--neg);
+  border-radius: var(--radius);
+  box-shadow: var(--elevate);
+  max-width: 680px;
+}
+.boot-error-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.boot-error-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--neg);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.boot-error-desc {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.5;
+}
+.boot-error-details {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.boot-error-details summary {
+  cursor: pointer;
+  user-select: none;
+  color: var(--muted2);
+  margin-bottom: 6px;
+}
+.boot-error-details code {
+  display: block;
+  padding: 8px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: ui-monospace, monospace;
+  font-size: 11px;
+  color: var(--neg);
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.btn-retry {
+  align-self: flex-start;
+  margin-top: 6px;
+  padding: 6px 14px;
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #fff;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.1s ease;
+}
+[data-theme="dark"] .btn-retry {
+  background: var(--brz-blue);
+  color: #fff;
+}
+.btn-retry:hover {
+  opacity: 0.9;
+}
+.btn-retry:active {
+  transform: scale(0.98);
+}

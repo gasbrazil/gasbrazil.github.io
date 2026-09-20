@@ -1,4 +1,4 @@
-﻿"""
+"""
 Builds the ANP gas-prices dashboard from data/anp_prices.parquet.
 
 Usage: python dashboard.py [output_path]
@@ -695,7 +695,7 @@ async function init() {
     applyI18n();
   } catch (err) {
     console.error(err);
-    document.getElementById("kpi-row").innerHTML = '<div class="kpi-cell"><div class="lbl">Error</div><div class="val" style="font-size:13px">' + escapeHtml(String(err && err.message || err)) + "</div></div>";
+    showBootError(err, () => init());
   }
 }
 init();

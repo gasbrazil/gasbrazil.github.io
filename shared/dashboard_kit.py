@@ -74,12 +74,22 @@ THEME_CSS = THEME_CSS_PATH.read_text(encoding="utf-8")
 def _font_face_rules(family: str, faces: Iterable[tuple[int, str]]) -> list[str]:
     rules: list[str] = []
     for weight, name in faces:
-        if not (FONTS_DIR / name).exists():
+        stem = Path(name).stem
+        woff2_name = f"{stem}.woff2"
+        ttf_name = f"{stem}.ttf"
+        has_woff2 = (FONTS_DIR / woff2_name).exists()
+        has_ttf = (FONTS_DIR / ttf_name).exists()
+        if not has_woff2 and not has_ttf:
             continue
-        url = f"{FONTS_URL_PREFIX}/{name}"
+        sources = []
+        if has_woff2:
+            sources.append(f"url('{FONTS_URL_PREFIX}/{woff2_name}') format('woff2')")
+        if has_ttf:
+            sources.append(f"url('{FONTS_URL_PREFIX}/{ttf_name}') format('truetype')")
+        src_clause = ", ".join(sources)
         rules.append(
             f"@font-face{{font-family:'{family}';font-weight:{weight};"
-            f"font-style:normal;font-display:swap;src:url('{url}') format('truetype');}}"
+            f"font-style:normal;font-display:swap;src:{src_clause};}}"
         )
     return rules
 
@@ -98,12 +108,18 @@ def embed_font_face(font_path: Path | str = DEFAULT_FONT_PATH) -> str:
 
 
 def font_preload_html(*, weight: int = 300) -> str:
-    """Preload default UI + display faces (Plex Regular, Pacaembu SemiBold)."""
+    """Preload default UI + display faces (Plex Regular, Pacaembu SemiBold in WOFF2)."""
     links: list[str] = []
-    for name in ("IBMPlexSans-Regular.ttf", "Pacaembu-SemiBold.ttf"):
-        path = FONTS_DIR / name
-        if path.exists():
-            href = f"{FONTS_URL_PREFIX}/{name}"
+    for stem in ("IBMPlexSans-Regular", "Pacaembu-SemiBold"):
+        woff2_path = FONTS_DIR / f"{stem}.woff2"
+        ttf_path = FONTS_DIR / f"{stem}.ttf"
+        if woff2_path.exists():
+            href = f"{FONTS_URL_PREFIX}/{stem}.woff2"
+            links.append(
+                f'<link rel="preload" href="{href}" as="font" type="font/woff2" crossorigin>'
+            )
+        elif ttf_path.exists():
+            href = f"{FONTS_URL_PREFIX}/{stem}.ttf"
             links.append(
                 f'<link rel="preload" href="{href}" as="font" type="font/ttf" crossorigin>'
             )
@@ -111,18 +127,27 @@ def font_preload_html(*, weight: int = 300) -> str:
         return "\n".join(links)
     # Fallback when Plex bundle not extracted yet.
     name = next((n for w, n in PACAEMBU_FACES if w == weight), None)
-    if not name or not (FONTS_DIR / name).exists():
+    if not name:
         return ""
-    href = f"{FONTS_URL_PREFIX}/{name}"
-    return f'<link rel="preload" href="{href}" as="font" type="font/ttf" crossorigin>'
+    stem = Path(name).stem
+    if (FONTS_DIR / f"{stem}.woff2").exists():
+        href = f"{FONTS_URL_PREFIX}/{stem}.woff2"
+        return f'<link rel="preload" href="{href}" as="font" type="font/woff2" crossorigin>'
+    if (FONTS_DIR / f"{stem}.ttf").exists():
+        href = f"{FONTS_URL_PREFIX}/{stem}.ttf"
+        return f'<link rel="preload" href="{href}" as="font" type="font/ttf" crossorigin>'
+    return ""
 
 
 def embed_favicon(favicon_path: Path | str = DEFAULT_FAVICON_PATH,
-                   fallback_hex: str = "#03183D") -> str:
-    """Return a data: URI for the favicon, or a plain flat-color square
-    (fallback_hex) if favicon.png isn't present in this checkout."""
+                   fallback_hex: str = "#03183D",
+                   as_data_uri: bool = False) -> str:
+    """Return a URL path for the cached favicon asset, or a data: URI if requested
+    or if a custom path / fallback SVG square is needed."""
     favicon_path = Path(favicon_path)
     if favicon_path.exists():
+        if not as_data_uri and favicon_path.resolve() == DEFAULT_FAVICON_PATH.resolve():
+            return "/shared/favicon.png"
         favicon_b64 = base64.b64encode(favicon_path.read_bytes()).decode("ascii")
         return "data:image/png;base64," + favicon_b64
     hex_color = fallback_hex.lstrip("#").upper()
@@ -253,6 +278,9 @@ def seo_head(*, title: str, description: str, path: str = "/") -> str:
         f"<title>{title_esc}</title>\n"
         f'<meta name="description" content="{desc}">\n'
         f'<link rel="canonical" href="{canonical_esc}">\n'
+        '<link rel="preconnect" href="https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev" crossorigin>\n'
+        '<link rel="dns-prefetch" href="https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev">\n'
+        '<meta name="theme-color" content="#06080c">\n'
         f'{preload_line}'
         f'<meta property="og:type" content="website">\n'
         f'<meta property="og:site_name" content="GasBrazil.com">\n'
@@ -292,15 +320,26 @@ async function inflateGzipB64(b64) {
   const stream = new Blob([b64ToBytes(b64)]).stream().pipeThrough(ds);
   return new TextDecoder().decode(await new Response(stream).arrayBuffer());
 }
-async function inflateGzipUrl(url) {
+async function inflateGzipUrl(url, maxRetries = 1, delayMs = 600) {
   if (typeof DecompressionStream !== "function") {
     throw new Error("This browser lacks DecompressionStream (needs Chrome/Edge 80+, Firefox 113+, or Safari 16.4+).");
   }
-  const res = await fetch(url, { cache: "no-cache" });
-  if (!res.ok) throw new Error("Failed to load " + url + " (" + res.status + ")");
-  const ds = new DecompressionStream("gzip");
-  const stream = res.body.pipeThrough(ds);
-  return new TextDecoder().decode(await new Response(stream).arrayBuffer());
+  let lastErr;
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const res = await fetch(url, { cache: "no-cache" });
+      if (!res.ok) throw new Error("Failed to load " + url + " (" + res.status + ")");
+      const ds = new DecompressionStream("gzip");
+      const stream = res.body.pipeThrough(ds);
+      return new TextDecoder().decode(await new Response(stream).arrayBuffer());
+    } catch (err) {
+      lastErr = err;
+      if (attempt < maxRetries) {
+        await new Promise(r => setTimeout(r, delayMs * (attempt + 1)));
+      }
+    }
+  }
+  throw lastErr;
 }
 function parseDashboardJson(text) {
   // Legacy gzip payloads were built with Python json.dumps NaN tokens, which
@@ -309,6 +348,49 @@ function parseDashboardJson(text) {
     .replace(/:\s*NaN\b/g, ":null")
     .replace(/,\s*NaN\b/g, ",null");
   return JSON.parse(safe);
+}
+function showBootError(err, retryFn, containerSelector) {
+  const container = (typeof containerSelector === "string" ? document.querySelector(containerSelector) : containerSelector)
+    || document.querySelector(".wrap") || document.querySelector("main") || document.body;
+  if (!container) return;
+  const existing = document.getElementById("gb-boot-error");
+  if (existing) existing.remove();
+  const errorBox = document.createElement("div");
+  errorBox.id = "gb-boot-error";
+  errorBox.className = "boot-error-boundary";
+  errorBox.setAttribute("role", "alert");
+  errorBox.setAttribute("aria-live", "assertive");
+
+  const esc = typeof escapeHtml === "function"
+    ? escapeHtml
+    : s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  const title = (typeof t === "function") ? t("bootErrorTitle") : "Unable to load dashboard data";
+  const msg = (typeof t === "function") ? t("bootErrorBody") : "A network issue prevented the latest data from loading. Please check your connection and try again.";
+  const retryText = (typeof t === "function") ? t("bootRetry") : "Retry";
+  const detailsTitle = (typeof t === "function") ? t("bootErrorDetails") : "Technical details";
+  const errDetails = esc(err && err.message ? err.message : String(err));
+
+  errorBox.innerHTML =
+    '<div class="boot-error-card">' +
+      '<h3 class="boot-error-title"><span aria-hidden="true">&#x26A0;&#xFE0F;</span> ' + esc(title) + '</h3>' +
+      '<p class="boot-error-desc">' + esc(msg) + '</p>' +
+      '<details class="boot-error-details">' +
+        '<summary>' + esc(detailsTitle) + '</summary>' +
+        '<code>' + errDetails + '</code>' +
+      '</details>' +
+      (retryFn ? '<button type="button" class="btn-retry" id="gb-boot-retry-btn">' + esc(retryText) + '</button>' : '') +
+    '</div>';
+  container.prepend(errorBox);
+  if (retryFn) {
+    const btn = document.getElementById("gb-boot-retry-btn");
+    if (btn) {
+      btn.addEventListener("click", () => {
+        errorBox.remove();
+        retryFn();
+      });
+    }
+  }
 }
 """
 
@@ -522,7 +604,12 @@ const GB_I18N = {
     aboutCoverDesk: "The Desk: cross-product headline series. Full history and filters live on each product page.",
     notFound: "This page is not here.",
     notFoundBody: "The hub and dashboards are linked below.",
-    backHome: "Back to GasBrazil"
+    backHome: "Back to GasBrazil",
+    bootLoading: "Loading dashboard data…",
+    bootErrorTitle: "Unable to load dashboard data",
+    bootErrorBody: "A network issue prevented the latest data from loading. Please check your connection and try again.",
+    bootErrorDetails: "Technical details",
+    bootRetry: "Retry"
   },
   pt: {
     themeDark: "Mudar para o modo escuro",
@@ -650,7 +737,12 @@ const GB_I18N = {
     aboutCoverDesk: "The Desk: séries-resumo entre produtos. Histórico e filtros ficam em cada painel.",
     notFound: "Esta página não existe.",
     notFoundBody: "O hub e os painéis estão nos links abaixo.",
-    backHome: "Voltar ao GasBrazil"
+    backHome: "Voltar ao GasBrazil",
+    bootLoading: "Carregando dados do painel…",
+    bootErrorTitle: "Não foi possível carregar os dados do painel",
+    bootErrorBody: "Ocorreu uma falha de rede ao carregar os dados mais recentes. Verifique sua conexão e tente novamente.",
+    bootErrorDetails: "Detalhes técnicos",
+    bootRetry: "Tentar novamente"
   }
 };
 function currentLang() {

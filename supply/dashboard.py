@@ -1,4 +1,4 @@
-﻿"""
+"""
 Builds the single-file Gas Supply dashboard from data/supply_monthly.parquet.
 
 Usage: python dashboard.py [output_path]  (default: index.html)
@@ -572,8 +572,14 @@ function paintAsof() {
 
 async function init() {
   document.getElementById("year").textContent = new Date().getFullYear();
-  const json = await inflateGzipUrl(PAYLOAD_URL);
-  DATA = JSON.parse(json);
+  try {
+    const json = await inflateGzipUrl(PAYLOAD_URL);
+    DATA = JSON.parse(json);
+  } catch (err) {
+    console.error(err);
+    showBootError(err, () => init());
+    return;
+  }
   document.getElementById("import-gap").hidden = !DATA.importGap;
   DATA.metrics.forEach(m => { if (m.defaultOn) { picked.add(m.key); colorOf(m.key); } });
   applySupplyQuery();
