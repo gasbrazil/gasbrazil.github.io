@@ -125,31 +125,60 @@ TEMPLATE = r"""<!doctype html>
 <link rel="canonical" href="https://gasbrazil.com/mago/">
 <link rel="icon" href="__FAVICON_DATA_URI__">
 __FONT_PRELOAD__
-__SHARED_THEME_CSS__
-__SHARED_TYPO_WEIGHT_CSS__
+<!-- home-page teaser marker, read by ../build_home.py:
+     generated: __GENERATED__
+     kpi_linepack: __KPI_LINEPACK__ -->
+<script>__SHARED_JS_BOOT__</script>
 <style>
-.panel { margin: 1rem 0 1.5rem; padding: 1rem 1.1rem; border: 1px solid var(--border); border-radius: 12px; background: var(--panel); }
+__SHARED_THEME_CSS__
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; font-weight: 300; }
+header.dash-head { display: flex; flex-direction: row; align-items: center; gap: 10px; margin-bottom: 0; }
+h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
+.header-right { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; width: auto; }
+.sources { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0 0 var(--gap); }
+.sources-label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 200; margin-right: 2px; }
+.pill { font-size: 11.5px; color: var(--muted2); text-decoration: none; border: 1px solid var(--border); border-radius: 5px; padding: 3px 10px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; }
+.pill:hover { background: var(--accent-soft); color: var(--text); border-color: var(--border-strong); }
+.ext-icon { width: 10px; height: 10px; display: inline-block; flex: none; opacity: .75; }
+#theme-toggle { display: inline-flex; align-items: center; justify-content: center; background: var(--panel); border: 1px solid var(--border-strong); border-radius: 5px; padding: 5px 9px; line-height: 0; cursor: pointer; color: var(--text); }
+#theme-toggle:hover { background: var(--accent-soft); }
+#theme-toggle svg { width: 16px; height: 16px; display: block; }
+.panel { margin: 0 0 var(--gap); padding: var(--card-pad); border: 1px solid var(--border); border-radius: var(--radius); background: var(--panel); }
 .panel h2 { margin: 0 0 .35rem; font-size: 1.05rem; }
-.panel p.sub { margin: 0 0 .75rem; color: var(--muted); font-size: .92rem; }
-.kpi-row { display: flex; flex-wrap: wrap; gap: .75rem; margin: .5rem 0 1rem; }
-.kpi { min-width: 160px; padding: .65rem .85rem; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); }
+.panel p.sub { margin: 0 0 .75rem; color: var(--muted); font-size: .92rem; font-weight: 200; }
+.kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px; margin-bottom: var(--gap); }
+.kpi { padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--panel); }
 .kpi .label { color: var(--muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; }
-.kpi .val { font-size: 1.35rem; font-weight: 650; font-variant-numeric: tabular-nums; }
+.kpi .val { font-size: 1.35rem; font-weight: 650; font-variant-numeric: tabular-nums; margin-top: 4px; }
 .chips { display: flex; flex-wrap: wrap; gap: .35rem; margin: .5rem 0; }
-.chip { border: 1px solid var(--border); background: var(--bg); color: inherit; border-radius: 999px; padding: .25rem .65rem; font-size: .82rem; cursor: pointer; }
+.chip { border: 1px solid var(--border); background: var(--bg); color: inherit; border-radius: 999px; padding: .25rem .65rem; font-size: .82rem; cursor: pointer; font-family: var(--font); }
 .chip.on { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
-.controls { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; margin-bottom: .75rem; }
-select, button.btn { font: inherit; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: inherit; padding: .35rem .55rem; }
 #chart-lp, #chart-zones { min-height: 320px; }
 .chart-empty { color: var(--muted); padding: 2rem 0; text-align: center; }
 .legend { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: .35rem; font-size: .85rem; color: var(--muted); }
 .legend span::before { content: ""; display: inline-block; width: 12px; height: 3px; margin-right: .35rem; vertical-align: middle; background: currentColor; }
 .legend .dash::before { background: repeating-linear-gradient(90deg, currentColor 0 5px, transparent 5px 9px); height: 0; border-top: 2px dashed currentColor; width: 14px; }
+footer { margin-top: 22px; color: var(--muted); font-size: 11.5px; line-height: 1.7; font-weight: 200; }
+footer a { color: var(--accent); }
+__SHARED_TYPO_WEIGHT_CSS__
 </style>
 </head>
 <body>
-__SHARED_MASTHEAD__
-<main class="wrap">
+<a class="skip-link" href="#chart-lp" data-i18n="skip">Skip to content</a>
+<div class="wrap">
+<header class="dash-head">
+  __SHARED_MASTHEAD__
+  <div class="header-right">
+    <button type="button" id="lang-toggle" class="langBtn" aria-label="Português">PT</button>
+    <button id="theme-toggle" title="Toggle theme" aria-label="Toggle theme"></button>
+  </div>
+</header>
+<div class="flagbar" aria-hidden="true"></div>
+<div class="sources">
+  <span class="sources-label" data-i18n="sources">Sources</span>
+  <a href="https://mago.ntag.com.br/empacotamento" target="_blank" rel="noopener">TAG Mago<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+</div>
   <div class="kpi-row">
     <div class="kpi"><div class="label" data-i18n="magoKpiLinepack">Integrated line pack</div><div class="val" id="kpi-lp">—</div></div>
     <div class="kpi"><div class="label" data-i18n="magoKpiSnapshot">Snapshot (UTC)</div><div class="val" id="kpi-snap">—</div></div>
@@ -157,7 +186,7 @@ __SHARED_MASTHEAD__
 
   <section class="panel">
     <h2 data-i18n="magoLinepackTitle">Line pack — integrated mesh</h2>
-    <p class="sub" data-i18n="magoLinepackSub">Hourly actual (solid) and short-horizon forecast (dashed) from the selected Mago snapshot.</p>
+    <p class="sub" data-i18n="magoLinepackSub">Hourly actual (solid) and short-horizon forecast (dashed) from the latest Mago snapshot.</p>
     <div id="chart-lp"></div>
     <div class="legend"><span style="color:var(--tso-tag,#0066cc)">Actual</span><span class="dash" style="color:#888">Forecast</span></div>
   </section>
@@ -168,24 +197,40 @@ __SHARED_MASTHEAD__
     <div class="chips" id="zone-chips"></div>
     <div id="chart-zones"></div>
   </section>
-</main>
-__SHARED_METHODOLOGY__
-__SHARED_SHARE_BUTTON__
-<script id="payload-url" type="application/json">__PAYLOAD_URL__</script>
+<div class="toolbar" style="display:flex;gap:8px;margin-bottom:10px;">
+  __SHARED_SHARE_BUTTON__
+</div>
+<footer>
+  <div class="asof-strip asof-footer" id="asof-strip">
+    <span class="asof-label" data-i18n="kpiRefresh">Last refreshed</span>
+    <span class="asof-val" id="asof-refreshed">&mdash;</span>
+    <span class="asof-label" data-i18n="dataThrough">Data through</span>
+    <span class="asof-val" id="asof-through">&mdash;</span>
+  </div>
+  __SHARED_METHODOLOGY__
+  &copy; <span id="year"></span> GasBrazil.com &middot;
+  <span data-i18n="magoFooter">Data: TAG Mago EMPACOTAMENTOS snapshots. Not an official TAG product.</span>
+  &middot; <span data-i18n="contact">Contact</span>: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
+</footer>
+</div>
+<script>
+const PAYLOAD_URL = "__PAYLOAD_URL__";
 __SHARED_JS_DECODE__
 __SHARED_JS_ESCAPE_HTML__
+__SHARED_JS_CHART_PALETTE__
+__SHARED_SITE_LINKS_JS__
 __SHARED_JS_THEME_TOGGLE__
-__SHARED_JS_BOOT__
 __SHARED_JS_I18N__
 __SHARED_JS_ASOF__
 __SHARED_JS_QUERY_STATE__
-__SHARED_JS_CHART_PALETTE__
-__SHARED_SITE_LINKS_JS__
-<script>
-const DATA = GB_PAYLOAD;
-const LP = DATA.linepack || {};
-const ZONE_SERIES = DATA.zoneSeries || {};
-let selectedZones = new Set((DATA.zones || []).slice(0, 4));
+
+GB_I18N.en.magoFooter = "Data: TAG Mago EMPACOTAMENTOS snapshots. Not an official TAG product.";
+GB_I18N.pt.magoFooter = "Dados: snapshots EMPACOTAMENTOS do TAG Mago. Não é um produto oficial da TAG.";
+
+let DATA = {};
+let LP = {};
+let ZONE_SERIES = {};
+let selectedZones = new Set();
 
 function fmtMm3(v) {
   if (v === null || v === undefined || !isFinite(v)) return "—";
@@ -283,16 +328,41 @@ function renderZoneChips() {
   });
 }
 
-function initSnapshotSelect() {}
+function paintAsof() {
+  document.getElementById("asof-refreshed").textContent =
+    formatRefreshedLocal(DATA.generatedIso, DATA.generated);
+  document.getElementById("asof-through").textContent = DATA.snapshotAt || "—";
+  initStalenessBadgeFor("mago", DATA.snapshotAt);
+}
 
-document.addEventListener("DOMContentLoaded", () => {
+function paintPage() {
   setKpis();
   renderZoneChips();
   packLinepack();
   packZones();
+  paintAsof();
+}
+
+async function init() {
+  document.getElementById("year").textContent = new Date().getFullYear();
+  const json = await inflateGzipUrl(PAYLOAD_URL);
+  DATA = parseDashboardJson(json);
+  LP = DATA.linepack || {};
+  ZONE_SERIES = DATA.zoneSeries || {};
+  selectedZones = new Set((DATA.zones || []).slice(0, 4));
+  paintPage();
   initThemeToggle("theme-toggle", () => { packLinepack(); packZones(); });
+  initLangToggle("lang-toggle", () => {
+    renderZoneChips();
+    setKpis();
+    applyI18n();
+  });
+  initCrossLinks();
+  gbCopyLink("btn-share");
+  applyI18n();
   window.addEventListener("resize", () => { packLinepack(); packZones(); });
-});
+}
+init();
 </script>
 </body>
 </html>
@@ -308,9 +378,12 @@ def write_dashboard(out_path: Path | str = DEFAULT_OUT) -> Path:
     payload = load_payload(snapshot_at=snap_param)
     here = Path(__file__).resolve().parent
     _path, payload_href = dk.write_and_publish_artifact("mago", payload, here)
+    kpi_lp = payload.get("kpiLinepackMm3")
     html = kit.render(
         TEMPLATE,
         PAYLOAD_URL=payload_href,
+        GENERATED=payload["generated"],
+        KPI_LINEPACK="" if kpi_lp is None else f"{kpi_lp:.2f}",
         SHARED_THEME_CSS=kit.render_theme_css(),
         SHARED_TYPO_WEIGHT_CSS=kit.typo_weight_css(),
         SHARED_JS_DECODE=kit.JS_DECODE,
