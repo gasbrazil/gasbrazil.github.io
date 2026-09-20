@@ -409,6 +409,7 @@ const GB_I18N = {
     navSupply: "Gas Supply",
     navPld: "PLD Prices",
     navPrecos: "ANP Prices",
+    navMago: "TAG Mago",
     navDesk: "The Desk",
     navProducts: "Products", // retained for previously deployed pages cached in browsers
     navMenu: "Menu",
@@ -468,6 +469,14 @@ const GB_I18N = {
     sourceSupply: "ANP",
     sourcePrecos: "ANP",
     sourcePld: "CCEE",
+    sourceMago: "TAG Mago",
+    methodAssump_mago: "One EMPACOTAMENTOS snapshot feeds both line pack and zone forecasts; values are stored as published (m³ line pack, Mm³/d zones).",
+    magoKpiLinepack: "Integrated line pack",
+    magoKpiSnapshot: "Snapshot (UTC)",
+    magoLinepackTitle: "Line pack — integrated mesh",
+    magoLinepackSub: "Hourly actual (solid) and short-horizon forecast (dashed) from the latest Mago snapshot.",
+    magoZonesTitle: "Consumption forecast by zone",
+    magoZonesSub: "TAG 7-day hourly estimates (Mm³/d). Toggle zones to compare.",
     pldSubtitle: "CCEE daily-average and hourly PLD by submarket (R$/MWh).",
     pldNote: "PLD (CCEE) is not the same series as ONS CMO. See",
     pldNoteLink: "ONS Balances",
@@ -506,6 +515,9 @@ const GB_I18N = {
     aboutCoverSupply: "Gas Supply: ANP PPGN-EL national monthly series plus national imports (no Bolivia vs LNG split in the open CSV).",
     aboutCoverPrecos: "ANP Prices: Resolution 52/2011 monthly disclosures (R$/MMBtu, tax-inclusive). Some months are suppressed for confidentiality.",
     aboutCoverPld: "PLD: CCEE daily averages and hourly prices by submarket; peak is hours 18–20 on weekdays. Optional ONS CMO and median gas CVU when lake data is present.",
+    aboutCoverMago: "TAG Mago: hourly line pack and 7-day balancing-zone consumption forecasts from EMPACOTAMENTOS API snapshots.",
+    cardMago: "TAG Mago",
+    cardMagoDesc: "TAG operational line pack and zone consumption forecasts.",
     aboutCoverDesk: "The Desk: cross-product headline series. Full history and filters live on each product page.",
     notFound: "This page is not here.",
     notFoundBody: "The hub and dashboards are linked below.",
@@ -524,6 +536,7 @@ const GB_I18N = {
     navSupply: "Oferta de Gás",
     navPld: "Preços PLD",
     navPrecos: "Preços ANP",
+    navMago: "TAG Mago",
     navDesk: "The Desk",
     navProducts: "Produtos", // retained for previously deployed pages cached in browsers
     navMenu: "Menu",
@@ -583,6 +596,14 @@ const GB_I18N = {
     sourceSupply: "ANP",
     sourcePrecos: "ANP",
     sourcePld: "CCEE",
+    sourceMago: "TAG Mago",
+    methodAssump_mago: "Um snapshot EMPACOTAMENTOS alimenta empacotamento e previsão por zona; valores como publicados (m³ e Mm³/d).",
+    magoKpiLinepack: "Empacotamento integrado",
+    magoKpiSnapshot: "Snapshot (UTC)",
+    magoLinepackTitle: "Empacotamento — malha integrada",
+    magoLinepackSub: "Realizado horário (sólido) e previsão de curto prazo (tracejado) do último snapshot Mago.",
+    magoZonesTitle: "Previsão de consumo por zona",
+    magoZonesSub: "Estimativas horárias TAG em 7 dias (Mm³/d). Selecione zonas para comparar.",
     pldSubtitle: "PLD médio diário e horário da CCEE por submercado (R$/MWh).",
     pldNote: "O PLD (CCEE) não é a mesma série do CMO da ONS. Veja",
     pldNoteLink: "Balanços ONS",
@@ -621,6 +642,9 @@ const GB_I18N = {
     aboutCoverSupply: "Oferta: séries mensais PPGN-EL da ANP mais importações nacionais (CSV aberto sem split Bolívia vs GNL).",
     aboutCoverPrecos: "Preços ANP: divulgações mensais da Resolução 52/2011 (R$/MMBtu com impostos). Alguns meses são omitidos por confidencialidade.",
     aboutCoverPld: "PLD: médias diárias e preços horários da CCEE por submercado; ponta = horas 18–20 em dias úteis. CMO e CVU a gás da ONS quando disponíveis no lake.",
+    aboutCoverMago: "TAG Mago: empacotamento horário e previsões de consumo por zona de balanceamento (snapshots EMPACOTAMENTOS).",
+    cardMago: "TAG Mago",
+    cardMagoDesc: "Empacotamento operacional TAG e previsões de consumo por zona.",
     aboutCoverDesk: "The Desk: séries-resumo entre produtos. Histórico e filtros ficam em cada painel.",
     notFound: "Esta página não existe.",
     notFoundBody: "O hub e os painéis estão nos links abaixo.",
@@ -1053,6 +1077,12 @@ _SITES = {
         "caissonpoint": "https://gasbrazil.com/flows/",
         "hub": "https://gasbrazil.github.io/flows/",
     },
+    "mago": {
+        "label": "TAG Mago",
+        "custom": "https://gasbrazil.com/mago/",
+        "caissonpoint": "https://gasbrazil.com/mago/",
+        "hub": "https://gasbrazil.github.io/mago/",
+    },
     "supply": {
         "label": "Gas Supply",
         "custom": "https://gasbrazil.com/supply/",
@@ -1078,6 +1108,7 @@ _PAGE_INTRO = {
     "poc": "navPoc",
     "contratos": "navContratos",
     "flows": "navFlows",
+    "mago": "navMago",
     "supply": "navSupply",
     "precos": "navPrecos",
 }
@@ -1092,6 +1123,7 @@ STALE_LAG_DAYS = {
     "pld": 7,
     "contratos": 7,
     "flows": 60,
+    "mago": 2,
     "supply": 100,
     "precos": 100,
     "desk": 14,
@@ -1127,6 +1159,7 @@ _METHODOLOGY = {
     "supply": (("sourceSupply",), "methodAssump_supply", "aboutCoverSupply"),
     "precos": (("sourcePrecos",), "methodAssump_precos", "aboutCoverPrecos"),
     "pld": (("sourcePld",), "methodAssump_pld", "aboutCoverPld"),
+    "mago": (("sourceMago",), "methodAssump_mago", "aboutCoverMago"),
     "desk": (
         ("sourceOns", "sourcePld", "sourcePoc", "sourceFlows"),
         "methodAssump_desk",
@@ -1143,6 +1176,7 @@ _METHOD_SOURCE_LABELS = {
     "sourceSupply": "ANP",
     "sourcePrecos": "ANP",
     "sourcePld": "CCEE",
+    "sourceMago": "TAG Mago",
 }
 
 
@@ -1179,6 +1213,7 @@ _METHOD_ASSUMP_DEFAULTS = {
     "supply": "Monthly aggregation of ANP PPGN-EL national series plus imports.",
     "precos": "Tax-inclusive R$/MMBtu monthly disclosures, not spot benchmarks.",
     "pld": "Peak = hours 18–20 on weekdays (ANEEL-style ponta, TOU v1); SIN has no PLD (join map v1).",
+    "mago": "One EMPACOTAMENTOS snapshot feeds both line pack and zone forecasts; values are stored as published (m³ line pack, Mm³/d zones).",
     "desk": "Cross-product headlines; full history and filters live on each product page.",
 }
 
@@ -1192,6 +1227,7 @@ _METHOD_LIMITS_DEFAULTS = {
     "aboutCoverSupply": "Gas Supply: ANP PPGN-EL national monthly series plus national imports (no Bolivia vs LNG split in the open CSV).",
     "aboutCoverPrecos": "ANP Prices: Resolution 52/2011 monthly disclosures (R$/MMBtu, tax-inclusive). Some months are suppressed for confidentiality.",
     "aboutCoverPld": "PLD: CCEE daily averages and hourly prices by submarket; peak is hours 18–20 on weekdays. Optional ONS CMO and median gas CVU when lake data is present.",
+    "aboutCoverMago": "TAG Mago: hourly line pack and 7-day balancing-zone consumption forecasts from EMPACOTAMENTOS API snapshots.",
     "aboutCoverDesk": "The Desk: cross-product headline series. Full history and filters live on each product page.",
 }
 
@@ -1344,6 +1380,7 @@ def _menu_items_html(self_id: str) -> str:
         "poc": "navPoc",
         "contratos": "navContratos",
         "flows": "navFlows",
+        "mago": "navMago",
         "supply": "navSupply",
         "pld": "navPld",
         "precos": "navPrecos",

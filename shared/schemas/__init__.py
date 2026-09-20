@@ -130,6 +130,26 @@ ANP_PRICE_SEGMENTS = ("producers", "distributors", "marketers")
 
 TSO_CODES = ("NTS", "TAG", "TBG", "TSB", "GOM")
 
+# --- TAG Mago (operational snapshots) -----------------------------------------
+
+TAG_MAGO_SERIES_COLUMNS = (
+    "snapshot_at",
+    "observed_at",
+    "series",
+    "mesh",
+    "zone",
+    "tag",
+    "value",
+    "unit",
+    "source",
+)
+
+TAG_MAGO_SERIES_KINDS = (
+    "linepack_actual",
+    "linepack_forecast",
+    "zone_consumption_forecast",
+)
+
 
 def _require(df: "pd.DataFrame", columns: tuple[str, ...], label: str) -> None:
     import data_kit as dk  # noqa: PLC0415 — shared/ on sys.path
@@ -227,4 +247,12 @@ def validate_poc_results(df: "pd.DataFrame") -> None:
 
 def validate_contratos(df: "pd.DataFrame") -> None:
     _require(df, CONTRATOS_COLUMNS, "contratos")
+
+
+def validate_tag_mago_series(df: "pd.DataFrame") -> None:
+    _require(df, TAG_MAGO_SERIES_COLUMNS, "tag_mago_series")
+    _assert_allowed(df, "series", TAG_MAGO_SERIES_KINDS, label="tag_mago_series")
+    _assert_numeric(df, "value", label="tag_mago_series")
+    if "source" in df.columns and not df.empty:
+        _assert_allowed(df, "source", ("mago",), label="tag_mago_series")
     _assert_numeric(df, "Contracted Capacity (000 m3/d)", label="contratos")
