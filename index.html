@@ -291,7 +291,30 @@ footer a,
 main.hub .kpi-cell,
 #lang-toggle,
 header.dash-head .nav-trail,
-.topbar.chrome-tools {
+header.dash-head h1,
+.topbar.chrome-tools,
+.panel-title,
+.kpi-title,
+.kpi-label,
+.kpi-header,
+.kpi-header .kpi-title,
+.filter-label,
+.band-label,
+.tab,
+.tabs,
+.tabs > button,
+.tabs button,
+.level-btn,
+.view-toggle,
+.view-toggle .level-btn,
+.chip,
+.pick h3,
+.tile .nm,
+.tool-row label,
+.controls label,
+.chart-toolbar label,
+.asof-strip .asof-label,
+button[aria-pressed] {
   font-family: var(--font-display);
 }
 .wordmark,
@@ -545,17 +568,17 @@ main.hub .brand-lockup .wordmark,
   transition: background-color .15s ease;
 }
 .masthead-ident .brand-mark-dot {
-  width: 5.5px;
-  height: 5.5px;
-  min-width: 5.5px;
-  min-height: 5.5px;
+  width: 5px;
+  height: 5px;
+  min-width: 5px;
+  min-height: 5px;
 }
 main.hub .brand-mark-dot,
 .hub-header .brand-mark-dot {
-  width: 8px;
-  height: 8px;
-  min-width: 8px;
-  min-height: 8px;
+  width: 6.5px;
+  height: 6.5px;
+  min-width: 6.5px;
+  min-height: 6.5px;
 }
 .brand-mark .dd-caret {
   display: none;
@@ -1264,7 +1287,7 @@ main.hub { flex: 1; width: var(--content-w); max-width: var(--content-max); marg
 .hub-controls #theme-toggle { position: static; }
 .hub-section-title {
   font-size: 11px; text-transform: uppercase; letter-spacing: .06em;
-  color: var(--muted); font-weight: 400; margin: 18px 0 8px;
+  color: var(--muted); font-weight: 600; margin: 18px 0 8px;
   font-family: var(--font-display);
 }
 .wordmark { font-size: 30px; font-weight: 600; letter-spacing: -.02em; line-height: 1.1; }
@@ -1339,7 +1362,7 @@ a.kpi-cell { cursor: pointer; }
   border-color: var(--border-strong); background: var(--panel-grad-hover);
   transform: translateY(-4px); box-shadow: var(--elevate);
 }
-.card .name { font-size: 14px; font-weight: 400; display: flex; align-items: center;
+.card .name { font-size: 14px; font-weight: 600; display: flex; align-items: center;
   gap: 8px; }
 .card .name .dot { width: 6px; height: 6px; border-radius: 50%; flex: none; background: var(--accent); }
 .card .desc { color: var(--muted); font-weight: 300; font-size: 12.5px; margin-top: 6px;
@@ -1405,7 +1428,7 @@ footer.site a:hover { color: var(--text); border-bottom-color: var(--brz-yellow)
 [data-theme="dark"] footer.site a:hover { color: var(--brz-yellow); border-bottom-color: var(--brz-yellow); }
 
 
-/* Shared header/label weight — last in cascade (Pacaembu-era density on Plex UI). */
+/* Shared header/label typography — last in cascade (Pacaembu SemiBold on chrome labels). */
 .wrap h1,
 .wrap h2,
 .wrap h3,
@@ -1413,6 +1436,7 @@ header.dash-head h1,
 .panel-title,
 .kpi-title,
 .kpi-label,
+.kpi-header,
 .kpi-header .kpi-title,
 .sources-label,
 .sources-block .label,
@@ -1420,13 +1444,16 @@ header.dash-head h1,
 .asof-strip .asof-label,
 .band-label,
 .level-btn,
+.view-toggle,
 .view-toggle .level-btn,
 .tab,
+.tabs,
 .tabs > button,
 .tabs button,
 .chip,
 .pill,
 .pick h3,
+.tile .nm,
 .tile .cap,
 .tile .lbl,
 button[aria-pressed],
@@ -1449,6 +1476,7 @@ main h1,
 main h2,
 main h3,
 .nav-trail a {
+  font-family: var(--font-display);
   font-weight: 600;
 }
 

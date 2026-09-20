@@ -285,7 +285,30 @@ footer a,
 main.hub .kpi-cell,
 #lang-toggle,
 header.dash-head .nav-trail,
-.topbar.chrome-tools {
+header.dash-head h1,
+.topbar.chrome-tools,
+.panel-title,
+.kpi-title,
+.kpi-label,
+.kpi-header,
+.kpi-header .kpi-title,
+.filter-label,
+.band-label,
+.tab,
+.tabs,
+.tabs > button,
+.tabs button,
+.level-btn,
+.view-toggle,
+.view-toggle .level-btn,
+.chip,
+.pick h3,
+.tile .nm,
+.tool-row label,
+.controls label,
+.chart-toolbar label,
+.asof-strip .asof-label,
+button[aria-pressed] {
   font-family: var(--font-display);
 }
 .wordmark,
@@ -539,17 +562,17 @@ main.hub .brand-lockup .wordmark,
   transition: background-color .15s ease;
 }
 .masthead-ident .brand-mark-dot {
-  width: 5.5px;
-  height: 5.5px;
-  min-width: 5.5px;
-  min-height: 5.5px;
+  width: 5px;
+  height: 5px;
+  min-width: 5px;
+  min-height: 5px;
 }
 main.hub .brand-mark-dot,
 .hub-header .brand-mark-dot {
-  width: 8px;
-  height: 8px;
-  min-width: 8px;
-  min-height: 8px;
+  width: 6.5px;
+  height: 6.5px;
+  min-width: 6.5px;
+  min-height: 6.5px;
 }
 .brand-mark .dd-caret {
   display: none;
@@ -1409,7 +1432,7 @@ table.data thead th.sortable:hover{background:var(--accent-soft)}
   .tabs{width:100%;overflow-x:auto}
   button,select,input{width:100%}
 }
-/* Shared header/label weight — last in cascade (Pacaembu-era density on Plex UI). */
+/* Shared header/label typography — last in cascade (Pacaembu SemiBold on chrome labels). */
 .wrap h1,
 .wrap h2,
 .wrap h3,
@@ -1417,6 +1440,7 @@ header.dash-head h1,
 .panel-title,
 .kpi-title,
 .kpi-label,
+.kpi-header,
 .kpi-header .kpi-title,
 .sources-label,
 .sources-block .label,
@@ -1424,13 +1448,16 @@ header.dash-head h1,
 .asof-strip .asof-label,
 .band-label,
 .level-btn,
+.view-toggle,
 .view-toggle .level-btn,
 .tab,
+.tabs,
 .tabs > button,
 .tabs button,
 .chip,
 .pill,
 .pick h3,
+.tile .nm,
 .tile .cap,
 .tile .lbl,
 button[aria-pressed],
@@ -1453,6 +1480,7 @@ main h1,
 main h2,
 main h3,
 .nav-trail a {
+  font-family: var(--font-display);
   font-weight: 600;
 }
 </style>

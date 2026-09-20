@@ -250,7 +250,7 @@ main.hub { flex: 1; width: var(--content-w); max-width: var(--content-max); marg
 .hub-controls #theme-toggle { position: static; }
 .hub-section-title {
   font-size: 11px; text-transform: uppercase; letter-spacing: .06em;
-  color: var(--muted); font-weight: 400; margin: 18px 0 8px;
+  color: var(--muted); font-weight: 600; margin: 18px 0 8px;
   font-family: var(--font-display);
 }
 .wordmark { font-size: 30px; font-weight: 600; letter-spacing: -.02em; line-height: 1.1; }
@@ -325,7 +325,7 @@ a.kpi-cell { cursor: pointer; }
   border-color: var(--border-strong); background: var(--panel-grad-hover);
   transform: translateY(-4px); box-shadow: var(--elevate);
 }
-.card .name { font-size: 14px; font-weight: 400; display: flex; align-items: center;
+.card .name { font-size: 14px; font-weight: 600; display: flex; align-items: center;
   gap: 8px; }
 .card .name .dot { width: 6px; height: 6px; border-radius: 50%; flex: none; background: var(--accent); }
 .card .desc { color: var(--muted); font-weight: 300; font-size: 12.5px; margin-top: 6px;
