@@ -10,9 +10,9 @@
 <link rel="preload" href="/shared/fonts/IBMPlexSans-Regular.ttf" as="font" type="font/ttf" crossorigin>
 <link rel="preload" href="/shared/fonts/Pacaembu-SemiBold.ttf" as="font" type="font/ttf" crossorigin>
 <!-- home-page teaser marker, read by ../build_home.py:
-     generated: 2026-09-20 18:07 UTC
-     kpi_linepack: 68.58
-     kpi_snapshot: 2026-09-20 14:08 UTC -->
+     generated: 2026-09-20 18:57 UTC
+     kpi_linepack: 68.69
+     kpi_snapshot: 2026-09-20 17:08 UTC -->
 <script>
 (function(){
   try {
@@ -1277,34 +1277,49 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 #theme-toggle { display: inline-flex; align-items: center; justify-content: center; background: var(--panel); border: 1px solid var(--border-strong); border-radius: 5px; padding: 5px 9px; line-height: 0; cursor: pointer; color: var(--text); }
 #theme-toggle:hover { background: var(--accent-soft); }
 #theme-toggle svg { width: 16px; height: 16px; display: block; }
-.panel { margin: 0 0 var(--gap); padding: var(--card-pad); border: 1px solid var(--border); border-radius: var(--radius); background: var(--panel); }
-.panel h2 { margin: 0 0 .35rem; font-size: 1.05rem; }
-.panel p.sub { margin: 0 0 .75rem; color: var(--muted); font-size: .92rem; font-weight: 200; }
-.kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px; margin-bottom: var(--gap); }
-.kpi { padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--panel); }
-.kpi .label { color: var(--muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; }
-.kpi .val { font-size: 1.35rem; font-weight: 650; font-variant-numeric: tabular-nums; margin-top: 4px; }
-.chips { display: flex; flex-wrap: wrap; gap: .35rem; margin: .5rem 0; }
-.chip { border: 1px solid var(--border); background: var(--bg); color: inherit; border-radius: 999px; padding: .25rem .65rem; font-size: .82rem; cursor: pointer; font-family: var(--font); }
-.chip.on { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
-.chip.muted { opacity: .55; font-size: .78rem; }
-.chip-row-label { width: 100%; font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-top: .35rem; }
-.view-opts { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; margin: .35rem 0 .65rem; }
-.view-opts label { font-size: .85rem; color: var(--muted); display: inline-flex; align-items: center; gap: .35rem; cursor: pointer; }
-#chart-lp, #chart-zones, #chart-lp-hist { min-height: 320px; }
-.chart-empty { color: var(--muted); padding: 2rem 0; text-align: center; }
-.legend { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: .35rem; font-size: .85rem; color: var(--muted); }
-.legend span::before { content: ""; display: inline-block; width: 12px; height: 3px; margin-right: .35rem; vertical-align: middle; background: currentColor; }
-.legend .dash::before { background: repeating-linear-gradient(90deg, currentColor 0 5px, transparent 5px 9px); height: 0; border-top: 2px dashed currentColor; width: 14px; }
-.data-table-wrap { overflow: auto; max-height: 360px; border: 1px solid var(--border); border-radius: var(--radius-sm); margin-top: .75rem; }
-table.lp-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
-table.lp-table th, table.lp-table td { padding: 6px 10px; border-bottom: 1px solid var(--border); text-align: left; }
+.panel { margin: 0 0 10px; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--panel); }
+.panel-tight { padding: 10px 12px; }
+.panel h2 { margin: 0 0 .2rem; font-size: .98rem; font-weight: 500; }
+.panel p.sub { margin: 0 0 .5rem; color: var(--muted); font-size: .8rem; font-weight: 200; line-height: 1.35; }
+.panel p.sub.compact { margin-bottom: .35rem; }
+.panel-head-row { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+.kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 6px; margin-bottom: 10px; }
+.kpi { padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--panel); }
+.kpi .label { color: var(--muted); font-size: .7rem; text-transform: uppercase; letter-spacing: .04em; }
+.kpi .val { font-size: 1.1rem; font-weight: 650; font-variant-numeric: tabular-nums; margin-top: 2px; }
+.chart-box { min-height: 220px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg); padding: 4px 2px 0; margin-bottom: 8px; }
+.chart-box.chart-sm { min-height: 200px; }
+#chart-lp, #chart-lp-hist, #chart-zones { min-height: 0; }
+.chart-empty { color: var(--muted); padding: 1.25rem .75rem; text-align: center; font-size: .82rem; }
+.legend { display: flex; flex-wrap: wrap; gap: .5rem .75rem; margin-top: .25rem; font-size: .75rem; color: var(--muted); }
+.legend span::before { content: ""; display: inline-block; width: 10px; height: 3px; margin-right: .3rem; vertical-align: middle; background: currentColor; }
+.legend .dash::before { background: repeating-linear-gradient(90deg, currentColor 0 4px, transparent 4px 7px); height: 0; border-top: 2px dashed currentColor; width: 12px; }
+.filter-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 6px; }
+.filter-bar .hint { font-size: .75rem; color: var(--muted); margin-left: auto; }
+.filter-matrix { display: flex; flex-wrap: wrap; gap: 4px; max-height: 88px; overflow-y: auto; padding: 2px 0; }
+.filter-matrix.zone-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(42px, 1fr)); gap: 4px; max-height: 120px; }
+.filter-chip { border: 1px solid var(--border); background: var(--bg); color: inherit; border-radius: 4px; padding: 3px 7px; font-size: 11px; line-height: 1.2; cursor: pointer; font-family: var(--font); font-variant-numeric: tabular-nums; }
+.filter-chip:hover { background: var(--accent-soft); }
+.filter-chip.on { border-color: var(--accent); background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent); font-weight: 500; }
+.is-hidden { display: none !important; }
+.seg-row { display: inline-flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.seg { display: inline-flex; border: 1px solid var(--border-strong); border-radius: 5px; overflow: hidden; }
+.seg button { border: 0; background: var(--bg); color: var(--muted); font-size: 11px; padding: 4px 9px; cursor: pointer; font-family: var(--font); }
+.seg button.on { background: var(--accent-soft); color: var(--text); font-weight: 500; }
+.seg button + button { border-left: 1px solid var(--border); }
+details.panel-fold { margin-bottom: 10px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--panel); }
+details.panel-fold > summary { cursor: pointer; padding: 10px 12px; font-size: .92rem; font-weight: 500; list-style: none; }
+details.panel-fold > summary::-webkit-details-marker { display: none; }
+details.panel-fold > .fold-body { padding: 0 12px 12px; border-top: 1px solid var(--border); }
+.data-table-wrap { overflow: auto; max-height: 220px; border: 1px solid var(--border); border-radius: var(--radius-sm); margin-top: .5rem; }
+table.lp-table { width: 100%; border-collapse: collapse; font-size: .78rem; }
+table.lp-table th, table.lp-table td { padding: 4px 8px; border-bottom: 1px solid var(--border); text-align: left; }
 table.lp-table th { position: sticky; top: 0; background: var(--panel); cursor: pointer; font-weight: 500; }
 table.lp-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
-.toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; align-items: center; }
-.toolbar button { font-family: var(--font); cursor: pointer; border: 1px solid var(--border-strong); background: var(--panel); color: var(--text); border-radius: 5px; padding: 6px 12px; font-size: .85rem; }
-.toolbar button:hover { background: var(--accent-soft); }
-footer { margin-top: 22px; color: var(--muted); font-size: 11.5px; line-height: 1.7; font-weight: 200; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; align-items: center; }
+.toolbar button, .filter-bar .btn-clear { font-family: var(--font); cursor: pointer; border: 1px solid var(--border-strong); background: var(--panel); color: var(--text); border-radius: 5px; padding: 4px 10px; font-size: .78rem; }
+.toolbar button:hover, .filter-bar .btn-clear:hover { background: var(--accent-soft); }
+footer { margin-top: 16px; color: var(--muted); font-size: 11px; line-height: 1.6; font-weight: 200; }
 footer a { color: var(--accent); }
 
 /* Shared header/label typography — last in cascade (Pacaembu SemiBold on chrome labels). */
@@ -1489,46 +1504,60 @@ main h3,
     <div class="kpi"><div class="label" data-i18n="magoKpiSnapshot">Snapshot (UTC)</div><div class="val" id="kpi-snap">—</div></div>
   </div>
 
-  <section class="panel">
+  <section class="panel panel-tight">
     <h2 data-i18n="magoLinepackTitle">Line pack — integrated mesh</h2>
-    <p class="sub" data-i18n="magoLinepackSub">Hourly actual (solid) and short-horizon forecast (dashed) from the latest Mago snapshot.</p>
-    <div id="chart-lp"></div>
+    <p class="sub compact" data-i18n="magoLinepackSub">Hourly actual (solid) and short-horizon forecast (dashed) from the latest Mago snapshot.</p>
+    <div class="chart-box chart-sm"><div id="chart-lp"></div></div>
     <div class="legend"><span style="color:var(--tso-tag,#0066cc)">Actual</span><span class="dash" style="color:#888">Forecast</span></div>
   </section>
 
-  <section class="panel">
-    <h2 data-i18n="magoLinepackHistTitle">Line pack history</h2>
-    <p class="sub" data-i18n="magoLinepackHistSub">Continuous hourly integrated inventory from all cached Mago snapshots (newest snapshot wins when hours overlap).</p>
-    <div id="chart-lp-hist"></div>
-    <div class="toolbar">
-      <button type="button" id="btn-lp-csv" data-i18n="magoLpCsv">Download line pack CSV</button>
+  <details class="panel-fold">
+    <summary data-i18n="magoLinepackHistTitle">Line pack history</summary>
+    <div class="fold-body">
+      <p class="sub compact" data-i18n="magoLinepackHistSub">Hourly integrated inventory from cached snapshots (newest wins on overlap).</p>
+      <div class="chart-box chart-sm"><div id="chart-lp-hist"></div></div>
+      <div class="toolbar">
+        <button type="button" id="btn-lp-csv" data-i18n="magoLpCsv">Download line pack CSV</button>
+      </div>
+      <div class="data-table-wrap">
+        <table class="lp-table" id="lp-table">
+          <thead><tr>
+            <th data-col="observedAt" data-i18n="magoColObserved">Observed (UTC)</th>
+            <th data-col="valueMm3" class="num" data-i18n="magoColMm3">Mm³</th>
+            <th data-col="valueM3" class="num" data-i18n="magoColM3">m³</th>
+            <th data-col="snapshotAt" data-i18n="magoColSnapshot">Source snapshot</th>
+          </tr></thead>
+          <tbody id="lp-tbody"></tbody>
+        </table>
+      </div>
     </div>
-    <div class="data-table-wrap">
-      <table class="lp-table" id="lp-table">
-        <thead><tr>
-          <th data-col="observedAt" data-i18n="magoColObserved">Observed (UTC)</th>
-          <th data-col="valueMm3" class="num" data-i18n="magoColMm3">Mm³</th>
-          <th data-col="valueM3" class="num" data-i18n="magoColM3">m³</th>
-          <th data-col="snapshotAt" data-i18n="magoColSnapshot">Source snapshot</th>
-        </tr></thead>
-        <tbody id="lp-tbody"></tbody>
-      </table>
-    </div>
-  </section>
+  </details>
 
-  <section class="panel">
-    <h2 data-i18n="magoZonesTitle">Consumption forecast by zone</h2>
-    <p class="sub" data-i18n="magoZonesSub">TAG 7-day daily estimates (Mm³/d). Group by state or zone; stacked columns show all states plus system total.</p>
-    <div class="view-opts">
-      <button type="button" id="btn-clear-zones" class="btn-clear" data-i18n="clearAllSelections">Clear all</button>
-      <label><input type="radio" name="gran" value="state" checked> <span data-i18n="magoByState">By state</span></label>
-      <label><input type="radio" name="gran" value="zone"> <span data-i18n="magoByZone">By zone</span></label>
-      <label><input type="radio" name="chartMode" value="line" checked> <span data-i18n="magoChartLine">Lines</span></label>
-      <label><input type="radio" name="chartMode" value="stack"> <span data-i18n="magoChartStack">Stacked columns</span></label>
+  <section class="panel panel-tight" id="consume-panel">
+    <div class="panel-head-row">
+      <div>
+        <h2 data-i18n="magoZonesTitle">Consumption forecast</h2>
+        <p class="sub compact" data-i18n="magoZonesSub">7-day daily TAG estimates (Mm³/d). Chart updates from the compact filters below.</p>
+      </div>
+      <div class="seg-row" role="group" aria-label="Chart options">
+        <div class="seg">
+          <button type="button" data-gran="state" class="on" data-i18n="magoByState">States</button>
+          <button type="button" data-gran="zone" data-i18n="magoByZone">Zones</button>
+        </div>
+        <div class="seg">
+          <button type="button" data-mode="line" class="on" data-i18n="magoChartLine">Lines</button>
+          <button type="button" data-mode="stack" data-i18n="magoChartStack">Stack</button>
+        </div>
+      </div>
     </div>
-    <div class="chips" id="group-chips"></div>
-    <div class="chips" id="zone-chips" hidden></div>
-    <div id="chart-zones"></div>
+    <div class="chart-box"><div id="chart-zones"></div></div>
+    <div class="filter-bar">
+      <button type="button" id="btn-select-zones" class="btn-clear" data-i18n="magoSelectAll">Select all</button>
+      <button type="button" id="btn-clear-zones" class="btn-clear" data-i18n="clearAllSelections">Clear all</button>
+      <span id="selection-hint" class="hint"></span>
+    </div>
+    <div id="filter-state" class="filter-matrix"></div>
+    <div id="filter-zone" class="filter-matrix zone-grid is-hidden"></div>
   </section>
 <div class="toolbar" style="display:flex;gap:8px;margin-bottom:10px;">
   <button type="button" id="btn-share" data-i18n="copyLink">Copy link</button>
@@ -1552,7 +1581,7 @@ main h3,
 </footer>
 </div>
 <script>
-const PAYLOAD_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/mago/payload.json.gz?v=35528004938";
+const PAYLOAD_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/mago/payload.json.gz";
 /** Public R2 artifact (same bucket as other GasBrazil dashboards). Used when the shell still points at a sibling payload.json.gz that is not on Pages. */
 const MAGO_PAYLOAD_R2 = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/mago/payload.json.gz";
 
@@ -2233,16 +2262,18 @@ GB_I18N.en.magoLinepackHistTitle = "Line pack history";
 GB_I18N.pt.magoLinepackHistTitle = "Histórico de empacotamento";
 GB_I18N.en.magoLinepackHistSub = "Continuous hourly integrated inventory from all cached Mago snapshots (newest snapshot wins when hours overlap).";
 GB_I18N.pt.magoLinepackHistSub = "Inventário integrado horário de todos os snapshots Mago em cache (snapshot mais recente prevalece quando horas coincidem).";
-GB_I18N.en.magoByState = "By state";
-GB_I18N.pt.magoByState = "Por estado";
-GB_I18N.en.magoZonesSub = "TAG 7-day daily estimates (Mm³/d). Group by state or zone; stacked columns show all states plus system total.";
-GB_I18N.pt.magoZonesSub = "Estimativas diárias TAG (7 dias, Mm³/d). Agrupe por estado ou zona; colunas empilhadas mostram todos os estados e o total do sistema.";
-GB_I18N.en.magoByZone = "By zone";
-GB_I18N.pt.magoByZone = "Por zona";
+GB_I18N.en.magoByState = "States";
+GB_I18N.pt.magoByState = "Estados";
+GB_I18N.en.magoByZone = "Zones";
+GB_I18N.pt.magoByZone = "Zonas";
 GB_I18N.en.magoChartLine = "Lines";
 GB_I18N.pt.magoChartLine = "Linhas";
-GB_I18N.en.magoChartStack = "Stacked columns";
-GB_I18N.pt.magoChartStack = "Colunas empilhadas";
+GB_I18N.en.magoChartStack = "Stack";
+GB_I18N.pt.magoChartStack = "Empilhado";
+GB_I18N.en.magoSelectAll = "Select all";
+GB_I18N.pt.magoSelectAll = "Selecionar tudo";
+GB_I18N.en.magoZonesSub = "7-day daily TAG estimates (Mm³/d). Chart first; use compact filters below.";
+GB_I18N.pt.magoZonesSub = "Estimativas diárias TAG (7 dias, Mm³/d). Gráfico acima; filtros compactos abaixo.";
 GB_I18N.en.magoLpCsv = "Download line pack CSV";
 GB_I18N.pt.magoLpCsv = "Baixar CSV de empacotamento";
 GB_I18N.en.magoColObserved = "Observed (UTC)";
@@ -2302,7 +2333,7 @@ function drawLines(hostId, seriesList, yFmt) {
   const minX = Math.min(...xs), maxX = Math.max(...xs);
   let lo = Math.min(...ys), hi = Math.max(...ys);
   const pad = (hi - lo) * 0.08 || 1; lo -= pad; hi += pad;
-  const W = Math.max(640, host.clientWidth || 640), H = 320, ML = 58, MR = 12, MT = 16, MB = 30;
+  const W = Math.max(640, host.clientWidth || 640), H = hostId === "chart-zones" ? 240 : 220, ML = 52, MR = 10, MT = 12, MB = 26;
   const x = v => ML + (W - ML - MR) * ((v - minX) / (maxX - minX || 1));
   const y = v => MT + (H - MT - MB) * (1 - (v - lo) / (hi - lo || 1));
   const svg = chartSvg("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: "img" });
@@ -2365,7 +2396,7 @@ function drawConsumptionStackedDaily(hostId) {
     }),
   }));
   const maxTot = Math.max(...days.map(d => (d.total != null && isFinite(d.total) ? d.total : 0)), 1);
-  const W = Math.max(640, host.clientWidth || 640), H = 340, ML = 58, MR = 16, MT = 16, MB = 44;
+  const W = Math.max(640, host.clientWidth || 640), H = 260, ML = 52, MR = 12, MT = 12, MB = 36;
   const plotW = W - ML - MR;
   const gap = Math.max(8, plotW / Math.max(n, 1) * 0.08);
   const barW = Math.max(18, (plotW - gap * (n + 1)) / n);
@@ -2460,68 +2491,100 @@ function activeZoneSeries() {
   return series;
 }
 
+function updateSelectionHint() {
+  const el = document.getElementById("selection-hint");
+  if (!el) return;
+  if (chartMode === "stack") {
+    el.textContent = "Stacked view shows all states + total dot.";
+    return;
+  }
+  const n = granularity === "state" ? selectedGroups.size : selectedZones.size;
+  el.textContent = n ? (n + " selected") : "Nothing selected";
+}
+
 function packZones() {
   if (chartMode === "stack") {
     drawConsumptionStackedDaily("chart-zones");
+    updateSelectionHint();
     return;
   }
   const series = activeZoneSeries();
+  const host = document.getElementById("chart-zones");
+  if (!series.length) {
+    host.innerHTML = '<div class="chart-empty">Select states or zones below, or click <strong>Select all</strong>.</div>';
+    updateSelectionHint();
+    return;
+  }
   drawLines("chart-zones", series, v => v.toFixed(1));
+  updateSelectionHint();
+}
+
+function selectAllMago() {
+  if (granularity === "state") {
+    selectedGroups = new Set(DATA.groups || []);
+  } else {
+    selectedZones = new Set(DATA.zones || []);
+  }
+  renderFilters();
+  packZones();
+  writeMagoQuery();
 }
 
 function clearMagoSelections() {
   selectedGroups.clear();
   selectedZones.clear();
-  renderGroupChips();
-  renderZoneChips();
+  renderFilters();
   packZones();
   writeMagoQuery();
 }
 
-function renderGroupChips() {
-  const host = document.getElementById("group-chips");
-  host.innerHTML = "";
-  (DATA.groups || []).forEach(g => {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.className = "chip" + (selectedGroups.has(g) ? " on" : "");
-    const label = (DATA.groupLabels && DATA.groupLabels[g]) ? DATA.groupLabels[g] : g;
-    b.textContent = g === "total" ? label : label + " (" + g + ")";
-    b.addEventListener("click", () => {
-      if (selectedGroups.has(g)) selectedGroups.delete(g); else selectedGroups.add(g);
-      renderGroupChips(); packZones(); writeMagoQuery();
-    });
-    host.appendChild(b);
-  });
-}
-
-function renderZoneChips() {
-  const host = document.getElementById("zone-chips");
-  host.innerHTML = "";
-  if (granularity !== "zone") return;
-  const byState = {};
-  (DATA.groups || []).forEach(g => {
-    if (g === "total") return;
-    const zones = (DATA.groupZones && DATA.groupZones[g]) || [];
-    if (zones.length) byState[g] = zones;
-  });
-  Object.keys(byState).forEach(g => {
-    const lbl = document.createElement("div");
-    lbl.className = "chip-row-label";
-    lbl.textContent = (DATA.groupLabels && DATA.groupLabels[g]) ? DATA.groupLabels[g] : g;
-    host.appendChild(lbl);
-    byState[g].forEach(z => {
+function renderFilters() {
+  const stateHost = document.getElementById("filter-state");
+  const zoneHost = document.getElementById("filter-zone");
+  if (!stateHost || !zoneHost) return;
+  stateHost.innerHTML = "";
+  zoneHost.innerHTML = "";
+  const isState = granularity === "state";
+  stateHost.classList.toggle("is-hidden", !isState);
+  zoneHost.classList.toggle("is-hidden", isState);
+  if (isState) {
+    (DATA.groups || []).forEach(g => {
       const b = document.createElement("button");
       b.type = "button";
-      b.className = "chip muted" + (selectedZones.has(z) ? " on" : "");
-      b.textContent = (DATA.zoneLabels && DATA.zoneLabels[z]) ? DATA.zoneLabels[z] + " (" + z + ")" : z;
+      b.className = "filter-chip" + (selectedGroups.has(g) ? " on" : "");
+      const label = (DATA.groupLabels && DATA.groupLabels[g]) ? DATA.groupLabels[g] : g;
+      b.textContent = g === "total" ? "Total" : g;
+      b.title = label;
+      b.addEventListener("click", () => {
+        if (selectedGroups.has(g)) selectedGroups.delete(g); else selectedGroups.add(g);
+        renderFilters(); packZones(); writeMagoQuery();
+      });
+      stateHost.appendChild(b);
+    });
+  } else {
+    (DATA.zones || []).forEach(z => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "filter-chip" + (selectedZones.has(z) ? " on" : "");
+      b.textContent = z;
+      b.title = (DATA.zoneLabels && DATA.zoneLabels[z]) ? DATA.zoneLabels[z] : z;
       b.addEventListener("click", () => {
         if (selectedZones.has(z)) selectedZones.delete(z); else selectedZones.add(z);
-        renderZoneChips(); packZones(); writeMagoQuery();
+        renderFilters(); packZones(); writeMagoQuery();
       });
-      host.appendChild(b);
+      zoneHost.appendChild(b);
     });
+  }
+}
+
+function syncGranularityUi() {
+  document.querySelectorAll("[data-gran]").forEach(btn => {
+    btn.classList.toggle("on", btn.getAttribute("data-gran") === granularity);
   });
+  document.querySelectorAll("[data-mode]").forEach(btn => {
+    btn.classList.toggle("on", btn.getAttribute("data-mode") === chartMode);
+  });
+  renderFilters();
 }
 
 function sortedLpRows() {
@@ -2587,17 +2650,6 @@ function writeMagoQuery() {
   });
 }
 
-function syncGranularityUi() {
-  document.querySelectorAll('input[name="gran"]').forEach(el => {
-    el.checked = el.value === granularity;
-  });
-  document.querySelectorAll('input[name="chartMode"]').forEach(el => {
-    el.checked = el.value === chartMode;
-  });
-  document.getElementById("group-chips").hidden = granularity !== "state";
-  document.getElementById("zone-chips").hidden = granularity !== "zone";
-}
-
 function paintAsof() {
   document.getElementById("asof-refreshed").textContent =
     formatRefreshedLocal(DATA.generatedIso, DATA.generated);
@@ -2608,8 +2660,6 @@ function paintAsof() {
 function paintPage() {
   setKpis();
   syncGranularityUi();
-  renderGroupChips();
-  renderZoneChips();
   packLinepack();
   packLinepackHistory();
   packZones();
@@ -2661,26 +2711,28 @@ async function init() {
   LP_ROWS = DATA.linepackHistoryRows || [];
   ZONE_SERIES = DATA.zoneSeries || {};
   GROUP_SERIES = DATA.groupSeries || {};
-  if (!selectedZones.size) selectedZones = new Set((DATA.zones || []).slice(0, 4));
   applyMagoQuery();
+  if (granularity === "state" && !selectedGroups.size) selectedGroups = new Set(["total"]);
+  if (granularity === "zone" && !selectedZones.size) {
+    selectedZones = new Set((DATA.zones || []).slice(0, 5));
+  }
   paintPage();
   writeMagoQuery();
 
+  document.getElementById("btn-select-zones").addEventListener("click", selectAllMago);
   document.getElementById("btn-clear-zones").addEventListener("click", clearMagoSelections);
-  document.querySelectorAll('input[name="gran"]').forEach(el => {
-    el.addEventListener("change", () => {
-      if (!el.checked) return;
-      granularity = el.value;
+  document.querySelectorAll("[data-gran]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      granularity = btn.getAttribute("data-gran") || "state";
       syncGranularityUi();
-      renderZoneChips();
       packZones();
       writeMagoQuery();
     });
   });
-  document.querySelectorAll('input[name="chartMode"]').forEach(el => {
-    el.addEventListener("change", () => {
-      if (!el.checked) return;
-      chartMode = el.value;
+  document.querySelectorAll("[data-mode]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      chartMode = btn.getAttribute("data-mode") || "line";
+      syncGranularityUi();
       packZones();
       writeMagoQuery();
     });
@@ -2697,8 +2749,7 @@ async function init() {
 
   initThemeToggle("theme-toggle", () => { packLinepack(); packLinepackHistory(); packZones(); });
   initLangToggle("lang-toggle", () => {
-    renderGroupChips();
-    renderZoneChips();
+    renderFilters();
     setKpis();
     applyI18n();
   });
