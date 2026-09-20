@@ -29,6 +29,7 @@ Usage: python3 build_wiki.py   (run from the repo root; no arguments)
 """
 import html
 import pathlib
+import re as _re
 import sys
 
 import markdown as md
@@ -69,7 +70,6 @@ for slug in DASHBOARD_SLUGS:
 # full as a root-relative path directly in the markdown (e.g.
 # "/wiki/ons/known-limitations.html") since that's unambiguous regardless
 # of which page it's rendered on and doesn't need resolving here.
-import re as _re
 
 def fix_internal_links(text: str, out_name: str) -> str:
     depth_prefix = "../" if "/" in out_name else ""
@@ -195,7 +195,7 @@ def render_nav(current_out: str) -> str:
     for slug in DASHBOARD_SLUGS:
         dash_label = kit._SITES[slug]["label"]
         items.append(f'<div class="group">{dash_label}</div>')
-        for out_name, _src, label, s in PAGES:
+        for out_name, _src, _label, s in PAGES:
             if s != slug:
                 continue
             short = "Using the Dashboard" if "using-the-dashboard" in out_name else "Known Limitations"

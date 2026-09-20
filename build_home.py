@@ -189,7 +189,7 @@ def collect_status() -> dict:
             n = len(active)
             status["contratos_kpi"] = f"{n:,} contracts · {_fmt_num(cap, 0)} thousand m³/d"
             status["contratos_kpi_pt"] = f"{n:,} contratos · {_fmt_num(cap, 0)} mil m³/d"
-            status["contratos_when"] = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d")
+            status["contratos_when"] = dt.datetime.now(dt.UTC).strftime("%Y-%m-%d")
 
         # Hub sparklines (last ~24 points) from committed / rebuilt parquet.
         if poc.exists() and "Trade Date" in pd.read_parquet(poc, columns=["Trade Date"]).columns:
@@ -238,11 +238,13 @@ main.hub { flex: 1; width: var(--content-w); max-width: var(--content-max); marg
   position: sticky; top: 0; z-index: 40;
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
   background: var(--header-bg);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
   padding: 10px 0 10px;
   margin: 0 0 4px;
   isolation: isolate;
+  transition: background-color .2s ease, border-color .2s ease;
 }
 @media (max-width: 720px) {
   .hub-header { flex-wrap: wrap; }
@@ -277,19 +279,20 @@ a.kpi-cell { cursor: pointer; }
   padding: 8px 10px; text-decoration: none; color: var(--text);
   display: flex; flex-direction: column; gap: 2px; min-width: 0;
   box-shadow: 0 1px 0 rgba(255,255,255,.55) inset, 0 1px 3px rgba(0,39,118,.04);
-  transition: border-color .3s ease, transform .3s ease, background .3s ease, box-shadow .3s ease;
+  transition: border-color .18s ease, transform .18s ease, background .18s ease, box-shadow .18s ease;
 }
 .kpi-cell::before {
   content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-  background: var(--brz-blue); opacity: 0; transition: opacity .3s ease;
+  background: var(--brz-blue); opacity: 0; transition: opacity .25s ease;
 }
 .kpi-cell:nth-child(3n+1)::before { background: var(--brz-green); }
 .kpi-cell:nth-child(3n+2)::before { background: var(--brz-yellow); }
 .kpi-cell:nth-child(3n+3)::before { background: var(--brz-blue); }
 .kpi-cell:hover {
   border-color: var(--border-strong); background: var(--panel-grad-hover);
-  transform: translateY(-4px); box-shadow: var(--elevate);
+  transform: translateY(-2px); box-shadow: var(--elevate);
 }
+.kpi-cell:active { transform: translateY(0); }
 .kpi-cell:hover::before { opacity: 1; }
 .kpi-cell .kpi-label { font-size: 13px; font-weight: 600; color: var(--text); letter-spacing: -.01em;
   display: flex; align-items: baseline; gap: 6px; }
@@ -306,7 +309,7 @@ a.kpi-cell { cursor: pointer; }
 [data-theme="dark"] .kpi-cell .kpi-label::after { color: var(--brz-yellow); }
 .kpi-cell .kpi-role { font-size: 11px; font-weight: 300; color: var(--muted); line-height: 1.3; }
 .kpi-cell .kpi-val { font-size: 12px; font-weight: 400; color: var(--muted2);
-  line-height: 1.35; min-height: 1.1em; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  line-height: 1.35; min-height: 1.1em; margin-top: 2px; font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
 .kpi-cell .kpi-when { font-size: 10px; font-weight: 300; color: var(--muted); min-height: 1em; margin-top: auto; padding-top: 4px; }
 .kpi-spark { display: block; width: 100%; height: 20px; margin-top: 2px; color: var(--accent); }
 .kpi-spark polyline { fill: none; stroke: currentColor; stroke-width: 1.5;
@@ -321,13 +324,14 @@ a.kpi-cell { cursor: pointer; }
   padding: var(--card-pad);
   text-align: left; text-decoration: none; color: var(--text);
   box-shadow: 0 1px 0 rgba(255,255,255,.55) inset, 0 1px 3px rgba(0,39,118,.04);
-  transition: border-color .3s ease, transform .3s ease, background .3s ease, box-shadow .3s ease;
+  transition: border-color .18s ease, transform .18s ease, background .18s ease, box-shadow .18s ease;
   display: flex; flex-direction: column;
 }
 .card:hover {
   border-color: var(--border-strong); background: var(--panel-grad-hover);
-  transform: translateY(-4px); box-shadow: var(--elevate);
+  transform: translateY(-2px); box-shadow: var(--elevate);
 }
+.card:active { transform: translateY(0); }
 .card .name { font-size: 14px; font-weight: 600; display: flex; align-items: center;
   gap: 8px; }
 .card .name .dot { width: 6px; height: 6px; border-radius: 50%; flex: none; background: var(--accent); }
@@ -343,15 +347,16 @@ a.kpi-cell { cursor: pointer; }
   border: 1px solid var(--ring); border-radius: var(--radius-sm); padding: 5px 12px;
   white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;
   background: var(--panel-grad);
-  transition: border-color .3s ease, transform .3s ease, background .3s ease, box-shadow .3s ease, color .3s ease;
+  transition: border-color .15s ease, transform .15s ease, background .15s ease, box-shadow .15s ease, color .15s ease;
 }
 .sources-block a:hover {
   background: var(--panel-grad-hover); color: var(--text); border-color: var(--border-strong);
-  transform: translateY(-2px); box-shadow: var(--elevate);
+  transform: translateY(-1.5px); box-shadow: var(--elevate-sm);
 }
+.sources-block a:active { transform: translateY(0); }
 [data-theme="dark"] .sources-block a:hover {
   border-color: rgba(255, 223, 0, .35);
-  box-shadow: var(--elevate), 0 0 0 1px rgba(255, 223, 0, .12);
+  box-shadow: var(--elevate-sm), 0 0 0 1px rgba(255, 223, 0, .12);
 }
 .sources-block .ext-icon { width: 10px; height: 10px; display: inline-block; flex: none; opacity: .75; }
 .prose { margin-top: 8px; max-width: 42em; }
