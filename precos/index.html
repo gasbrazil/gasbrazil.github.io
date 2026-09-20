@@ -10,7 +10,7 @@
 <link rel="preload" href="/shared/fonts/IBMPlexSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/shared/fonts/Pacaembu-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
 <!-- home-page teaser marker, read by ../build_home.py:
-     generated: 2026-09-20 19:28 UTC
+     generated: 2026-09-20 20:54 UTC
      kpi_santos: 18.2
      data_through: 2026-06 -->
 <script>
@@ -1368,6 +1368,7 @@ select optgroup {
 .btn-retry:active {
   transform: scale(0.98);
 }
+
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; font-weight: 300; }
 /* Single-row header: wordmark-menu · title … Wiki/About · PT · theme */
@@ -1427,7 +1428,6 @@ footer a { color: var(--accent); }
   .count { margin-left: 0; }
 }
 
-
 /* Shared header/label typography — last in cascade (Pacaembu SemiBold on chrome labels). */
 .wrap h1,
 .wrap h2,
@@ -1479,6 +1479,7 @@ main h3,
   font-family: var(--font-display);
   font-weight: 600;
 }
+
 </style>
 </head>
 <body>
@@ -1653,7 +1654,7 @@ main h3,
 </div>
 <div class="tt" id="chart-tt"></div>
 <script>
-const PAYLOAD_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/precos/payload.json.gz?v=35532388981";
+const PAYLOAD_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/precos/payload.json.gz?v=35537024258";
 
 function b64ToBytes(b64) {
   const bin = atob(b64);
@@ -3020,7 +3021,7 @@ async function init() {
     applyI18n();
   } catch (err) {
     console.error(err);
-    document.getElementById("kpi-row").innerHTML = '<div class="kpi-cell"><div class="lbl">Error</div><div class="val" style="font-size:13px">' + escapeHtml(String(err && err.message || err)) + "</div></div>";
+    showBootError(err, () => init());
   }
 }
 init();
