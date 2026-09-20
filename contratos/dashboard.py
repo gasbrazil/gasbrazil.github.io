@@ -1,4 +1,4 @@
-﻿"""
+"""
 Builds the single-file POC Contratos (gas transport contracts) dashboard from
 data/contratos.parquet.
 
@@ -1567,8 +1567,14 @@ __SHARED_JS_ASOF__
 
 async function init() {
   document.getElementById("year").textContent = new Date().getFullYear();
-  const text = await inflateGzipUrl(PAYLOAD_URL);
-  DATA = JSON.parse(text);
+  try {
+    const text = await inflateGzipUrl(PAYLOAD_URL);
+    DATA = JSON.parse(text);
+  } catch (err) {
+    console.error(err);
+    showBootError(err, () => init());
+    return;
+  }
   ensureM3TariffColumn(DATA);
   columnOrder = DATA.columns.slice();
   hiddenCols = new Set(DEFAULT_HIDDEN_COLS);

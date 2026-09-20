@@ -1,4 +1,4 @@
-﻿"""
+"""
 Builds the Pipeline Flows dashboard from data/flows_points.parquet and
 data/flows_ledger.parquet.
 
@@ -1579,13 +1579,11 @@ async function init() {
     onLevelOrVariableChanged();
   } catch (err) {
     console.error(err);
-    const msg = String(err && err.message || err);
     document.getElementById("asof-refreshed").textContent = "—";
     document.getElementById("asof-through").textContent = "—";
-    const host = document.getElementById("chart-host");
-    if (host) host.innerHTML = '<div class="chart-empty">' + escapeHtml(msg) + "</div>";
     const kpi = document.getElementById("kpi-cards");
     if (kpi) kpi.innerHTML = "";
+    showBootError(err, () => init());
     return;
   }
 
