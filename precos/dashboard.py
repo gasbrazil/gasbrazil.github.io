@@ -208,6 +208,7 @@ __SHARED_TYPO_WEIGHT_CSS__
   <div class="legend" id="leg-marketers"></div>
 </div>
 <div class="toolbar">
+  __SHARED_CLEAR_SELECTION__
   <button type="button" id="btn-csv" data-i18n="precosCsv">Download CSV</button>
   <button type="button" id="btn-xlsx" data-i18n="precosXlsx">Export Excel</button>
   __SHARED_SHARE_BUTTON__
@@ -680,6 +681,14 @@ async function init() {
     renderKpis();
     refreshPickersAndCharts();
     renderTable();
+    document.getElementById("btn-clear-precos").addEventListener("click", () => {
+      pickedProd.clear();
+      pickedDist.clear();
+      prodSlots.clear();
+      distSlots.clear();
+      refreshPickersAndCharts();
+      writePrecosQuery();
+    });
     document.getElementById("btn-csv").addEventListener("click", downloadCsv);
     document.getElementById("btn-xlsx").addEventListener("click", downloadXlsx);
     window.addEventListener("resize", () => { clearTimeout(window.__pr); window.__pr = setTimeout(renderCharts, 120); });
@@ -721,6 +730,7 @@ def write_dashboard(out_path=DEFAULT_OUT):
         SHARED_JS_TABLE_SORT=kit.JS_TABLE_SORT,
         SHARED_JS_QUERY_STATE=kit.JS_QUERY_STATE,
         SHARED_SHARE_BUTTON=kit.share_link_button_html(),
+        SHARED_CLEAR_SELECTION=kit.clear_selection_button_html("btn-clear-precos"),
         SHARED_JS_CHART_PALETTE=kit.chart_palette_js(),
         SHARED_SITE_LINKS_JS=kit.site_links_js("precos"),
         SHARED_MASTHEAD=kit.masthead_html("precos"),

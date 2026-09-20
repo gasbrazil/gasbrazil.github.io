@@ -194,7 +194,10 @@ __SHARED_TYPO_WEIGHT_CSS__
 <div class="chart-card">
   <p class="panel-title" data-i18n="supplyChartTitle">Monthly supply balance</p>
   <p class="panel-note" data-i18n="supplyChartNote">National totals (sum of UF × location). LGN is cubic metres; other series are thousand m³.</p>
-  <div class="series-picker" id="series-picker"></div>
+  <div class="picker-row" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px">
+    __SHARED_CLEAR_SELECTION__
+    <div class="series-picker" id="series-picker" style="margin-bottom:0"></div>
+  </div>
   <div id="chart-host"></div>
   <div class="legend" id="chart-legend"></div>
 </div>
@@ -580,6 +583,13 @@ async function init() {
   renderChart();
   renderTable();
   writeSupplyQuery();
+  document.getElementById("btn-clear-series").addEventListener("click", () => {
+    picked.clear();
+    chartSlots.clear();
+    buildPicker();
+    renderChart();
+    writeSupplyQuery();
+  });
   document.getElementById("btn-csv").addEventListener("click", downloadCsv);
   document.getElementById("btn-xlsx").addEventListener("click", downloadXlsx);
   window.addEventListener("resize", () => {
@@ -627,6 +637,7 @@ def write_dashboard(out_path: Path | str = DEFAULT_OUT) -> Path:
         SHARED_JS_TABLE_SORT=kit.JS_TABLE_SORT,
         SHARED_JS_QUERY_STATE=kit.JS_QUERY_STATE,
         SHARED_SHARE_BUTTON=kit.share_link_button_html(),
+        SHARED_CLEAR_SELECTION=kit.clear_selection_button_html("btn-clear-series"),
         SHARED_JS_CHART_PALETTE=kit.chart_palette_js(),
         SHARED_SITE_LINKS_JS=kit.site_links_js("supply"),
         SHARED_MASTHEAD=kit.masthead_html("supply"),

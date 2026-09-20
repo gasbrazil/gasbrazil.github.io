@@ -77,6 +77,25 @@ def _series_pack(sub: pd.DataFrame) -> dict:
     return {"times": times, "values": values}
 
 
+def _collapse_consumption_to_daily(series: dict) -> dict:
+    """TAG zone forecasts are a 7-day daily horizon; snapshots often repeat hourly."""
+    times = series.get("times") or []
+    values = series.get("values") or []
+    day_map: dict[str, tuple[str, float | None]] = {}
+    for t, v in zip(times, values, strict=False):
+        day = t[:10]
+        is_midnight = len(t) >= 16 and t[11:16] == "00:00"
+        if day not in day_map or is_midnight:
+            day_map[day] = (f"{day}T00:00", v)
+    days = sorted(day_map.keys())
+    if not days:
+        return {"times": [], "values": []}
+    return {
+        "times": [day_map[d][0] for d in days],
+        "values": [day_map[d][1] for d in days],
+    }
+
+
 def _sum_zone_series(zone_series: dict[str, dict], zones: list[str]) -> dict:
     maps: dict[str, dict[str, float | None]] = {}
     for z in zones:
@@ -143,7 +162,7 @@ def load_payload(*, snapshot_at: pd.Timestamp | None = None) -> dict:
     zones_present = [z for z in ZONE_ORDER if z in set(zones_df["zone"].dropna())]
     for zone in zones_present:
         part = zones_df[zones_df["zone"] == zone]
-        zone_series[zone] = _series_pack(part)
+        zone_series[zone] = _collapse_consumption_to_daily(_series_pack(part))
 
     group_series: dict[str, dict] = {}
     group_zones: dict[str, list[str]] = {}
@@ -186,7 +205,8 @@ def load_payload(*, snapshot_at: pd.Timestamp | None = None) -> dict:
         "kpiLinepackM3": latest_lp,
         "kpiLinepackMm3": None if latest_lp is None else round(latest_lp / 1_000_000, 3),
         "source": "TAG Mago — EMPACOTAMENTOS snapshots (api-mago-prod-lb.ntag.com.br)",
-        "note": "Zone forecasts are TAG's 7-day hourly consumption estimates (Mm³/d). "
+        "note": "Zone forecasts are TAG's 7-day daily consumption estimates (Mm³/d). "
+        "Hourly PI samples in snapshots are collapsed to one point per UTC day. "
         "Line pack is integrated mesh inventory (m³). History merges hourly actuals "
         "across cached snapshots (newest snapshot wins at each timestamp).",
     }
@@ -302,8 +322,9 @@ __SHARED_TYPO_WEIGHT_CSS__
 
   <section class="panel">
     <h2 data-i18n="magoZonesTitle">Consumption forecast by zone</h2>
-    <p class="sub" data-i18n="magoZonesSub">TAG 7-day hourly estimates (Mm³/d). Group by state or individual zones; optional stacked columns.</p>
+    <p class="sub" data-i18n="magoZonesSub">TAG 7-day daily estimates (Mm³/d). Group by state or zone; stacked columns show all states plus system total.</p>
     <div class="view-opts">
+      __SHARED_CLEAR_SELECTION__
       <label><input type="radio" name="gran" value="state" checked> <span data-i18n="magoByState">By state</span></label>
       <label><input type="radio" name="gran" value="zone"> <span data-i18n="magoByZone">By zone</span></label>
       <label><input type="radio" name="chartMode" value="line" checked> <span data-i18n="magoChartLine">Lines</span></label>
@@ -349,6 +370,8 @@ GB_I18N.en.magoLinepackHistSub = "Continuous hourly integrated inventory from al
 GB_I18N.pt.magoLinepackHistSub = "Inventário integrado horário de todos os snapshots Mago em cache (snapshot mais recente prevalece quando horas coincidem).";
 GB_I18N.en.magoByState = "By state";
 GB_I18N.pt.magoByState = "Por estado";
+GB_I18N.en.magoZonesSub = "TAG 7-day daily estimates (Mm³/d). Group by state or zone; stacked columns show all states plus system total.";
+GB_I18N.pt.magoZonesSub = "Estimativas diárias TAG (7 dias, Mm³/d). Agrupe por estado ou zona; colunas empilhadas mostram todos os estados e o total do sistema.";
 GB_I18N.en.magoByZone = "By zone";
 GB_I18N.pt.magoByZone = "Por zona";
 GB_I18N.en.magoChartLine = "Lines";
@@ -442,37 +465,45 @@ function drawLines(hostId, seriesList, yFmt) {
   host.appendChild(svg);
 }
 
-function drawStackedColumns(hostId, seriesList, yFmt) {
+function formatDayLabel(ms) {
+  const d = new Date(ms);
+  return (d.getUTCMonth() + 1) + "/" + d.getUTCDate() + "/" + d.getUTCFullYear();
+}
+
+function consumptionStateKeys() {
+  return (DATA.groups || []).filter(g => g !== "total");
+}
+
+function drawConsumptionStackedDaily(hostId) {
   const host = document.getElementById(hostId);
   host.innerHTML = "";
-  const usable = seriesList.filter(s => (s.points || []).length >= 1);
-  if (!usable.length) {
-    host.innerHTML = '<div class="chart-empty">No series in this view.</div>';
+  const totalBag = GROUP_SERIES.total;
+  const stateKeys = consumptionStateKeys();
+  if (!totalBag || !totalBag.times || totalBag.times.length < 1 || !stateKeys.length) {
+    host.innerHTML = '<div class="chart-empty">No daily forecast in this snapshot.</div>';
     return;
   }
-  const timeSet = {};
-  usable.forEach(s => s.points.forEach(p => { timeSet[p.x] = 1; }));
-  const times = Object.keys(timeSet).map(Number).sort((a, b) => a - b);
-  if (times.length < 1) {
-    host.innerHTML = '<div class="chart-empty">No series in this view.</div>';
-    return;
-  }
-  const stacks = times.map(t => {
-    let total = 0;
-    const parts = usable.map(s => {
-      const pt = s.points.find(p => p.x === t);
-      const v = pt && pt.y != null && isFinite(pt.y) ? pt.y : 0;
-      total += v;
-      return { v, color: s.color };
-    });
-    return { t, total, parts };
-  });
-  const maxTot = Math.max(...stacks.map(s => s.total), 1);
-  const W = Math.max(640, host.clientWidth || 640), H = 320, ML = 58, MR = 12, MT = 16, MB = 36;
+  const palette = (window.GB_CHART_PALETTE || ["#0066cc", "#e67e22", "#2ecc71", "#9b59b6", "#c0392b", "#16a085", "#8e44ad", "#d35400", "#2980b9"]);
+  const n = totalBag.times.length;
+  const days = totalBag.times.map((t, i) => ({
+    x: tsMs(t),
+    total: totalBag.values[i],
+    states: stateKeys.map((g, si) => {
+      const bag = GROUP_SERIES[g];
+      const v = bag && bag.values ? bag.values[i] : null;
+      return {
+        g,
+        v: v != null && isFinite(v) ? v : 0,
+        color: palette[si % palette.length],
+        label: (DATA.groupLabels && DATA.groupLabels[g]) ? DATA.groupLabels[g] : g,
+      };
+    }),
+  }));
+  const maxTot = Math.max(...days.map(d => (d.total != null && isFinite(d.total) ? d.total : 0)), 1);
+  const W = Math.max(640, host.clientWidth || 640), H = 340, ML = 58, MR = 16, MT = 16, MB = 44;
   const plotW = W - ML - MR;
-  const n = stacks.length;
-  const gap = Math.min(4, plotW / Math.max(n, 1) * 0.15);
-  const barW = Math.max(2, (plotW - gap * (n + 1)) / n);
+  const gap = Math.max(8, plotW / Math.max(n, 1) * 0.08);
+  const barW = Math.max(18, (plotW - gap * (n + 1)) / n);
   const y = v => MT + (H - MT - MB) * (1 - v / maxTot);
   const svg = chartSvg("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: "img" });
   svg.style.width = "100%"; svg.style.height = H + "px";
@@ -481,31 +512,48 @@ function drawStackedColumns(hostId, seriesList, yFmt) {
     const yy = y(t);
     svg.appendChild(chartSvg("line", { x1: ML, x2: W - MR, y1: yy, y2: yy, stroke: "var(--border)", "stroke-width": 1 }));
     const lb = chartSvg("text", { x: ML - 6, y: yy + 4, "text-anchor": "end", fill: "var(--muted)", "font-size": 11 });
-    lb.textContent = yFmt(t); svg.appendChild(lb);
+    lb.textContent = t.toFixed(0); svg.appendChild(lb);
   }
-  stacks.forEach((st, i) => {
+  days.forEach((day, i) => {
     const x0 = ML + gap + i * (barW + gap);
+    const cx = x0 + barW / 2;
     let yTop = MT + (H - MT - MB);
-    st.parts.forEach(part => {
-      if (!part.v) return;
-      const h = (part.v / maxTot) * (H - MT - MB);
+    day.states.forEach(st => {
+      if (!st.v) return;
+      const h = (st.v / maxTot) * (H - MT - MB);
       yTop -= h;
       svg.appendChild(chartSvg("rect", {
         x: x0.toFixed(1), y: yTop.toFixed(1), width: barW.toFixed(1), height: h.toFixed(1),
-        fill: part.color, stroke: "none"
+        fill: st.color, stroke: "none", "data-state": st.g,
       }));
     });
-    if (n <= 24 || i % Math.ceil(n / 12) === 0) {
-      const lbl = chartSvg("text", {
-        x: (x0 + barW / 2).toFixed(1), y: (H - 8).toFixed(1),
-        "text-anchor": "middle", fill: "var(--muted)", "font-size": 9,
-        transform: `rotate(-35 ${(x0 + barW / 2).toFixed(1)} ${(H - 8).toFixed(1)})`
-      });
-      lbl.textContent = new Date(st.t).toISOString().slice(5, 16).replace("T", " ");
-      svg.appendChild(lbl);
+    if (day.total != null && isFinite(day.total)) {
+      const cy = y(day.total);
+      svg.appendChild(chartSvg("circle", {
+        cx: cx.toFixed(1), cy: cy.toFixed(1), r: 4.5, fill: "var(--text)", stroke: "var(--panel)", "stroke-width": 1.5,
+      }));
     }
+    const lbl = chartSvg("text", {
+      x: cx.toFixed(1), y: (H - 10).toFixed(1),
+      "text-anchor": "middle", fill: "var(--muted)", "font-size": 10,
+    });
+    lbl.textContent = formatDayLabel(day.x);
+    svg.appendChild(lbl);
   });
+  const legHost = document.createElement("div");
+  legHost.className = "legend";
+  stateKeys.forEach((g, si) => {
+    const span = document.createElement("span");
+    span.style.color = palette[si % palette.length];
+    span.textContent = (DATA.groupLabels && DATA.groupLabels[g]) ? DATA.groupLabels[g] : g;
+    legHost.appendChild(span);
+  });
+  const totSpan = document.createElement("span");
+  totSpan.style.color = "var(--text)";
+  totSpan.textContent = "● " + ((DATA.groupLabels && DATA.groupLabels.total) ? DATA.groupLabels.total : "Total");
+  legHost.appendChild(totSpan);
   host.appendChild(svg);
+  host.appendChild(legHost);
 }
 
 function packLinepack() {
@@ -548,9 +596,21 @@ function activeZoneSeries() {
 }
 
 function packZones() {
+  if (chartMode === "stack") {
+    drawConsumptionStackedDaily("chart-zones");
+    return;
+  }
   const series = activeZoneSeries();
-  if (chartMode === "stack") drawStackedColumns("chart-zones", series, v => v.toFixed(1));
-  else drawLines("chart-zones", series, v => v.toFixed(1));
+  drawLines("chart-zones", series, v => v.toFixed(1));
+}
+
+function clearMagoSelections() {
+  selectedGroups.clear();
+  selectedZones.clear();
+  renderGroupChips();
+  renderZoneChips();
+  packZones();
+  writeMagoQuery();
 }
 
 function renderGroupChips() {
@@ -564,7 +624,6 @@ function renderGroupChips() {
     b.textContent = g === "total" ? label : label + " (" + g + ")";
     b.addEventListener("click", () => {
       if (selectedGroups.has(g)) selectedGroups.delete(g); else selectedGroups.add(g);
-      if (!selectedGroups.size) selectedGroups.add("total");
       renderGroupChips(); packZones(); writeMagoQuery();
     });
     host.appendChild(b);
@@ -707,6 +766,7 @@ async function init() {
   paintPage();
   writeMagoQuery();
 
+  document.getElementById("btn-clear-zones").addEventListener("click", clearMagoSelections);
   document.querySelectorAll('input[name="gran"]').forEach(el => {
     el.addEventListener("change", () => {
       if (!el.checked) return;
@@ -782,6 +842,7 @@ def write_dashboard(out_path: Path | str = DEFAULT_OUT) -> Path:
         SHARED_MASTHEAD=kit.masthead_html("mago"),
         SHARED_METHODOLOGY=kit.methodology_html("mago"),
         SHARED_SHARE_BUTTON=kit.share_link_button_html(),
+        SHARED_CLEAR_SELECTION=kit.clear_selection_button_html("btn-clear-zones"),
         FAVICON_DATA_URI=kit.embed_favicon(),
         FONT_PRELOAD=kit.font_preload_html(),
     )

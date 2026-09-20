@@ -245,7 +245,10 @@ __SHARED_TYPO_WEIGHT_CSS__
 <div class="tso-row" id="tso-row"></div>
 <div class="chart-card">
   <p class="panel-title">Price Trend</p>
-  <div class="chart-picker" id="chart-picker"></div>
+  <div class="picker-row" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px">
+    __SHARED_CLEAR_SELECTION__
+    <div class="chart-picker" id="chart-picker" style="margin-bottom:0"></div>
+  </div>
   <div id="chart-host"></div>
 </div>
 <div class="quick-filters" id="quick-filters"></div>
@@ -1376,6 +1379,14 @@ async function init() {
   buildQuickFilters();
   initChartDefaults();
   buildChartPicker();
+  document.getElementById("btn-clear-chart").addEventListener("click", () => {
+    chartPipelines.clear();
+    chartTypes.clear();
+    chartPicked.clear();
+    buildChartPicker();
+    renderChart();
+    writeQueryFilters();
+  });
   applyQueryFilters();
   updateFilterIcons();
   render();
@@ -1466,6 +1477,7 @@ def write_dashboard(out_path=DEFAULT_OUT):
         SHARED_JS_TABLE_SORT=kit.JS_TABLE_SORT,
         SHARED_JS_QUERY_STATE=kit.JS_QUERY_STATE,
         SHARED_SHARE_BUTTON=kit.share_link_button_html(),
+        SHARED_CLEAR_SELECTION=kit.clear_selection_button_html("btn-clear-chart"),
         SHARED_JS_CHART_PALETTE=kit.chart_palette_js(),
         SHARED_SITE_LINKS_JS=kit.site_links_js("poc"),
         SHARED_MASTHEAD=kit.masthead_html("poc"),

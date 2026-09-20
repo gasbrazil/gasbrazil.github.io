@@ -419,6 +419,7 @@ const GB_I18N = {
     contact: "Contact",
     copyLink: "Copy link",
     linkCopied: "Copied",
+    clearAllSelections: "Clear all",
     tagline: "Analytical Firepower for Brazil's Energy Markets",
     hubDashboards: "Live dashboards",
     hubHint: "Every card below opens a live dashboard — pick a product to explore.",
@@ -546,6 +547,7 @@ const GB_I18N = {
     contact: "Contato",
     copyLink: "Copiar link",
     linkCopied: "Copiado",
+    clearAllSelections: "Limpar tudo",
     tagline: "Potência analítica para os mercados de energia do Brasil",
     hubDashboards: "Painéis ao vivo",
     hubHint: "Cada cartão abaixo abre um painel ao vivo — escolha um produto para explorar.",
@@ -873,6 +875,18 @@ function gbCopyLink(buttonId) {
   });
 }
 """
+
+
+def clear_selection_button_html(
+    button_id: str = "btn-clear-selection", css_class: str = "btn-clear"
+) -> str:
+    """Clear-all button for multi-select pickers. Uses shared clearAllSelections i18n."""
+    safe = html.escape(button_id, quote=True)
+    cls = html.escape(css_class, quote=True)
+    return (
+        f'<button type="button" id="{safe}" class="{cls}" '
+        'data-i18n="clearAllSelections">Clear all</button>'
+    )
 
 
 def share_link_button_html(button_id: str = "btn-share", css_class: str = "") -> str:

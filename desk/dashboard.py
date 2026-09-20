@@ -171,7 +171,10 @@ __SHARED_TYPO_WEIGHT_CSS__
         </select>
       </label>
     </div>
-    <div class="series-picker" id="picker-compare"></div>
+    <div class="picker-row" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px">
+      __SHARED_CLEAR_COMPARE__
+      <div class="series-picker" id="picker-compare" style="margin-bottom:0"></div>
+    </div>
     <div class="chart-host" id="main-chart"></div>
   </section>
   <section class="panel" aria-labelledby="spark-title">
@@ -214,7 +217,10 @@ __SHARED_TYPO_WEIGHT_CSS__
 
 <section class="panel" aria-labelledby="poc-anp-title">
   <p class="panel-title" id="poc-anp-title" data-i18n="deskPocAnpTitle">POC · ANP — monthly</p>
-  <div class="series-picker" id="picker-poc-anp"></div>
+  <div class="picker-row" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px">
+    __SHARED_CLEAR_POC_ANP__
+    <div class="series-picker" id="picker-poc-anp" style="margin-bottom:0"></div>
+  </div>
   <div class="chart-host" id="poc-anp-chart"></div>
 </section>
 
@@ -1313,6 +1319,26 @@ async function init() {
         writeDeskQuery();
       });
     }
+    const clearCompare = document.getElementById("btn-clear-compare");
+    if (clearCompare && clearCompare.dataset.bound !== "1") {
+      clearCompare.dataset.bound = "1";
+      clearCompare.addEventListener("click", () => {
+        pickedCompare.clear();
+        compareSlots.clear();
+        refreshCompare();
+        writeDeskQuery();
+      });
+    }
+    const clearPocAnp = document.getElementById("btn-clear-poc-anp");
+    if (clearPocAnp && clearPocAnp.dataset.bound !== "1") {
+      clearPocAnp.dataset.bound = "1";
+      clearPocAnp.addEventListener("click", () => {
+        pickedPocAnp.clear();
+        pocAnpSlots.clear();
+        refreshPocAnp();
+        writeDeskQuery();
+      });
+    }
     if (smSel) {
       smSel.value = compareSm;
       smSel.addEventListener("change", () => {
@@ -1398,6 +1424,8 @@ def write_dashboard(out_path: Path | str = DEFAULT_OUT) -> Path:
         SHARED_JS_TABLE_SORT=kit.JS_TABLE_SORT,
         SHARED_JS_QUERY_STATE=kit.JS_QUERY_STATE,
         SHARED_SHARE_BUTTON=kit.share_link_button_html(css_class="series-btn"),
+        SHARED_CLEAR_COMPARE=kit.clear_selection_button_html("btn-clear-compare"),
+        SHARED_CLEAR_POC_ANP=kit.clear_selection_button_html("btn-clear-poc-anp"),
         SHARED_JS_THEME_TOGGLE=kit.JS_THEME_TOGGLE,
         SHARED_JS_BOOT=kit.JS_BOOT,
         SHARED_JS_I18N=kit.JS_I18N,
