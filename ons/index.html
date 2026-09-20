@@ -10,7 +10,7 @@
 <link rel="preload" href="/shared/fonts/IBMPlexSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/shared/fonts/Pacaembu-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
 <!-- home-page teaser marker, read by ../build_home.py -- not otherwise used by this page:
-     generated: 2026-09-20 19:28 UTC
+     generated: 2026-09-20 20:55 UTC
      kpi_gas_mwmed: 3266 -->
 <script>
 (function(){
@@ -1367,6 +1367,7 @@ select optgroup {
 .btn-retry:active {
   transform: scale(0.98);
 }
+
 /* Everything below is ons-dashboard's own layout/components. The palette
    (neutral tokens + the shared Brazilian-flag accent) now lives entirely in
    shared/theme.css -- see ADR-001, Decision 2 Option C -- this file only
@@ -1552,7 +1553,6 @@ table.data thead th.sortable:hover{background:var(--accent-soft)}
   button,select,input{width:100%}
 }
 
-
 /* Shared header/label typography — last in cascade (Pacaembu SemiBold on chrome labels). */
 .wrap h1,
 .wrap h2,
@@ -1604,6 +1604,7 @@ main h3,
   font-family: var(--font-display);
   font-weight: 600;
 }
+
 </style>
 </head>
 <body>
@@ -1791,7 +1792,7 @@ main h3,
 <div class="tt" id="tt"></div>
 
 <script>
-const PAYLOAD_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/ons/payload.json.gz?v=35532389007";
+const PAYLOAD_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/ons/payload.json.gz?v=35537024252";
 
 function b64ToBytes(b64) {
   const bin = atob(b64);
@@ -5272,7 +5273,9 @@ async function boot(){
     const text = await inflateGzipUrl(PAYLOAD_URL);
     DATA = JSON.parse(text);
   }catch(err){
-    document.getElementById("boot").innerHTML = ""; showBootError(err, () => boot(), "#boot");
+    console.error(err);
+    document.getElementById("boot").innerHTML = "";
+    showBootError(err, () => boot(), "#boot");
     return;
   }
   document.getElementById("boot").hidden=true;
