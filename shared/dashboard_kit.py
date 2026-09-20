@@ -156,7 +156,7 @@ def typo_weight_css() -> str:
 
 
 TYPO_WEIGHT_CSS = """
-/* Shared header/label weight — last in cascade (Pacaembu-era density on Plex UI). */
+/* Shared header/label typography — last in cascade (Pacaembu SemiBold on chrome labels). */
 .wrap h1,
 .wrap h2,
 .wrap h3,
@@ -164,6 +164,7 @@ header.dash-head h1,
 .panel-title,
 .kpi-title,
 .kpi-label,
+.kpi-header,
 .kpi-header .kpi-title,
 .sources-label,
 .sources-block .label,
@@ -171,13 +172,16 @@ header.dash-head h1,
 .asof-strip .asof-label,
 .band-label,
 .level-btn,
+.view-toggle,
 .view-toggle .level-btn,
 .tab,
+.tabs,
 .tabs > button,
 .tabs button,
 .chip,
 .pill,
 .pick h3,
+.tile .nm,
 .tile .cap,
 .tile .lbl,
 button[aria-pressed],
@@ -200,6 +204,7 @@ main h1,
 main h2,
 main h3,
 .nav-trail a {
+  font-family: var(--font-display);
   font-weight: 600;
 }
 """
