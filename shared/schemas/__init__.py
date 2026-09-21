@@ -259,3 +259,26 @@ def validate_tag_mago_series(df: pd.DataFrame) -> None:
     if "source" in df.columns and not df.empty:
         _assert_allowed(df, "source", ("mago",), label="tag_mago_series")
 
+
+# --- NTS OnTime (operational telemetry) ---------------------------------------
+
+NTS_ONTIME_SERIES_COLUMNS = (
+    "timestamp",
+    "value_m3",
+    "value_mm3",
+    "rate_m3_h",
+    "observed_at",
+    "source",
+)
+
+
+def validate_nts_ontime_series(df: pd.DataFrame) -> None:
+    _require(df, NTS_ONTIME_SERIES_COLUMNS, "nts_ontime_series")
+    _assert_numeric(df, "value_m3", label="nts_ontime_series")
+    _assert_numeric(df, "value_mm3", label="nts_ontime_series")
+    if "rate_m3_h" in df.columns:
+        _assert_numeric(df, "rate_m3_h", label="nts_ontime_series")
+    if "source" in df.columns and not df.empty:
+        _assert_allowed(df, "source", ("nts", "ontime"), label="nts_ontime_series")
+
+

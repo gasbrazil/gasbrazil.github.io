@@ -139,9 +139,13 @@ def collect_status() -> dict:
         "mago_kpi": None,
         "mago_kpi_pt": None,
         "mago_when": None,
+        "nts_kpi": None,
+        "nts_kpi_pt": None,
+        "nts_when": None,
         "supply_spark": "",
         "pld_spark": "",
         "poc_spark": "",
+        "nts_spark": "",
         "teasers_url": dk.teaser_url(),
     }
     for key, val in pt.status_from_teasers().items():
@@ -216,6 +220,14 @@ def collect_status() -> dict:
             se = ldf[ldf["submarket"].astype(str).str.upper().isin(["SE", "SUDESTE"])]
             se = se.dropna(subset=["date", "pld"]).sort_values("date")
             status["pld_spark"] = _sparkline_svg(se["pld"].tail(45).tolist())
+
+        nts_pq = ROOT / "nts" / "data" / "nts_linepack_series.parquet"
+        if nts_pq.exists():
+            ndf = pd.read_parquet(nts_pq)
+            if not ndf.empty and "value_mm3" in ndf.columns:
+                ndf["timestamp"] = pd.to_datetime(ndf["timestamp"], errors="coerce")
+                ndf = ndf.dropna(subset=["timestamp", "value_mm3"]).sort_values("timestamp")
+                status["nts_spark"] = _sparkline_svg(ndf["value_mm3"].tail(40).tolist())
     except Exception:
         pass
     return status
@@ -512,6 +524,13 @@ HOME_TEMPLATE = """__HEAD__
       <div class="kpi-val" data-en="__MAGO_KPI__" data-pt="__MAGO_KPI_PT__">__MAGO_KPI__</div>
       <div class="kpi-when" data-refresh="__MAGO_WHEN__"></div>
     </a>
+    <a class="kpi-cell" href="nts/" data-slug="nts">
+      <div class="kpi-label" data-i18n="cardNts">NTS OnTime</div>
+      <div class="kpi-role" data-i18n="cardNtsDesc">NTS operational line pack and network packing/unpacking rate.</div>
+      <div class="kpi-val" data-en="__NTS_KPI__" data-pt="__NTS_KPI_PT__">__NTS_KPI__</div>
+      <div class="kpi-when" data-refresh="__NTS_WHEN__"></div>
+      __NTS_SPARK__
+    </a>
     <a class="kpi-cell" href="supply/" data-slug="supply">
       <div class="kpi-label" data-i18n="cardSupply">Gas Supply</div>
       <div class="kpi-role">National balance</div>
@@ -534,6 +553,7 @@ HOME_TEMPLATE = """__HEAD__
       <a href="https://www.ofertadecapacidade.com.br/PEG/resultado" target="_blank" rel="noopener">POC<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
       <a href="https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/dados-consolidados-movimentacao-de-gas-natural-em-gasodutos-de-transporte" target="_blank" rel="noopener">ANP<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
       <a href="https://dadosabertos.ccee.org.br/dataset/pld_media_diaria" target="_blank" rel="noopener">CCEE<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+      <a href="https://www.ntsbrasil.com/ontime/" target="_blank" rel="noopener">NTS<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
     </div>
   </div>
 </main>
@@ -632,7 +652,7 @@ ABOUT_TEMPLATE = """__HEAD__
     <p data-i18n="aboutCoverPld">PLD: CCEE daily averages and hourly prices by submarket; peak is hours 18–20 on weekdays. Optional ONS CMO and median gas CVU when lake data is present.</p>
     <p data-i18n="aboutCoverDesk">The Desk: cross-product headline series. Full history and filters live on each product page.</p>
     <p>
-      <a href="../ons/">ONS</a> · <a href="../poc/">POC</a> · <a href="../contratos/">Contratos</a> · <a href="../flows/">Flows</a> · <a href="../mago/">TAG Mago</a> · <a href="../supply/">Supply</a> · <a href="../precos/">ANP Prices</a> · <a href="../pld/">PLD</a> · <a href="../desk/">The Desk</a> ·
+      <a href="../ons/">ONS</a> · <a href="../poc/">POC</a> · <a href="../contratos/">Contratos</a> · <a href="../flows/">Flows</a> · <a href="../mago/">TAG Mago</a> · <a href="../nts/">NTS OnTime</a> · <a href="../supply/">Supply</a> · <a href="../precos/">ANP Prices</a> · <a href="../pld/">PLD</a> · <a href="../desk/">The Desk</a> ·
       <a href="../ons/wiki-html/">ONS wiki</a>
     </p>
   </div>
@@ -719,9 +739,13 @@ def write_home(out_path: Path | str = DEFAULT_OUT) -> Path:
     html = html.replace("__MAGO_KPI__", st.get("mago_kpi") or "")
     html = html.replace("__MAGO_KPI_PT__", st.get("mago_kpi_pt") or st.get("mago_kpi") or "")
     html = html.replace("__MAGO_WHEN__", st.get("mago_when") or "")
+    html = html.replace("__NTS_KPI__", st.get("nts_kpi") or "")
+    html = html.replace("__NTS_KPI_PT__", st.get("nts_kpi_pt") or st.get("nts_kpi") or "")
+    html = html.replace("__NTS_WHEN__", st.get("nts_when") or "")
     html = html.replace("__POC_SPARK__", st.get("poc_spark") or "")
     html = html.replace("__SUPPLY_SPARK__", st.get("supply_spark") or "")
     html = html.replace("__PLD_SPARK__", st.get("pld_spark") or "")
+    html = html.replace("__NTS_SPARK__", st.get("nts_spark") or "")
     html = html.replace("__TEASERS_URL__", st.get("teasers_url") or "")
     html = html.replace("__HUB_CONTROLS__", _hub_controls("wiki/", "about/"))
     html = html.replace(
@@ -793,8 +817,11 @@ def write_robots_and_sitemap() -> None:
         encoding="utf-8",
     )
     today = dt.date.today().isoformat()
-    urls = ["/", "/ons/", "/poc/", "/contratos/", "/flows/", "/mago/", "/supply/", "/precos/", "/pld/", "/desk/", "/wiki/", "/about/"]
+    urls = ["/", "/ons/", "/poc/", "/contratos/", "/flows/", "/mago/", "/nts/", "/supply/", "/precos/", "/pld/", "/desk/", "/wiki/", "/about/"]
     body = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    for u in urls:
+        body += f"  <url><loc>https://gasbrazil.com{u}</loc><lastmod>{today}</lastmod></url>\n"
+    body += "</urlset>\n"
     for u in urls:
         body += f"  <url><loc>https://gasbrazil.com{u}</loc><lastmod>{today}</lastmod></url>\n"
     body += "</urlset>\n"

@@ -492,6 +492,7 @@ const GB_I18N = {
     navPld: "PLD Prices",
     navPrecos: "ANP Prices",
     navMago: "TAG Mago",
+    navNts: "NTS OnTime",
     navDesk: "The Desk",
     navProducts: "Products", // retained for previously deployed pages cached in browsers
     navMenu: "Menu",
@@ -553,8 +554,16 @@ const GB_I18N = {
     sourcePrecos: "ANP",
     sourcePld: "CCEE",
     sourceMago: "TAG Mago",
+    sourceNts: "NTS OnTime",
     methodAssump_mago: "One EMPACOTAMENTOS snapshot feeds both line pack and zone forecasts; values are stored as published (m³ line pack, Mm³/d zones).",
+    methodAssump_nts: "NTS SCADA telemetry snapshot; values are stored as published (m³ line pack and calculated packing rate).",
     magoKpiLinepack: "Integrated line pack",
+    ntsKpiLinepack: "NTS Line pack",
+    ntsKpiRate: "Packing Rate",
+    ntsKpiPacking: "Packing",
+    ntsKpiUnpacking: "Unpacking",
+    ntsLinepackTitle: "NTS Line pack — Southeast transmission mesh",
+    ntsLinepackSub: "Real-time pipeline line pack inventory and hourly packing/unpacking rate.",
     magoKpiZone: "Operating Zone",
     magoKpiSnapshot: "Snapshot (UTC)",
     magoLinepackTitle: "Line pack — integrated mesh",
@@ -644,6 +653,9 @@ const GB_I18N = {
     aboutCoverMago: "TAG Mago: hourly line pack and 7-day balancing-zone consumption forecasts from EMPACOTAMENTOS API snapshots.",
     cardMago: "TAG Mago",
     cardMagoDesc: "TAG operational line pack and zone consumption forecasts.",
+    cardNts: "NTS OnTime",
+    cardNtsDesc: "NTS operational line pack and network packing/unpacking rate.",
+    aboutCoverNts: "NTS OnTime: real-time line pack telemetry and hourly network packing/unpacking rate for the NTS pipeline grid.",
     aboutCoverDesk: "The Desk: cross-product headline series. Full history and filters live on each product page.",
     notFound: "This page is not here.",
     notFoundBody: "The hub and dashboards are linked below.",
@@ -694,6 +706,7 @@ const GB_I18N = {
     navPld: "Preços PLD",
     navPrecos: "Preços ANP",
     navMago: "TAG Mago",
+    navNts: "NTS OnTime",
     navDesk: "The Desk",
     navProducts: "Produtos", // retained for previously deployed pages cached in browsers
     navMenu: "Menu",
@@ -755,8 +768,16 @@ const GB_I18N = {
     sourcePrecos: "ANP",
     sourcePld: "CCEE",
     sourceMago: "TAG Mago",
+    sourceNts: "NTS OnTime",
     methodAssump_mago: "Um snapshot EMPACOTAMENTOS alimenta empacotamento e previsão por zona; valores como publicados (m³ e Mm³/d).",
+    methodAssump_nts: "Telemetria de empacotamento em tempo real publicada pelo sistema SCADA da NTS (m³ e Mm³).",
     magoKpiLinepack: "Empacotamento integrado",
+    ntsKpiLinepack: "Empacotamento NTS",
+    ntsKpiRate: "Taxa de Variação",
+    ntsKpiPacking: "Empacotando",
+    ntsKpiUnpacking: "Desempacotando",
+    ntsLinepackTitle: "Empacotamento NTS — Malha Sudeste",
+    ntsLinepackSub: "Estoque de gás em tempo real na malha de transporte e taxa horária de empacotamento/desempacotamento.",
     magoKpiZone: "Faixa Operacional",
     magoKpiSnapshot: "Snapshot (UTC)",
     magoLinepackTitle: "Empacotamento — malha integrada",
@@ -846,6 +867,9 @@ const GB_I18N = {
     aboutCoverMago: "TAG Mago: empacotamento horário e previsões de consumo por zona de balanceamento (snapshots EMPACOTAMENTOS).",
     cardMago: "TAG Mago",
     cardMagoDesc: "Empacotamento operacional TAG e previsões de consumo por zona.",
+    cardNts: "NTS OnTime",
+    cardNtsDesc: "Empacotamento operacional da malha NTS e taxa horária de empacotamento.",
+    aboutCoverNts: "NTS OnTime: telemetria de estoque de empacotamento (linepack) e taxa de variação da malha NTS.",
     aboutCoverDesk: "The Desk: séries-resumo entre produtos. Histórico e filtros ficam em cada painel.",
     notFound: "Esta página não existe.",
     notFoundBody: "O hub e os painéis estão nos links abaixo.",
@@ -2014,6 +2038,12 @@ _SITES = {
         "caissonpoint": "https://gasbrazil.com/mago/",
         "hub": "https://gasbrazil.github.io/mago/",
     },
+    "nts": {
+        "label": "NTS OnTime",
+        "custom": "https://gasbrazil.com/nts/",
+        "caissonpoint": "https://gasbrazil.com/nts/",
+        "hub": "https://gasbrazil.github.io/nts/",
+    },
     "supply": {
         "label": "Gas Supply",
         "custom": "https://gasbrazil.com/supply/",
@@ -2040,6 +2070,7 @@ _PAGE_INTRO = {
     "contratos": "navContratos",
     "flows": "navFlows",
     "mago": "navMago",
+    "nts": "navNts",
     "supply": "navSupply",
     "precos": "navPrecos",
 }
@@ -2055,6 +2086,7 @@ STALE_LAG_DAYS = {
     "contratos": 7,
     "flows": 60,
     "mago": 2,
+    "nts": 2,
     "supply": 100,
     "precos": 100,
     "desk": 14,
@@ -2091,6 +2123,7 @@ _METHODOLOGY = {
     "precos": (("sourcePrecos",), "methodAssump_precos", "aboutCoverPrecos"),
     "pld": (("sourcePld",), "methodAssump_pld", "aboutCoverPld"),
     "mago": (("sourceMago",), "methodAssump_mago", "aboutCoverMago"),
+    "nts": (("sourceNts",), "methodAssump_nts", "aboutCoverNts"),
     "desk": (
         ("sourceOns", "sourcePld", "sourcePoc", "sourceFlows"),
         "methodAssump_desk",
@@ -2108,6 +2141,7 @@ _METHOD_SOURCE_LABELS = {
     "sourcePrecos": "ANP",
     "sourcePld": "CCEE",
     "sourceMago": "TAG Mago",
+    "sourceNts": "NTS OnTime",
 }
 
 
@@ -2145,6 +2179,7 @@ _METHOD_ASSUMP_DEFAULTS = {
     "precos": "Tax-inclusive R$/MMBtu monthly disclosures, not spot benchmarks.",
     "pld": "Peak = hours 18–20 on weekdays (ANEEL-style ponta, TOU v1); SIN has no PLD (join map v1).",
     "mago": "One EMPACOTAMENTOS snapshot feeds both line pack and zone forecasts; values are stored as published (m³ line pack, Mm³/d zones).",
+    "nts": "NTS SCADA telemetry snapshot; values are stored as published (m³ line pack and calculated packing rate).",
     "desk": "Cross-product headlines; full history and filters live on each product page.",
 }
 
@@ -2159,6 +2194,7 @@ _METHOD_LIMITS_DEFAULTS = {
     "aboutCoverPrecos": "ANP Prices: Resolution 52/2011 monthly disclosures (R$/MMBtu, tax-inclusive). Some months are suppressed for confidentiality.",
     "aboutCoverPld": "PLD: CCEE daily averages and hourly prices by submarket; peak is hours 18–20 on weekdays. Optional ONS CMO and median gas CVU when lake data is present.",
     "aboutCoverMago": "TAG Mago: hourly line pack and 7-day balancing-zone consumption forecasts from EMPACOTAMENTOS API snapshots.",
+    "aboutCoverNts": "NTS OnTime: real-time line pack telemetry and hourly network packing/unpacking rate for the NTS pipeline grid.",
     "aboutCoverDesk": "The Desk: cross-product headline series. Full history and filters live on each product page.",
 }
 
@@ -2312,6 +2348,7 @@ def _menu_items_html(self_id: str) -> str:
         "contratos": "navContratos",
         "flows": "navFlows",
         "mago": "navMago",
+        "nts": "navNts",
         "supply": "navSupply",
         "pld": "navPld",
         "precos": "navPrecos",

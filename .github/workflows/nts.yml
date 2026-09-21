@@ -1,0 +1,99 @@
+name: Refresh NTS OnTime dashboard
+
+# NTS publishes real-time SCADA telemetry for the Southeast gas transmission
+# system via https://www.ntsbrasil.com/wp-json/ontime/v1/estoque.
+# Poll every 4 hours to keep GasBrazil telemetry and historical series fresh.
+on:
+  schedule:
+    - cron: "45 */4 * * *"
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths:
+      - "nts/**"
+      - "shared/**"
+      - ".github/workflows/nts.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: nts-refresh
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_ENDPOINT_URL: ${{ secrets.R2_ENDPOINT_URL }}
+      GASBRAZIL_LAKE_BUCKET: ${{ secrets.GASBRAZIL_LAKE_BUCKET }}
+      GASBRAZIL_ARTIFACTS_BUCKET: ${{ secrets.GASBRAZIL_ARTIFACTS_BUCKET }}
+      GASBRAZIL_DATA_BASE_URL: ${{ secrets.GASBRAZIL_DATA_BASE_URL }}
+      GASBRAZIL_DATA_CACHE_BUST: ${{ github.run_id }}
+    defaults:
+      run:
+        working-directory: nts
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5.4.2
+        with:
+          enable-cache: true
+          python-version: "3.12"
+          cache-dependency-glob: "nts/requirements.txt"
+
+      - run: uv pip install -r requirements.txt -c ../shared/constraints.txt
+
+      - name: Cache key for this month
+        id: ym
+        run: echo "ym=$(date -u +%Y-%m)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore NTS raw snapshots
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: nts/raw
+          key: nts-raw-${{ steps.ym.outputs.ym }}
+          restore-keys: |
+            nts-raw-
+
+      - name: Fetch recent NTS snapshots
+        run: python nts_pipeline.py fetch --days 7
+
+      - name: Build parquet + dashboard
+        run: |
+          python nts_pipeline.py build
+          python dashboard.py
+
+      - name: Commit dashboard artifacts
+        working-directory: .
+        env:
+          GASBRAZIL_DATA_BASE_URL: ${{ secrets.GASBRAZIL_DATA_BASE_URL }}
+          GASBRAZIL_DATA_CACHE_BUST: ${{ github.run_id }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add nts/index.html nts/data/nts_linepack_series.parquet lake/transport/nts_linepack_series.parquet 2>/dev/null || true
+          git diff --staged --quiet || git commit -m "chore(nts): refresh NTS OnTime dashboard and telemetry"
+          git push || bash .github/scripts/push-with-rebase.sh
+
+      - name: Refresh home hub (NTS OnTime card)
+        working-directory: .
+        env:
+          GASBRAZIL_DATA_BASE_URL: ${{ secrets.GASBRAZIL_DATA_BASE_URL }}
+          GASBRAZIL_DATA_CACHE_BUST: ${{ github.run_id }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT_URL: ${{ secrets.R2_ENDPOINT_URL }}
+          GASBRAZIL_ARTIFACTS_BUCKET: ${{ secrets.GASBRAZIL_ARTIFACTS_BUCKET }}
+        run: |
+          uv pip install -r poc/requirements.txt -c shared/constraints.txt
+          python build_home.py
+          python shared/publish_teasers.py
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html about/index.html 404.html robots.txt sitemap.xml hub/teasers.json.gz 2>/dev/null || true
+          git diff --staged --quiet || git commit -m "home: refresh hub after NTS update"
+          git push || bash .github/scripts/push-with-rebase.sh
