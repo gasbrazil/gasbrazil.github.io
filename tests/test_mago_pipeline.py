@@ -159,3 +159,99 @@ def test_load_payload_groups_and_history(tmp_path, monkeypatch):
     assert result["groupSeries"]["BA"]["times"]
     assert len(result["linepackHistoryRows"]) >= 1
     assert result["linepackHistory"]["times"]
+    assert "toleranceBands" in result
+    assert "toleranceBandsList" in result
+    assert "kpiZone" in result
+    assert result["linepackHistoryRows"][0]["zone"] in [
+        "severo_superior", "alto_superior", "baixo_superior",
+        "marginal", "baixo_inferior", "alto_inferior", "severo_inferior", "unknown"
+    ]
+
+
+def test_rows_from_snapshot_with_tolerance_bands():
+    snap = datetime(2026, 9, 19, 12, 0, 0, tzinfo=UTC)
+    payload = {
+        "Items": [
+            {
+                "Tag": "Comercial_Faixa_Severo_Superior_MalhaIntegrada",
+                "Timestamp": "2026-09-19T12:00:00Z",
+                "Value": 75500000.0,
+                "Good": True,
+            },
+            {
+                "Tag": "Comercial_Faixa_Marginal_Superior_MalhaIntegrada",
+                "Timestamp": "2026-09-19T12:00:00Z",
+                "Value": 72000000.0,
+                "Good": True,
+            },
+            {
+                "Tag": "Comercial_Faixa_Marginal_Inferior_MalhaIntegrada",
+                "Timestamp": "2026-09-19T12:00:00Z",
+                "Value": 69000000.0,
+                "Good": True,
+            },
+        ]
+    }
+    rows = rows_from_snapshot(snap, payload)
+    assert len(rows) == 3
+    for r in rows:
+        assert r["series"] == "linepack_tolerance_band"
+        assert r["mesh"] == "integrated"
+    zones = {r["zone"] for r in rows}
+    assert zones == {"severo_superior", "marginal_superior", "marginal_inferior"}
+
+
+def test_determine_linepack_zone():
+    md = _load_mago_dashboard()
+    bands = {
+        "severo_superior": 75_500_000.0,
+        "baixo_superior": 74_500_000.0,
+        "marginal_superior": 72_000_000.0,
+        "marginal_inferior": 69_000_000.0,
+        "baixo_inferior": 67_500_000.0,
+        "severo_inferior": 66_000_000.0,
+    }
+
+    # Severo Superior
+    z = md.determine_linepack_zone(76_000_000.0, bands)
+    assert z["key"] == "severo_superior"
+    assert z["isAlert"] is True
+    assert z["isCritical"] is True
+
+    # Alto Superior
+    z = md.determine_linepack_zone(75_000_000.0, bands)
+    assert z["key"] == "alto_superior"
+    assert z["isAlert"] is True
+    assert z["isCritical"] is False
+
+    # Baixo Superior
+    z = md.determine_linepack_zone(73_000_000.0, bands)
+    assert z["key"] == "baixo_superior"
+    assert z["isAlert"] is False
+
+    # Marginal (Target Operating Envelope)
+    z = md.determine_linepack_zone(70_500_000.0, bands)
+    assert z["key"] == "marginal"
+    assert z["isAlert"] is False
+
+    # Baixo Inferior
+    z = md.determine_linepack_zone(68_000_000.0, bands)
+    assert z["key"] == "baixo_inferior"
+    assert z["isAlert"] is False
+
+    # Alto Inferior (Alert)
+    z = md.determine_linepack_zone(67_000_000.0, bands)
+    assert z["key"] == "alto_inferior"
+    assert z["isAlert"] is True
+
+    # Severo Inferior (Critical Curtailment Risk)
+    z = md.determine_linepack_zone(65_000_000.0, bands)
+    assert z["key"] == "severo_inferior"
+    assert z["isAlert"] is True
+    assert z["isCritical"] is True
+
+    # None / Missing
+    z = md.determine_linepack_zone(None, bands)
+    assert z["key"] == "unknown"
+    assert z["isAlert"] is False
+

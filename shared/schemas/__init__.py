@@ -148,6 +148,7 @@ TAG_MAGO_SERIES_COLUMNS = (
 TAG_MAGO_SERIES_KINDS = (
     "linepack_actual",
     "linepack_forecast",
+    "linepack_tolerance_band",
     "zone_consumption_forecast",
 )
 

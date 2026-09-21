@@ -24,7 +24,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from datetime import date, datetime, timedelta, timezone
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 
 import pandas as pd
@@ -37,8 +37,6 @@ PARQUET_PATH = DATA_DIR / "tag_mago_series.parquet"
 
 sys.path.insert(0, str(HERE.parent / "shared"))
 import data_kit as dk  # noqa: E402
-from schemas import validate_tag_mago_series  # noqa: E402
-
 from mago_client import (  # noqa: E402
     MagoObject,
     fetch_object_json,
@@ -47,13 +45,14 @@ from mago_client import (  # noqa: E402
     parse_snapshot_key,
     rows_from_snapshot,
 )
+from schemas import validate_tag_mago_series  # noqa: E402
 
 DEFAULT_FETCH_DAYS = 14
 MAX_STALENESS_DAYS = 2
 
 
 def _utc_today() -> date:
-    return datetime.now(timezone.utc).date()
+    return datetime.now(UTC).date()
 
 
 def _load_manifest() -> dict:
@@ -75,7 +74,7 @@ def _manifest_entry(obj: MagoObject) -> dict:
         "etag": obj.etag,
         "size": obj.size,
         "last_modified": obj.last_modified.isoformat(),
-        "fetched_at": datetime.now(timezone.utc).isoformat(),
+        "fetched_at": datetime.now(UTC).isoformat(),
     }
 
 
@@ -119,7 +118,7 @@ def cmd_fetch(*, days: int | None, backfill_from: date | None) -> None:
             failed += 1
             print(f"  warn: failed {obj.key}: {e}")
 
-    manifest["last_fetch"] = datetime.now(timezone.utc).isoformat()
+    manifest["last_fetch"] = datetime.now(UTC).isoformat()
     manifest["fetch_window"] = {"start": start.isoformat(), "end": today.isoformat()}
     _save_manifest(manifest)
     print(f"Fetch done: downloaded={downloaded} skipped={skipped} failed={failed}")
@@ -181,7 +180,7 @@ def cmd_build() -> None:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     df.sort_values(["snapshot_at", "series", "zone", "observed_at"], inplace=True)
     df.to_parquet(PARQUET_PATH, index=False)
-    print(f"Wrote {len(df):,} rows → {PARQUET_PATH}")
+    print(f"Wrote {len(df):,} rows -> {PARQUET_PATH}")
 
     try:
         dk.publish("tag_mago_series", PARQUET_PATH)
