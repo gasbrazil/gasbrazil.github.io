@@ -2481,8 +2481,8 @@ main h3,
     <a class="kpi-cell" href="ons/" data-slug="ons">
       <div class="kpi-label" data-i18n="cardOns">ONS Balances</div>
       <div class="kpi-role">Grid &amp; gas dispatch</div>
-      <div class="kpi-val" data-en="3,266 MWmed gas" data-pt="3,266 MWmed a gás">3,266 MWmed gas</div>
-      <div class="kpi-when" data-refresh="2026-09-21 14:47 UTC"></div>
+      <div class="kpi-val" data-en="3,232 MWmed gas" data-pt="3,232 MWmed a gás">3,232 MWmed gas</div>
+      <div class="kpi-when" data-refresh="2026-09-21 22:00 UTC"></div>
     </a>
     <a class="kpi-cell" href="pld/" data-slug="pld">
       <div class="kpi-label" data-i18n="cardPld">PLD Prices</div>
@@ -2514,7 +2514,7 @@ main h3,
       <div class="kpi-label" data-i18n="cardMago">TAG Mago</div>
       <div class="kpi-role" data-i18n="cardMagoDesc">TAG operational line pack and zone consumption forecasts.</div>
       <div class="kpi-val" data-en="72.66 Mm³ line pack" data-pt="72.66 Mm³ empacotamento">72.66 Mm³ line pack</div>
-      <div class="kpi-when" data-refresh="2026-09-21 22:00 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-21 22:06 UTC"></div>
     </a>
     <a class="kpi-cell" href="supply/" data-slug="supply">
       <div class="kpi-label" data-i18n="cardSupply">Gas Supply</div>
@@ -3913,7 +3913,7 @@ initLangToggle("lang-toggle");
 </html>
 
 <script>
-const TEASERS_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/hub/teasers.json.gz?v=35660323681";
+const TEASERS_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/hub/teasers.json.gz?v=35660795015";
 function paintRefreshLabels() {
   document.querySelectorAll(".kpi-when[data-refresh]").forEach(el => {
     const when = el.getAttribute("data-refresh");
