@@ -177,6 +177,25 @@ def resync_footer_shortcuts(html: str) -> str:
     return html
 
 
+def resync_search_btn(html: str) -> str:
+    if 'id="gb-search-trigger"' in html:
+        return html
+    btn = (
+        '<button type="button" class="gb-search-btn" id="gb-search-trigger" aria-label="Search (Ctrl+K)" title="Search (Ctrl+K)">'
+        '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>'
+        '<span data-i18n="searchBtn">Search</span> <kbd>Ctrl+K</kbd>'
+        '</button>'
+    )
+    if '<div class="nav-trail">' in html:
+        return re.sub(
+            r'(<div class="nav-trail">[\s\S]*?)(</div>)',
+            rf'\1{btn}\2',
+            html,
+            count=1,
+        )
+    return html
+
+
 def resync_site(site_id: str) -> None:
     path = ROOT / site_id / "index.html"
     html = path.read_text(encoding="utf-8")
@@ -190,6 +209,7 @@ def resync_site(site_id: str) -> None:
     html = resync_i18n_js(html)
     html = resync_boot_resilience(html)
     html = resync_footer_shortcuts(html)
+    html = resync_search_btn(html)
     path.write_text(html, encoding="utf-8")
     print(f"resynced {path.relative_to(ROOT)}")
 

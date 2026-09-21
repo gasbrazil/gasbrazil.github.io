@@ -496,3 +496,62 @@ def test_build_sort_filter_th_has_filter_class():
     assert 'th.classList.add("has-filter")' in kit.JS_TABLE_SORT
     assert 'th.classList.toggle("has-filter", !!filterInput.value)' in kit.JS_TABLE_SORT
 
+
+def test_command_palette_theme_css_and_markup():
+    css = kit.render_theme_css()
+    assert ".gb-palette-backdrop" in css
+    assert ".gb-palette-card" in css
+    assert ".gb-palette-input" in css
+    assert ".gb-palette-results" in css
+    assert ".gb-search-btn" in css
+    assert ".chart-export-btn" in css
+    assert ".pulse-dot" in css
+    assert "gb-pulse" in css
+
+
+def test_command_palette_js_and_catalog():
+    assert "function toggleCommandPalette(" in kit.JS_I18N
+    assert "function getPaletteCatalog(" in kit.JS_I18N
+    assert "function renderPaletteResults(" in kit.JS_I18N
+    assert "function executePaletteItem(" in kit.JS_I18N
+    assert "function gbExportChartPng(" in kit.JS_I18N
+    assert "function gbBindChartExportButtons(" in kit.JS_I18N
+    assert "e.key === \"k\" || e.key === \"K\"" in kit.JS_I18N
+    assert 'modal.id = "gb-command-palette"' in kit.JS_I18N
+
+
+def test_command_palette_i18n_strings():
+    assert "searchBtn:" in kit.JS_I18N
+    assert "searchPlaceholder:" in kit.JS_I18N
+    assert "paletteDashboards:" in kit.JS_I18N
+    assert "palettePoints:" in kit.JS_I18N
+    assert "exportPng:" in kit.JS_I18N
+    assert "exportPngTitle:" in kit.JS_I18N
+    assert "freshLive:" in kit.JS_I18N
+
+
+def test_masthead_includes_search_button():
+    mast = kit.masthead_html("desk")
+    assert 'id="gb-search-trigger"' in mast
+    assert 'class="gb-search-btn"' in mast
+    assert 'data-i18n="searchBtn"' in mast
+    assert "Ctrl+K" in mast
+
+
+def test_mago_heatmap_theme_css_and_i18n():
+    css = kit.render_theme_css()
+    assert ".hm-summary-grid" in css
+    assert ".hm-summary-tile" in css
+    assert ".hm-calendar-grid" in css
+    assert ".hm-day-card" in css
+    assert ".hm-risk-bar" in css
+    assert ".hm-poc-callout" in css
+
+    assert "magoHeatmapTitle:" in kit.JS_I18N
+    assert "magoHmCompliance:" in kit.JS_I18N
+    assert "magoHmAlertHours:" in kit.JS_I18N
+    assert "magoHmCriticalHours:" in kit.JS_I18N
+    assert "magoHmViewPoc:" in kit.JS_I18N
+
+
+
