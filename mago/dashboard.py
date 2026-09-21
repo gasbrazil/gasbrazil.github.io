@@ -24,7 +24,7 @@ DEFAULT_OUT = HERE / "index.html"
 FAIXA_INFO = [
     {
         "key": "severo_superior",
-        "name_en": "Critical High (Severo)",
+        "name_en": "Critical High",
         "name_pt": "Severo (Superior)",
         "color": "#ef4444",
         "badge_class": "badge-danger",
@@ -33,7 +33,7 @@ FAIXA_INFO = [
     },
     {
         "key": "alto_superior",
-        "name_en": "High Alert (Alto)",
+        "name_en": "High Alert",
         "name_pt": "Alto (Superior)",
         "color": "#f59e0b",
         "badge_class": "badge-warning",
@@ -42,7 +42,7 @@ FAIXA_INFO = [
     },
     {
         "key": "baixo_superior",
-        "name_en": "Mild High (Baixo)",
+        "name_en": "Mild High",
         "name_pt": "Baixo (Superior)",
         "color": "#10b981",
         "badge_class": "badge-success",
@@ -51,7 +51,7 @@ FAIXA_INFO = [
     },
     {
         "key": "marginal",
-        "name_en": "Target Operating (Marginal)",
+        "name_en": "Target Operating",
         "name_pt": "Marginal (Operação Ideal)",
         "color": "#10b981",
         "badge_class": "badge-target",
@@ -60,7 +60,7 @@ FAIXA_INFO = [
     },
     {
         "key": "baixo_inferior",
-        "name_en": "Mild Low (Baixo)",
+        "name_en": "Mild Low",
         "name_pt": "Baixo (Inferior)",
         "color": "#10b981",
         "badge_class": "badge-success",
@@ -69,7 +69,7 @@ FAIXA_INFO = [
     },
     {
         "key": "alto_inferior",
-        "name_en": "Low Alert (Alto)",
+        "name_en": "Low Alert",
         "name_pt": "Alto (Inferior)",
         "color": "#f59e0b",
         "badge_class": "badge-warning",
@@ -78,7 +78,7 @@ FAIXA_INFO = [
     },
     {
         "key": "severo_inferior",
-        "name_en": "Critical Low (Severo)",
+        "name_en": "Critical Low",
         "name_pt": "Severo (Inferior)",
         "color": "#ef4444",
         "badge_class": "badge-danger",
@@ -504,7 +504,7 @@ def load_payload(*, snapshot_at: pd.Timestamp | None = None) -> dict:
         {
             "key": "severo_superior",
             "name": "Severo (Superior)",
-            "nameEn": "Critical High (Severo)",
+            "nameEn": "Critical High",
             "color": "#ef4444",
             "badgeClass": "badge-danger",
             "range": f"≥ {tolerance_bands['severo_superior'] / 1_000_000:.2f} Mm³",
@@ -514,7 +514,7 @@ def load_payload(*, snapshot_at: pd.Timestamp | None = None) -> dict:
         {
             "key": "alto_superior",
             "name": "Alto (Superior)",
-            "nameEn": "High Alert (Alto)",
+            "nameEn": "High Alert",
             "color": "#f59e0b",
             "badgeClass": "badge-warning",
             "range": f"{tolerance_bands['baixo_superior'] / 1_000_000:.2f} – {tolerance_bands['severo_superior'] / 1_000_000:.2f} Mm³",
@@ -524,7 +524,7 @@ def load_payload(*, snapshot_at: pd.Timestamp | None = None) -> dict:
         {
             "key": "baixo_superior",
             "name": "Baixo (Superior)",
-            "nameEn": "Mild High (Baixo)",
+            "nameEn": "Mild High",
             "color": "#10b981",
             "badgeClass": "badge-success",
             "range": f"{tolerance_bands['marginal_superior'] / 1_000_000:.2f} – {tolerance_bands['baixo_superior'] / 1_000_000:.2f} Mm³",
@@ -534,7 +534,7 @@ def load_payload(*, snapshot_at: pd.Timestamp | None = None) -> dict:
         {
             "key": "marginal",
             "name": "Marginal (Ideal)",
-            "nameEn": "Target Operating (Marginal)",
+            "nameEn": "Target Operating",
             "color": "#10b981",
             "badgeClass": "badge-target",
             "range": f"{tolerance_bands['marginal_inferior'] / 1_000_000:.2f} – {tolerance_bands['marginal_superior'] / 1_000_000:.2f} Mm³",
@@ -544,7 +544,7 @@ def load_payload(*, snapshot_at: pd.Timestamp | None = None) -> dict:
         {
             "key": "baixo_inferior",
             "name": "Baixo (Inferior)",
-            "nameEn": "Mild Low (Baixo)",
+            "nameEn": "Mild Low",
             "color": "#10b981",
             "badgeClass": "badge-success",
             "range": f"{tolerance_bands['baixo_inferior'] / 1_000_000:.2f} – {tolerance_bands['marginal_inferior'] / 1_000_000:.2f} Mm³",
@@ -554,7 +554,7 @@ def load_payload(*, snapshot_at: pd.Timestamp | None = None) -> dict:
         {
             "key": "alto_inferior",
             "name": "Alto (Inferior)",
-            "nameEn": "Low Alert (Alto)",
+            "nameEn": "Low Alert",
             "color": "#f59e0b",
             "badgeClass": "badge-warning",
             "range": f"{tolerance_bands['severo_inferior'] / 1_000_000:.2f} – {tolerance_bands['baixo_inferior'] / 1_000_000:.2f} Mm³",
@@ -564,7 +564,7 @@ def load_payload(*, snapshot_at: pd.Timestamp | None = None) -> dict:
         {
             "key": "severo_inferior",
             "name": "Severo (Inferior)",
-            "nameEn": "Critical Low (Severo)",
+            "nameEn": "Critical Low",
             "color": "#ef4444",
             "badgeClass": "badge-danger",
             "range": f"≤ {tolerance_bands['severo_inferior'] / 1_000_000:.2f} Mm³",
@@ -742,9 +742,6 @@ __SHARED_TYPO_WEIGHT_CSS__
     <div class="legend">
       <span style="color:var(--tso-tag,#0066cc)" data-i18n="magoLegendActual">Actual</span>
       <span class="dash" style="color:#888" data-i18n="magoLegendForecast">Forecast</span>
-      <span class="legend-band" style="--band-color:#ef4444" data-i18n="magoLegendSev">Severo (Critical)</span>
-      <span class="legend-band" style="--band-color:#f59e0b" data-i18n="magoLegendAlt">Alto (Alert)</span>
-      <span class="legend-band" style="--band-color:#10b981" data-i18n="magoLegendMarg">Marginal (Target)</span>
     </div>
   </section>
 
@@ -784,7 +781,7 @@ __SHARED_TYPO_WEIGHT_CSS__
         <button type="button" id="btn-lp-csv" data-i18n="magoLpCsv">Download line pack CSV</button>
         <div class="hist-filter-group">
           <button type="button" id="btn-hist-all" class="hist-filter-btn active" data-i18n="magoHistAll">All Hours</button>
-          <button type="button" id="btn-hist-alerts" class="hist-filter-btn" data-i18n="magoHistAlerts">Alerts & Breaches Only (Alto & Severo)</button>
+          <button type="button" id="btn-hist-alerts" class="hist-filter-btn" data-i18n="magoHistAlerts">Alerts & Breaches Only</button>
         </div>
       </div>
       <div class="data-table-wrap">
@@ -896,7 +893,7 @@ GB_I18N.en.magoFaixasSub = "TAG commercial balancing tolerance thresholds. Excee
 GB_I18N.pt.magoFaixasSub = "Limites comerciais de tolerância da TAG. Desvios fora da faixa marginal geram penalidades de desbalanceamento ou ações operacionais de compra/venda de gás.";
 GB_I18N.en.magoHistAll = "All Hours";
 GB_I18N.pt.magoHistAll = "Todas as Horas";
-GB_I18N.en.magoHistAlerts = "Alerts & Breaches Only (Alto & Severo)";
+GB_I18N.en.magoHistAlerts = "Alerts & Breaches Only";
 GB_I18N.pt.magoHistAlerts = "Apenas Alertas e Violações (Alto e Severo)";
 GB_I18N.en.magoFaixaTier = "Operational Risk Tier";
 GB_I18N.pt.magoFaixaTier = "Nível de Risco Operacional";
@@ -908,12 +905,22 @@ GB_I18N.en.magoLegendActual = "Actual";
 GB_I18N.pt.magoLegendActual = "Realizado";
 GB_I18N.en.magoLegendForecast = "Forecast";
 GB_I18N.pt.magoLegendForecast = "Estimativa";
-GB_I18N.en.magoLegendSev = "Severo (Critical)";
-GB_I18N.pt.magoLegendSev = "Severo (Crítico)";
-GB_I18N.en.magoLegendAlt = "Alto (Alert)";
+GB_I18N.en.magoLegendSev = "Severe";
+GB_I18N.pt.magoLegendSev = "Severo";
+GB_I18N.en.magoLegendAlt = "High Alert";
 GB_I18N.pt.magoLegendAlt = "Alto (Alerta)";
-GB_I18N.en.magoLegendMarg = "Marginal (Target)";
+GB_I18N.en.magoLegendMarg = "Target";
 GB_I18N.pt.magoLegendMarg = "Marginal (Ideal)";
+GB_I18N.en.magoAxisSevere = "Severe";
+GB_I18N.pt.magoAxisSevere = "Severo";
+GB_I18N.en.magoAxisHigh = "High";
+GB_I18N.pt.magoAxisHigh = "Alto";
+GB_I18N.en.magoAxisMild = "Mild";
+GB_I18N.pt.magoAxisMild = "Baixo";
+GB_I18N.en.magoAxisTarget = "Target";
+GB_I18N.pt.magoAxisTarget = "Marginal";
+GB_I18N.en.magoAxisLow = "Low";
+GB_I18N.pt.magoAxisLow = "Alerta";
 
 let DATA = {};
 let LP = {};
@@ -986,7 +993,7 @@ function drawLines(hostId, seriesList, yFmt, bands) {
   }
   const pad = (hi - lo) * 0.06 || 1; lo -= pad; hi += pad;
   const W = Math.max(640, host.clientWidth || 640), H = hostId === "chart-zones" ? 240 : 220;
-  const ML = 52, MR = bands ? 58 : 10, MT = 12, MB = 26;
+  const ML = 52, MR = bands ? 84 : 10, MT = 12, MB = 26;
   const plotLeft = ML, plotWidth = W - ML - MR, plotTop = MT, plotBottom = H - MB;
   const x = v => ML + plotWidth * ((v - minX) / (maxX - minX || 1));
   const y = v => MT + (plotBottom - plotTop) * (1 - (v - lo) / (hi - lo || 1));
@@ -1038,13 +1045,26 @@ function drawLines(hostId, seriesList, yFmt, bands) {
   }
 
   if (bands) {
+    const axisX = plotLeft + plotWidth;
+    const lang = document.documentElement.getAttribute("data-lang") || "en";
+    const isPt = lang === "pt";
+
+    svg.appendChild(chartSvg("line", {
+      x1: axisX,
+      x2: axisX,
+      y1: plotTop,
+      y2: plotBottom,
+      stroke: "var(--border)",
+      "stroke-width": 1,
+    }));
+
     const guides = [
-      { key: "sev_sup", val: bands.severo_superior, color: "#ef4444", label: "Sev. Sup" },
-      { key: "alt_sup", val: bands.baixo_superior, color: "#f59e0b", label: "Alto Sup" },
-      { key: "marg_sup", val: bands.marginal_superior, color: "#10b981", label: "Marg. Sup" },
-      { key: "marg_inf", val: bands.marginal_inferior, color: "#10b981", label: "Marg. Inf" },
-      { key: "alt_inf", val: bands.baixo_inferior, color: "#f59e0b", label: "Alto Inf" },
-      { key: "sev_inf", val: bands.severo_inferior, color: "#ef4444", label: "Sev. Inf" },
+      { key: "sev_sup", val: bands.severo_superior, color: "#ef4444", labelEn: "Critical High Threshold", labelPt: "Limite Severo Superior" },
+      { key: "alt_sup", val: bands.baixo_superior, color: "#f59e0b", labelEn: "High Alert Threshold", labelPt: "Limite Alerta Alto" },
+      { key: "marg_sup", val: bands.marginal_superior, color: "#10b981", labelEn: "Target Upper Limit", labelPt: "Limite Marginal Superior" },
+      { key: "marg_inf", val: bands.marginal_inferior, color: "#10b981", labelEn: "Target Lower Limit", labelPt: "Limite Marginal Inferior" },
+      { key: "alt_inf", val: bands.baixo_inferior, color: "#f59e0b", labelEn: "Low Alert Threshold", labelPt: "Limite Alerta Baixo" },
+      { key: "sev_inf", val: bands.severo_inferior, color: "#ef4444", labelEn: "Critical Low Threshold", labelPt: "Limite Severo Inferior" },
     ];
     guides.forEach(g => {
       if (g.val == null || !isFinite(g.val)) return;
@@ -1052,7 +1072,7 @@ function drawLines(hostId, seriesList, yFmt, bands) {
       if (gy < plotTop - 2 || gy > plotBottom + 2) return;
       const line = chartSvg("line", {
         x1: plotLeft,
-        x2: plotLeft + plotWidth,
+        x2: axisX,
         y1: gy,
         y2: gy,
         stroke: g.color,
@@ -1061,22 +1081,144 @@ function drawLines(hostId, seriesList, yFmt, bands) {
         opacity: 0.65,
       });
       const tip = chartSvg("title");
-      tip.textContent = `${g.label}: ${(g.val / 1e6).toFixed(2)} Mm³`;
+      tip.textContent = `${isPt ? g.labelPt : g.labelEn}: ${(g.val / 1e6).toFixed(2)} Mm³`;
       line.appendChild(tip);
       svg.appendChild(line);
 
+      svg.appendChild(chartSvg("line", {
+        x1: axisX,
+        x2: axisX + 3,
+        y1: gy,
+        y2: gy,
+        stroke: g.color,
+        "stroke-width": 1.2,
+      }));
+
       const rLabel = chartSvg("text", {
-        x: plotLeft + plotWidth + 4,
+        x: axisX + 5,
         y: gy + 3,
         fill: g.color,
         "font-size": 9,
         "font-weight": 600,
+        "font-family": "var(--font-mono, monospace)",
       });
       rLabel.textContent = `${(g.val / 1e6).toFixed(1)}M`;
       const tipText = chartSvg("title");
-      tipText.textContent = `${g.label}: ${(g.val / 1e6).toFixed(2)} Mm³`;
+      tipText.textContent = `${isPt ? g.labelPt : g.labelEn}: ${(g.val / 1e6).toFixed(2)} Mm³`;
       rLabel.appendChild(tipText);
       svg.appendChild(rLabel);
+    });
+
+    const sevSup = bands.severo_superior;
+    const bSup = bands.baixo_superior;
+    const mSup = bands.marginal_superior;
+    const mInf = bands.marginal_inferior;
+    const bInf = bands.baixo_inferior;
+    const sevInf = bands.severo_inferior;
+
+    const axisRanges = [
+      {
+        topVal: hi,
+        botVal: sevSup,
+        color: "#ef4444",
+        nameEn: "Severe",
+        namePt: "Severo",
+        fullEn: "Critical High (≥ " + (sevSup / 1e6).toFixed(2) + " Mm³)",
+        fullPt: "Severo Superior (≥ " + (sevSup / 1e6).toFixed(2) + " Mm³)",
+      },
+      {
+        topVal: sevSup,
+        botVal: bSup,
+        color: "#f59e0b",
+        nameEn: "High",
+        namePt: "Alto",
+        fullEn: "High Alert (" + (bSup / 1e6).toFixed(2) + " – " + (sevSup / 1e6).toFixed(2) + " Mm³)",
+        fullPt: "Alerta Alto (" + (bSup / 1e6).toFixed(2) + " – " + (sevSup / 1e6).toFixed(2) + " Mm³)",
+      },
+      {
+        topVal: bSup,
+        botVal: mSup,
+        color: "rgba(16, 185, 129, 0.75)",
+        nameEn: "Mild",
+        namePt: "Baixo",
+        fullEn: "Mild High (" + (mSup / 1e6).toFixed(2) + " – " + (bSup / 1e6).toFixed(2) + " Mm³)",
+        fullPt: "Baixo Risco Superior (" + (mSup / 1e6).toFixed(2) + " – " + (bSup / 1e6).toFixed(2) + " Mm³)",
+      },
+      {
+        topVal: mSup,
+        botVal: mInf,
+        color: "#10b981",
+        nameEn: "Target",
+        namePt: "Marginal",
+        fullEn: "Target Operating (" + (mInf / 1e6).toFixed(2) + " – " + (mSup / 1e6).toFixed(2) + " Mm³)",
+        fullPt: "Faixa Marginal Ideal (" + (mInf / 1e6).toFixed(2) + " – " + (mSup / 1e6).toFixed(2) + " Mm³)",
+      },
+      {
+        topVal: mInf,
+        botVal: bInf,
+        color: "rgba(16, 185, 129, 0.75)",
+        nameEn: "Mild",
+        namePt: "Baixo",
+        fullEn: "Mild Low (" + (bInf / 1e6).toFixed(2) + " – " + (mInf / 1e6).toFixed(2) + " Mm³)",
+        fullPt: "Baixo Risco Inferior (" + (bInf / 1e6).toFixed(2) + " – " + (mInf / 1e6).toFixed(2) + " Mm³)",
+      },
+      {
+        topVal: bInf,
+        botVal: sevInf,
+        color: "#f59e0b",
+        nameEn: "Low",
+        namePt: "Alerta",
+        fullEn: "Low Alert (" + (sevInf / 1e6).toFixed(2) + " – " + (bInf / 1e6).toFixed(2) + " Mm³)",
+        fullPt: "Alerta Baixo (" + (sevInf / 1e6).toFixed(2) + " – " + (bInf / 1e6).toFixed(2) + " Mm³)",
+      },
+      {
+        topVal: sevInf,
+        botVal: lo,
+        color: "#ef4444",
+        nameEn: "Severe",
+        namePt: "Severo",
+        fullEn: "Critical Low (≤ " + (sevInf / 1e6).toFixed(2) + " Mm³)",
+        fullPt: "Severo Inferior (≤ " + (sevInf / 1e6).toFixed(2) + " Mm³)",
+      },
+    ];
+
+    axisRanges.forEach(rng => {
+      if (rng.topVal == null || rng.botVal == null) return;
+      const yTop = Math.max(plotTop, Math.min(plotBottom, y(rng.topVal)));
+      const yBot = Math.max(plotTop, Math.min(plotBottom, y(rng.botVal)));
+      const spanH = yBot - yTop;
+      if (spanH < 8) return;
+
+      const rail = chartSvg("rect", {
+        x: axisX + 34,
+        y: yTop + 1,
+        width: 3,
+        height: Math.max(1, spanH - 2),
+        rx: 1.5,
+        fill: rng.color,
+        opacity: 0.85,
+      });
+      const railTip = chartSvg("title");
+      railTip.textContent = isPt ? rng.fullPt : rng.fullEn;
+      rail.appendChild(railTip);
+      svg.appendChild(rail);
+
+      if (spanH >= 14) {
+        const midY = (yTop + yBot) / 2;
+        const textEl = chartSvg("text", {
+          x: axisX + 41,
+          y: midY + 3.5,
+          fill: rng.color,
+          "font-size": 9,
+          "font-weight": 700,
+          "letter-spacing": "0.02em",
+        });
+        textEl.textContent = isPt ? rng.namePt : rng.nameEn;
+        const textTip = chartSvg("title");
+        textTip.textContent = isPt ? rng.fullPt : rng.fullEn;
+        textEl.appendChild(textTip);
+        svg.appendChild(textEl);
+      }
     });
   }
 
@@ -1402,12 +1544,12 @@ function renderHeatmap() {
       <span class="hm-sub">${isPt ? "Horas em faixa ideal / moderada" : "Hours in target / mild envelope"}</span>
     </div>
     <div class="hm-summary-tile ${alertClass}">
-      <span class="hm-label" data-i18n="magoHmAlertHours">${isPt ? "Horas em Alerta (Alto)" : "Alert Hours (Alto)"}</span>
+      <span class="hm-label" data-i18n="magoHmAlertHours">${isPt ? "Horas em Alerta (Alto)" : "Alert Hours"}</span>
       <span class="hm-val">${alertH}</span>
       <span class="hm-sub">${summary.alertDaysCount || 0} ${isPt ? "dias com alertas" : "days with alerts"}</span>
     </div>
     <div class="hm-summary-tile ${critClass}">
-      <span class="hm-label" data-i18n="magoHmCriticalHours">${isPt ? "Horas Críticas (Severo)" : "Critical Hours (Severo)"}</span>
+      <span class="hm-label" data-i18n="magoHmCriticalHours">${isPt ? "Horas Críticas (Severo)" : "Critical Hours"}</span>
       <span class="hm-val">${critH}</span>
       <span class="hm-sub">${summary.criticalDaysCount || 0} ${isPt ? "dias críticos" : "critical days"}</span>
     </div>
@@ -1506,7 +1648,7 @@ function renderHeatmap() {
   }
 
   if (pocHost) {
-    const pocTextEn = "Under ANP Res. 52/2011 and TAG's Network Code, inventory breaches into Alert (Alto) or Critical (Severo) require operational balancing tenders to prevent network depressurization or overpressurization. Transport balancing transactions and clearing prices are settled on Brazil's Portal de Oferta de Capacidade (POC).";
+    const pocTextEn = "Under ANP Res. 52/2011 and TAG's Network Code, inventory breaches into High Alert or Critical require operational balancing tenders to prevent network depressurization or overpressurization. Transport balancing transactions and clearing prices are settled on Brazil's Portal de Oferta de Capacidade (POC).";
     const pocTextPt = "Sob a Resolução ANP 52/2011 e o Código de Rede da TAG, desvios para faixas de Alerta (Alto) ou Crítico (Severo) exigem compras/vendas de gás para balanceamento operacional. As ofertas de capacidade e preços de liquidação são transacionados no Portal de Oferta de Capacidade (POC).";
     pocHost.innerHTML = `
       <p><strong>${isPt ? "Correlação com Leilões no POC:" : "POC Commercial Balancing Correlation:"}</strong> ${isPt ? pocTextPt : pocTextEn}</p>
@@ -1695,7 +1837,7 @@ async function init() {
       {
         key: "severo_superior",
         name: "Severo (Superior)",
-        nameEn: "Critical High (Severo)",
+        nameEn: "Critical High",
         color: "#ef4444",
         badgeClass: "badge-danger",
         range: "≥ " + (tb.severo_superior / 1e6).toFixed(2) + " Mm³",
@@ -1705,7 +1847,7 @@ async function init() {
       {
         key: "alto_superior",
         name: "Alto (Superior)",
-        nameEn: "High Alert (Alto)",
+        nameEn: "High Alert",
         color: "#f59e0b",
         badgeClass: "badge-warning",
         range: (tb.baixo_superior / 1e6).toFixed(2) + " – " + (tb.severo_superior / 1e6).toFixed(2) + " Mm³",
@@ -1715,7 +1857,7 @@ async function init() {
       {
         key: "baixo_superior",
         name: "Baixo (Superior)",
-        nameEn: "Mild High (Baixo)",
+        nameEn: "Mild High",
         color: "#10b981",
         badgeClass: "badge-success",
         range: (tb.marginal_superior / 1e6).toFixed(2) + " – " + (tb.baixo_superior / 1e6).toFixed(2) + " Mm³",
@@ -1725,7 +1867,7 @@ async function init() {
       {
         key: "marginal",
         name: "Marginal (Ideal)",
-        nameEn: "Target Operating (Marginal)",
+        nameEn: "Target Operating",
         color: "#10b981",
         badgeClass: "badge-target",
         range: (tb.marginal_inferior / 1e6).toFixed(2) + " – " + (tb.marginal_superior / 1e6).toFixed(2) + " Mm³",
@@ -1735,7 +1877,7 @@ async function init() {
       {
         key: "baixo_inferior",
         name: "Baixo (Inferior)",
-        nameEn: "Mild Low (Baixo)",
+        nameEn: "Mild Low",
         color: "#10b981",
         badgeClass: "badge-success",
         range: (tb.baixo_inferior / 1e6).toFixed(2) + " – " + (tb.marginal_inferior / 1e6).toFixed(2) + " Mm³",
@@ -1745,7 +1887,7 @@ async function init() {
       {
         key: "alto_inferior",
         name: "Alto (Inferior)",
-        nameEn: "Low Alert (Alto)",
+        nameEn: "Low Alert",
         color: "#f59e0b",
         badgeClass: "badge-warning",
         range: (tb.severo_inferior / 1e6).toFixed(2) + " – " + (tb.baixo_inferior / 1e6).toFixed(2) + " Mm³",
@@ -1755,7 +1897,7 @@ async function init() {
       {
         key: "severo_inferior",
         name: "Severo (Inferior)",
-        nameEn: "Critical Low (Severo)",
+        nameEn: "Critical Low",
         color: "#ef4444",
         badgeClass: "badge-danger",
         range: "≤ " + (tb.severo_inferior / 1e6).toFixed(2) + " Mm³",
@@ -1767,13 +1909,13 @@ async function init() {
 
   function calcMagoZone(valM3) {
     if (valM3 == null || !isFinite(valM3)) return null;
-    if (valM3 >= tb.severo_superior) return { key: "severo_superior", name: "Critical High (Severo)", namePt: "Severo (Superior)", color: "#ef4444", badgeClass: "badge-danger", isAlert: true, isCritical: true };
-    if (valM3 >= tb.baixo_superior) return { key: "alto_superior", name: "High Alert (Alto)", namePt: "Alto (Superior)", color: "#f59e0b", badgeClass: "badge-warning", isAlert: true, isCritical: false };
-    if (valM3 >= tb.marginal_superior) return { key: "baixo_superior", name: "Mild High (Baixo)", namePt: "Baixo (Superior)", color: "#10b981", badgeClass: "badge-success", isAlert: false, isCritical: false };
-    if (valM3 >= tb.marginal_inferior) return { key: "marginal", name: "Target Operating (Marginal)", namePt: "Marginal (Ideal)", color: "#10b981", badgeClass: "badge-target", isAlert: false, isCritical: false };
-    if (valM3 >= tb.baixo_inferior) return { key: "baixo_inferior", name: "Mild Low (Baixo)", namePt: "Baixo (Inferior)", color: "#10b981", badgeClass: "badge-success", isAlert: false, isCritical: false };
-    if (valM3 >= tb.severo_inferior) return { key: "alto_inferior", name: "Low Alert (Alto)", namePt: "Alto (Inferior)", color: "#f59e0b", badgeClass: "badge-warning", isAlert: true, isCritical: false };
-    return { key: "severo_inferior", name: "Critical Low (Severo)", namePt: "Severo (Inferior)", color: "#ef4444", badgeClass: "badge-danger", isAlert: true, isCritical: true };
+    if (valM3 >= tb.severo_superior) return { key: "severo_superior", name: "Critical High", namePt: "Severo (Superior)", color: "#ef4444", badgeClass: "badge-danger", isAlert: true, isCritical: true };
+    if (valM3 >= tb.baixo_superior) return { key: "alto_superior", name: "High Alert", namePt: "Alto (Superior)", color: "#f59e0b", badgeClass: "badge-warning", isAlert: true, isCritical: false };
+    if (valM3 >= tb.marginal_superior) return { key: "baixo_superior", name: "Mild High", namePt: "Baixo (Superior)", color: "#10b981", badgeClass: "badge-success", isAlert: false, isCritical: false };
+    if (valM3 >= tb.marginal_inferior) return { key: "marginal", name: "Target Operating", namePt: "Marginal (Ideal)", color: "#10b981", badgeClass: "badge-target", isAlert: false, isCritical: false };
+    if (valM3 >= tb.baixo_inferior) return { key: "baixo_inferior", name: "Mild Low", namePt: "Baixo (Inferior)", color: "#10b981", badgeClass: "badge-success", isAlert: false, isCritical: false };
+    if (valM3 >= tb.severo_inferior) return { key: "alto_inferior", name: "Low Alert", namePt: "Alto (Inferior)", color: "#f59e0b", badgeClass: "badge-warning", isAlert: true, isCritical: false };
+    return { key: "severo_inferior", name: "Critical Low", namePt: "Severo (Inferior)", color: "#ef4444", badgeClass: "badge-danger", isAlert: true, isCritical: true };
   }
 
   if (!DATA.kpiZone) {
@@ -1900,6 +2042,8 @@ async function init() {
     renderFaixasTable();
     renderHeatmap();
     renderLpTable();
+    packLinepack();
+    packLinepackHistory();
     applyI18n();
   });
   initCrossLinks();
