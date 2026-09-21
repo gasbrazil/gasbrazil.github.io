@@ -166,6 +166,10 @@ def test_load_payload_groups_and_history(tmp_path, monkeypatch):
         "severo_superior", "alto_superior", "baixo_superior",
         "marginal", "baixo_inferior", "alto_inferior", "severo_inferior", "unknown"
     ]
+    assert "linepackHeatmap" in result
+    assert "linepackHeatmapSummary" in result
+    assert result["linepackHeatmapSummary"]["totalDays"] >= 1
+    assert result["linepackHeatmapSummary"]["compliancePct"] >= 0.0
 
 
 def test_rows_from_snapshot_with_tolerance_bands():
@@ -254,4 +258,113 @@ def test_determine_linepack_zone():
     z = md.determine_linepack_zone(None, bands)
     assert z["key"] == "unknown"
     assert z["isAlert"] is False
+
+
+def test_build_linepack_heatmap():
+    md = _load_mago_dashboard()
+    sample_rows = [
+        # Day 1: All marginal
+        {
+            "observedAt": "2026-09-18T01:00",
+            "valueMm3": 70.5,
+            "valueM3": 70500000.0,
+            "zone": "marginal",
+            "zoneLabel": "Target Operating (Marginal)",
+            "zoneLabelPt": "Marginal (Ideal)",
+            "badgeClass": "badge-target",
+            "isAlert": False,
+            "isCritical": False,
+        },
+        {
+            "observedAt": "2026-09-18T02:00",
+            "valueMm3": 70.8,
+            "valueM3": 70800000.0,
+            "zone": "marginal",
+            "zoneLabel": "Target Operating (Marginal)",
+            "zoneLabelPt": "Marginal (Ideal)",
+            "badgeClass": "badge-target",
+            "isAlert": False,
+            "isCritical": False,
+        },
+        # Day 2: 1 marginal, 1 alto_inferior (Alert)
+        {
+            "observedAt": "2026-09-19T01:00",
+            "valueMm3": 69.5,
+            "valueM3": 69500000.0,
+            "zone": "marginal",
+            "zoneLabel": "Target Operating (Marginal)",
+            "zoneLabelPt": "Marginal (Ideal)",
+            "badgeClass": "badge-target",
+            "isAlert": False,
+            "isCritical": False,
+        },
+        {
+            "observedAt": "2026-09-19T02:00",
+            "valueMm3": 67.2,
+            "valueM3": 67200000.0,
+            "zone": "alto_inferior",
+            "zoneLabel": "Low Alert (Alto)",
+            "zoneLabelPt": "Alto (Inferior)",
+            "badgeClass": "badge-warning",
+            "isAlert": True,
+            "isCritical": False,
+        },
+        # Day 3: 1 severo_inferior (Critical)
+        {
+            "observedAt": "2026-09-20T01:00",
+            "valueMm3": 65.5,
+            "valueM3": 65500000.0,
+            "zone": "severo_inferior",
+            "zoneLabel": "Critical Low (Severo)",
+            "zoneLabelPt": "Severo (Inferior)",
+            "badgeClass": "badge-danger",
+            "isAlert": True,
+            "isCritical": True,
+        },
+    ]
+
+    poc_actions = {
+        "2026-09-19": [
+            {
+                "processCode": "TAG-PC-001",
+                "transactionType": "Op. Bal.",
+                "price": 35.0,
+                "volumeAccepted": 100000,
+            }
+        ]
+    }
+
+    heatmap, summary = md._build_linepack_heatmap(sample_rows, poc_actions)
+
+    assert len(heatmap) == 3
+    # Day 1: normal
+    assert heatmap[0]["date"] == "2026-09-18"
+    assert heatmap[0]["riskStatus"] == "normal"
+    assert heatmap[0]["compliancePct"] == 100.0
+    assert heatmap[0]["hoursAlto"] == 0
+    assert heatmap[0]["hoursSevero"] == 0
+    assert heatmap[0]["pocActions"] == []
+
+    # Day 2: alert
+    assert heatmap[1]["date"] == "2026-09-19"
+    assert heatmap[1]["riskStatus"] == "alert"
+    assert heatmap[1]["compliancePct"] == 50.0
+    assert heatmap[1]["hoursAlto"] == 1
+    assert len(heatmap[1]["pocActions"]) == 1
+
+    # Day 3: critical
+    assert heatmap[2]["date"] == "2026-09-20"
+    assert heatmap[2]["riskStatus"] == "critical"
+    assert heatmap[2]["compliancePct"] == 0.0
+    assert heatmap[2]["hoursSevero"] == 1
+
+    # Summary
+    assert summary["totalDays"] == 3
+    assert summary["totalHours"] == 5
+    assert summary["totalAlertHours"] == 1
+    assert summary["totalCriticalHours"] == 1
+    assert summary["alertDaysCount"] == 2  # both day 2 (alert) and day 3 (critical)
+    assert summary["criticalDaysCount"] == 1
+    assert summary["hasPocActions"] is True
+
 

@@ -423,6 +423,10 @@ def _hub_controls(wiki_href: str, about_href: str) -> str:
       <div class="nav-trail">
         <a class="navlink" href="{wiki_href}" data-i18n="navWiki">Wiki</a>
         <a class="navlink" href="{about_href}" data-i18n="navAbout">About</a>
+        <button type="button" class="gb-search-btn" id="gb-search-trigger" aria-label="Search (Ctrl+K)" title="Search (Ctrl+K)">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span data-i18n="searchBtn">Search</span> <kbd>Ctrl+K</kbd>
+        </button>
       </div>
       <button type="button" id="lang-toggle" class="langBtn" aria-label="Português">PT</button>
       <button id="theme-toggle" title="Toggle theme" aria-label="Toggle theme"></button>
@@ -539,7 +543,22 @@ const TEASERS_URL = "__TEASERS_URL__";
 function paintRefreshLabels() {
   document.querySelectorAll(".kpi-when[data-refresh]").forEach(el => {
     const when = el.getAttribute("data-refresh");
-    el.textContent = when ? when : "";
+    if (!when) { el.innerHTML = ""; return; }
+    let dotClass = "pulse-dot";
+    let statusTip = (typeof t === "function" ? t("freshLive") : null) || "Live & fresh";
+    try {
+      const now = new Date();
+      const dt = new Date(when.replace(" ", "T") + (when.includes("Z") ? "" : "Z"));
+      const diffHours = (now - dt) / 3600000;
+      if (isNaN(diffHours) || diffHours > 48) {
+        dotClass = "pulse-dot neutral";
+        statusTip = (typeof t === "function" ? t("freshScheduled") : null) || "Scheduled publication";
+      } else if (diffHours > 24) {
+        dotClass = "pulse-dot delayed";
+        statusTip = (typeof t === "function" ? t("freshDelayed") : null) || "Awaiting update";
+      }
+    } catch (e) {}
+    el.innerHTML = '<span class="' + dotClass + '" title="' + escapeHtml(statusTip) + '" aria-hidden="true"></span> <span>' + escapeHtml(when) + '</span>';
   });
   document.querySelectorAll(".kpi-val[data-en]").forEach(el => {
     const en = el.getAttribute("data-en");

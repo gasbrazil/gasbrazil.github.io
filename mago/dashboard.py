@@ -193,6 +193,167 @@ def _linepack_history(df: pd.DataFrame, default_bands: dict[str, float]) -> tupl
         )
     return series, rows
 
+
+def _load_poc_balancing_correlation() -> dict[str, list[dict]]:
+    """Scan available POC parquet stores for TAG transport balancing events."""
+    candidates = [
+        HERE.parents[0] / "poc" / "data" / "poc_results.parquet",
+        HERE.parents[0] / "lake" / "poc" / "poc_results.parquet",
+        HERE.parents[0] / "lake" / "transport" / "poc_results.parquet",
+    ]
+    for p in candidates:
+        if not p.exists():
+            continue
+        try:
+            pdf = pd.read_parquet(p)
+            if "Transporter (TSO)" not in pdf.columns:
+                continue
+            is_tag = pdf["Transporter (TSO)"].astype(str).str.contains("TAG|Associada", case=False, na=False)
+            tag_df = pdf[is_tag].copy()
+            if tag_df.empty:
+                continue
+            date_col = "Trade Date" if "Trade Date" in tag_df.columns else "Flow Date Start"
+            if date_col not in tag_df.columns:
+                continue
+            tag_df = tag_df.dropna(subset=[date_col])
+            tag_df["_dt"] = pd.to_datetime(tag_df[date_col], errors="coerce").dt.strftime("%Y-%m-%d")
+            by_date: dict[str, list[dict]] = {}
+            for _, r in tag_df.iterrows():
+                d_str = r["_dt"]
+                if not d_str or pd.isna(d_str):
+                    continue
+                by_date.setdefault(d_str, []).append({
+                    "processCode": str(r.get("codigoProcesso") or ""),
+                    "transactionType": str(r.get("Transaction Type") or ""),
+                    "serviceType": str(r.get("Service Type") or ""),
+                    "price": _num(r.get("Price")),
+                    "volumeAccepted": _num(r.get("Volume Accepted")),
+                    "date": d_str,
+                })
+            return by_date
+        except Exception:
+            continue
+    return {}
+
+
+def _build_linepack_heatmap(
+    lp_rows: list[dict],
+    poc_by_date: dict[str, list[dict]] | None = None,
+) -> tuple[list[dict], dict]:
+    """Group hourly linepack records by UTC day and calculate risk breach statistics."""
+    if not lp_rows:
+        return [], {
+            "totalDays": 0,
+            "totalHours": 0,
+            "compliancePct": 100.0,
+            "totalAlertHours": 0,
+            "totalCriticalHours": 0,
+            "alertDaysCount": 0,
+            "criticalDaysCount": 0,
+            "hasPocActions": False,
+        }
+    poc_map = poc_by_date or {}
+    days_dict: dict[str, list[dict]] = {}
+    for r in lp_rows:
+        day = str(r.get("observedAt") or "")[:10]
+        if day:
+            days_dict.setdefault(day, []).append(r)
+
+    daily_heatmap: list[dict] = []
+    tot_alert_hours = 0
+    tot_critical_hours = 0
+    tot_hours = 0
+    tot_compliant_hours = 0
+    alert_days = 0
+    critical_days = 0
+    has_poc = False
+
+    sorted_days = sorted(days_dict.keys())
+    for day in sorted_days:
+        items = days_dict[day]
+        n_hours = len(items)
+        tot_hours += n_hours
+
+        h_marginal = sum(1 for x in items if x.get("zone") == "marginal")
+        h_baixo = sum(1 for x in items if x.get("zone") in ("baixo_superior", "baixo_inferior"))
+        h_alto = sum(1 for x in items if x.get("zone") in ("alto_superior", "alto_inferior"))
+        h_severo = sum(1 for x in items if x.get("zone") in ("severo_superior", "severo_inferior"))
+
+        tot_alert_hours += h_alto
+        tot_critical_hours += h_severo
+        tot_compliant_hours += (h_marginal + h_baixo)
+
+        vals_mm3 = [x["valueMm3"] for x in items if x.get("valueMm3") is not None]
+        min_mm3 = round(min(vals_mm3), 3) if vals_mm3 else None
+        max_mm3 = round(max(vals_mm3), 3) if vals_mm3 else None
+        avg_mm3 = round(sum(vals_mm3) / len(vals_mm3), 3) if vals_mm3 else None
+
+        if h_severo > 0:
+            risk_status = "critical"
+            critical_days += 1
+            alert_days += 1
+            peak_item = next((x for x in items if x.get("zone") in ("severo_superior", "severo_inferior")), items[0])
+        elif h_alto > 0:
+            risk_status = "alert"
+            alert_days += 1
+            peak_item = next((x for x in items if x.get("zone") in ("alto_superior", "alto_inferior")), items[0])
+        elif h_baixo > 0:
+            risk_status = "mild"
+            peak_item = next((x for x in items if x.get("zone") in ("baixo_superior", "baixo_inferior")), items[0])
+        else:
+            risk_status = "normal"
+            peak_item = items[0]
+
+        compliance_pct = round(((h_marginal + h_baixo) / n_hours) * 100, 1) if n_hours else 100.0
+
+        try:
+            dt_obj = dt.date.fromisoformat(day)
+            day_label = dt_obj.strftime("%d %b")
+            weekday = dt_obj.strftime("%a")
+        except Exception:
+            day_label = day
+            weekday = ""
+
+        poc_actions = poc_map.get(day, [])
+        if poc_actions:
+            has_poc = True
+
+        daily_heatmap.append({
+            "date": day,
+            "dayLabel": day_label,
+            "weekday": weekday,
+            "totalHours": n_hours,
+            "hoursMarginal": h_marginal,
+            "hoursBaixo": h_baixo,
+            "hoursAlto": h_alto,
+            "hoursSevero": h_severo,
+            "minMm3": min_mm3,
+            "maxMm3": max_mm3,
+            "avgMm3": avg_mm3,
+            "riskStatus": risk_status,
+            "peakZone": peak_item.get("zone"),
+            "peakZoneLabel": peak_item.get("zoneLabel"),
+            "peakZoneLabelPt": peak_item.get("zoneLabelPt"),
+            "badgeClass": peak_item.get("badgeClass"),
+            "compliancePct": compliance_pct,
+            "pocActions": poc_actions,
+        })
+
+    overall_compliance = round((tot_compliant_hours / tot_hours) * 100, 1) if tot_hours else 100.0
+
+    summary = {
+        "totalDays": len(sorted_days),
+        "totalHours": tot_hours,
+        "compliancePct": overall_compliance,
+        "totalAlertHours": tot_alert_hours,
+        "totalCriticalHours": tot_critical_hours,
+        "alertDaysCount": alert_days,
+        "criticalDaysCount": critical_days,
+        "hasPocActions": has_poc,
+    }
+    return daily_heatmap, summary
+
+
 ZONE_LABELS = {
     "AL": "Alagoas",
     "BA1": "Bahia 1",
@@ -330,6 +491,8 @@ def load_payload(*, snapshot_at: pd.Timestamp | None = None) -> dict:
 
     tolerance_bands = _extract_tolerance_bands(snap_df)
     lp_hist_series, lp_hist_rows = _linepack_history(df, tolerance_bands)
+    poc_map = _load_poc_balancing_correlation()
+    daily_heatmap, heatmap_summary = _build_linepack_heatmap(lp_hist_rows, poc_map)
 
     latest_lp = None
     if len(lp_actual):
@@ -429,6 +592,9 @@ def load_payload(*, snapshot_at: pd.Timestamp | None = None) -> dict:
         },
         "linepackHistory": lp_hist_series,
         "linepackHistoryRows": lp_hist_rows,
+        "linepackHeatmap": daily_heatmap,
+        "linepackHeatmapSummary": heatmap_summary,
+        "pocCorrelation": poc_map,
         "toleranceBands": tolerance_bands,
         "toleranceBandsList": bands_list,
         "kpiZone": current_zone,
@@ -588,10 +754,31 @@ __SHARED_TYPO_WEIGHT_CSS__
     <div id="faixas-grid"></div>
   </section>
 
+  <section class="panel panel-tight" id="heatmap-panel">
+    <div class="panel-head-row">
+      <div>
+        <h2 data-i18n="magoHeatmapTitle">Operating Risk & Imbalance Breach Heatmap</h2>
+        <p class="sub compact" data-i18n="magoHeatmapSub">Daily historical tracking of TAG integrated inventory across commercial tolerance tiers and correlation with transport balancing actions.</p>
+      </div>
+      <div class="hist-filter-group">
+        <button type="button" id="btn-hm-all" class="hist-filter-btn active" data-i18n="magoHmAll">All Days</button>
+        <button type="button" id="btn-hm-alerts" class="hist-filter-btn" data-i18n="magoHmAlerts">Alerts & Breaches</button>
+        <button type="button" id="btn-hm-critical" class="hist-filter-btn" data-i18n="magoHmCritical">Critical Only</button>
+      </div>
+    </div>
+    <div class="hm-summary-grid" id="hm-summary-grid"></div>
+    <div class="hm-calendar-grid" id="hm-calendar-grid"></div>
+    <div class="hm-poc-callout" id="hm-poc-callout"></div>
+  </section>
+
   <details class="panel-fold">
     <summary data-i18n="magoLinepackHistTitle">Line pack history</summary>
     <div class="fold-body">
       <p class="sub compact" data-i18n="magoLinepackHistSub">Hourly integrated inventory from cached snapshots (newest wins on overlap).</p>
+      <div id="hm-selected-day-indicator" style="display:none;margin-bottom:8px;padding:4px 10px;background:var(--accent-soft);border:1px solid var(--accent);border-radius:4px;font-size:11px;align-items:center;justify-content:space-between;">
+        <span><strong id="hm-filter-day-text"></strong></span>
+        <button type="button" id="btn-clear-day-filter" style="border:none;background:none;color:var(--accent);font-weight:600;cursor:pointer;font-size:11px;">✕ Clear</button>
+      </div>
       <div class="chart-box chart-sm"><div id="chart-lp-hist"></div></div>
       <div class="toolbar">
         <button type="button" id="btn-lp-csv" data-i18n="magoLpCsv">Download line pack CSV</button>
@@ -1186,8 +1373,156 @@ function renderFaixasTable() {
   host.innerHTML = html;
 }
 
+let heatmapFilter = "all";
+let selectedHeatmapDate = null;
+
+function renderHeatmap() {
+  const summaryHost = document.getElementById("hm-summary-grid");
+  const calendarHost = document.getElementById("hm-calendar-grid");
+  const pocHost = document.getElementById("hm-poc-callout");
+  if (!summaryHost || !calendarHost) return;
+
+  const rawHeatmap = DATA.linepackHeatmap || [];
+  const summary = DATA.linepackHeatmapSummary || {};
+  const lang = document.documentElement.getAttribute("data-lang") || "en";
+  const isPt = lang === "pt";
+
+  const compVal = summary.compliancePct != null ? summary.compliancePct.toFixed(1) + "%" : "—";
+  const compClass = (summary.compliancePct || 0) >= 95 ? "val-ok" : ((summary.compliancePct || 0) >= 80 ? "val-warn" : "val-danger");
+  const alertH = summary.totalAlertHours != null ? summary.totalAlertHours + "h" : "0h";
+  const alertClass = (summary.totalAlertHours || 0) > 0 ? "val-warn" : "val-ok";
+  const critH = summary.totalCriticalHours != null ? summary.totalCriticalHours + "h" : "0h";
+  const critClass = (summary.totalCriticalHours || 0) > 0 ? "val-danger" : "val-ok";
+  const daysN = summary.totalDays != null ? summary.totalDays : rawHeatmap.length;
+
+  summaryHost.innerHTML = `
+    <div class="hm-summary-tile ${compClass}">
+      <span class="hm-label" data-i18n="magoHmCompliance">${isPt ? "Conformidade Operacional" : "Envelope Compliance"}</span>
+      <span class="hm-val">${compVal}</span>
+      <span class="hm-sub">${isPt ? "Horas em faixa ideal / moderada" : "Hours in target / mild envelope"}</span>
+    </div>
+    <div class="hm-summary-tile ${alertClass}">
+      <span class="hm-label" data-i18n="magoHmAlertHours">${isPt ? "Horas em Alerta (Alto)" : "Alert Hours (Alto)"}</span>
+      <span class="hm-val">${alertH}</span>
+      <span class="hm-sub">${summary.alertDaysCount || 0} ${isPt ? "dias com alertas" : "days with alerts"}</span>
+    </div>
+    <div class="hm-summary-tile ${critClass}">
+      <span class="hm-label" data-i18n="magoHmCriticalHours">${isPt ? "Horas Críticas (Severo)" : "Critical Hours (Severo)"}</span>
+      <span class="hm-val">${critH}</span>
+      <span class="hm-sub">${summary.criticalDaysCount || 0} ${isPt ? "dias críticos" : "critical days"}</span>
+    </div>
+    <div class="hm-summary-tile">
+      <span class="hm-label" data-i18n="magoHmDaysMonitored">${isPt ? "Dias Monitorados" : "Days Monitored"}</span>
+      <span class="hm-val">${daysN}</span>
+      <span class="hm-sub">${summary.totalHours || 0} ${isPt ? "amostras horárias" : "hourly observations"}</span>
+    </div>
+  `;
+
+  let filteredDays = rawHeatmap.slice();
+  if (heatmapFilter === "alerts") {
+    filteredDays = filteredDays.filter(d => d.riskStatus === "alert" || d.riskStatus === "critical");
+  } else if (heatmapFilter === "critical") {
+    filteredDays = filteredDays.filter(d => d.riskStatus === "critical");
+  }
+
+  if (!filteredDays.length) {
+    calendarHost.innerHTML = `<div class="chart-empty" style="grid-column:1/-1;padding:1.5rem;text-align:center;color:var(--muted);">${
+      isPt ? "Nenhum dia encontrado para o filtro selecionado." : "No days recorded for the selected filter."
+    }</div>`;
+  } else {
+    calendarHost.innerHTML = filteredDays.map(d => {
+      const isSelected = selectedHeatmapDate === d.date;
+      const peakLabel = isPt ? (d.peakZoneLabelPt || d.peakZoneLabel || d.peakZone) : (d.peakZoneLabel || d.peakZone);
+      const riskClass = "risk-" + (d.riskStatus || "normal");
+
+      const totH = d.totalHours || 24;
+      const pctMarginal = ((d.hoursMarginal || 0) / totH) * 100;
+      const pctBaixo = ((d.hoursBaixo || 0) / totH) * 100;
+      const pctAlto = ((d.hoursAlto || 0) / totH) * 100;
+      const pctSevero = ((d.hoursSevero || 0) / totH) * 100;
+
+      let pocBadgeHtml = "";
+      if (d.pocActions && d.pocActions.length) {
+        pocBadgeHtml = `<div class="hm-poc-badge" title="${escapeHtml(d.pocActions.map(p => p.transactionType + ' ' + p.processCode).join(', '))}">⚡ POC (${d.pocActions.length})</div>`;
+      }
+
+      return `
+        <div class="hm-day-card ${riskClass} ${isSelected ? 'active' : ''}" data-date="${escapeHtml(d.date)}" title="${isPt ? 'Clique para filtrar histórico horário' : 'Click to inspect hourly history'}">
+          <div class="hm-day-head">
+            <div>
+              <span class="hm-day-date">${escapeHtml(d.dayLabel || d.date)}</span>
+              <span class="hm-day-weekday">${escapeHtml(d.weekday || '')}</span>
+            </div>
+            <span class="zone-badge ${escapeHtml(d.badgeClass || '')}">${escapeHtml(peakLabel || '')}</span>
+          </div>
+
+          <div class="hm-risk-bar" title="${isPt ? `Marginal: ${d.hoursMarginal || 0}h | Baixo: ${d.hoursBaixo || 0}h | Alto: ${d.hoursAlto || 0}h | Severo: ${d.hoursSevero || 0}h` : `Marginal: ${d.hoursMarginal || 0}h | Mild: ${d.hoursBaixo || 0}h | Alert: ${d.hoursAlto || 0}h | Critical: ${d.hoursSevero || 0}h`}">
+            ${pctMarginal > 0 ? `<div class="hm-risk-seg seg-marginal" style="width:${pctMarginal.toFixed(1)}%"></div>` : ''}
+            ${pctBaixo > 0 ? `<div class="hm-risk-seg seg-baixo" style="width:${pctBaixo.toFixed(1)}%"></div>` : ''}
+            ${pctAlto > 0 ? `<div class="hm-risk-seg seg-alto" style="width:${pctAlto.toFixed(1)}%"></div>` : ''}
+            ${pctSevero > 0 ? `<div class="hm-risk-seg seg-severo" style="width:${pctSevero.toFixed(1)}%"></div>` : ''}
+          </div>
+
+          <div class="hm-day-stats">
+            <div class="stat-item">
+              <span>Min:</span>
+              <span class="stat-val">${d.minMm3 != null ? d.minMm3.toFixed(2) : '—'} Mm³</span>
+            </div>
+            <div class="stat-item">
+              <span>Max:</span>
+              <span class="stat-val">${d.maxMm3 != null ? d.maxMm3.toFixed(2) : '—'} Mm³</span>
+            </div>
+            <div class="stat-item">
+              <span>${isPt ? 'Média' : 'Avg'}:</span>
+              <span class="stat-val">${d.avgMm3 != null ? d.avgMm3.toFixed(2) : '—'} Mm³</span>
+            </div>
+            <div class="stat-item">
+              <span>${isPt ? 'Alerta' : 'Alert'}:</span>
+              <span class="stat-val" style="color:${(d.hoursAlto || 0) + (d.hoursSevero || 0) > 0 ? 'var(--warn-ink)' : 'inherit'}">${(d.hoursAlto || 0) + (d.hoursSevero || 0)}h</span>
+            </div>
+          </div>
+          ${pocBadgeHtml}
+        </div>
+      `;
+    }).join("");
+
+    calendarHost.querySelectorAll(".hm-day-card").forEach(card => {
+      card.addEventListener("click", () => {
+        const dtStr = card.getAttribute("data-date");
+        if (selectedHeatmapDate === dtStr) {
+          selectedHeatmapDate = null;
+        } else {
+          selectedHeatmapDate = dtStr;
+        }
+        renderHeatmap();
+        renderLpTable();
+        const fold = document.querySelector("details.panel-fold");
+        if (fold && selectedHeatmapDate) {
+          fold.open = true;
+          fold.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+      });
+    });
+  }
+
+  if (pocHost) {
+    const pocTextEn = "Under ANP Res. 52/2011 and TAG's Network Code, inventory breaches into Alert (Alto) or Critical (Severo) require operational balancing tenders to prevent network depressurization or overpressurization. Transport balancing transactions and clearing prices are settled on Brazil's Portal de Oferta de Capacidade (POC).";
+    const pocTextPt = "Sob a Resolução ANP 52/2011 e o Código de Rede da TAG, desvios para faixas de Alerta (Alto) ou Crítico (Severo) exigem compras/vendas de gás para balanceamento operacional. As ofertas de capacidade e preços de liquidação são transacionados no Portal de Oferta de Capacidade (POC).";
+    pocHost.innerHTML = `
+      <p><strong>${isPt ? "Correlação com Leilões no POC:" : "POC Commercial Balancing Correlation:"}</strong> ${isPt ? pocTextPt : pocTextEn}</p>
+      <a href="/poc/?search=TAG" class="hm-poc-btn" data-i18n="magoHmViewPoc">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        ${isPt ? "Ver Leilões de Balanceamento no POC" : "View TAG Balancing on POC"}
+      </a>
+    `;
+  }
+}
+
 function sortedLpRows() {
   let rows = LP_ROWS.slice();
+  if (selectedHeatmapDate) {
+    rows = rows.filter(r => (r.observedAt || "").startsWith(selectedHeatmapDate));
+  }
   if (lpFilter === "alerts") {
     rows = rows.filter(r => r.isAlert || r.isCritical);
   }
@@ -1206,13 +1541,25 @@ function sortedLpRows() {
 function renderLpTable() {
   const tbody = document.getElementById("lp-tbody");
   if (!tbody) return;
+  const lang = document.documentElement.getAttribute("data-lang") || "en";
+  const isPt = lang === "pt";
+
+  const ind = document.getElementById("hm-selected-day-indicator");
+  const indText = document.getElementById("hm-filter-day-text");
+  if (ind && indText) {
+    if (selectedHeatmapDate) {
+      ind.style.display = "flex";
+      indText.textContent = (isPt ? "Filtrando por data: " : "Filtering by date: ") + selectedHeatmapDate;
+    } else {
+      ind.style.display = "none";
+    }
+  }
+
   const rows = sortedLpRows();
   if (!rows.length) {
     tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:1rem;">No records match the active filter.</td></tr>';
     return;
   }
-  const lang = document.documentElement.getAttribute("data-lang") || "en";
-  const isPt = lang === "pt";
   tbody.innerHTML = rows.map(r => {
     const label = isPt ? (r.zoneLabelPt || r.zoneLabel || r.zone) : (r.zoneLabel || r.zone);
     const badge = r.zone ? `<span class="zone-badge ${escapeHtml(r.badgeClass || '')}">${escapeHtml(label || '')}</span>` : '—';
@@ -1278,6 +1625,7 @@ function paintPage() {
   setKpis();
   syncGranularityUi();
   renderFaixasTable();
+  renderHeatmap();
   packLinepack();
   packLinepackHistory();
   packZones();
@@ -1509,11 +1857,48 @@ async function init() {
     });
   }
 
+  const btnHmAll = document.getElementById("btn-hm-all");
+  const btnHmAlerts = document.getElementById("btn-hm-alerts");
+  const btnHmCritical = document.getElementById("btn-hm-critical");
+  if (btnHmAll && btnHmAlerts && btnHmCritical) {
+    btnHmAll.addEventListener("click", () => {
+      heatmapFilter = "all";
+      btnHmAll.classList.add("active");
+      btnHmAlerts.classList.remove("active");
+      btnHmCritical.classList.remove("active");
+      renderHeatmap();
+    });
+    btnHmAlerts.addEventListener("click", () => {
+      heatmapFilter = "alerts";
+      btnHmAlerts.classList.add("active");
+      btnHmAll.classList.remove("active");
+      btnHmCritical.classList.remove("active");
+      renderHeatmap();
+    });
+    btnHmCritical.addEventListener("click", () => {
+      heatmapFilter = "critical";
+      btnHmCritical.classList.add("active");
+      btnHmAll.classList.remove("active");
+      btnHmAlerts.classList.remove("active");
+      renderHeatmap();
+    });
+  }
+
+  const btnClearDay = document.getElementById("btn-clear-day-filter");
+  if (btnClearDay) {
+    btnClearDay.addEventListener("click", () => {
+      selectedHeatmapDate = null;
+      renderHeatmap();
+      renderLpTable();
+    });
+  }
+
   initThemeToggle("theme-toggle", () => { packLinepack(); packLinepackHistory(); packZones(); });
   initLangToggle("lang-toggle", () => {
     renderFilters();
     setKpis();
     renderFaixasTable();
+    renderHeatmap();
     renderLpTable();
     applyI18n();
   });

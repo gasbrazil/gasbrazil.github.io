@@ -1728,6 +1728,493 @@ th.has-filter .th-label {
   color: var(--brz-yellow);
 }
 
+/* =========================================================================
+   Command Palette (Ctrl+K)
+   ========================================================================= */
+.gb-palette-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10000;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 12vh 16px 16px;
+  box-sizing: border-box;
+}
+.gb-palette-backdrop[hidden] {
+  display: none !important;
+}
+.gb-palette-card {
+  background: var(--panel);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--elevate-lg), 0 0 0 1px var(--ring);
+  max-width: 620px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: gb-palette-pop 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes gb-palette-pop {
+  from { opacity: 0; transform: scale(0.97) translateY(-8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.gb-palette-search-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+.gb-palette-search-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--muted);
+  flex: none;
+}
+.gb-palette-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: var(--font-ui);
+  font-size: 15px;
+  color: var(--text);
+  padding: 0;
+}
+.gb-palette-input::placeholder {
+  color: var(--muted);
+  font-weight: 300;
+}
+.gb-palette-badge {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--muted2);
+  line-height: 1.2;
+}
+.gb-palette-results {
+  max-height: 380px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 8px 6px;
+}
+.gb-palette-group-title {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--muted);
+  padding: 8px 10px 4px;
+}
+.gb-palette-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--text);
+  transition: background 0.1s ease;
+}
+.gb-palette-item:hover,
+.gb-palette-item.is-selected {
+  background: var(--accent-soft);
+  color: var(--text);
+}
+[data-theme="dark"] .gb-palette-item.is-selected {
+  background: rgba(63, 116, 217, 0.22);
+}
+.gb-palette-item-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--muted);
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.gb-palette-item.is-selected .gb-palette-item-icon {
+  color: var(--accent);
+}
+.gb-palette-item-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.gb-palette-item-title {
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gb-palette-item-desc {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 300;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gb-palette-item-tag {
+  font-size: 10px;
+  color: var(--muted2);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 2px 6px;
+  border-radius: 4px;
+  flex: none;
+  font-variant-numeric: tabular-nums;
+}
+.gb-palette-empty {
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+.gb-palette-footer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 16px;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--muted);
+}
+.gb-palette-footer kbd {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 9.5px;
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--muted2);
+  margin-right: 3px;
+}
+.gb-search-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--panel);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+  font-size: 12px;
+  color: var(--muted2);
+  cursor: pointer;
+  transition: all .15s ease;
+}
+.gb-search-btn:hover {
+  background: var(--accent-soft);
+  color: var(--text);
+  border-color: var(--accent);
+}
+.gb-search-btn kbd {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 9.5px;
+  color: var(--muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+/* =========================================================================
+   Chart Image Export Button (PNG)
+   ========================================================================= */
+.chart-export-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted2);
+  cursor: pointer;
+  transition: all .15s ease;
+  line-height: 1.4;
+  user-select: none;
+}
+.chart-export-btn:hover {
+  background: var(--accent-soft);
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+.chart-export-btn:active {
+  transform: scale(0.97);
+}
+.chart-export-btn svg {
+  width: 12px;
+  height: 12px;
+  flex: none;
+}
+.chart-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+/* =========================================================================
+   Live Freshness Pulse Indicators
+   ========================================================================= */
+.pulse-dot {
+  display: inline-block;
+  width: 6.5px;
+  height: 6.5px;
+  border-radius: 50%;
+  background: var(--ok-ink, #009c3b);
+  box-shadow: 0 0 0 0 rgba(0, 156, 59, 0.6);
+  animation: gb-pulse 2.2s infinite;
+  vertical-align: middle;
+  flex: none;
+}
+@keyframes gb-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(0, 156, 59, 0.7); }
+  70% { box-shadow: 0 0 0 5px rgba(0, 156, 59, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 156, 59, 0); }
+}
+.pulse-dot.delayed {
+  background: var(--tso-nts, #d97706);
+  box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.6);
+  animation: gb-pulse-amber 2.2s infinite;
+}
+@keyframes gb-pulse-amber {
+  0% { box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.7); }
+  70% { box-shadow: 0 0 0 5px rgba(217, 119, 6, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(217, 119, 6, 0); }
+}
+.pulse-dot.neutral {
+  background: var(--muted);
+  box-shadow: none;
+  animation: none;
+}
+.kpi-freshness {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+/* =========================================================================
+   TAG Mago Operating Risk & Imbalance Heatmap
+   ========================================================================= */
+.hm-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.hm-summary-tile {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.hm-summary-tile .hm-label {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.hm-summary-tile .hm-val {
+  font-size: 18px;
+  font-weight: 700;
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+.hm-summary-tile .hm-sub {
+  font-size: 10.5px;
+  color: var(--muted);
+}
+.hm-summary-tile.val-ok .hm-val { color: var(--ok-ink); }
+.hm-summary-tile.val-warn .hm-val { color: var(--warn-ink); }
+.hm-summary-tile.val-danger .hm-val { color: var(--neg); }
+
+.hm-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+.hm-day-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 9px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  cursor: pointer;
+  transition: transform 0.12s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  position: relative;
+  text-align: left;
+  user-select: none;
+}
+.hm-day-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  border-color: var(--accent);
+}
+.hm-day-card.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+  background: var(--panel-hover);
+}
+.hm-day-card.risk-critical {
+  border-left: 3px solid #ef4444;
+}
+.hm-day-card.risk-alert {
+  border-left: 3px solid #f59e0b;
+}
+.hm-day-card.risk-mild {
+  border-left: 3px solid #10b981;
+}
+.hm-day-card.risk-normal {
+  border-left: 3px solid #009c3b;
+}
+
+.hm-day-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+.hm-day-date {
+  font-weight: 600;
+  font-size: 12px;
+  font-family: var(--font-display);
+  color: var(--text);
+}
+.hm-day-weekday {
+  font-size: 10.5px;
+  color: var(--muted);
+  font-weight: normal;
+  margin-left: 3px;
+}
+.hm-risk-bar {
+  display: flex;
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+  background: var(--border);
+  width: 100%;
+}
+.hm-risk-seg {
+  height: 100%;
+  transition: width 0.2s ease;
+}
+.hm-risk-seg.seg-marginal { background: #10b981; }
+.hm-risk-seg.seg-baixo { background: #34d399; }
+.hm-risk-seg.seg-alto { background: #f59e0b; }
+.hm-risk-seg.seg-severo { background: #ef4444; }
+
+.hm-day-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  font-size: 11px;
+  color: var(--muted);
+  gap: 2px 6px;
+}
+.hm-day-stats .stat-item {
+  display: flex;
+  justify-content: space-between;
+  font-variant-numeric: tabular-nums;
+}
+.hm-day-stats .stat-val {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.hm-poc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: rgba(0, 39, 118, 0.12);
+  color: var(--accent);
+  border: 1px solid rgba(0, 39, 118, 0.2);
+  margin-top: 2px;
+}
+[data-theme="dark"] .hm-poc-badge {
+  background: rgba(59, 130, 246, 0.18);
+  color: #60a5fa;
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.hm-poc-callout {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--panel-hover);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 11.5px;
+}
+.hm-poc-callout p {
+  margin: 0;
+  color: var(--muted);
+  flex: 1;
+  min-width: 240px;
+  line-height: 1.45;
+}
+.hm-poc-callout strong {
+  color: var(--text);
+}
+.hm-poc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 4px;
+  background: var(--accent);
+  color: #fff !important;
+  font-size: 11px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: opacity 0.15s ease;
+}
+.hm-poc-btn:hover {
+  opacity: 0.9;
+}
+
+
+
 
 
 * { box-sizing: border-box; }
@@ -1971,6 +2458,10 @@ main h3,
       <div class="nav-trail">
         <a class="navlink" href="wiki/" data-i18n="navWiki">Wiki</a>
         <a class="navlink" href="about/" data-i18n="navAbout">About</a>
+        <button type="button" class="gb-search-btn" id="gb-search-trigger" aria-label="Search (Ctrl+K)" title="Search (Ctrl+K)">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span data-i18n="searchBtn">Search</span> <kbd>Ctrl+K</kbd>
+        </button>
       </div>
       <button type="button" id="lang-toggle" class="langBtn" aria-label="Português">PT</button>
       <button id="theme-toggle" title="Toggle theme" aria-label="Toggle theme"></button>
@@ -2201,11 +2692,49 @@ const GB_I18N = {
     sourceMago: "TAG Mago",
     methodAssump_mago: "One EMPACOTAMENTOS snapshot feeds both line pack and zone forecasts; values are stored as published (m³ line pack, Mm³/d zones).",
     magoKpiLinepack: "Integrated line pack",
+    magoKpiZone: "Operating Zone",
     magoKpiSnapshot: "Snapshot (UTC)",
     magoLinepackTitle: "Line pack — integrated mesh",
-    magoLinepackSub: "Hourly actual (solid) and short-horizon forecast (dashed) from the latest Mago snapshot.",
-    magoZonesTitle: "Consumption forecast by zone",
-    magoZonesSub: "TAG 7-day hourly estimates (Mm³/d). Toggle zones to compare.",
+    magoLinepackSub: "Hourly actual (solid) and short-horizon forecast (dashed) with TAG commercial tolerance risk bands.",
+    magoLegendActual: "Actual",
+    magoLegendForecast: "Forecast",
+    magoLegendSev: "Severo (Critical)",
+    magoLegendAlt: "Alto (Alert)",
+    magoLegendMarg: "Marginal (Target)",
+    magoFaixasTitle: "Operating Risk & Imbalance Tolerance Bands",
+    magoFaixasSub: "Commercial balancing tolerance thresholds established for TAG's integrated pipeline system. Exceeding marginal thresholds incurs imbalance penalties or triggers operational balancing actions.",
+    magoHeatmapTitle: "Operating Risk & Imbalance Breach Heatmap",
+    magoHeatmapSub: "Daily historical tracking of TAG integrated inventory across commercial tolerance tiers and correlation with transport balancing actions.",
+    magoHmAll: "All Days",
+    magoHmAlerts: "Alerts & Breaches",
+    magoHmCritical: "Critical Only",
+    magoHmCompliance: "Envelope Compliance",
+    magoHmAlertHours: "Alert Hours (Alto)",
+    magoHmCriticalHours: "Critical Hours (Severo)",
+    magoHmDaysMonitored: "Days Monitored",
+    magoHmViewPoc: "View TAG Balancing on POC",
+    magoHmClickHint: "Click day to inspect hourly line pack history",
+    magoHmPeakZone: "Peak Operating Zone",
+    magoHmRange: "Inventory Range",
+    magoHmAvg: "Daily Mean",
+    magoHmBalancingPoc: "POC Balancing Auction",
+    magoLinepackHistTitle: "Line pack history",
+    magoLinepackHistSub: "Hourly integrated inventory from cached snapshots (newest wins on overlap).",
+    magoLpCsv: "Download line pack CSV",
+    magoHistAll: "All Hours",
+    magoHistAlerts: "Alerts & Breaches Only (Alto & Severo)",
+    magoColObserved: "Observed (UTC)",
+    magoColMm3: "Mm³",
+    magoColM3: "m³",
+    magoColZone: "Operating Zone",
+    magoColSnapshot: "Source snapshot",
+    magoZonesTitle: "Consumption forecast",
+    magoZonesSub: "7-day daily TAG estimates (Mm³/d). Chart updates from the compact filters below.",
+    magoByState: "States",
+    magoByZone: "Zones",
+    magoChartLine: "Lines",
+    magoChartStack: "Stack",
+    magoSelectAll: "Select all",
     pldSubtitle: "CCEE daily-average and hourly PLD by submarket (R$/MWh).",
     pldNote: "PLD (CCEE) is not the same series as ONS CMO. See",
     pldNoteLink: "ONS Balances",
@@ -2262,11 +2791,26 @@ const GB_I18N = {
     shortcutsGeneral: "General",
     shortcutsGoTo: "Go To (press \"g\" then key)",
     shortcutHelp: "Show keyboard shortcuts",
+    shortcutPalette: "Command search palette",
     shortcutFilter: "Focus search or table filter",
     shortcutTheme: "Toggle dark / light theme",
     shortcutLang: "Toggle EN / PT language",
     shortcutEsc: "Clear filter or close menu",
-    shortcutsBtn: "Shortcuts (?)"
+    shortcutsBtn: "Shortcuts (?)",
+    searchBtn: "Search",
+    searchPlaceholder: "Search dashboards, transport points, contracts, topics… (Ctrl+K)",
+    paletteDashboards: "Dashboards",
+    palettePoints: "Transport Hubs & Points",
+    paletteActions: "Actions & Settings",
+    paletteTopics: "Market & Regulatory Topics",
+    paletteNoResults: "No results matching \"{q}\"",
+    exportPng: "PNG",
+    exportPngTitle: "Download chart as high-resolution PNG (2x)",
+    chartCopied: "Chart image copied to clipboard & downloaded",
+    chartDownloaded: "Chart image downloaded (PNG)",
+    freshLive: "Live & fresh",
+    freshDelayed: "Awaiting update",
+    freshScheduled: "Scheduled monthly"
   },
   pt: {
     themeDark: "Mudar para o modo escuro",
@@ -2345,11 +2889,49 @@ const GB_I18N = {
     sourceMago: "TAG Mago",
     methodAssump_mago: "Um snapshot EMPACOTAMENTOS alimenta empacotamento e previsão por zona; valores como publicados (m³ e Mm³/d).",
     magoKpiLinepack: "Empacotamento integrado",
+    magoKpiZone: "Faixa Operacional",
     magoKpiSnapshot: "Snapshot (UTC)",
     magoLinepackTitle: "Empacotamento — malha integrada",
-    magoLinepackSub: "Realizado horário (sólido) e previsão de curto prazo (tracejado) do último snapshot Mago.",
-    magoZonesTitle: "Previsão de consumo por zona",
-    magoZonesSub: "Estimativas horárias TAG em 7 dias (Mm³/d). Selecione zonas para comparar.",
+    magoLinepackSub: "Realizado horário (sólido) e previsão de curto prazo (tracejado) com faixas de tolerância comercial da TAG.",
+    magoLegendActual: "Realizado",
+    magoLegendForecast: "Previsão",
+    magoLegendSev: "Severo (Crítico)",
+    magoLegendAlt: "Alto (Alerta)",
+    magoLegendMarg: "Marginal (Ideal)",
+    magoFaixasTitle: "Faixas de Tolerância Operacional e Desbalanço",
+    magoFaixasSub: "Limites comerciais de tolerância de balanceamento estabelecidos para a malha integrada da TAG. Desvios além da faixa marginal geram penalidades ou ações de balanceamento operacional.",
+    magoHeatmapTitle: "Mapa de Risco Operacional e Violações de Desbalanço",
+    magoHeatmapSub: "Acompanhamento diário do empacotamento integrado da TAG nas faixas de tolerância comercial e correlação com ações de balanceamento.",
+    magoHmAll: "Todos os Dias",
+    magoHmAlerts: "Alertas e Violações",
+    magoHmCritical: "Apenas Crítico",
+    magoHmCompliance: "Conformidade Operacional",
+    magoHmAlertHours: "Horas em Alerta (Alto)",
+    magoHmCriticalHours: "Horas Críticas (Severo)",
+    magoHmDaysMonitored: "Dias Monitorados",
+    magoHmViewPoc: "Ver Balanceamento da TAG no POC",
+    magoHmClickHint: "Clique no dia para inspecionar histórico horário",
+    magoHmPeakZone: "Faixa Operacional Máxima",
+    magoHmRange: "Faixa de Inventário",
+    magoHmAvg: "Média Diária",
+    magoHmBalancingPoc: "Leilão de Balanceamento POC",
+    magoLinepackHistTitle: "Histórico de empacotamento",
+    magoLinepackHistSub: "Inventário horário integrado de snapshots armazenados (o mais recente prevalece em sobreposições).",
+    magoLpCsv: "Baixar CSV de empacotamento",
+    magoHistAll: "Todas as Horas",
+    magoHistAlerts: "Apenas Alertas e Violações (Alto e Severo)",
+    magoColObserved: "Observado (UTC)",
+    magoColMm3: "Mm³",
+    magoColM3: "m³",
+    magoColZone: "Faixa Operacional",
+    magoColSnapshot: "Snapshot de origem",
+    magoZonesTitle: "Previsão de consumo",
+    magoZonesSub: "Estimativas diárias TAG em 7 dias (Mm³/d). O gráfico atualiza pelos filtros abaixo.",
+    magoByState: "Estados",
+    magoByZone: "Zonas",
+    magoChartLine: "Linhas",
+    magoChartStack: "Empilhado",
+    magoSelectAll: "Selecionar todos",
     pldSubtitle: "PLD médio diário e horário da CCEE por submercado (R$/MWh).",
     pldNote: "O PLD (CCEE) não é a mesma série do CMO da ONS. Veja",
     pldNoteLink: "Balanços ONS",
@@ -2406,11 +2988,26 @@ const GB_I18N = {
     shortcutsGeneral: "Geral",
     shortcutsGoTo: "Navegação (pressione \"g\" e a tecla)",
     shortcutHelp: "Mostrar atalhos de teclado",
+    shortcutPalette: "Busca de comandos",
     shortcutFilter: "Focar busca ou filtro da tabela",
     shortcutTheme: "Alternar modo claro / escuro",
     shortcutLang: "Alternar idioma EN / PT",
     shortcutEsc: "Limpar filtro ou fechar menu",
-    shortcutsBtn: "Atalhos (?)"
+    shortcutsBtn: "Atalhos (?)",
+    searchBtn: "Buscar",
+    searchPlaceholder: "Buscar painéis, pontos de transporte, contratos, tópicos… (Ctrl+K)",
+    paletteDashboards: "Painéis",
+    palettePoints: "Pontos & Hubs de Transporte",
+    paletteActions: "Ações & Configurações",
+    paletteTopics: "Tópicos de Mercado & Regulatórios",
+    paletteNoResults: "Nenhum resultado para \"{q}\"",
+    exportPng: "PNG",
+    exportPngTitle: "Baixar gráfico em alta resolução PNG (2x)",
+    chartCopied: "Gráfico copiado e imagem baixada (PNG)",
+    chartDownloaded: "Gráfico baixado (PNG)",
+    freshLive: "Ao vivo & atualizado",
+    freshDelayed: "Aguardando atualização",
+    freshScheduled: "Publicação mensal"
   }
 };
 function currentLang() {
@@ -2576,6 +3173,7 @@ function toggleShortcutsModal() {
         '<div class="shortcuts-modal-grid">' +
           '<div class="shortcuts-section">' +
             '<h4 class="shortcuts-sec-title" data-i18n="shortcutsGeneral">General</h4>' +
+            '<div class="shortcut-row"><kbd>Ctrl</kbd> <kbd>K</kbd> <span data-i18n="shortcutPalette">Command search palette</span></div>' +
             '<div class="shortcut-row"><kbd>?</kbd> <span data-i18n="shortcutHelp">Show this help dialog</span></div>' +
             '<div class="shortcut-row"><kbd>/</kbd> or <kbd>f</kbd> <span data-i18n="shortcutFilter">Focus search / table filter</span></div>' +
             '<div class="shortcut-row"><kbd>t</kbd> <span data-i18n="shortcutTheme">Toggle light / dark theme</span></div>' +
@@ -2586,6 +3184,7 @@ function toggleShortcutsModal() {
             '<h4 class="shortcuts-sec-title" data-i18n="shortcutsGoTo">Go To (press "g" then key)</h4>' +
             '<div class="shortcut-row"><kbd>g</kbd> <kbd>h</kbd> <span>Home (Hub)</span></div>' +
             '<div class="shortcut-row"><kbd>g</kbd> <kbd>d</kbd> <span>The Desk</span></div>' +
+            '<div class="shortcut-row"><kbd>g</kbd> <kbd>m</kbd> <span>TAG Mago</span></div>' +
             '<div class="shortcut-row"><kbd>g</kbd> <kbd>o</kbd> <span>ONS Balances</span></div>' +
             '<div class="shortcut-row"><kbd>g</kbd> <kbd>p</kbd> <span>POC Results</span></div>' +
             '<div class="shortcut-row"><kbd>g</kbd> <kbd>c</kbd> <span>POC Contracts</span></div>' +
@@ -2593,7 +3192,6 @@ function toggleShortcutsModal() {
             '<div class="shortcut-row"><kbd>g</kbd> <kbd>s</kbd> <span>Gas Supply</span></div>' +
             '<div class="shortcut-row"><kbd>g</kbd> <kbd>l</kbd> <span>PLD Prices</span></div>' +
             '<div class="shortcut-row"><kbd>g</kbd> <kbd>r</kbd> <span>ANP Prices</span></div>' +
-            '<div class="shortcut-row"><kbd>g</kbd> <kbd>m</kbd> <span>TAG Mago</span></div>' +
           '</div>' +
         '</div>' +
       '</div>';
@@ -2608,6 +3206,398 @@ function toggleShortcutsModal() {
   modal.hidden = !modal.hidden;
 }
 
+// -----------------------------------------------------------------------------
+// Global Command Palette (Ctrl+K)
+// -----------------------------------------------------------------------------
+let GB_PALETTE_ITEMS = null;
+let gbPaletteActiveIdx = 0;
+let gbPaletteVisibleItems = [];
+
+function getPaletteCatalog() {
+  if (GB_PALETTE_ITEMS) return GB_PALETTE_ITEMS;
+  GB_PALETTE_ITEMS = [
+    // Dashboards
+    { cat: "dashboards", id: "desk", title: "The Desk", titlePt: "The Desk", desc: "Cross-product snapshot, spark calculator, and market balance", descPt: "Visão integrada mercado de gás e energia, calculadora spark spread", tag: "Live", url: "/desk/", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>' },
+    { cat: "dashboards", id: "mago", title: "TAG Mago", titlePt: "TAG Mago", desc: "Operational line pack, 7-risk tolerance bands, and zone forecasts", descPt: "Empacotamento operacional, faixas de tolerância e previsão de consumo", tag: "Real-time", url: "/mago/", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>' },
+    { cat: "dashboards", id: "ons", title: "ONS Balances", titlePt: "Balanços ONS", desc: "SIN electricity grid balance and gas-fired thermal dispatch", descPt: "Balanço do SIN e despacho térmico a gás natural", tag: "Daily", url: "/ons/", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>' },
+    { cat: "dashboards", id: "pld", title: "PLD Prices", titlePt: "Preços PLD", desc: "CCEE spot electricity settlement prices (hourly & peak/off-peak)", descPt: "Preço de Liquidação das Diferenças CCEE (horário e ponta)", tag: "Daily", url: "/pld/", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>' },
+    { cat: "dashboards", id: "poc", title: "POC Results", titlePt: "Resultados POC", desc: "Capacity auctions, balancing trades, GUS, and linepack tenders", descPt: "Leilões de capacidade de transporte, balanceamento e aquisição GUS", tag: "Daily", url: "/poc/", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>' },
+    { cat: "dashboards", id: "contratos", title: "POC Contracts", titlePt: "Contratos POC", desc: "Active firm transport and master capacity contracts (TBG, TAG, NTS)", descPt: "Contratos de transporte e contratos master ativos", tag: "Transport", url: "/contratos/", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>' },
+    { cat: "dashboards", id: "flows", title: "Pipeline Flows", titlePt: "Fluxos de Gasodutos", desc: "Physical receipt and delivery volumes across national gas transport network", descPt: "Movimentação física de gás nos pontos de entrada e saída", tag: "ANP / TSO", url: "/flows/", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>' },
+    { cat: "dashboards", id: "supply", title: "Gas Supply", titlePt: "Oferta de Gás", desc: "National monthly natural gas balance (production, imports, flaring)", descPt: "Balanço nacional de suprimento (produção, importação, queima)", tag: "Monthly", url: "/supply/", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>' },
+    { cat: "dashboards", id: "precos", title: "ANP Prices", titlePt: "Preços ANP", desc: "ANP Resolution 52/2011 disclosed gas contract prices (R$/MMBtu)", descPt: "Preços de venda de gás natural divulgados sob a Resolução ANP 52/2011", tag: "Monthly", url: "/precos/", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>' },
+    { cat: "dashboards", id: "wiki", title: "Wiki & Glossary", titlePt: "Wiki & Glossário", desc: "Methodologies, regulatory background, and market definitions", descPt: "Metodologias, contexto regulatório e definições de mercado", tag: "Docs", url: "/wiki/", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>' },
+    { cat: "dashboards", id: "about", title: "About & Methodology", titlePt: "Sobre & Metodologia", desc: "Data sources, pipelines, and architecture overview", descPt: "Fontes de dados, pipelines e arquitetura técnica", tag: "Info", url: "/about/", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>' },
+
+    // Transport Hubs & Points
+    { cat: "points", id: "cabiunas", title: "Cabiúnas (Terminal Cabiúnas / Macaé)", titlePt: "Cabiúnas (Terminal Cabiúnas / Macaé)", desc: "Major offshore pre-salt receipt and processing hub (Rio de Janeiro)", descPt: "Principal hub de recebimento e escoamento do pré-sal (RJ)", tag: "Pre-salt Hub", url: "/flows/?point=Cabi", keywords: ["macae", "upgn", "pre-sal", "rio", "terminal"] },
+    { cat: "points", id: "paulinia", title: "Paulínia (REPLAN)", titlePt: "Paulínia (REPLAN)", desc: "Key interconnection between TBG (Gasbol), NTS, and São Paulo demand", descPt: "Interconexão estratégica TBG, NTS e demanda paulista", tag: "SP Hub", url: "/flows/?point=Paulinia", keywords: ["replan", "gasbol", "sp", "tbg", "nts"] },
+    { cat: "points", id: "caraguatatuba", title: "Caraguatatuba (UTGCA)", titlePt: "Caraguatatuba (UTGCA)", desc: "Pre-salt Santos basin gas treatment unit and delivery point", descPt: "Unidade de Tratamento de Gás de Caraguatatuba (Bacia de Santos)", tag: "Santos Basin", url: "/flows/?point=Caraguatatuba", keywords: ["utgca", "santos", "mexilhao", "pre-sal"] },
+    { cat: "points", id: "guanabara", title: "Terminal Baía de Guanabara (TRBG)", titlePt: "Terminal Baía de Guanabara (TRBG)", desc: "FSRU LNG regasification terminal in Rio de Janeiro", descPt: "Terminal de Regaseificação de GNL da Baía de Guanabara (FSRU)", tag: "LNG Terminal", url: "/flows/?point=Guanabara", keywords: ["gnl", "lng", "fsru", "regas", "rio"] },
+    { cat: "points", id: "pecem", title: "Terminal Pecém", titlePt: "Terminal de Pecém", desc: "Ceará LNG import and regasification terminal (Northeast)", descPt: "Terminal de GNL e regaseificação no Ceará (Nordeste)", tag: "LNG Terminal", url: "/flows/?point=Pecem", keywords: ["gnl", "lng", "ceara", "nordeste"] },
+    { cat: "points", id: "sergipe", title: "Terminal Sergipe (Barra dos Coqueiros)", titlePt: "Terminal de Sergipe (Barra dos Coqueiros)", desc: "Private LNG import terminal connected to Porto de Sergipe I power plant", descPt: "Terminal privado de GNL conectado à UTE Porto de Sergipe I", tag: "LNG Terminal", url: "/flows/?point=Sergipe", keywords: ["gnl", "lng", "ute", "celse", "aracaju"] },
+    { cat: "points", id: "tgs", title: "Terminal Gás Sul (TGS)", titlePt: "Terminal Gás Sul (TGS)", desc: "Offshore LNG regasification terminal in Santa Catarina connected to TBG", descPt: "Terminal de GNL em Santa Catarina conectado à malha da TBG", tag: "LNG Terminal", url: "/flows/?point=TGS", keywords: ["gnl", "lng", "santa catarina", "sul", "tbg"] },
+    { cat: "points", id: "mutum", title: "Corumbá / Mutum (Gasbol)", titlePt: "Corumbá / Mutum (Gasbol)", desc: "Bolivia-Brazil international border entry point on TBG pipeline", descPt: "Ponto de entrada na fronteira Bolívia-Brasil no Gasbol (TBG)", tag: "Border Entry", url: "/flows/?point=Mutum", keywords: ["bolivia", "gasbol", "fronteira", "tbg"] },
+    { cat: "points", id: "catu", title: "Catu (Bahia)", titlePt: "Catu (Bahia)", desc: "TAG pipeline network balancing hub and junction in Bahia", descPt: "Hub e entroncamento principal da malha TAG na Bahia", tag: "TAG Hub", url: "/mago/?zone=BA1", keywords: ["bahia", "tag", "nordeste", "mago"] },
+    { cat: "points", id: "atalaia", title: "Atalaia (Sergipe)", titlePt: "Atalaia (Sergipe)", desc: "TAG coastal pipeline receiving point in Sergipe", descPt: "Ponto de recebimento da TAG em Sergipe", tag: "TAG Point", url: "/mago/?zone=SE", keywords: ["sergipe", "tag", "nordeste"] },
+
+    // Regulatory & Market Topics
+    { cat: "topics", id: "linepack", title: "Linepack & Tolerance Bands (Faixas de Tolerância)", titlePt: "Empacotamento & Faixas de Tolerância", desc: "TAG 7-tier balancing risk thresholds (Severo, Alto, Baixo, Marginal)", descPt: "Faixas comerciais de tolerância da TAG (Severo, Alto, Baixo, Marginal)", tag: "Balancing", url: "/mago/", keywords: ["faixa", "severo", "alto", "marginal", "penalidade", "desequilibrio", "imbalance"] },
+    { cat: "topics", id: "spark", title: "Spark Spread Calculator", titlePt: "Calculadora de Spark Spread", desc: "Thermal generation fuel margin (PLD vs Implied CVU)", descPt: "Margem de geração térmica (PLD vs CVU Implícito)", tag: "Power / Gas", url: "/desk/", keywords: ["cvu", "calorifico", "heat rate", "pld", "geracao", "termica"] },
+    { cat: "topics", id: "gus", title: "GUS (Gás de Uso do Sistema)", titlePt: "GUS (Gás de Uso do Sistema)", desc: "Fuel gas purchased by transportadoras for pipeline compressor stations", descPt: "Gás de combustível para estações de compressão das transportadoras", tag: "Transport", url: "/poc/?q=GUS", keywords: ["compressao", "combustivel", "leilao", "tso"] },
+    { cat: "topics", id: "pld-cmo", title: "PLD vs CMO Spread", titlePt: "Diferencial PLD vs CMO", desc: "CCEE market clearing price compared to ONS marginal operational cost", descPt: "Preço de liquidação CCEE comparado ao custo marginal ONS", tag: "Power", url: "/pld/", keywords: ["ccee", "ons", "cmo", "submercado", "sudeste", "sul"] },
+    { cat: "topics", id: "res52", title: "Resolução ANP 52/2011", titlePt: "Resolução ANP 52/2011", desc: "Mandatory public disclosures of natural gas purchase and sale prices", descPt: "Publicação obrigatória de preços de compra e venda de gás natural", tag: "Regulation", url: "/precos/", keywords: ["anp", "resolucao 52", "contrato", "precos"] },
+
+    // Actions & Tools
+    { cat: "actions", id: "act-theme", title: "Toggle Theme (Dark / Light)", titlePt: "Alternar Tema (Escuro / Claro)", desc: "Switch between terminal dark desk and paper light theme", descPt: "Alternar entre modo escuro de terminal e modo claro", tag: "Action", action: "theme", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>' },
+    { cat: "actions", id: "act-lang", title: "Toggle Language (PT / EN)", titlePt: "Alternar Idioma (PT / EN)", desc: "Switch UI language between English and Portuguese", descPt: "Alternar idioma da interface entre português e inglês", tag: "Action", action: "lang", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>' },
+    { cat: "actions", id: "act-shortcuts", title: "Keyboard Shortcuts (?)", titlePt: "Atalhos de Teclado (?)", desc: "View all available keyboard navigation shortcuts", descPt: "Ver todos os atalhos de navegação disponíveis", tag: "Help", action: "shortcuts", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="6" y1="8" x2="6.01" y2="8"/><line x1="10" y1="8" x2="10.01" y2="8"/><line x1="14" y1="8" x2="14.01" y2="8"/><line x1="18" y1="8" x2="18.01" y2="8"/><line x1="8" y1="12" x2="8.01" y2="12"/><line x1="12" y1="12" x2="12.01" y2="12"/><line x1="16" y1="12" x2="16.01" y2="12"/><line x1="18" y1="16" x2="6" y2="16"/></svg>' },
+    { cat: "actions", id: "act-share", title: "Copy Page Link", titlePt: "Copiar Link da Página", desc: "Copy the current page URL with all active filters to clipboard", descPt: "Copiar o endereço da página com todos os filtros ativos", tag: "Tool", action: "share", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>' }
+  ];
+  return GB_PALETTE_ITEMS;
+}
+
+function executePaletteItem(item) {
+  toggleCommandPalette(false);
+  if (!item) return;
+  if (item.url) {
+    window.location.href = item.url;
+  } else if (item.action === "theme") {
+    const themeBtn = document.getElementById("theme-toggle");
+    if (themeBtn) themeBtn.click();
+  } else if (item.action === "lang") {
+    const langBtn = document.getElementById("lang-toggle");
+    if (langBtn) langBtn.click();
+  } else if (item.action === "shortcuts") {
+    toggleShortcutsModal();
+  } else if (item.action === "share") {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(window.location.href);
+      gbShowToast(t("linkCopied") || "Link copied");
+    }
+  }
+}
+
+function renderPaletteResults(query) {
+  const container = document.getElementById("gb-palette-results");
+  if (!container) return;
+  const catalog = getPaletteCatalog();
+  const q = (query || "").trim().toLowerCase();
+  const isPt = currentLang() === "pt";
+
+  const matches = catalog.filter(item => {
+    if (!q) return true;
+    const title = (isPt ? item.titlePt : item.title).toLowerCase();
+    const desc = (isPt ? item.descPt : item.desc).toLowerCase();
+    const tag = (item.tag || "").toLowerCase();
+    const kw = (item.keywords || []).map(k => k.toLowerCase()).join(" ");
+    return title.includes(q) || desc.includes(q) || tag.includes(q) || kw.includes(q);
+  });
+
+  gbPaletteVisibleItems = matches;
+  gbPaletteActiveIdx = 0;
+
+  if (matches.length === 0) {
+    const noRes = (t("paletteNoResults") || 'No results matching "{q}"').replace("{q}", escapeHtml(q));
+    container.innerHTML = '<div class="gb-palette-empty">' + noRes + '</div>';
+    return;
+  }
+
+  const categoryNames = {
+    dashboards: t("paletteDashboards") || "Dashboards",
+    points: t("palettePoints") || "Transport Hubs & Points",
+    topics: t("paletteTopics") || "Market & Regulatory Topics",
+    actions: t("paletteActions") || "Actions & Settings"
+  };
+
+  const groups = {};
+  matches.forEach(item => {
+    const cat = item.cat || "dashboards";
+    if (!groups[cat]) groups[cat] = [];
+    groups[cat].push(item);
+  });
+
+  let html = "";
+  let itemIdx = 0;
+  for (const cat of ["dashboards", "points", "topics", "actions"]) {
+    const list = groups[cat];
+    if (!list || !list.length) continue;
+    html += '<div class="gb-palette-group-title">' + escapeHtml(categoryNames[cat] || cat) + '</div>';
+    list.forEach(item => {
+      const idx = itemIdx++;
+      const isSel = idx === gbPaletteActiveIdx;
+      const title = isPt ? item.titlePt : item.title;
+      const desc = isPt ? item.descPt : item.desc;
+      const icon = item.icon || '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>';
+      html +=
+        '<div class="gb-palette-item' + (isSel ? ' is-selected' : '') + '" data-idx="' + idx + '" role="option" aria-selected="' + (isSel ? 'true' : 'false') + '">' +
+          '<div class="gb-palette-item-icon">' + icon + '</div>' +
+          '<div class="gb-palette-item-body">' +
+            '<div class="gb-palette-item-title">' + escapeHtml(title) + '</div>' +
+            '<div class="gb-palette-item-desc">' + escapeHtml(desc) + '</div>' +
+          '</div>' +
+          (item.tag ? '<span class="gb-palette-item-tag">' + escapeHtml(item.tag) + '</span>' : '') +
+        '</div>';
+    });
+  }
+  container.innerHTML = html;
+
+  container.querySelectorAll(".gb-palette-item").forEach(el => {
+    el.addEventListener("mouseenter", () => {
+      gbPaletteActiveIdx = parseInt(el.getAttribute("data-idx"), 10);
+      updatePaletteSelection();
+    });
+    el.addEventListener("click", () => {
+      const idx = parseInt(el.getAttribute("data-idx"), 10);
+      if (gbPaletteVisibleItems[idx]) executePaletteItem(gbPaletteVisibleItems[idx]);
+    });
+  });
+}
+
+function updatePaletteSelection() {
+  const container = document.getElementById("gb-palette-results");
+  if (!container) return;
+  const items = container.querySelectorAll(".gb-palette-item");
+  items.forEach((el, idx) => {
+    const isSel = idx === gbPaletteActiveIdx;
+    el.classList.toggle("is-selected", isSel);
+    el.setAttribute("aria-selected", isSel ? "true" : "false");
+    if (isSel) {
+      el.scrollIntoView({ block: "nearest" });
+    }
+  });
+}
+
+function toggleCommandPalette(forceOpen) {
+  let modal = document.getElementById("gb-command-palette");
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "gb-command-palette";
+    modal.className = "gb-palette-backdrop";
+    modal.setAttribute("role", "dialog");
+    modal.setAttribute("aria-modal", "true");
+    modal.setAttribute("aria-label", "Command Palette");
+
+    const placeholder = t("searchPlaceholder") || "Search dashboards, transport points, contracts, topics… (Ctrl+K)";
+    modal.innerHTML =
+      '<div class="gb-palette-card">' +
+        '<div class="gb-palette-search-row">' +
+          '<svg class="gb-palette-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
+          '<input type="text" id="gb-palette-input" class="gb-palette-input" placeholder="' + escapeHtml(placeholder) + '" autocomplete="off" spellcheck="false" aria-autocomplete="list" aria-controls="gb-palette-results">' +
+          '<span class="gb-palette-badge">ESC</span>' +
+        '</div>' +
+        '<div id="gb-palette-results" class="gb-palette-results" role="listbox"></div>' +
+        '<div class="gb-palette-footer">' +
+          '<span><kbd>&uarr;</kbd><kbd>&darr;</kbd> Navigate</span>' +
+          '<span><kbd>&crarr;</kbd> Open</span>' +
+          '<span><kbd>Esc</kbd> Close</span>' +
+        '</div>' +
+      '</div>';
+
+    document.body.appendChild(modal);
+
+    const input = document.getElementById("gb-palette-input");
+    input.addEventListener("input", (e) => {
+      renderPaletteResults(e.target.value);
+    });
+
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        if (gbPaletteVisibleItems.length > 0) {
+          gbPaletteActiveIdx = (gbPaletteActiveIdx + 1) % gbPaletteVisibleItems.length;
+          updatePaletteSelection();
+        }
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        if (gbPaletteVisibleItems.length > 0) {
+          gbPaletteActiveIdx = (gbPaletteActiveIdx - 1 + gbPaletteVisibleItems.length) % gbPaletteVisibleItems.length;
+          updatePaletteSelection();
+        }
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        if (gbPaletteVisibleItems[gbPaletteActiveIdx]) {
+          executePaletteItem(gbPaletteVisibleItems[gbPaletteActiveIdx]);
+        }
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        toggleCommandPalette(false);
+      }
+    });
+
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) {
+        toggleCommandPalette(false);
+      }
+    });
+  }
+
+  const shouldOpen = (forceOpen !== undefined) ? forceOpen : modal.hidden;
+  modal.hidden = !shouldOpen;
+  if (shouldOpen) {
+    const input = document.getElementById("gb-palette-input");
+    if (input) {
+      input.value = "";
+      renderPaletteResults("");
+      setTimeout(() => input.focus(), 25);
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// 1-Click Chart PNG Exporter
+// -----------------------------------------------------------------------------
+async function gbExportChartPng(svgEl, title, customFilename) {
+  if (!svgEl) return;
+  try {
+    const rect = svgEl.getBoundingClientRect();
+    const width = Math.max(svgEl.viewBox?.baseVal?.width || 0, rect.width || 800);
+    const height = Math.max(svgEl.viewBox?.baseVal?.height || 0, rect.height || 400);
+
+    const scale = 2;
+    const padTop = 64;
+    const padBottom = 38;
+    const padSide = 24;
+    const canvas = document.createElement("canvas");
+    canvas.width = (width + padSide * 2) * scale;
+    canvas.height = (height + padTop + padBottom) * scale;
+    const ctx = canvas.getContext("2d");
+    ctx.scale(scale, scale);
+
+    const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+    ctx.fillStyle = isDark ? "#06080c" : "#ffffff";
+    ctx.fillRect(0, 0, width + padSide * 2, height + padTop + padBottom);
+
+    // Subtle border
+    ctx.strokeStyle = isDark ? "#2a303c" : "#d2d5da";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(0.5, 0.5, width + padSide * 2 - 1, height + padTop + padBottom - 1);
+
+    // Header banner: GasBrazil wordmark + flag accent
+    ctx.font = "600 16px 'IBM Plex Sans', -apple-system, sans-serif";
+    ctx.fillStyle = isDark ? "#ffffff" : "#0b0b0b";
+    ctx.fillText("GasBrazil", padSide, 28);
+
+    ctx.font = "400 12px 'IBM Plex Sans', -apple-system, sans-serif";
+    ctx.fillStyle = isDark ? "#9aa0ab" : "#6a6e75";
+    const chartTitle = title || "Chart Export";
+    ctx.fillText(chartTitle, padSide + 85, 28);
+
+    // Brazil Flag accent line
+    ctx.fillStyle = "#009C3B"; ctx.fillRect(padSide, 38, 20, 2.5);
+    ctx.fillStyle = "#FFDF00"; ctx.fillRect(padSide + 20, 38, 20, 2.5);
+    ctx.fillStyle = "#002776"; ctx.fillRect(padSide + 40, 38, 20, 2.5);
+
+    // Footer attribution
+    ctx.font = "300 10.5px 'IBM Plex Sans', -apple-system, sans-serif";
+    ctx.fillStyle = isDark ? "#9aa0ab" : "#6a6e75";
+    const nowUtc = new Date().toISOString().replace("T", " ").substring(0, 16) + " UTC";
+    ctx.fillText("Source: GasBrazil.com · Generated " + nowUtc, padSide, height + padTop + padBottom - 14);
+
+    // Clone SVG and inline styles
+    const clone = svgEl.cloneNode(true);
+    clone.setAttribute("width", width);
+    clone.setAttribute("height", height);
+
+    const origElements = svgEl.querySelectorAll("*");
+    const cloneElements = clone.querySelectorAll("*");
+    for (let i = 0; i < origElements.length; i++) {
+      const orig = origElements[i];
+      const cl = cloneElements[i];
+      if (!orig || !cl) continue;
+      const comp = window.getComputedStyle(orig);
+      if (comp.fill && comp.fill !== "none") cl.style.fill = comp.fill;
+      if (comp.stroke && comp.stroke !== "none") cl.style.stroke = comp.stroke;
+      if (comp.strokeWidth) cl.style.strokeWidth = comp.strokeWidth;
+      if (comp.strokeDasharray) cl.style.strokeDasharray = comp.strokeDasharray;
+      if (comp.opacity) cl.style.opacity = comp.opacity;
+      if (comp.fontFamily) cl.style.fontFamily = comp.fontFamily;
+      if (comp.fontSize) cl.style.fontSize = comp.fontSize;
+      if (comp.fontWeight) cl.style.fontWeight = comp.fontWeight;
+    }
+
+    const xml = new XMLSerializer().serializeToString(clone);
+    const svgBlob = new Blob([xml], { type: "image/svg+xml;charset=utf-8" });
+    const blobUrl = URL.createObjectURL(svgBlob);
+
+    const img = new Image();
+    img.onload = function() {
+      ctx.drawImage(img, padSide, padTop, width, height);
+      URL.revokeObjectURL(blobUrl);
+
+      canvas.toBlob(async function(blob) {
+        if (!blob) return;
+        const slug = (chartTitle.toLowerCase().replace(/[^a-z0-9]+/g, "_").slice(0, 24) || "chart");
+        const filename = (customFilename || "gasbrazil_" + slug + "_" + new Date().toISOString().slice(0, 10)) + ".png";
+
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+
+        let copied = false;
+        try {
+          if (navigator.clipboard && window.ClipboardItem) {
+            await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+            copied = true;
+          }
+        } catch (e) {}
+
+        const msg = copied ? t("chartCopied") : t("chartDownloaded");
+        gbShowToast(msg);
+      }, "image/png");
+    };
+    img.src = blobUrl;
+  } catch (err) {
+    console.error("Export chart error:", err);
+    gbShowToast("Failed to export chart image");
+  }
+}
+
+function gbBindChartExportButtons() {
+  document.querySelectorAll("svg").forEach(svg => {
+    if (svg.classList.contains("kpi-spark") || svg.classList.contains("ext-icon") || svg.classList.contains("gb-palette-search-icon")) return;
+    const rect = svg.getBoundingClientRect();
+    const w = svg.viewBox?.baseVal?.width || rect.width || 0;
+    const h = svg.viewBox?.baseVal?.height || rect.height || 0;
+    if (w < 200 && h < 100) return;
+
+    const container = svg.closest(".chart-wrap, .chart-card, .analysis-chart-panel, .panel, .stage, .desk-stage, main");
+    if (!container) return;
+    if (container.querySelector(".chart-export-btn")) return;
+
+    let target = container.querySelector(".chart-toolbar, .chart-toolbar-actions, .panel-title, .chart-title, .infotitle");
+    if (!target) {
+      target = document.createElement("div");
+      target.className = "chart-toolbar-actions";
+      container.insertBefore(target, svg);
+    }
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "chart-export-btn";
+    btn.setAttribute("data-i18n-title", "exportPngTitle");
+    btn.title = (typeof t === "function") ? t("exportPngTitle") : "Download chart as high-resolution PNG (2x)";
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>PNG</span>';
+
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      let title = "GasBrazil Chart";
+      const titleEl = container.querySelector(".panel-title, .chart-title, h2, h3");
+      if (titleEl) {
+        title = titleEl.childNodes[0]?.textContent?.trim() || titleEl.textContent?.trim() || title;
+      }
+      gbExportChartPng(svg, title);
+    });
+
+    target.appendChild(btn);
+  });
+}
+
 function initGlobalShortcuts() {
   let gPressed = false;
   let gTimer = null;
@@ -2617,6 +3607,12 @@ function initGlobalShortcuts() {
     const isInput = tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (e.target && e.target.isContentEditable);
 
     if (e.key === "Escape") {
+      const palette = document.getElementById("gb-command-palette");
+      if (palette && !palette.hidden) {
+        palette.hidden = true;
+        e.preventDefault();
+        return;
+      }
       const modal = document.getElementById("gb-shortcuts-modal");
       if (modal && !modal.hidden) {
         modal.hidden = true;
@@ -2630,6 +3626,13 @@ function initGlobalShortcuts() {
         e.preventDefault();
         return;
       }
+    }
+
+    // Ctrl+K or Cmd+K opens Command Palette anywhere (even when focused in input)
+    if ((e.ctrlKey || e.metaKey) && (e.key === "k" || e.key === "K")) {
+      e.preventDefault();
+      toggleCommandPalette();
+      return;
     }
 
     if (isInput) return;
@@ -2714,7 +3717,16 @@ function initGlobalShortcuts() {
     });
   }
 
+  const searchTriggers = document.querySelectorAll("#gb-search-trigger, .gb-search-btn");
+  searchTriggers.forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      toggleCommandPalette(true);
+    });
+  });
+
   gbBindTableCopyButtons();
+  setTimeout(gbBindChartExportButtons, 500);
 }
 
 if (document.readyState === "loading") {
