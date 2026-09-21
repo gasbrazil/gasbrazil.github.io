@@ -1991,7 +1991,7 @@ main h3,
       <div class="kpi-label" data-i18n="cardOns">ONS Balances</div>
       <div class="kpi-role">Grid &amp; gas dispatch</div>
       <div class="kpi-val" data-en="3,266 MWmed gas" data-pt="3,266 MWmed a gás">3,266 MWmed gas</div>
-      <div class="kpi-when" data-refresh="2026-09-20 21:19 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-21 01:23 UTC"></div>
     </a>
     <a class="kpi-cell" href="pld/" data-slug="pld">
       <div class="kpi-label" data-i18n="cardPld">PLD Prices</div>
@@ -2023,7 +2023,7 @@ main h3,
       <div class="kpi-label" data-i18n="cardMago">TAG Mago</div>
       <div class="kpi-role" data-i18n="cardMagoDesc">TAG operational line pack and zone consumption forecasts.</div>
       <div class="kpi-val" data-en="68.69 Mm³ line pack" data-pt="68.69 Mm³ empacotamento">68.69 Mm³ line pack</div>
-      <div class="kpi-when" data-refresh="2026-09-20 22:19 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-20 22:20 UTC"></div>
     </a>
     <a class="kpi-cell" href="supply/" data-slug="supply">
       <div class="kpi-label" data-i18n="cardSupply">Gas Supply</div>
@@ -2891,7 +2891,7 @@ initLangToggle("lang-toggle");
 </html>
 
 <script>
-const TEASERS_URL = "hub/teasers.json.gz";
+const TEASERS_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/hub/teasers.json.gz?v=35553136911";
 function paintRefreshLabels() {
   document.querySelectorAll(".kpi-when[data-refresh]").forEach(el => {
     const when = el.getAttribute("data-refresh");
