@@ -57,3 +57,10 @@ ignore = [
 
 [tool.ruff.lint.isort]
 known-first-party = ["shared", "api", "flows", "ons", "poc", "pld", "contratos", "supply", "precos", "mago", "desk"]
+
+[tool.uv]
+package = false
+
+[tool.setuptools]
+py-modules = []
+

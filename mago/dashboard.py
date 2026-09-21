@@ -1329,6 +1329,133 @@ async function init() {
   LP_ROWS = DATA.linepackHistoryRows || [];
   ZONE_SERIES = DATA.zoneSeries || {};
   GROUP_SERIES = DATA.groupSeries || {};
+
+  const DEFAULT_FAIXAS = {
+    severo_superior: 75500000.0,
+    baixo_superior: 74500000.0,
+    marginal_superior: 72000000.0,
+    marginal_inferior: 69000000.0,
+    baixo_inferior: 67500000.0,
+    severo_inferior: 66000000.0,
+  };
+  if (!DATA.toleranceBands || !Object.keys(DATA.toleranceBands).length) {
+    DATA.toleranceBands = DEFAULT_FAIXAS;
+  }
+  const tb = DATA.toleranceBands;
+  if (!DATA.toleranceBandsList || !DATA.toleranceBandsList.length) {
+    DATA.toleranceBandsList = [
+      {
+        key: "severo_superior",
+        name: "Severo (Superior)",
+        nameEn: "Critical High (Severo)",
+        color: "#ef4444",
+        badgeClass: "badge-danger",
+        range: "≥ " + (tb.severo_superior / 1e6).toFixed(2) + " Mm³",
+        descEn: "Critical overpack: venting / relief risk, maximum imbalance penalty",
+        descPt: "Empacotamento crítico elevado: risco de alívio e penalidades máximas",
+      },
+      {
+        key: "alto_superior",
+        name: "Alto (Superior)",
+        nameEn: "High Alert (Alto)",
+        color: "#f59e0b",
+        badgeClass: "badge-warning",
+        range: (tb.baixo_superior / 1e6).toFixed(2) + " – " + (tb.severo_superior / 1e6).toFixed(2) + " Mm³",
+        descEn: "High inventory: network balancing actions / penalties apply",
+        descPt: "Inventário elevado: ações comerciais e penalidades aplicáveis",
+      },
+      {
+        key: "baixo_superior",
+        name: "Baixo (Superior)",
+        nameEn: "Mild High (Baixo)",
+        color: "#10b981",
+        badgeClass: "badge-success",
+        range: (tb.marginal_superior / 1e6).toFixed(2) + " – " + (tb.baixo_superior / 1e6).toFixed(2) + " Mm³",
+        descEn: "Mild high inventory above target operating envelope",
+        descPt: "Inventário moderadamente alto, acima da faixa ideal",
+      },
+      {
+        key: "marginal",
+        name: "Marginal (Ideal)",
+        nameEn: "Target Operating (Marginal)",
+        color: "#10b981",
+        badgeClass: "badge-target",
+        range: (tb.marginal_inferior / 1e6).toFixed(2) + " – " + (tb.marginal_superior / 1e6).toFixed(2) + " Mm³",
+        descEn: "Optimal operating envelope: standard transport, zero imbalance penalty",
+        descPt: "Faixa de operação ideal: transporte neutro sem penalidades",
+      },
+      {
+        key: "baixo_inferior",
+        name: "Baixo (Inferior)",
+        nameEn: "Mild Low (Baixo)",
+        color: "#10b981",
+        badgeClass: "badge-success",
+        range: (tb.baixo_inferior / 1e6).toFixed(2) + " – " + (tb.marginal_inferior / 1e6).toFixed(2) + " Mm³",
+        descEn: "Mild low inventory below target operating envelope",
+        descPt: "Inventário moderadamente baixo, abaixo da faixa ideal",
+      },
+      {
+        key: "alto_inferior",
+        name: "Alto (Inferior)",
+        nameEn: "Low Alert (Alto)",
+        color: "#f59e0b",
+        badgeClass: "badge-warning",
+        range: (tb.severo_inferior / 1e6).toFixed(2) + " – " + (tb.baixo_inferior / 1e6).toFixed(2) + " Mm³",
+        descEn: "Low inventory: transport system alert, balancing injections needed",
+        descPt: "Inventário reduzido: alerta no sistema, compras de gás pela transportadora",
+      },
+      {
+        key: "severo_inferior",
+        name: "Severo (Inferior)",
+        nameEn: "Critical Low (Severo)",
+        color: "#ef4444",
+        badgeClass: "badge-danger",
+        range: "≤ " + (tb.severo_inferior / 1e6).toFixed(2) + " Mm³",
+        descEn: "Critical underpack: risk of system depressurization and supply curtailment",
+        descPt: "Empacotamento criticamente baixo: risco de despressurização e corte",
+      },
+    ];
+  }
+
+  function calcMagoZone(valM3) {
+    if (valM3 == null || !isFinite(valM3)) return null;
+    if (valM3 >= tb.severo_superior) return { key: "severo_superior", name: "Critical High (Severo)", namePt: "Severo (Superior)", color: "#ef4444", badgeClass: "badge-danger", isAlert: true, isCritical: true };
+    if (valM3 >= tb.baixo_superior) return { key: "alto_superior", name: "High Alert (Alto)", namePt: "Alto (Superior)", color: "#f59e0b", badgeClass: "badge-warning", isAlert: true, isCritical: false };
+    if (valM3 >= tb.marginal_superior) return { key: "baixo_superior", name: "Mild High (Baixo)", namePt: "Baixo (Superior)", color: "#10b981", badgeClass: "badge-success", isAlert: false, isCritical: false };
+    if (valM3 >= tb.marginal_inferior) return { key: "marginal", name: "Target Operating (Marginal)", namePt: "Marginal (Ideal)", color: "#10b981", badgeClass: "badge-target", isAlert: false, isCritical: false };
+    if (valM3 >= tb.baixo_inferior) return { key: "baixo_inferior", name: "Mild Low (Baixo)", namePt: "Baixo (Inferior)", color: "#10b981", badgeClass: "badge-success", isAlert: false, isCritical: false };
+    if (valM3 >= tb.severo_inferior) return { key: "alto_inferior", name: "Low Alert (Alto)", namePt: "Alto (Inferior)", color: "#f59e0b", badgeClass: "badge-warning", isAlert: true, isCritical: false };
+    return { key: "severo_inferior", name: "Critical Low (Severo)", namePt: "Severo (Inferior)", color: "#ef4444", badgeClass: "badge-danger", isAlert: true, isCritical: true };
+  }
+
+  if (!DATA.kpiZone) {
+    let latestLp = DATA.kpiLinepackM3;
+    if (latestLp == null && DATA.kpiLinepackMm3 != null) latestLp = DATA.kpiLinepackMm3 * 1e6;
+    if (latestLp == null && LP.actual && LP.actual.values && LP.actual.values.length) {
+      latestLp = LP.actual.values[LP.actual.values.length - 1];
+    }
+    if (latestLp != null) {
+      DATA.kpiZone = calcMagoZone(latestLp);
+    }
+  }
+
+  LP_ROWS.forEach(r => {
+    if (!r.zone) {
+      let val = r.valueM3;
+      if (val == null && r.valueMm3 != null) val = r.valueMm3 * 1e6;
+      if (val != null) {
+        const z = calcMagoZone(val);
+        if (z) {
+          r.zone = z.key;
+          r.zoneLabel = z.name;
+          r.zoneLabelPt = z.namePt;
+          r.badgeClass = z.badgeClass;
+          r.isAlert = z.isAlert;
+          r.isCritical = z.isCritical;
+        }
+      }
+    }
+  });
   applyMagoQuery();
   if (granularity === "state" && !selectedGroups.size) selectedGroups = new Set(["total"]);
   if (granularity === "zone" && !selectedZones.size) {

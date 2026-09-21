@@ -59,12 +59,12 @@ jobs:
             mago-raw-
 
       - name: Fetch recent Mago snapshots
-        run: uv run python mago_pipeline.py fetch --days 14
+        run: python mago_pipeline.py fetch --days 14
 
       - name: Build parquet + dashboard
         run: |
-          uv run python mago_pipeline.py build
-          uv run python dashboard.py
+          python mago_pipeline.py build
+          python dashboard.py
 
       - name: Commit dashboard artifacts
         working-directory: .
@@ -89,8 +89,8 @@ jobs:
           GASBRAZIL_ARTIFACTS_BUCKET: ${{ secrets.GASBRAZIL_ARTIFACTS_BUCKET }}
         run: |
           uv pip install -r poc/requirements.txt -c shared/constraints.txt
-          uv run python build_home.py
-          uv run python shared/publish_teasers.py
+          python build_home.py
+          python shared/publish_teasers.py
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html about/index.html 404.html robots.txt sitemap.xml hub/teasers.json.gz 2>/dev/null || true
