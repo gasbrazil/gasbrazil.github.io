@@ -59,12 +59,26 @@ def test_monitor_visual_consistency_typography():
     html_path = ROOT / "monitor" / "index.html"
     content = html_path.read_text(encoding="utf-8")
 
-    # Refined font hierarchy matching TAG Mago
+    # Refined font hierarchy and consistent card heights
     assert ".kpi .val { font-size: 1.15rem;" in content
     assert ".kpi .label { color: var(--muted); font-size: .7rem;" in content
+    assert "min-height: 68px;" in content
     assert ".data-table th, .lp-table th" in content
     assert "font-size: 11px;" in content
     assert "font-variant-numeric: tabular-nums;" in content
+
+    # Headers and tooltips
+    assert "TAG Line Pack — Integrated Network" in content
+    assert "NTS Line Pack — Transmission Network" in content
+    assert 'class="infodot"' in content
+
+    # Collapsed by default tolerance bands
+    assert '<details class="panel-fold" id="faixas-panel">' in content
+    assert '<details class="panel-fold" id="faixas-panel" open>' not in content
+
+    # Standardized 260px chart boxes
+    assert 'viewBox="0 0 1000 260"' in content
+    assert ".chart-box.chart-lp-box { min-height: 260px; height: 260px; }" in content
 
 
 def test_mago_and_nts_redirects():
