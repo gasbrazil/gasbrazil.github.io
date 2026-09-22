@@ -520,7 +520,6 @@ __SHARED_TYPO_WEIGHT_CSS__
     </table>
   </div>
 </section>
-</div>
 <div class="sources">
   <span class="sources-label" data-i18n="sources">Sources</span>
   <a href="../ons/">ONS</a>

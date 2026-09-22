@@ -16,7 +16,7 @@
 <link rel="preload" href="/shared/fonts/IBMPlexSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/shared/fonts/Pacaembu-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
 <!-- home-page teaser marker, read by ../build_home.py:
-     generated: 2026-09-22 14:02 UTC
+     generated: 2026-09-22 15:02 UTC
      kpi_linepack: 68.69
      kpi_snapshot: 2026-09-20 22:08 UTC -->
 <script>
@@ -2483,9 +2483,9 @@ main h3,
 
   <section class="panel panel-tight">
     <div class="panel-head-row">
-      <div>
-        <h2 data-i18n="magoLinepackTitle">Line pack — integrated mesh</h2>
-        <p class="sub compact" data-i18n="magoLinepackSub">Hourly actual (solid) and short-horizon forecast (dashed) with TAG commercial tolerance risk bands.</p>
+      <div style="display:flex;align-items:center;">
+        <h2 data-i18n="magoLinepackTitle">TAG Line Pack — Integrated Network</h2>
+        <button type="button" class="infodot" data-info="Hourly actual (solid) and short-horizon forecast (dashed) with TAG commercial tolerance risk bands." title="Hourly actual (solid) and short-horizon forecast (dashed) with TAG commercial tolerance risk bands." aria-label="Info">i</button>
       </div>
       <div id="linepack-zone-pill" class="zone-pill">—</div>
     </div>
@@ -2496,11 +2496,15 @@ main h3,
     </div>
   </section>
 
-  <section class="panel panel-tight" id="faixas-panel">
-    <h2 data-i18n="magoFaixasTitle">Operating Risk & Imbalance Tolerance Bands</h2>
-    <p class="sub compact" data-i18n="magoFaixasSub">Commercial balancing tolerance thresholds established for TAG's integrated pipeline system. Exceeding marginal thresholds incurs imbalance penalties or triggers operational balancing actions.</p>
-    <div id="faixas-grid"></div>
-  </section>
+  <details class="panel-fold" id="faixas-panel">
+    <summary style="display:flex;align-items:center;">
+      <span data-i18n="magoFaixasTitle">Operating Risk & Imbalance Tolerance Bands</span>
+      <button type="button" class="infodot" data-info="Commercial balancing tolerance thresholds established for TAG's integrated pipeline system. Exceeding marginal thresholds incurs imbalance penalties or triggers operational balancing actions." title="Commercial balancing tolerance thresholds established for TAG's integrated pipeline system. Exceeding marginal thresholds incurs imbalance penalties or triggers operational balancing actions." aria-label="Info" onclick="event.stopPropagation()">i</button>
+    </summary>
+    <div class="fold-body">
+      <div id="faixas-grid"></div>
+    </div>
+  </details>
 
   <section class="panel panel-tight" id="heatmap-panel">
     <div class="panel-head-row">
@@ -3025,11 +3029,11 @@ const GB_I18N = {
     ntsKpiRate: "Packing Rate",
     ntsKpiPacking: "Packing",
     ntsKpiUnpacking: "Unpacking",
-    ntsLinepackTitle: "NTS Line pack — Southeast transmission mesh",
+    ntsLinepackTitle: "NTS Line Pack — Transmission Network",
     ntsLinepackSub: "Real-time pipeline line pack inventory and hourly packing/unpacking rate.",
     magoKpiZone: "Operating Zone",
     magoKpiSnapshot: "Snapshot (UTC)",
-    magoLinepackTitle: "Line pack — integrated mesh",
+    magoLinepackTitle: "TAG Line Pack — Integrated Network",
     magoLinepackSub: "Hourly actual (solid) and short-horizon forecast (dashed) with TAG commercial tolerance risk bands.",
     magoLegendActual: "Actual",
     magoLegendForecast: "Forecast",
@@ -3248,11 +3252,11 @@ const GB_I18N = {
     ntsKpiRate: "Taxa de Variação",
     ntsKpiPacking: "Empacotando",
     ntsKpiUnpacking: "Desempacotando",
-    ntsLinepackTitle: "Empacotamento NTS — Malha Sudeste",
+    ntsLinepackTitle: "NTS Line Pack — Malha de Transporte",
     ntsLinepackSub: "Estoque de gás em tempo real na malha de transporte e taxa horária de empacotamento/desempacotamento.",
     magoKpiZone: "Faixa Operacional",
     magoKpiSnapshot: "Snapshot (UTC)",
-    magoLinepackTitle: "Empacotamento — malha integrada",
+    magoLinepackTitle: "TAG Line Pack — Malha Integrada",
     magoLinepackSub: "Realizado horário (sólido) e previsão de curto prazo (tracejado) com faixas de tolerância comercial da TAG.",
     magoLegendActual: "Realizado",
     magoLegendForecast: "Previsão",

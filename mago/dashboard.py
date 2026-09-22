@@ -742,9 +742,9 @@ __SHARED_TYPO_WEIGHT_CSS__
 
   <section class="panel panel-tight">
     <div class="panel-head-row">
-      <div>
-        <h2 data-i18n="magoLinepackTitle">Line pack — integrated mesh</h2>
-        <p class="sub compact" data-i18n="magoLinepackSub">Hourly actual (solid) and short-horizon forecast (dashed) with TAG commercial tolerance risk bands.</p>
+      <div style="display:flex;align-items:center;">
+        <h2 data-i18n="magoLinepackTitle">TAG Line Pack — Integrated Network</h2>
+        <button type="button" class="infodot" data-info="Hourly actual (solid) and short-horizon forecast (dashed) with TAG commercial tolerance risk bands." title="Hourly actual (solid) and short-horizon forecast (dashed) with TAG commercial tolerance risk bands." aria-label="Info">i</button>
       </div>
       <div id="linepack-zone-pill" class="zone-pill">—</div>
     </div>
@@ -755,11 +755,15 @@ __SHARED_TYPO_WEIGHT_CSS__
     </div>
   </section>
 
-  <section class="panel panel-tight" id="faixas-panel">
-    <h2 data-i18n="magoFaixasTitle">Operating Risk & Imbalance Tolerance Bands</h2>
-    <p class="sub compact" data-i18n="magoFaixasSub">Commercial balancing tolerance thresholds established for TAG's integrated pipeline system. Exceeding marginal thresholds incurs imbalance penalties or triggers operational balancing actions.</p>
-    <div id="faixas-grid"></div>
-  </section>
+  <details class="panel-fold" id="faixas-panel">
+    <summary style="display:flex;align-items:center;">
+      <span data-i18n="magoFaixasTitle">Operating Risk & Imbalance Tolerance Bands</span>
+      <button type="button" class="infodot" data-info="Commercial balancing tolerance thresholds established for TAG's integrated pipeline system. Exceeding marginal thresholds incurs imbalance penalties or triggers operational balancing actions." title="Commercial balancing tolerance thresholds established for TAG's integrated pipeline system. Exceeding marginal thresholds incurs imbalance penalties or triggers operational balancing actions." aria-label="Info" onclick="event.stopPropagation()">i</button>
+    </summary>
+    <div class="fold-body">
+      <div id="faixas-grid"></div>
+    </div>
+  </details>
 
   <section class="panel panel-tight" id="heatmap-panel">
     <div class="panel-head-row">

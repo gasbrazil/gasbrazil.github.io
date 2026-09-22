@@ -39,25 +39,36 @@ def _num(val: object) -> float | None:
 
 
 def _load_data(parquet_path: Path | str | None = None) -> pd.DataFrame:
-    path = Path(parquet_path) if parquet_path else PARQUET_PATH
-    if not path.exists():
-        # Fallback synthetic series if parquet not yet generated (e.g. CI or fresh checkout)
-        base_time = pd.Timestamp.now(tz="UTC").floor("h")
-        timestamps = [base_time - pd.Timedelta(hours=i) for i in range(48, -1, -1)]
-        values_m3 = [47_000_000.0 + (i % 7) * 100_000.0 for i in range(len(timestamps))]
-        df = pd.DataFrame({
-            "timestamp": timestamps,
-            "value_m3": values_m3,
-            "value_mm3": [v / 1_000_000.0 for v in values_m3],
-            "rate_m3_h": [15_000.0 if i % 2 == 0 else -10_000.0 for i in range(len(timestamps))],
-            "observed_at": [ts + pd.Timedelta(minutes=5) for ts in timestamps],
-            "source": ["nts"] * len(timestamps),
-        })
-        return df
-    df = pd.read_parquet(path)
-    df["timestamp"] = pd.to_datetime(df["timestamp"], utc=True)
-    df = df.sort_values("timestamp").reset_index(drop=True)
-    return df
+    candidates: list[Path] = []
+    if parquet_path:
+        candidates.append(Path(parquet_path))
+    candidates.extend([
+        PARQUET_PATH,
+        ROOT / "lake" / "transport" / "nts_linepack_series.parquet",
+        ROOT / "nts" / "data" / "nts_linepack_series.parquet",
+    ])
+    for p in candidates:
+        if p.exists():
+            df = pd.read_parquet(p)
+            df["timestamp"] = pd.to_datetime(df["timestamp"], utc=True)
+            df = df.sort_values("timestamp").reset_index(drop=True)
+            return df
+
+    # If parquet file does not exist locally, attempt to build from NTS OnTime API
+    try:
+        from nts_pipeline import cmd_build
+        df = cmd_build()
+        if df is not None and not df.empty:
+            df["timestamp"] = pd.to_datetime(df["timestamp"], utc=True)
+            df = df.sort_values("timestamp").reset_index(drop=True)
+            return df
+    except Exception as exc:
+        print(f"Warning: could not build NTS pipeline live: {exc}")
+
+    raise RuntimeError(
+        f"NTS linepack parquet not found at any candidate path: {[str(c) for c in candidates]}, "
+        "and live fetch from NTS OnTime API was unavailable."
+    )
 
 
 def _build_payload(df: pd.DataFrame) -> tuple[dict, dict]:
@@ -600,8 +611,10 @@ __SHARED_TYPO_WEIGHT_CSS__
   <section class="chart-section" aria-labelledby="chart-title">
     <div class="chart-header">
       <div class="chart-title-group">
-        <h2 id="chart-title" data-i18n="ntsLinepackTitle">NTS Line pack — Southeast transmission mesh</h2>
-        <p data-i18n="chartDesc">SCADA line pack telemetry (solid amber) with historical mean guideline (dashed).</p>
+        <h2 id="chart-title" style="display:inline-flex;align-items:center;">
+          <span data-i18n="ntsLinepackTitle">NTS Line Pack — Transmission Network</span>
+          <button type="button" class="infodot" data-info="SCADA line pack telemetry (solid amber) with historical mean guideline (dashed)." title="SCADA line pack telemetry (solid amber) with historical mean guideline (dashed)." aria-label="Info">i</button>
+        </h2>
       </div>
       <div class="range-toggle-group" role="group" aria-label="Chart time window">
         <button type="button" class="range-btn active" data-range="24h" onclick="setChartRange('24h')">24H</button>

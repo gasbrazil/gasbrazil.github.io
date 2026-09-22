@@ -96,7 +96,7 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 
 /* KPI Grid & Cards */
 .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 6px; margin-bottom: 10px; }
-.kpi { padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--panel); position: relative; }
+.kpi { padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--panel); position: relative; min-height: 68px; display: flex; flex-direction: column; justify-content: space-between; }
 .kpi .label { color: var(--muted); font-size: .7rem; text-transform: uppercase; letter-spacing: .04em; }
 .kpi .val { font-size: 1.15rem; margin-top: 2px; font-variant-numeric: tabular-nums; font-weight: 400; color: var(--text); display: flex; align-items: baseline; gap: 4px; }
 .kpi .val .unit { font-size: .85rem; font-weight: 300; color: var(--muted); }
@@ -121,6 +121,7 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 /* Charts & Toolbars */
 .chart-box { position: relative; width: 100%; min-height: 220px; }
 .chart-box.chart-sm { min-height: 200px; }
+.chart-box.chart-lp-box { min-height: 260px; height: 260px; }
 .legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 11px; margin-top: 6px; color: var(--muted); }
 .legend span { display: inline-flex; align-items: center; gap: 4px; }
 .legend span::before { content: ""; display: inline-block; width: 14px; height: 2px; background: currentColor; }
@@ -167,7 +168,7 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .hm-day-cell .tag { font-size: 8px; opacity: .85; }
 
 /* NTS Chart Specific */
-.chart-svg-box { width: 100%; height: 320px; position: relative; user-select: none; }
+.chart-svg-box { width: 100%; height: 260px; min-height: 260px; position: relative; user-select: none; }
 .chart-svg { width: 100%; height: 100%; overflow: visible; }
 .chart-tooltip { position: absolute; pointer-events: none; background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; font-size: 11.5px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); opacity: 0; transition: opacity 0.12s ease; z-index: 20; transform: translate(-50%, -115%); white-space: nowrap; }
 .chart-tooltip b { color: var(--accent); }
@@ -202,31 +203,47 @@ __SHARED_TYPO_WEIGHT_CSS__
 <!-- ======================= TAG MAGO SUBPAGE ======================= -->
 <div id="monitor-view-tag">
   <div class="kpi-row">
-    <div class="kpi"><div class="label" data-i18n="magoKpiLinepack">Integrated line pack</div><div class="val" id="kpi-lp">—</div></div>
-    <div class="kpi"><div class="label" data-i18n="magoKpiZone">Operating Zone</div><div class="val" id="kpi-zone">—</div></div>
-    <div class="kpi"><div class="label" data-i18n="magoKpiSnapshot">Snapshot (UTC)</div><div class="val" id="kpi-snap">—</div></div>
+    <div class="kpi">
+      <div class="label" data-i18n="magoKpiLinepack">Integrated line pack</div>
+      <div class="val" id="kpi-lp">—</div>
+      <div class="sub-val" id="kpi-lp-m3">—</div>
+    </div>
+    <div class="kpi">
+      <div class="label" data-i18n="magoKpiZone">Operating Zone</div>
+      <div class="val" id="kpi-zone">—</div>
+      <div class="sub-val" id="kpi-zone-sub" data-i18n="magoKpiZoneSub">Commercial tolerance tier</div>
+    </div>
+    <div class="kpi">
+      <div class="label" data-i18n="magoKpiSnapshot">Snapshot (UTC)</div>
+      <div class="val" id="kpi-snap">—</div>
+      <div class="sub-val" id="kpi-snap-sub" data-i18n="magoKpiSnapSub">Cached Mago telemetry</div>
+    </div>
   </div>
 
   <section class="panel panel-tight">
     <div class="panel-head-row">
-      <div>
-        <h2 data-i18n="magoLinepackTitle">Line pack — integrated mesh</h2>
-        <p class="sub compact" data-i18n="magoLinepackSub">Hourly actual (solid) and short-horizon forecast (dashed) with TAG commercial tolerance risk bands.</p>
+      <div style="display:flex;align-items:center;">
+        <h2 data-i18n="magoLinepackTitle">TAG Line Pack — Integrated Network</h2>
+        <button type="button" class="infodot" data-info="Hourly actual (solid) and short-horizon forecast (dashed) with TAG commercial tolerance risk bands." title="Hourly actual (solid) and short-horizon forecast (dashed) with TAG commercial tolerance risk bands." aria-label="Info">i</button>
       </div>
       <div id="linepack-zone-pill" class="zone-pill">—</div>
     </div>
-    <div class="chart-box chart-sm"><div id="chart-lp"></div></div>
+    <div class="chart-box chart-lp-box"><div id="chart-lp"></div></div>
     <div class="legend">
       <span style="color:var(--tso-tag,#0066cc)" data-i18n="magoLegendActual">Actual</span>
       <span class="dash" style="color:#888" data-i18n="magoLegendForecast">Forecast</span>
     </div>
   </section>
 
-  <section class="panel panel-tight" id="faixas-panel">
-    <h2 data-i18n="magoFaixasTitle">Operating Risk & Imbalance Tolerance Bands</h2>
-    <p class="sub compact" data-i18n="magoFaixasSub">Commercial balancing tolerance thresholds established for TAG's integrated pipeline system. Exceeding marginal thresholds incurs imbalance penalties or triggers operational balancing actions.</p>
-    <div id="faixas-grid"></div>
-  </section>
+  <details class="panel-fold" id="faixas-panel">
+    <summary style="display:flex;align-items:center;">
+      <span data-i18n="magoFaixasTitle">Operating Risk & Imbalance Tolerance Bands</span>
+      <button type="button" class="infodot" data-info="Commercial balancing tolerance thresholds established for TAG's integrated pipeline system. Exceeding marginal thresholds incurs imbalance penalties or triggers operational balancing actions." title="Commercial balancing tolerance thresholds established for TAG's integrated pipeline system. Exceeding marginal thresholds incurs imbalance penalties or triggers operational balancing actions." aria-label="Info" onclick="event.stopPropagation()">i</button>
+    </summary>
+    <div class="fold-body">
+      <div id="faixas-grid"></div>
+    </div>
+  </details>
 
   <section class="panel panel-tight" id="heatmap-panel">
     <div class="panel-head-row">
@@ -336,9 +353,9 @@ __SHARED_TYPO_WEIGHT_CSS__
 
   <section class="panel panel-tight">
     <div class="panel-head-row">
-      <div>
-        <h2 data-i18n="ntsLinepackTitle">NTS Line pack — Southeast transmission mesh</h2>
-        <p class="sub compact" data-i18n="chartDesc">SCADA line pack telemetry (solid amber) with historical mean guideline (dashed).</p>
+      <div style="display:flex;align-items:center;">
+        <h2 data-i18n="ntsLinepackTitle">NTS Line Pack — Transmission Network</h2>
+        <button type="button" class="infodot" data-info="SCADA line pack telemetry (solid amber) with historical mean guideline (dashed)." title="SCADA line pack telemetry (solid amber) with historical mean guideline (dashed)." aria-label="Info">i</button>
       </div>
       <div class="range-toggle-group" role="group" aria-label="Chart time window">
         <button type="button" class="range-btn active" data-range="24h" onclick="setNtsChartRange('24h')">24H</button>
@@ -346,8 +363,8 @@ __SHARED_TYPO_WEIGHT_CSS__
         <button type="button" class="range-btn" data-range="all" onclick="setNtsChartRange('all')" data-i18n="rangeAll">All</button>
       </div>
     </div>
-    <div class="chart-svg-box" id="nts-chart-box">
-      <svg class="chart-svg" id="linepack-chart" viewBox="0 0 1000 340" preserveAspectRatio="none"></svg>
+    <div class="chart-svg-box chart-lp-box" id="nts-chart-box">
+      <svg class="chart-svg" id="linepack-chart" viewBox="0 0 1000 260" preserveAspectRatio="none"></svg>
       <div class="chart-tooltip" id="nts-chart-tooltip"></div>
     </div>
   </section>
@@ -421,6 +438,10 @@ if (typeof GB_I18N !== "undefined") {
   Object.assign(GB_I18N.en, {
     monitorTabTag: "TAG Mago",
     monitorTabNts: "NTS OnTime",
+    magoLinepackTitle: "TAG Line Pack — Integrated Network",
+    ntsLinepackTitle: "NTS Line Pack — Transmission Network",
+    magoKpiZoneSub: "Commercial tolerance tier",
+    magoKpiSnapSub: "Cached Mago telemetry",
     ntsKpiCurrent: "Linepack Inventory",
     ntsKpiState: "Packing State",
     kpiDelta24h: "24h Change",
@@ -457,6 +478,10 @@ if (typeof GB_I18N !== "undefined") {
   Object.assign(GB_I18N.pt, {
     monitorTabTag: "TAG Mago",
     monitorTabNts: "NTS OnTime",
+    magoLinepackTitle: "TAG Line Pack — Malha Integrada",
+    ntsLinepackTitle: "NTS Line Pack — Malha de Transporte",
+    magoKpiZoneSub: "Faixa de tolerância comercial",
+    magoKpiSnapSub: "Telemetria em cache do Mago",
     ntsKpiCurrent: "Estoque de Empacotamento",
     ntsKpiState: "Estado de Empacotamento",
     kpiDelta24h: "Variação 24h",
@@ -567,7 +592,7 @@ function renderNtsChart() {
   const svg = document.getElementById("linepack-chart");
   if (!svg || !pts.length) return;
 
-  const W = 1000, H = 340;
+  const W = 1000, H = 260;
   const L = 56, R = 24, T = 16, B = 32;
   const vals = pts.map(p => p[1]);
   let minV = Math.min(...vals);
@@ -774,6 +799,11 @@ function setMagoKpis() {
     lpEl.textContent = DATA.kpiLinepackMm3 != null
       ? DATA.kpiLinepackMm3.toFixed(2) + " Mm³" : fmtMm3(DATA.kpiLinepackM3);
   }
+  const lpM3El = document.getElementById("kpi-lp-m3");
+  if (lpM3El) {
+    const m3Val = DATA.kpiLinepackM3 != null ? DATA.kpiLinepackM3 : (DATA.kpiLinepackMm3 != null ? DATA.kpiLinepackMm3 * 1e6 : null);
+    lpM3El.textContent = m3Val != null ? Math.round(m3Val).toLocaleString("pt-BR") + " m³" : "—";
+  }
   const snapEl = document.getElementById("kpi-snap");
   if (snapEl) snapEl.textContent = DATA.snapshotAt || "—";
   const z = DATA.kpiZone;
@@ -825,7 +855,7 @@ function drawLines(hostId, seriesList, yFmt, bands) {
     }
   }
   const pad = (hi - lo) * 0.06 || 1; lo -= pad; hi += pad;
-  const W = Math.max(640, host.clientWidth || 640), H = hostId === "chart-zones" ? 230 : 210;
+  const W = Math.max(640, host.clientWidth || 640), H = hostId === "chart-zones" ? 230 : (hostId === "chart-lp" ? 260 : 210);
   const ML = 52, MR = bands ? 84 : 10, MT = 12, MB = 26;
   const plotLeft = ML, plotWidth = W - ML - MR, plotTop = MT, plotBottom = H - MB;
   const x = v => ML + plotWidth * ((v - minX) / (maxX - minX || 1));

@@ -59,3 +59,13 @@ def test_desk_analysis_stage_spans_full_width():
 
     html = (ROOT / "desk" / "index.html").read_text(encoding="utf-8")
     assert "observeAnalysisResize" in html
+
+
+def test_desk_analysis_contained_in_wrap():
+    html = (ROOT / "desk" / "index.html").read_text(encoding="utf-8")
+    wrap_idx = html.find('class="wrap"')
+    anal_idx = html.find('id="desk-view-analysis"')
+    close_wrap = html.rfind('</div>\n<div class="tt"')
+    assert wrap_idx != -1
+    assert anal_idx != -1
+    assert wrap_idx < anal_idx < close_wrap, "desk-view-analysis must be contained within .wrap"

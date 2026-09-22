@@ -2207,7 +2207,6 @@ th.has-filter .th-label {
 
 
 
-
 /* Everything below is this dashboard's own layout/components -- the palette
    (neutral tokens + the shared Brazilian-flag accent) now lives entirely in
    shared/theme.css (see ADR-001, Decision 2 Option C). Token names are
@@ -2542,7 +2541,7 @@ main h3,
 <div class="method-row"><span class="method-label" data-i18n="methodAssump">Key assumption</span><span data-i18n="methodAssump_contratos">Master rows enable later nominations; they are not firm capacity bookings.</span></div>
 <div class="method-row"><span class="method-label" data-i18n="methodLimits">Limits</span><span data-i18n="aboutCoverBody">POC Contracts include Transport and Master rows. Legacy and access-connection contracts are not in the public GraphQL feed yet.</span></div>
 </details>
-  &copy; <span id="year"></span> GasBrazil.com &middot; Data: Portal de Oferta de Capacidade (public API) &middot; Contact: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
+  &copy; <span id="year"></span> GasBrazil.com &middot; Data: Portal de Oferta de Capacidade (public API) &middot; <button type="button" class="footer-link-btn" id="link-shortcuts" data-i18n="shortcutsBtn">Shortcuts (?)</button> &middot; Contact: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
   <br><span id="coverage-note">Active Transport &amp; Master contracts</span><button class="infodot" type="button" aria-label="About contract coverage" data-info="Covers the &quot;Transport Contract&quot; and &quot;Master Contract&quot; contract types. &quot;Legacy Transport Contract&quot; and &quot;Access Connection&quot; are small, separately-sourced categories on the source site and are not yet included. Concluded contracts are excluded from the view.">i</button>
 </footer>
 </div>
@@ -4502,11 +4501,11 @@ const GB_I18N = {
     ntsKpiRate: "Packing Rate",
     ntsKpiPacking: "Packing",
     ntsKpiUnpacking: "Unpacking",
-    ntsLinepackTitle: "NTS Line pack — Southeast transmission mesh",
+    ntsLinepackTitle: "NTS Line Pack — Transmission Network",
     ntsLinepackSub: "Real-time pipeline line pack inventory and hourly packing/unpacking rate.",
     magoKpiZone: "Operating Zone",
     magoKpiSnapshot: "Snapshot (UTC)",
-    magoLinepackTitle: "Line pack — integrated mesh",
+    magoLinepackTitle: "TAG Line Pack — Integrated Network",
     magoLinepackSub: "Hourly actual (solid) and short-horizon forecast (dashed) with TAG commercial tolerance risk bands.",
     magoLegendActual: "Actual",
     magoLegendForecast: "Forecast",
@@ -4725,11 +4724,11 @@ const GB_I18N = {
     ntsKpiRate: "Taxa de Variação",
     ntsKpiPacking: "Empacotando",
     ntsKpiUnpacking: "Desempacotando",
-    ntsLinepackTitle: "Empacotamento NTS — Malha Sudeste",
+    ntsLinepackTitle: "NTS Line Pack — Malha de Transporte",
     ntsLinepackSub: "Estoque de gás em tempo real na malha de transporte e taxa horária de empacotamento/desempacotamento.",
     magoKpiZone: "Faixa Operacional",
     magoKpiSnapshot: "Snapshot (UTC)",
-    magoLinepackTitle: "Empacotamento — malha integrada",
+    magoLinepackTitle: "TAG Line Pack — Malha Integrada",
     magoLinepackSub: "Realizado horário (sólido) e previsão de curto prazo (tracejado) com faixas de tolerância comercial da TAG.",
     magoLegendActual: "Realizado",
     magoLegendForecast: "Previsão",
