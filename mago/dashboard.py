@@ -614,6 +614,12 @@ TEMPLATE = r"""<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="refresh" content="0; url=../monitor/?tab=tag">
+<script>
+  if (window.location.pathname.endsWith('/mago/') || window.location.pathname.endsWith('/mago/index.html')) {
+    window.location.replace('../monitor/?tab=tag' + (window.location.hash || ''));
+  }
+</script>
 <title>TAG Mago — GasBrazil.com</title>
 <meta name="description" content="TAG Mago line pack and 7-day balancing-zone consumption forecasts from hourly operational snapshots.">
 <link rel="canonical" href="https://gasbrazil.com/mago/">
@@ -712,6 +718,10 @@ __SHARED_TYPO_WEIGHT_CSS__
 <body>
 <a class="skip-link" href="#chart-lp" data-i18n="skip">Skip to content</a>
 <div class="wrap">
+<div style="background:var(--accent-soft);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;margin:8px 0 10px;font-size:12.5px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+  <span>TAG Mago is now part of the unified <strong>Pipeline Monitor</strong> dashboard.</span>
+  <a href="../monitor/?tab=tag" style="color:var(--accent);font-weight:600;text-decoration:underline;white-space:nowrap;">Open Pipeline Monitor &rarr;</a>
+</div>
 <header class="dash-head">
   __SHARED_MASTHEAD__
   <div class="header-right">

@@ -23,7 +23,7 @@ REPO_ROOT = HERE.parent
 LAKE_ROOT = REPO_ROOT / "lake"
 
 # Dashboard slug → artifact key prefix under the public R2 artifacts bucket.
-ARTIFACT_DOMAINS = ("ons", "flows", "poc", "contratos", "supply", "pld", "precos", "desk", "hub", "mago")
+ARTIFACT_DOMAINS = ("ons", "flows", "poc", "contratos", "supply", "pld", "precos", "desk", "hub", "mago", "nts", "monitor")
 
 # Domain → relative lake path (parquet files).
 LAKE_PATHS = {
@@ -38,6 +38,7 @@ LAKE_PATHS = {
     "supply_monthly": LAKE_ROOT / "supply" / "supply_monthly.parquet",
     "anp_prices": LAKE_ROOT / "supply" / "anp_prices.parquet",
     "tag_mago_series": LAKE_ROOT / "transport" / "tag_mago_series.parquet",
+    "nts_linepack_series": LAKE_ROOT / "transport" / "nts_linepack_series.parquet",
 }
 
 

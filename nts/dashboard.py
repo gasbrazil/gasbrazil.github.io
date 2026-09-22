@@ -201,16 +201,16 @@ header.dash-head { display: flex; flex-direction: row; align-items: center; gap:
 /* KPI Cards Grid */
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 16px;
-  margin-bottom: 28px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 6px;
+  margin-bottom: 10px;
 }
 .nts-card {
   background: var(--card-bg);
   border: 1px solid var(--border);
-  border-radius: var(--radius, 8px);
-  padding: 18px 20px;
-  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-sm, 4px);
+  padding: 8px 10px;
+  box-shadow: none;
   transition: transform 0.15s ease, border-color 0.15s ease;
   position: relative;
   overflow: hidden;
@@ -222,7 +222,7 @@ header.dash-head { display: flex; flex-direction: row; align-items: center; gap:
   content: "";
   position: absolute;
   top: 0; left: 0; right: 0;
-  height: 3px;
+  height: 2px;
   background: var(--border);
 }
 .nts-card.accent::before {
@@ -230,48 +230,50 @@ header.dash-head { display: flex; flex-direction: row; align-items: center; gap:
 }
 
 .kpi-title {
-  font-size: 12.5px;
-  font-weight: 500;
+  font-size: .7rem;
+  font-weight: 400;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   color: var(--muted);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
+  margin-bottom: 2px;
 }
 .kpi-num {
-  font-size: 28px;
-  font-weight: 600;
-  font-family: var(--font-mono, monospace);
+  font-size: 1.15rem;
+  font-weight: 400;
+  font-family: var(--font);
+  font-variant-numeric: tabular-nums;
   color: var(--text);
-  line-height: 1.1;
+  line-height: 1.2;
   display: flex;
   align-items: baseline;
-  gap: 6px;
+  gap: 4px;
 }
 .kpi-unit {
-  font-size: 15px;
-  font-weight: 400;
+  font-size: .85rem;
+  font-weight: 300;
   color: var(--muted);
 }
 .kpi-sub {
-  font-size: 12.5px;
+  font-size: 11px;
   color: var(--muted);
-  margin-top: 6px;
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
 }
 
 /* Status Badges */
 .badge-pack {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 3px 8px;
-  border-radius: 9999px;
-  font-size: 12px;
+  gap: 4px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
   font-weight: 500;
 }
 .badge-pack.packing {
@@ -287,61 +289,66 @@ header.dash-head { display: flex; flex-direction: row; align-items: center; gap:
 .chart-section {
   background: var(--card-bg);
   border: 1px solid var(--border);
-  border-radius: var(--radius, 8px);
-  padding: 22px 24px;
-  box-shadow: var(--shadow-sm);
-  margin-bottom: 28px;
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  box-shadow: none;
+  margin-bottom: 10px;
 }
 .chart-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 18px;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 .chart-title-group h2 {
-  font-size: 18px;
-  font-weight: 600;
-  margin: 0;
+  font-size: .98rem;
+  font-weight: 500;
+  margin: 0 0 .2rem;
   color: var(--text);
 }
 .chart-title-group p {
-  font-size: 13px;
+  font-size: .8rem;
+  font-weight: 200;
   color: var(--muted);
-  margin: 4px 0 0;
+  margin: 0 0 .35rem;
+  line-height: 1.35;
 }
 
 .range-toggle-group {
   display: inline-flex;
-  background: var(--bg-hover, rgba(128,128,128,0.08));
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 2px;
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  padding: 1px;
+  gap: 2px;
 }
 .range-btn {
   background: transparent;
   border: none;
-  padding: 5px 12px;
-  font-size: 12.5px;
-  font-weight: 500;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 400;
   color: var(--muted);
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 3px;
+  font-family: var(--font);
   transition: all 0.15s ease;
 }
 .range-btn:hover {
+  background: var(--accent-soft);
   color: var(--text);
 }
 .range-btn.active {
-  background: var(--card-bg);
-  color: var(--tso-nts);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--text);
+  font-weight: 600;
 }
 
 .chart-svg-box {
   width: 100%;
-  height: 380px;
+  height: 340px;
   position: relative;
   user-select: none;
 }
@@ -375,53 +382,54 @@ header.dash-head { display: flex; flex-direction: row; align-items: center; gap:
 .table-section {
   background: var(--card-bg);
   border: 1px solid var(--border);
-  border-radius: var(--radius, 8px);
-  padding: 20px 24px;
-  box-shadow: var(--shadow-sm);
-  margin-bottom: 28px;
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  box-shadow: none;
+  margin-bottom: 10px;
 }
 .table-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 14px;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 .table-header h2 {
-  font-size: 17px;
-  font-weight: 600;
+  font-size: .98rem;
+  font-weight: 500;
   margin: 0;
 }
 .download-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   background: var(--card-bg);
-  border: 1px solid var(--border);
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 12.5px;
-  font-weight: 500;
-  color: var(--text);
+  border: 1px solid var(--border-strong);
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--muted);
   cursor: pointer;
+  font-family: var(--font);
   transition: all 0.15s ease;
 }
 .download-btn:hover {
-  border-color: var(--tso-nts);
-  color: var(--tso-nts);
+  background: var(--accent-soft);
+  color: var(--text);
 }
 
 .data-table-wrap {
   overflow-x: auto;
   max-height: 440px;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 4px;
 }
 .data-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: 12px;
   text-align: left;
 }
 .data-table th {
@@ -430,21 +438,26 @@ header.dash-head { display: flex; flex-direction: row; align-items: center; gap:
   background: var(--bg);
   color: var(--muted);
   font-weight: 500;
-  padding: 10px 14px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+  padding: 6px 10px;
   border-bottom: 1px solid var(--border);
   white-space: nowrap;
   z-index: 5;
 }
 .data-table td {
-  padding: 8px 14px;
+  padding: 6px 10px;
   border-bottom: 1px solid var(--border);
   white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 .data-table tr:hover td {
-  background: var(--bg-hover, rgba(128,128,128,0.04));
+  background: var(--accent-soft);
 }
 .mono {
-  font-family: var(--font-mono, monospace);
+  font-family: var(--font);
+  font-variant-numeric: tabular-nums;
 }
 
 .nts-footer {
@@ -474,6 +487,12 @@ DASHBOARD_TEMPLATE = """<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="refresh" content="0; url=../monitor/?tab=nts">
+<script>
+  if (window.location.pathname.endsWith('/nts/') || window.location.pathname.endsWith('/nts/index.html')) {
+    window.location.replace('../monitor/?tab=nts' + (window.location.hash || ''));
+  }
+</script>
 __HEAD__
 <script>__SHARED_JS_BOOT__</script>
 <style>
@@ -493,6 +512,10 @@ __SHARED_TYPO_WEIGHT_CSS__
 -->
 <a class="skip-link" href="#main" data-i18n="skip">Skip to content</a>
 <div class="wrap">
+<div style="background:var(--accent-soft);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;margin:8px 0 10px;font-size:12.5px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+  <span>NTS OnTime is now part of the unified <strong>Pipeline Monitor</strong> dashboard.</span>
+  <a href="../monitor/?tab=nts" style="color:var(--accent);font-weight:600;text-decoration:underline;white-space:nowrap;">Open Pipeline Monitor &rarr;</a>
+</div>
 <header class="dash-head">
   __MASTHEAD__
   <div class="header-right">

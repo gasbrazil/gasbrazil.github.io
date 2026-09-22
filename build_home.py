@@ -146,11 +146,34 @@ def collect_status() -> dict:
         "pld_spark": "",
         "poc_spark": "",
         "nts_spark": "",
+        "monitor_kpi": None,
+        "monitor_kpi_pt": None,
+        "monitor_when": None,
+        "monitor_spark": "",
         "teasers_url": dk.teaser_url(),
     }
     for key, val in pt.status_from_teasers().items():
         if val:
             status[key] = val
+
+    if not status.get("monitor_kpi"):
+        mon_html = ROOT / "monitor" / "index.html"
+        if mon_html.exists():
+            text = mon_html.read_text(encoding="utf-8")
+            tag_lp = pt._marker(text, "kpi_tag_lp")
+            nts_lp = pt._marker(text, "kpi_nts_lp")
+            when = pt._marker(text, "generated")
+            parts_en, parts_pt = [], []
+            if tag_lp:
+                parts_en.append(f"TAG {tag_lp} Mm³")
+                parts_pt.append(f"TAG {tag_lp} Mm³")
+            if nts_lp:
+                parts_en.append(f"NTS {nts_lp} Mm³")
+                parts_pt.append(f"NTS {nts_lp} Mm³")
+            if parts_en:
+                status["monitor_kpi"] = " · ".join(parts_en)
+                status["monitor_kpi_pt"] = " · ".join(parts_pt)
+                status["monitor_when"] = when or status.get("monitor_when")
 
     # Legacy ONS embed fallback when the committed shell has no KPI marker.
     if not status["ons_kpi"]:
@@ -228,6 +251,7 @@ def collect_status() -> dict:
                 ndf["timestamp"] = pd.to_datetime(ndf["timestamp"], errors="coerce")
                 ndf = ndf.dropna(subset=["timestamp", "value_mm3"]).sort_values("timestamp")
                 status["nts_spark"] = _sparkline_svg(ndf["value_mm3"].tail(40).tolist())
+                status["monitor_spark"] = status["nts_spark"]
     except Exception:
         pass
     return status
@@ -518,18 +542,12 @@ HOME_TEMPLATE = """__HEAD__
       <div class="kpi-val" data-en="__FLOWS_KPI__" data-pt="__FLOWS_KPI_PT__">__FLOWS_KPI__</div>
       <div class="kpi-when" data-refresh="__FLOWS_WHEN__"></div>
     </a>
-    <a class="kpi-cell" href="mago/" data-slug="mago">
-      <div class="kpi-label" data-i18n="cardMago">TAG Mago</div>
-      <div class="kpi-role" data-i18n="cardMagoDesc">TAG operational line pack and zone consumption forecasts.</div>
-      <div class="kpi-val" data-en="__MAGO_KPI__" data-pt="__MAGO_KPI_PT__">__MAGO_KPI__</div>
-      <div class="kpi-when" data-refresh="__MAGO_WHEN__"></div>
-    </a>
-    <a class="kpi-cell" href="nts/" data-slug="nts">
-      <div class="kpi-label" data-i18n="cardNts">NTS OnTime</div>
-      <div class="kpi-role" data-i18n="cardNtsDesc">NTS operational line pack and network packing/unpacking rate.</div>
-      <div class="kpi-val" data-en="__NTS_KPI__" data-pt="__NTS_KPI_PT__">__NTS_KPI__</div>
-      <div class="kpi-when" data-refresh="__NTS_WHEN__"></div>
-      __NTS_SPARK__
+    <a class="kpi-cell" href="monitor/" data-slug="monitor">
+      <div class="kpi-label" data-i18n="cardMonitor">Pipeline Monitor</div>
+      <div class="kpi-role" data-i18n="cardMonitorDesc">TAG Mago &amp; NTS OnTime operational line pack &amp; SCADA telemetry.</div>
+      <div class="kpi-val" data-en="__MONITOR_KPI__" data-pt="__MONITOR_KPI_PT__">__MONITOR_KPI__</div>
+      <div class="kpi-when" data-refresh="__MONITOR_WHEN__"></div>
+      __MONITOR_SPARK__
     </a>
     <a class="kpi-cell" href="supply/" data-slug="supply">
       <div class="kpi-label" data-i18n="cardSupply">Gas Supply</div>
@@ -742,6 +760,10 @@ def write_home(out_path: Path | str = DEFAULT_OUT) -> Path:
     html = html.replace("__NTS_KPI__", st.get("nts_kpi") or "")
     html = html.replace("__NTS_KPI_PT__", st.get("nts_kpi_pt") or st.get("nts_kpi") or "")
     html = html.replace("__NTS_WHEN__", st.get("nts_when") or "")
+    html = html.replace("__MONITOR_KPI__", st.get("monitor_kpi") or "")
+    html = html.replace("__MONITOR_KPI_PT__", st.get("monitor_kpi_pt") or st.get("monitor_kpi") or "")
+    html = html.replace("__MONITOR_WHEN__", st.get("monitor_when") or "")
+    html = html.replace("__MONITOR_SPARK__", st.get("monitor_spark") or "")
     html = html.replace("__POC_SPARK__", st.get("poc_spark") or "")
     html = html.replace("__SUPPLY_SPARK__", st.get("supply_spark") or "")
     html = html.replace("__PLD_SPARK__", st.get("pld_spark") or "")
@@ -817,11 +839,11 @@ def write_robots_and_sitemap() -> None:
         encoding="utf-8",
     )
     today = dt.date.today().isoformat()
-    urls = ["/", "/ons/", "/poc/", "/contratos/", "/flows/", "/mago/", "/nts/", "/supply/", "/precos/", "/pld/", "/desk/", "/wiki/", "/about/"]
+    urls = [
+        "/", "/ons/", "/poc/", "/contratos/", "/flows/", "/monitor/",
+        "/mago/", "/nts/", "/supply/", "/precos/", "/pld/", "/desk/", "/wiki/", "/about/",
+    ]
     body = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-    for u in urls:
-        body += f"  <url><loc>https://gasbrazil.com{u}</loc><lastmod>{today}</lastmod></url>\n"
-    body += "</urlset>\n"
     for u in urls:
         body += f"  <url><loc>https://gasbrazil.com{u}</loc><lastmod>{today}</lastmod></url>\n"
     body += "</urlset>\n"
