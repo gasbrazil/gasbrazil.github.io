@@ -2207,7 +2207,6 @@ th.has-filter .th-label {
 
 
 
-
 /* Everything below is this dashboard's own layout/components -- the palette
    (neutral tokens + the shared Brazilian-flag accent) now lives entirely in
    shared/theme.css (see ADR-001, Decision 2 Option C). Token names are
@@ -2386,7 +2385,7 @@ main h3,
 <header class="dash-head">
   <div class="masthead">
       <div class="masthead-ident">
-      <div class="products-dd"><span class="brand-lockup"><a class="masthead-brand" id="link-home" href="https://gasbrazil.com" data-i18n="navHome">GasBrazil</a><button type="button" class="dd-trigger brand-mark" aria-haspopup="menu" aria-expanded="false" aria-controls="gb-products-menu" id="gb-products-trigger" data-i18n-aria="navMenu" aria-label="Menu"><span class="brand-mark-dot" aria-hidden="true"></span><span class="dd-caret" aria-hidden="true"></span></button></span><div class="dd-menu" id="gb-products-menu" role="menu" aria-labelledby="gb-products-trigger"><a id="link-desk" href="https://gasbrazil.com/desk/" role="menuitem" data-i18n="navDesk"><span class="chk"></span>The Desk</a><a id="link-ons" href="https://gasbrazil.com/ons/" role="menuitem" data-i18n="navOns"><span class="chk"></span>ONS Balances</a><a id="link-pld" href="https://gasbrazil.com/pld/" role="menuitem" data-i18n="navPld"><span class="chk"></span>PLD Prices</a><a id="link-poc" href="https://gasbrazil.com/poc/" role="menuitem" data-i18n="navPoc"><span class="chk"></span>POC Results</a><span class="is-current" role="menuitem" aria-current="page" data-i18n="navContratos"><span class="chk">✓</span>POC Contracts</span><a id="link-flows" href="https://gasbrazil.com/flows/" role="menuitem" data-i18n="navFlows"><span class="chk"></span>Pipeline Flows</a><a id="link-mago" href="https://gasbrazil.com/mago/" role="menuitem" data-i18n="navMago"><span class="chk"></span>TAG Mago</a><a id="link-nts" href="https://gasbrazil.com/nts/" role="menuitem" data-i18n="navNts"><span class="chk"></span>NTS OnTime</a><a id="link-supply" href="https://gasbrazil.com/supply/" role="menuitem" data-i18n="navSupply"><span class="chk"></span>Gas Supply</a><a id="link-precos" href="https://gasbrazil.com/precos/" role="menuitem" data-i18n="navPrecos"><span class="chk"></span>ANP Prices</a></div></div>
+      <div class="products-dd"><span class="brand-lockup"><a class="masthead-brand" id="link-home" href="https://gasbrazil.com" data-i18n="navHome">GasBrazil</a><button type="button" class="dd-trigger brand-mark" aria-haspopup="menu" aria-expanded="false" aria-controls="gb-products-menu" id="gb-products-trigger" data-i18n-aria="navMenu" aria-label="Menu"><span class="brand-mark-dot" aria-hidden="true"></span><span class="dd-caret" aria-hidden="true"></span></button></span><div class="dd-menu" id="gb-products-menu" role="menu" aria-labelledby="gb-products-trigger"><a id="link-desk" href="https://gasbrazil.com/desk/" role="menuitem" data-i18n="navDesk"><span class="chk"></span>The Desk</a><a id="link-ons" href="https://gasbrazil.com/ons/" role="menuitem" data-i18n="navOns"><span class="chk"></span>ONS Balances</a><a id="link-pld" href="https://gasbrazil.com/pld/" role="menuitem" data-i18n="navPld"><span class="chk"></span>PLD Prices</a><a id="link-poc" href="https://gasbrazil.com/poc/" role="menuitem" data-i18n="navPoc"><span class="chk"></span>POC Results</a><span class="is-current" role="menuitem" aria-current="page" data-i18n="navContratos"><span class="chk">✓</span>POC Contracts</span><a id="link-flows" href="https://gasbrazil.com/flows/" role="menuitem" data-i18n="navFlows"><span class="chk"></span>Pipeline Flows</a><a id="link-mago" href="https://gasbrazil.com/mago/" role="menuitem" data-i18n="navMago"><span class="chk"></span>TAG Mago</a><a id="link-nts" href="https://gasbrazil.com/nts/" role="menuitem" data-i18n="navNts"><span class="chk"></span>NTS OnTime</a><a id="link-supply" href="https://gasbrazil.com/supply/" role="menuitem" data-i18n="navSupply"><span class="chk"></span>Gas Supply</a><a id="link-precos" href="https://gasbrazil.com/precos/" role="menuitem" data-i18n="navPrecos"><span class="chk"></span>ANP Prices</a><a id="link-monitor" href="https://gasbrazil.com/monitor/" role="menuitem" data-i18n="navMonitor"><span class="chk"></span>Pipeline Monitor</a></div></div>
       <span class="crumb-sep" aria-hidden="true"></span>
       <h1 data-i18n="navContratos">POC Contracts</h1>
       </div>
@@ -2542,7 +2541,7 @@ main h3,
 <div class="method-row"><span class="method-label" data-i18n="methodAssump">Key assumption</span><span data-i18n="methodAssump_contratos">Master rows enable later nominations; they are not firm capacity bookings.</span></div>
 <div class="method-row"><span class="method-label" data-i18n="methodLimits">Limits</span><span data-i18n="aboutCoverBody">POC Contracts include Transport and Master rows. Legacy and access-connection contracts are not in the public GraphQL feed yet.</span></div>
 </details>
-  &copy; <span id="year"></span> GasBrazil.com &middot; Data: Portal de Oferta de Capacidade (public API) &middot; Contact: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
+  &copy; <span id="year"></span> GasBrazil.com &middot; Data: Portal de Oferta de Capacidade (public API) &middot; <button type="button" class="footer-link-btn" id="link-shortcuts" data-i18n="shortcutsBtn">Shortcuts (?)</button> &middot; Contact: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
   <br><span id="coverage-note">Active Transport &amp; Master contracts</span><button class="infodot" type="button" aria-label="About contract coverage" data-info="Covers the &quot;Transport Contract&quot; and &quot;Master Contract&quot; contract types. &quot;Legacy Transport Contract&quot; and &quot;Access Connection&quot; are small, separately-sourced categories on the source site and are not yet included. Concluded contracts are excluded from the view.">i</button>
 </footer>
 </div>
@@ -4418,6 +4417,7 @@ const GB_I18N = {
     navPrecos: "ANP Prices",
     navMago: "TAG Mago",
     navNts: "NTS OnTime",
+    navMonitor: "Pipeline Monitor",
     navDesk: "The Desk",
     navProducts: "Products", // retained for previously deployed pages cached in browsers
     navMenu: "Menu",
@@ -4449,6 +4449,11 @@ const GB_I18N = {
     cardPrecosDesc: "ANP Resolution 52/2011 disclosed gas prices.",
     cardDesk: "The Desk",
     cardDeskDesc: "Cross-product snapshot across gas and power.",
+    cardMonitor: "Pipeline Monitor",
+    cardMonitorDesc: "TAG Mago & NTS OnTime real-time line pack, forecasts & packing rates.",
+    monitorTabTag: "TAG Mago",
+    monitorTabNts: "NTS OnTime",
+    monitorFooter: "Pipeline Monitor: Real-time and operational linepack telemetry across Brazilian gas transmission systems.",
     deskLinkOns: "ONS",
     deskLinkPld: "CCEE PLD",
     deskLinkPrecos: "ANP prices",
@@ -4480,8 +4485,11 @@ const GB_I18N = {
     sourcePld: "CCEE",
     sourceMago: "TAG Mago",
     sourceNts: "NTS OnTime",
+    sourceMonitor: "Pipeline Monitor",
     methodAssump_mago: "One EMPACOTAMENTOS snapshot feeds both line pack and zone forecasts; values are stored as published (m³ line pack, Mm³/d zones).",
     methodAssump_nts: "NTS SCADA telemetry snapshot; values are stored as published (m³ line pack and calculated packing rate).",
+    methodAssump_monitor: "TAG and NTS operational telemetry snapshots; values are stored as published by each TSO.",
+    aboutCoverMonitor: "Pipeline Monitor: TAG Mago line pack and 7-day zone forecasts combined with NTS OnTime real-time SCADA telemetry.",
     magoKpiLinepack: "Integrated line pack",
     ntsKpiLinepack: "NTS Line pack",
     ntsKpiRate: "Packing Rate",
@@ -4632,6 +4640,7 @@ const GB_I18N = {
     navPrecos: "Preços ANP",
     navMago: "TAG Mago",
     navNts: "NTS OnTime",
+    navMonitor: "Monitor de Gasodutos",
     navDesk: "The Desk",
     navProducts: "Produtos", // retained for previously deployed pages cached in browsers
     navMenu: "Menu",
@@ -4663,6 +4672,11 @@ const GB_I18N = {
     cardPrecosDesc: "Preços divulgados pela ANP (Resolução 52/2011).",
     cardDesk: "The Desk",
     cardDeskDesc: "Retrato cruzado de gás e energia.",
+    cardMonitor: "Monitor de Gasodutos",
+    cardMonitorDesc: "Empacotamento e previsões da TAG Mago e taxas de empacotamento em tempo real do NTS OnTime.",
+    monitorTabTag: "TAG Mago",
+    monitorTabNts: "NTS OnTime",
+    monitorFooter: "Monitor de Gasodutos: Telemetria de empacotamento em tempo real nos sistemas de transporte de gás do Brasil.",
     deskLinkOns: "ONS",
     deskLinkPld: "PLD CCEE",
     deskLinkPrecos: "Preços ANP",
@@ -4694,8 +4708,11 @@ const GB_I18N = {
     sourcePld: "CCEE",
     sourceMago: "TAG Mago",
     sourceNts: "NTS OnTime",
+    sourceMonitor: "Monitor de Gasodutos",
     methodAssump_mago: "Um snapshot EMPACOTAMENTOS alimenta empacotamento e previsão por zona; valores como publicados (m³ e Mm³/d).",
     methodAssump_nts: "Telemetria de empacotamento em tempo real publicada pelo sistema SCADA da NTS (m³ e Mm³).",
+    methodAssump_monitor: "Snapshots de telemetria operacional da TAG e NTS; valores armazenados conforme publicados por cada transportadora.",
+    aboutCoverMonitor: "Monitor de Gasodutos: empacotamento e previsões zonais da TAG Mago combinados com a telemetria SCADA do NTS OnTime.",
     magoKpiLinepack: "Empacotamento integrado",
     ntsKpiLinepack: "Empacotamento NTS",
     ntsKpiRate: "Taxa de Variação",

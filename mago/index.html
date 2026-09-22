@@ -3,6 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="refresh" content="0; url=../monitor/?tab=tag">
+<script>
+  if (window.location.pathname.endsWith('/mago/') || window.location.pathname.endsWith('/mago/index.html')) {
+    window.location.replace('../monitor/?tab=tag' + (window.location.hash || ''));
+  }
+</script>
 <title>TAG Mago — GasBrazil.com</title>
 <meta name="description" content="TAG Mago line pack and 7-day balancing-zone consumption forecasts from hourly operational snapshots.">
 <link rel="canonical" href="https://gasbrazil.com/mago/">
@@ -10,9 +16,9 @@
 <link rel="preload" href="/shared/fonts/IBMPlexSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/shared/fonts/Pacaembu-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
 <!-- home-page teaser marker, read by ../build_home.py:
-     generated: 2026-09-22 11:55 UTC
-     kpi_linepack: 72.37
-     kpi_snapshot: 2026-09-22 08:08 UTC -->
+     generated: 2026-09-22 14:02 UTC
+     kpi_linepack: 68.69
+     kpi_snapshot: 2026-09-20 22:08 UTC -->
 <script>
 (function(){
   try {
@@ -2207,7 +2213,6 @@ th.has-filter .th-label {
 
 
 
-
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; font-weight: 300; }
 header.dash-head { display: flex; flex-direction: row; align-items: center; gap: 10px; margin-bottom: 0; }
@@ -2346,10 +2351,14 @@ main h3,
 <body>
 <a class="skip-link" href="#chart-lp" data-i18n="skip">Skip to content</a>
 <div class="wrap">
+<div style="background:var(--accent-soft);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;margin:8px 0 10px;font-size:12.5px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+  <span>TAG Mago is now part of the unified <strong>Pipeline Monitor</strong> dashboard.</span>
+  <a href="../monitor/?tab=tag" style="color:var(--accent);font-weight:600;text-decoration:underline;white-space:nowrap;">Open Pipeline Monitor &rarr;</a>
+</div>
 <header class="dash-head">
   <div class="masthead">
       <div class="masthead-ident">
-      <div class="products-dd"><span class="brand-lockup"><a class="masthead-brand" id="link-home" href="https://gasbrazil.com" data-i18n="navHome">GasBrazil</a><button type="button" class="dd-trigger brand-mark" aria-haspopup="menu" aria-expanded="false" aria-controls="gb-products-menu" id="gb-products-trigger" data-i18n-aria="navMenu" aria-label="Menu"><span class="brand-mark-dot" aria-hidden="true"></span><span class="dd-caret" aria-hidden="true"></span></button></span><div class="dd-menu" id="gb-products-menu" role="menu" aria-labelledby="gb-products-trigger"><a id="link-desk" href="https://gasbrazil.com/desk/" role="menuitem" data-i18n="navDesk"><span class="chk"></span>The Desk</a><a id="link-ons" href="https://gasbrazil.com/ons/" role="menuitem" data-i18n="navOns"><span class="chk"></span>ONS Balances</a><a id="link-pld" href="https://gasbrazil.com/pld/" role="menuitem" data-i18n="navPld"><span class="chk"></span>PLD Prices</a><a id="link-poc" href="https://gasbrazil.com/poc/" role="menuitem" data-i18n="navPoc"><span class="chk"></span>POC Results</a><a id="link-contratos" href="https://gasbrazil.com/contratos/" role="menuitem" data-i18n="navContratos"><span class="chk"></span>POC Contracts</a><a id="link-flows" href="https://gasbrazil.com/flows/" role="menuitem" data-i18n="navFlows"><span class="chk"></span>Pipeline Flows</a><span class="is-current" role="menuitem" aria-current="page" data-i18n="navMago"><span class="chk">✓</span>TAG Mago</span><a id="link-nts" href="https://gasbrazil.com/nts/" role="menuitem" data-i18n="navNts"><span class="chk"></span>NTS OnTime</a><a id="link-supply" href="https://gasbrazil.com/supply/" role="menuitem" data-i18n="navSupply"><span class="chk"></span>Gas Supply</a><a id="link-precos" href="https://gasbrazil.com/precos/" role="menuitem" data-i18n="navPrecos"><span class="chk"></span>ANP Prices</a></div></div>
+      <div class="products-dd"><span class="brand-lockup"><a class="masthead-brand" id="link-home" href="https://gasbrazil.com" data-i18n="navHome">GasBrazil</a><button type="button" class="dd-trigger brand-mark" aria-haspopup="menu" aria-expanded="false" aria-controls="gb-products-menu" id="gb-products-trigger" data-i18n-aria="navMenu" aria-label="Menu"><span class="brand-mark-dot" aria-hidden="true"></span><span class="dd-caret" aria-hidden="true"></span></button></span><div class="dd-menu" id="gb-products-menu" role="menu" aria-labelledby="gb-products-trigger"><a id="link-desk" href="https://gasbrazil.com/desk/" role="menuitem" data-i18n="navDesk"><span class="chk"></span>The Desk</a><a id="link-ons" href="https://gasbrazil.com/ons/" role="menuitem" data-i18n="navOns"><span class="chk"></span>ONS Balances</a><a id="link-pld" href="https://gasbrazil.com/pld/" role="menuitem" data-i18n="navPld"><span class="chk"></span>PLD Prices</a><a id="link-poc" href="https://gasbrazil.com/poc/" role="menuitem" data-i18n="navPoc"><span class="chk"></span>POC Results</a><a id="link-contratos" href="https://gasbrazil.com/contratos/" role="menuitem" data-i18n="navContratos"><span class="chk"></span>POC Contracts</a><a id="link-flows" href="https://gasbrazil.com/flows/" role="menuitem" data-i18n="navFlows"><span class="chk"></span>Pipeline Flows</a><span class="is-current" role="menuitem" aria-current="page" data-i18n="navMago"><span class="chk">✓</span>TAG Mago</span><a id="link-nts" href="https://gasbrazil.com/nts/" role="menuitem" data-i18n="navNts"><span class="chk"></span>NTS OnTime</a><a id="link-supply" href="https://gasbrazil.com/supply/" role="menuitem" data-i18n="navSupply"><span class="chk"></span>Gas Supply</a><a id="link-precos" href="https://gasbrazil.com/precos/" role="menuitem" data-i18n="navPrecos"><span class="chk"></span>ANP Prices</a><a id="link-monitor" href="https://gasbrazil.com/monitor/" role="menuitem" data-i18n="navMonitor"><span class="chk"></span>Pipeline Monitor</a></div></div>
       <span class="crumb-sep" aria-hidden="true"></span>
       <h1 data-i18n="navMago">TAG Mago</h1>
       </div>
@@ -2589,7 +2598,7 @@ main h3,
 </footer>
 </div>
 <script>
-const PAYLOAD_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/mago/payload.json.gz?v=35724069220";
+const PAYLOAD_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/mago/payload.json.gz";
 /** Public R2 artifact (same bucket as other GasBrazil dashboards). Used when the shell still points at a sibling payload.json.gz that is not on Pages. */
 const MAGO_PAYLOAD_R2 = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/mago/payload.json.gz";
 
@@ -2859,6 +2868,11 @@ const SITE_LINKS = {
     "custom": "https://gasbrazil.com/precos/",
     "caissonpoint": "https://gasbrazil.com/precos/",
     "hub": "https://gasbrazil.github.io/precos/"
+  },
+  "monitor": {
+    "custom": "https://gasbrazil.com/monitor/",
+    "caissonpoint": "https://gasbrazil.com/monitor/",
+    "hub": "https://gasbrazil.github.io/monitor/"
   }
 };
 function siteFlavor() {
@@ -2879,6 +2893,7 @@ function initCrossLinks() {
   { const el = document.getElementById("link-nts"); if (el) el.href = SITE_LINKS.nts[flavor]; }
   { const el = document.getElementById("link-supply"); if (el) el.href = SITE_LINKS.supply[flavor]; }
   { const el = document.getElementById("link-precos"); if (el) el.href = SITE_LINKS.precos[flavor]; }
+  { const el = document.getElementById("link-monitor"); if (el) el.href = SITE_LINKS.monitor[flavor]; }
 }
 
 
@@ -2932,6 +2947,7 @@ const GB_I18N = {
     navPrecos: "ANP Prices",
     navMago: "TAG Mago",
     navNts: "NTS OnTime",
+    navMonitor: "Pipeline Monitor",
     navDesk: "The Desk",
     navProducts: "Products", // retained for previously deployed pages cached in browsers
     navMenu: "Menu",
@@ -2963,6 +2979,11 @@ const GB_I18N = {
     cardPrecosDesc: "ANP Resolution 52/2011 disclosed gas prices.",
     cardDesk: "The Desk",
     cardDeskDesc: "Cross-product snapshot across gas and power.",
+    cardMonitor: "Pipeline Monitor",
+    cardMonitorDesc: "TAG Mago & NTS OnTime real-time line pack, forecasts & packing rates.",
+    monitorTabTag: "TAG Mago",
+    monitorTabNts: "NTS OnTime",
+    monitorFooter: "Pipeline Monitor: Real-time and operational linepack telemetry across Brazilian gas transmission systems.",
     deskLinkOns: "ONS",
     deskLinkPld: "CCEE PLD",
     deskLinkPrecos: "ANP prices",
@@ -2994,8 +3015,11 @@ const GB_I18N = {
     sourcePld: "CCEE",
     sourceMago: "TAG Mago",
     sourceNts: "NTS OnTime",
+    sourceMonitor: "Pipeline Monitor",
     methodAssump_mago: "One EMPACOTAMENTOS snapshot feeds both line pack and zone forecasts; values are stored as published (m³ line pack, Mm³/d zones).",
     methodAssump_nts: "NTS SCADA telemetry snapshot; values are stored as published (m³ line pack and calculated packing rate).",
+    methodAssump_monitor: "TAG and NTS operational telemetry snapshots; values are stored as published by each TSO.",
+    aboutCoverMonitor: "Pipeline Monitor: TAG Mago line pack and 7-day zone forecasts combined with NTS OnTime real-time SCADA telemetry.",
     magoKpiLinepack: "Integrated line pack",
     ntsKpiLinepack: "NTS Line pack",
     ntsKpiRate: "Packing Rate",
@@ -3146,6 +3170,7 @@ const GB_I18N = {
     navPrecos: "Preços ANP",
     navMago: "TAG Mago",
     navNts: "NTS OnTime",
+    navMonitor: "Monitor de Gasodutos",
     navDesk: "The Desk",
     navProducts: "Produtos", // retained for previously deployed pages cached in browsers
     navMenu: "Menu",
@@ -3177,6 +3202,11 @@ const GB_I18N = {
     cardPrecosDesc: "Preços divulgados pela ANP (Resolução 52/2011).",
     cardDesk: "The Desk",
     cardDeskDesc: "Retrato cruzado de gás e energia.",
+    cardMonitor: "Monitor de Gasodutos",
+    cardMonitorDesc: "Empacotamento e previsões da TAG Mago e taxas de empacotamento em tempo real do NTS OnTime.",
+    monitorTabTag: "TAG Mago",
+    monitorTabNts: "NTS OnTime",
+    monitorFooter: "Monitor de Gasodutos: Telemetria de empacotamento em tempo real nos sistemas de transporte de gás do Brasil.",
     deskLinkOns: "ONS",
     deskLinkPld: "PLD CCEE",
     deskLinkPrecos: "Preços ANP",
@@ -3208,8 +3238,11 @@ const GB_I18N = {
     sourcePld: "CCEE",
     sourceMago: "TAG Mago",
     sourceNts: "NTS OnTime",
+    sourceMonitor: "Monitor de Gasodutos",
     methodAssump_mago: "Um snapshot EMPACOTAMENTOS alimenta empacotamento e previsão por zona; valores como publicados (m³ e Mm³/d).",
     methodAssump_nts: "Telemetria de empacotamento em tempo real publicada pelo sistema SCADA da NTS (m³ e Mm³).",
+    methodAssump_monitor: "Snapshots de telemetria operacional da TAG e NTS; valores armazenados conforme publicados por cada transportadora.",
+    aboutCoverMonitor: "Monitor de Gasodutos: empacotamento e previsões zonais da TAG Mago combinados com a telemetria SCADA do NTS OnTime.",
     magoKpiLinepack: "Empacotamento integrado",
     ntsKpiLinepack: "Empacotamento NTS",
     ntsKpiRate: "Taxa de Variação",
@@ -4084,7 +4117,7 @@ function formatRefreshedLocal(iso, fallback, locale) {
     return fallback || "—";
   }
 }
-const STALE_MAX_LAG_DAYS = {"ons": 7, "pld": 7, "contratos": 7, "flows": 60, "mago": 2, "nts": 2, "supply": 100, "precos": 100, "desk": 14};
+const STALE_MAX_LAG_DAYS = {"ons": 7, "pld": 7, "contratos": 7, "flows": 60, "mago": 2, "nts": 2, "monitor": 2, "supply": 100, "precos": 100, "desk": 14};
 function initStalenessBadgeFor(site, through) {
   try {
     var maxLag = STALE_MAX_LAG_DAYS[site];

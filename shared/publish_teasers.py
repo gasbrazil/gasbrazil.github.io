@@ -58,7 +58,7 @@ def _domain_meta(domain: str) -> dict:
             "kpi_gas_mwmed", "generated", "kpi_price_7d", "kpi_trades_7d", "kpi_when",
             "kpi_contracts", "kpi_capacity", "kpi_total_7d", "kpi_production", "data_through",
             "kpi_santos", "kpi_se", "latest_date", "kpi_pld_se", "kpi_gen_gas", "kpi_linepack",
-            "kpi_rate", "kpi_snapshot",
+            "kpi_rate", "kpi_snapshot", "kpi_tag_lp", "kpi_nts_lp", "kpi_nts_rate",
         ):
             v = _marker(html, k)
             if v is not None and k not in meta:
@@ -203,6 +203,25 @@ def collect() -> dict:
                 "when": when or "",
             }
 
+    monitor = _domain_meta("monitor")
+    if monitor:
+        tag_lp = _floatish(str(monitor.get("kpi_tag_lp"))) if monitor.get("kpi_tag_lp") is not None else None
+        nts_lp = _floatish(str(monitor.get("kpi_nts_lp"))) if monitor.get("kpi_nts_lp") is not None else None
+        when = monitor.get("generated")
+        parts_en, parts_pt = [], []
+        if tag_lp is not None:
+            parts_en.append(f"TAG {tag_lp:.2f} Mm³")
+            parts_pt.append(f"TAG {tag_lp:.2f} Mm³")
+        if nts_lp is not None:
+            parts_en.append(f"NTS {nts_lp:.2f} Mm³")
+            parts_pt.append(f"NTS {nts_lp:.2f} Mm³")
+        if parts_en:
+            items["monitor"] = {
+                "kpiEn": " · ".join(parts_en),
+                "kpiPt": " · ".join(parts_pt),
+                "when": when or "",
+            }
+
     return {
         "generated": dt.datetime.now(dt.UTC).strftime("%Y-%m-%d %H:%M UTC"),
         "items": items,
@@ -224,6 +243,7 @@ def status_from_teasers(payload: dict | None = None) -> dict:
         "desk": ("desk_kpi", "desk_kpi_pt", "desk_when"),
         "mago": ("mago_kpi", "mago_kpi_pt", "mago_when"),
         "nts": ("nts_kpi", "nts_kpi_pt", "nts_when"),
+        "monitor": ("monitor_kpi", "monitor_kpi_pt", "monitor_when"),
     }
     out: dict = {}
     for slug, (en, pt, when) in mapping.items():

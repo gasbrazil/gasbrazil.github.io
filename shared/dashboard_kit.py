@@ -493,6 +493,7 @@ const GB_I18N = {
     navPrecos: "ANP Prices",
     navMago: "TAG Mago",
     navNts: "NTS OnTime",
+    navMonitor: "Pipeline Monitor",
     navDesk: "The Desk",
     navProducts: "Products", // retained for previously deployed pages cached in browsers
     navMenu: "Menu",
@@ -524,6 +525,11 @@ const GB_I18N = {
     cardPrecosDesc: "ANP Resolution 52/2011 disclosed gas prices.",
     cardDesk: "The Desk",
     cardDeskDesc: "Cross-product snapshot across gas and power.",
+    cardMonitor: "Pipeline Monitor",
+    cardMonitorDesc: "TAG Mago & NTS OnTime real-time line pack, forecasts & packing rates.",
+    monitorTabTag: "TAG Mago",
+    monitorTabNts: "NTS OnTime",
+    monitorFooter: "Pipeline Monitor: Real-time and operational linepack telemetry across Brazilian gas transmission systems.",
     deskLinkOns: "ONS",
     deskLinkPld: "CCEE PLD",
     deskLinkPrecos: "ANP prices",
@@ -555,8 +561,11 @@ const GB_I18N = {
     sourcePld: "CCEE",
     sourceMago: "TAG Mago",
     sourceNts: "NTS OnTime",
+    sourceMonitor: "Pipeline Monitor",
     methodAssump_mago: "One EMPACOTAMENTOS snapshot feeds both line pack and zone forecasts; values are stored as published (m³ line pack, Mm³/d zones).",
     methodAssump_nts: "NTS SCADA telemetry snapshot; values are stored as published (m³ line pack and calculated packing rate).",
+    methodAssump_monitor: "TAG and NTS operational telemetry snapshots; values are stored as published by each TSO.",
+    aboutCoverMonitor: "Pipeline Monitor: TAG Mago line pack and 7-day zone forecasts combined with NTS OnTime real-time SCADA telemetry.",
     magoKpiLinepack: "Integrated line pack",
     ntsKpiLinepack: "NTS Line pack",
     ntsKpiRate: "Packing Rate",
@@ -707,6 +716,7 @@ const GB_I18N = {
     navPrecos: "Preços ANP",
     navMago: "TAG Mago",
     navNts: "NTS OnTime",
+    navMonitor: "Monitor de Gasodutos",
     navDesk: "The Desk",
     navProducts: "Produtos", // retained for previously deployed pages cached in browsers
     navMenu: "Menu",
@@ -738,6 +748,11 @@ const GB_I18N = {
     cardPrecosDesc: "Preços divulgados pela ANP (Resolução 52/2011).",
     cardDesk: "The Desk",
     cardDeskDesc: "Retrato cruzado de gás e energia.",
+    cardMonitor: "Monitor de Gasodutos",
+    cardMonitorDesc: "Empacotamento e previsões da TAG Mago e taxas de empacotamento em tempo real do NTS OnTime.",
+    monitorTabTag: "TAG Mago",
+    monitorTabNts: "NTS OnTime",
+    monitorFooter: "Monitor de Gasodutos: Telemetria de empacotamento em tempo real nos sistemas de transporte de gás do Brasil.",
     deskLinkOns: "ONS",
     deskLinkPld: "PLD CCEE",
     deskLinkPrecos: "Preços ANP",
@@ -769,8 +784,11 @@ const GB_I18N = {
     sourcePld: "CCEE",
     sourceMago: "TAG Mago",
     sourceNts: "NTS OnTime",
+    sourceMonitor: "Monitor de Gasodutos",
     methodAssump_mago: "Um snapshot EMPACOTAMENTOS alimenta empacotamento e previsão por zona; valores como publicados (m³ e Mm³/d).",
     methodAssump_nts: "Telemetria de empacotamento em tempo real publicada pelo sistema SCADA da NTS (m³ e Mm³).",
+    methodAssump_monitor: "Snapshots de telemetria operacional da TAG e NTS; valores armazenados conforme publicados por cada transportadora.",
+    aboutCoverMonitor: "Monitor de Gasodutos: empacotamento e previsões zonais da TAG Mago combinados com a telemetria SCADA do NTS OnTime.",
     magoKpiLinepack: "Empacotamento integrado",
     ntsKpiLinepack: "Empacotamento NTS",
     ntsKpiRate: "Taxa de Variação",
@@ -2056,6 +2074,12 @@ _SITES = {
         "caissonpoint": "https://gasbrazil.com/precos/",
         "hub": "https://gasbrazil.github.io/precos/",
     },
+    "monitor": {
+        "label": "Pipeline Monitor",
+        "custom": "https://gasbrazil.com/monitor/",
+        "caissonpoint": "https://gasbrazil.com/monitor/",
+        "hub": "https://gasbrazil.github.io/monitor/",
+    },
 }
 
 # Page-intro trust block: breadcrumb + h1. Maps each dashboard to its
@@ -2071,6 +2095,7 @@ _PAGE_INTRO = {
     "flows": "navFlows",
     "mago": "navMago",
     "nts": "navNts",
+    "monitor": "navMonitor",
     "supply": "navSupply",
     "precos": "navPrecos",
 }
@@ -2087,6 +2112,7 @@ STALE_LAG_DAYS = {
     "flows": 60,
     "mago": 2,
     "nts": 2,
+    "monitor": 2,
     "supply": 100,
     "precos": 100,
     "desk": 14,
@@ -2124,6 +2150,11 @@ _METHODOLOGY = {
     "pld": (("sourcePld",), "methodAssump_pld", "aboutCoverPld"),
     "mago": (("sourceMago",), "methodAssump_mago", "aboutCoverMago"),
     "nts": (("sourceNts",), "methodAssump_nts", "aboutCoverNts"),
+    "monitor": (
+        ("sourceMago", "sourceNts"),
+        "methodAssump_monitor",
+        "aboutCoverMonitor",
+    ),
     "desk": (
         ("sourceOns", "sourcePld", "sourcePoc", "sourceFlows"),
         "methodAssump_desk",
@@ -2142,6 +2173,7 @@ _METHOD_SOURCE_LABELS = {
     "sourcePld": "CCEE",
     "sourceMago": "TAG Mago",
     "sourceNts": "NTS OnTime",
+    "sourceMonitor": "Pipeline Monitor",
 }
 
 
@@ -2180,6 +2212,7 @@ _METHOD_ASSUMP_DEFAULTS = {
     "pld": "Peak = hours 18–20 on weekdays (ANEEL-style ponta, TOU v1); SIN has no PLD (join map v1).",
     "mago": "One EMPACOTAMENTOS snapshot feeds both line pack and zone forecasts; values are stored as published (m³ line pack, Mm³/d zones).",
     "nts": "NTS SCADA telemetry snapshot; values are stored as published (m³ line pack and calculated packing rate).",
+    "monitor": "TAG and NTS operational telemetry snapshots; values are stored as published by each TSO.",
     "desk": "Cross-product headlines; full history and filters live on each product page.",
 }
 
@@ -2195,6 +2228,7 @@ _METHOD_LIMITS_DEFAULTS = {
     "aboutCoverPld": "PLD: CCEE daily averages and hourly prices by submarket; peak is hours 18–20 on weekdays. Optional ONS CMO and median gas CVU when lake data is present.",
     "aboutCoverMago": "TAG Mago: hourly line pack and 7-day balancing-zone consumption forecasts from EMPACOTAMENTOS API snapshots.",
     "aboutCoverNts": "NTS OnTime: real-time line pack telemetry and hourly network packing/unpacking rate for the NTS pipeline grid.",
+    "aboutCoverMonitor": "Pipeline Monitor: TAG Mago line pack and 7-day zone forecasts combined with NTS OnTime real-time SCADA telemetry.",
     "aboutCoverDesk": "The Desk: cross-product headline series. Full history and filters live on each product page.",
 }
 
@@ -2349,6 +2383,7 @@ def _menu_items_html(self_id: str) -> str:
         "flows": "navFlows",
         "mago": "navMago",
         "nts": "navNts",
+        "monitor": "navMonitor",
         "supply": "navSupply",
         "pld": "navPld",
         "precos": "navPrecos",

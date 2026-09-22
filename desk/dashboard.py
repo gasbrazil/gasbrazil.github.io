@@ -43,7 +43,7 @@ body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--
 header.dash-head { display: flex; flex-direction: row; align-items: center; gap: 10px; margin-bottom: 0; }
 h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .header-right { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; width: auto; }
-.sources { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0 0 var(--gap); }
+.sources { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 16px 0 0; }
 .sources-label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 200; margin-right: 2px; }
 .pill { font-size: 11.5px; color: var(--muted2); text-decoration: none; border: 1px solid var(--border); border-radius: 5px; padding: 3px 10px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; }
 .pill:hover { background: var(--accent-soft); color: var(--text); border-color: var(--border-strong); }
@@ -82,8 +82,6 @@ a.kpi-cell:hover .lbl { color: var(--text); }
 .desk-tabs button[aria-pressed="true"] { color: var(--text); background: var(--panel); border-bottom-color: var(--accent); }
 .desk-tabs button:hover { background: var(--accent-soft); }
 .desk-tabs button[aria-pressed="true"]:hover { background: var(--panel-grad-hover, var(--panel)); }
-body.desk-analysis-active .sources,
-body.desk-analysis-active .kpi-row { display: none; }
 body.desk-analysis-active footer { margin-top: 12px; }
 .visually-hidden {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
@@ -445,17 +443,6 @@ __SHARED_TYPO_WEIGHT_CSS__
   </div>
 </header>
 <div class="flagbar" aria-hidden="true"></div>
-<div class="sources">
-  <span class="sources-label" data-i18n="sources">Sources</span>
-  <a href="../ons/">ONS</a>
-  <a href="../pld/">CCEE</a>
-  <a href="../precos/">ANP</a>
-  <a href="../poc/">POC</a>
-  <a href="../contratos/">Contracts</a>
-  <a href="../flows/">Flows</a>
-  <a href="../supply/">Supply</a>
-</div>
-<div class="kpi-row" id="kpi-row"></div>
 
 <div class="desk-tabbar">
   <div class="desk-tabs" id="desk-tabs" role="tablist" aria-label="Desk views"></div>
@@ -463,6 +450,7 @@ __SHARED_TYPO_WEIGHT_CSS__
 </div>
 
 <div id="desk-view-overview">
+<div class="kpi-row" id="kpi-row"></div>
 <div class="desk-grid">
   <section class="panel" aria-labelledby="compare-title">
     <p class="panel-title" id="compare-title" data-i18n="deskCompareTitle">PLD · CMO · CVU</p>
@@ -532,6 +520,17 @@ __SHARED_TYPO_WEIGHT_CSS__
     </table>
   </div>
 </section>
+</div>
+<div class="sources">
+  <span class="sources-label" data-i18n="sources">Sources</span>
+  <a href="../ons/">ONS</a>
+  <a href="../pld/">CCEE</a>
+  <a href="../precos/">ANP</a>
+  <a href="../poc/">POC</a>
+  <a href="../contratos/">Contracts</a>
+  <a href="../flows/">Flows</a>
+  <a href="../supply/">Supply</a>
+</div>
 </div>
 
 <section class="analysis-workspace" id="desk-view-analysis" aria-labelledby="analysis-title" hidden>
@@ -2208,7 +2207,13 @@ def write_dashboard(out_path: Path | str = DEFAULT_OUT) -> Path:
     out_path = Path(out_path)
     lake_root = here.parent / "lake"
     sibling_poc = here.parent / "poc" / "data" / "poc_results.parquet"
-    has_local = sibling_poc.exists() or any(lake_root.glob("**/*.parquet"))
+    desk_parquets = [
+        lake_root / "electric" / "ons_daily.parquet",
+        lake_root / "electric" / "pld_hourly.parquet",
+        lake_root / "gas" / "anp_prices.parquet",
+        sibling_poc,
+    ]
+    has_local = any(p.exists() for p in desk_parquets)
     # CI ships an empty lake/ (parquet is gitignored). build_payload() calls
     # ensure_lake() to pull sibling mirrors from R2 — so lake credentials mean
     # we *can* rebuild even with no local files. Gating only on local parquet
