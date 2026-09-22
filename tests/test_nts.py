@@ -85,8 +85,22 @@ def test_nts_schema_validation_rejects_non_numeric_values():
 
 
 def test_nts_dashboard_generation(tmp_path: Path):
+    mock_pq = tmp_path / "mock.parquet"
+    base_time = pd.Timestamp.now(tz="UTC").floor("h")
+    timestamps = [base_time - pd.Timedelta(hours=i) for i in range(48, -1, -1)]
+    values_m3 = [47_000_000.0 + (i % 7) * 100_000.0 for i in range(len(timestamps))]
+    df = pd.DataFrame({
+        "timestamp": timestamps,
+        "value_m3": values_m3,
+        "value_mm3": [v / 1_000_000.0 for v in values_m3],
+        "rate_m3_h": [15_000.0 if i % 2 == 0 else -10_000.0 for i in range(len(timestamps))],
+        "observed_at": [ts + pd.Timedelta(minutes=5) for ts in timestamps],
+        "source": ["nts"] * len(timestamps),
+    })
+    df.to_parquet(mock_pq)
+
     out_html = tmp_path / "index.html"
-    res = dashboard.build_dashboard(out_path=out_html)
+    res = dashboard.build_dashboard(out_path=out_html, parquet_path=mock_pq)
     assert res.exists()
     content = res.read_text(encoding="utf-8")
 
@@ -94,14 +108,15 @@ def test_nts_dashboard_generation(tmp_path: Path):
     assert "<!doctype html>" in content.lower()
     assert "<html" in content
     assert "NTS OnTime" in content
-    assert "id=\"linepack-chart\"" in content
-    assert "id=\"telemetry-table\"" in content
-    assert "id=\"kpi-cur-mm3\"" in content
-    assert "id=\"nts-payload\"" in content
+    assert 'id="linepack-chart"' in content
+    assert 'id="telemetry-table"' in content
+    assert 'id="kpi-cur-mm3"' in content
+    assert 'id="nts-payload"' in content
     assert "generated:" in content
     assert "kpi_linepack:" in content
 
     # Ensure no unreplaced template placeholders
     import re
+
     unreplaced = [m for m in re.findall(r"__[A-Z0-9_]+__", content) if m != "__GB_I18N_END__"]
     assert not unreplaced, f"Found unreplaced tokens: {unreplaced}"
