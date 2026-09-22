@@ -89,10 +89,11 @@ body.desk-analysis-active footer { margin-top: 12px; }
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
 }
-.analysis-workspace { margin: 0 0 var(--gap); }
+.analysis-workspace { margin: 0 0 var(--gap); width: 100%; }
 .analysis-workspace-inner {
   display: flex;
   flex-direction: row;
+  width: 100%;
   height: calc(100vh - 168px);
   min-height: 480px;
   max-height: calc(100vh - 168px);
@@ -285,10 +286,13 @@ body.is-resizing svg {
 .analysis-series-row .lbl { flex: 1; min-width: 0; }
 .analysis-series-row .unit { display: block; font-size: 10px; color: var(--muted); font-weight: 300; margin-top: 1px; }
 .analysis-stage {
+  flex: 1 1 0;
+  min-width: 0;
+  width: 0;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  min-height: 0;
-  min-width: 0;
+  overflow: hidden;
 }
 .analysis-stage-head {
   display: flex;
@@ -335,15 +339,17 @@ body.is-resizing svg {
 .analysis-chart-panel {
   flex: 1 1 52%;
   min-height: 200px;
+  width: 100%;
   padding: 8px 12px 4px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
 }
-.analysis-chart-panel .chart-host { flex: 1 1 auto; min-height: 180px; }
+.analysis-chart-panel .chart-host { flex: 1 1 auto; min-height: 180px; width: 100%; }
 .analysis-table-panel {
   flex: 1 1 48%;
   min-height: 140px;
+  width: 100%;
   display: flex;
   flex-direction: column;
   border-top: 1px solid var(--border);
@@ -353,7 +359,9 @@ body.is-resizing svg {
   flex: 1 1 auto;
   min-height: 0;
   max-height: none;
+  width: 100%;
   border: 0;
+  overflow: auto;
 }
 .analysis-table-panel[data-hidden="true"],
 .analysis-chart-panel[data-hidden="true"] { display: none; }
@@ -422,7 +430,7 @@ footer a { color: var(--accent); }
 @media (max-width: 720px) {
   .sources, .series-picker { flex-direction: column; align-items: stretch; }
 }
-.chart-host svg { display: block; overflow: hidden; }
+.chart-host svg { display: block; overflow: hidden; width: 100%; height: auto; max-width: 100%; }
 __SHARED_TYPO_WEIGHT_CSS__
 </style>
 </head>
@@ -2053,6 +2061,26 @@ function initAnalysisResizer() {
   });
 }
 
+let analysisChartRo = null;
+function observeAnalysisResize() {
+  const panel = document.getElementById("analysis-chart-panel");
+  if (!panel || analysisChartRo || typeof ResizeObserver === "undefined") return;
+  let lastW = 0;
+  analysisChartRo = new ResizeObserver(entries => {
+    for (const entry of entries) {
+      const w = Math.round(entry.contentRect.width);
+      if (w > 0 && Math.abs(w - lastW) >= 4) {
+        lastW = w;
+        if (deskTab === "analysis" && (analysisPane === "chart" || analysisPane === "split")) {
+          const seriesList = analysisCatalog().filter(s => pickedAnalysis.has(s.id));
+          renderAnalysisChart(analysisDays(), seriesList);
+        }
+      }
+    }
+  });
+  analysisChartRo.observe(panel);
+}
+
 async function init() {
   document.getElementById("year").textContent = new Date().getFullYear();
   initThemeToggle("theme-toggle", () => {
@@ -2075,6 +2103,7 @@ async function init() {
   buildDeskTabs();
   setDeskTab(deskTab);
   initAnalysisResizer();
+  observeAnalysisResize();
   try {
     const json = await inflateGzipUrl(PAYLOAD_URL);
     DATA = JSON.parse(json);
