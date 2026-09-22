@@ -2521,7 +2521,7 @@ main h3,
       <div class="kpi-role" data-i18n="cardNtsDesc">NTS operational line pack and network packing/unpacking rate.</div>
       <div class="kpi-val" data-en="47.52 Mm³ line pack · +6,124 m³/h" data-pt="47.52 Mm³ empacotamento · +6,124 m³/h">47.52 Mm³ line pack · +6,124 m³/h</div>
       <div class="kpi-when" data-refresh="2026-09-21 23:22 UTC"></div>
-      <svg class="kpi-spark" viewBox="0 0 120 28" width="120" height="28" aria-hidden="true"><polyline points="2.0,2.0 5.0,2.5 7.9,2.8 10.9,3.2 13.9,3.3 16.9,3.6 19.8,2.7 22.8,3.1 25.8,7.5 28.8,8.2 31.7,8.6 34.7,9.4 37.7,8.3 40.7,9.6 43.6,9.9 46.6,10.2 49.6,10.9 52.6,11.3 55.5,12.2 58.5,12.8 61.5,13.2 64.5,12.9 67.4,16.1 70.4,16.9 73.4,17.7 76.4,18.6 79.3,19.7 82.3,19.7 85.3,20.4 88.3,21.3 91.2,21.9 94.2,21.9 97.2,22.7 100.2,23.3 103.1,24.1 106.1,24.8 109.1,25.7 112.1,26.0 115.0,23.1 118.0,23.0"/></svg>
+      
     </a>
     <a class="kpi-cell" href="supply/" data-slug="supply">
       <div class="kpi-label" data-i18n="cardSupply">Gas Supply</div>
@@ -3945,7 +3945,7 @@ initLangToggle("lang-toggle");
 </html>
 
 <script>
-const TEASERS_URL = "hub/teasers.json.gz";
+const TEASERS_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/hub/teasers.json.gz?v=35680584009";
 function paintRefreshLabels() {
   document.querySelectorAll(".kpi-when[data-refresh]").forEach(el => {
     const when = el.getAttribute("data-refresh");
