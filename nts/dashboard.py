@@ -168,6 +168,7 @@ PAGE_CSS = """
   --tso-nts-glow: rgba(217, 119, 6, 0.25);
   --pack-up: #10b981;
   --pack-down: #f59e0b;
+  --card-bg: var(--panel);
 }
 [data-theme="dark"] {
   --tso-nts: #f59e0b;
@@ -176,15 +177,16 @@ PAGE_CSS = """
   --tso-nts-glow: rgba(245, 158, 11, 0.3);
 }
 
-.nts-wrap {
-  width: var(--content-w);
-  max-width: var(--content-max);
-  margin: 0 auto;
-  padding: 32px 0 48px;
-}
-@media (max-width: 900px) {
-  .nts-wrap { width: auto; padding: 20px 16px 40px; }
-}
+header.dash-head { display: flex; flex-direction: row; align-items: center; gap: 10px; margin-bottom: 0; }
+.header-right { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; width: auto; }
+#theme-toggle { display: inline-flex; align-items: center; justify-content: center; background: var(--panel); border: 1px solid var(--border-strong); border-radius: 5px; padding: 5px 9px; line-height: 0; cursor: pointer; color: var(--text); }
+#theme-toggle:hover { background: var(--accent-soft); }
+#theme-toggle svg { width: 16px; height: 16px; display: block; }
+.sources { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0 0 var(--gap); }
+.sources-label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 200; margin-right: 2px; }
+.pill { font-size: 11.5px; color: var(--muted2); text-decoration: none; border: 1px solid var(--border); border-radius: 5px; padding: 3px 10px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; }
+.pill:hover { background: var(--accent-soft); color: var(--text); border-color: var(--border-strong); }
+.ext-icon { width: 10px; height: 10px; display: inline-block; flex: none; opacity: .75; }
 
 /* Header & Intro */
 .nts-intro {
@@ -446,16 +448,11 @@ PAGE_CSS = """
 }
 
 .nts-footer {
-  width: var(--content-w);
-  max-width: var(--content-max);
-  margin: 24px auto 0;
+  margin-top: 24px;
   padding: 16px 0 32px;
   font-size: 12px;
   color: var(--muted);
   border-top: 1px solid var(--border);
-}
-@media (max-width: 900px) {
-  .nts-footer { width: auto; padding: 16px 16px 32px; }
 }
 .nts-footer-inner {
   display: flex;
@@ -478,8 +475,14 @@ DASHBOARD_TEMPLATE = """<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 __HEAD__
+<script>__SHARED_JS_BOOT__</script>
 <style>
+__SHARED_THEME_CSS__
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; font-weight: 300; }
+/* Everything below is nts-dashboard's own layout/components */
 __PAGE_CSS__
+__SHARED_TYPO_WEIGHT_CSS__
 </style>
 </head>
 <body>
@@ -489,13 +492,23 @@ __PAGE_CSS__
   kpi_rate: __RATE_VAL_RAW__
 -->
 <a class="skip-link" href="#main" data-i18n="skip">Skip to content</a>
-__MASTHEAD__
+<div class="wrap">
+<header class="dash-head">
+  __MASTHEAD__
+  <div class="header-right">
+    <button type="button" id="lang-toggle" class="langBtn" aria-label="Português">PT</button>
+    <button id="theme-toggle" title="Toggle theme" aria-label="Toggle theme"></button>
+  </div>
+</header>
+<div class="flagbar" aria-hidden="true"></div>
 
-<main class="nts-wrap" id="main">
+<main id="main">
   <!-- Page Header Intro -->
   <div class="nts-intro">
-    __PAGE_INTRO__
-    <div class="flagbar" aria-hidden="true"></div>
+    <div class="sources">
+      <span class="sources-label" data-i18n="sources">Sources</span>
+      <a class="pill" href="https://ntsbrasil.com/ontime" target="_blank" rel="noopener">NTS OnTime<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+    </div>
     <div class="nts-intro-sub" data-i18n="ntsLinepackSub">
       Real-time pipeline line pack inventory and hourly packing/unpacking rate.
     </div>
@@ -625,11 +638,14 @@ __MASTHEAD__
       ·
       <a href="../flows/" data-i18n="navFlows">Pipeline Flows</a>
       ·
-      <a href="../about/" data-i18n="navAbout">About</a>
+      <a href="../about/" data-i18n="footerAbout">About</a>
+      ·
+      <button type="button" class="footer-link-btn" id="link-shortcuts" data-i18n="shortcutsBtn">Shortcuts (?)</button>
     </div>
   </footer>
 
 </main>
+</div>
 
 <script id="nts-payload" type="application/json">
 __PAYLOAD_JSON__
@@ -637,6 +653,8 @@ __PAYLOAD_JSON__
 
 <script>
 __SITE_LINKS_JS__
+__SHARED_JS_THEME_TOGGLE__
+__SHARED_JS_I18N__
 
 if (typeof GB_I18N !== "undefined") {
   Object.assign(GB_I18N.en, {
@@ -914,17 +932,14 @@ function exportTableCsv() {
 
 document.addEventListener("DOMContentLoaded", () => {
   initCrossLinks();
+  if (typeof initThemeToggle === "function") {
+    initThemeToggle("theme-toggle", () => { renderChart(); });
+  }
+  if (typeof initLangToggle === "function") {
+    initLangToggle("lang-toggle", () => { renderChart(); populateTable(); });
+  }
   renderChart();
   populateTable();
-
-  if (typeof applyI18n === "function") {
-    const origApply = applyI18n;
-    applyI18n = function() {
-      origApply();
-      renderChart();
-      populateTable();
-    };
-  }
 });
 window.addEventListener("resize", renderChart);
 """
@@ -993,6 +1008,11 @@ def build_dashboard(out_path: Path = DEFAULT_OUT, parquet_path: Path | str | Non
         METHODOLOGY=methodology,
         PAYLOAD_JSON=json.dumps(payload),
         SITE_LINKS_JS=site_links,
+        SHARED_THEME_CSS=kit.render_theme_css(),
+        SHARED_TYPO_WEIGHT_CSS=kit.typo_weight_css(),
+        SHARED_JS_BOOT=kit.JS_BOOT,
+        SHARED_JS_THEME_TOGGLE=kit.JS_THEME_TOGGLE,
+        SHARED_JS_I18N=kit.JS_I18N,
         CHART_JS=CHART_CLIENT_JS,
     )
 
