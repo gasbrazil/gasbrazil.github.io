@@ -758,7 +758,7 @@ function renderChart() {
   const vals = pts.map(p => p[1]);
   let minV = Math.min(...vals);
   let maxV = Math.max(...vals);
-  
+
   // Add 8% padding top and bottom
   const pad = (maxV - minV) * 0.12 || 1.0;
   minV = Math.floor((minV - pad) * 2) / 2;

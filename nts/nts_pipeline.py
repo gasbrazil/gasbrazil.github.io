@@ -33,7 +33,6 @@ LAKE_PATH = ROOT / "lake" / "transport" / "nts_linepack_series.parquet"
 sys.path.insert(0, str(ROOT / "shared"))
 sys.path.insert(0, str(HERE))
 
-import data_kit as dk  # noqa: E402
 import nts_client  # noqa: E402
 from schemas import validate_nts_ontime_series  # noqa: E402
 

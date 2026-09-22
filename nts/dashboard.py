@@ -10,13 +10,10 @@ Generates nts/index.html with:
 """
 from __future__ import annotations
 
-import datetime as dt
-import html
 import json
 import sys
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 
 HERE = Path(__file__).resolve().parent
@@ -719,7 +716,7 @@ function renderChart() {
   const vals = pts.map(p => p[1]);
   let minV = Math.min(...vals);
   let maxV = Math.max(...vals);
-  
+
   // Add 8% padding top and bottom
   const pad = (maxV - minV) * 0.12 || 1.0;
   minV = Math.floor((minV - pad) * 2) / 2;

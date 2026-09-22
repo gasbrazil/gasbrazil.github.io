@@ -17,7 +17,8 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from dataclasses import dataclass
-from datetime import UTC, date, datetime, time as dt_time, timedelta
+from datetime import UTC, date, datetime
+from datetime import time as dt_time
 
 logger = logging.getLogger(__name__)
 
