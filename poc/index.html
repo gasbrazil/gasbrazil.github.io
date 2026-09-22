@@ -2285,7 +2285,6 @@ th.has-filter .th-label {
     box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
   }
 }
-
 /* Everything below is this dashboard's own layout/components -- the palette
    (neutral tokens + the shared Brazilian-flag accent) now lives entirely in
    shared/theme.css (see ADR-001, Decision 2 Option C). Token names are
@@ -2611,7 +2610,7 @@ main h3,
 <div class="method-row"><span class="method-label" data-i18n="methodAssump">Key assumption</span><span data-i18n="methodAssump_poc">R$/m³ is R$/MMBtu divided by 26.8081 m³ per MMBtu (assumptions v2).</span></div>
 <div class="method-row"><span class="method-label" data-i18n="methodLimits">Limits</span><span data-i18n="methodLimits_poc">A few hundred records total; full-history rebuild each run.</span></div>
 </details>
-  &copy; <span id="year"></span> GasBrazil.com &middot; Data: Portal de Oferta de Capacidade (public API) &middot; Contact: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
+  &copy; <span id="year"></span> GasBrazil.com &middot; Data: Portal de Oferta de Capacidade (public API) &middot; <button type="button" class="footer-link-btn" id="link-shortcuts" data-i18n="shortcutsBtn">Shortcuts (?)</button> &middot; Contact: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
 </footer>
 </div>
 <div class="tt" id="chart-tt"></div>
@@ -4395,8 +4394,8 @@ const GB_I18N = {
     magoColM3: "m³",
     magoColZone: "Operating Zone",
     magoColSnapshot: "Source snapshot",
-    magoZonesTitle: "Consumption forecast",
-    magoZonesSub: "7-day daily TAG estimates (Mm³/d). Chart updates from the compact filters below.",
+    magoZonesTitle: "TAG Consumption Estimate Analysis",
+    magoZonesSub: "",
     magoByState: "States",
     magoByZone: "Zones",
     magoChartLine: "Lines",
@@ -4618,8 +4617,8 @@ const GB_I18N = {
     magoColM3: "m³",
     magoColZone: "Faixa Operacional",
     magoColSnapshot: "Snapshot de origem",
-    magoZonesTitle: "Previsão de consumo",
-    magoZonesSub: "Estimativas diárias TAG em 7 dias (Mm³/d). O gráfico atualiza pelos filtros abaixo.",
+    magoZonesTitle: "Análise de Estimativa de Consumo TAG",
+    magoZonesSub: "",
     magoByState: "Estados",
     magoByZone: "Zonas",
     magoChartLine: "Linhas",

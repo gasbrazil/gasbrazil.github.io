@@ -2284,7 +2284,6 @@ th.has-filter .th-label {
     box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
   }
 }
-
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; font-weight: 300; }
 /* Single-row header: wordmark-menu · title … Wiki/About · PT · theme */
@@ -2565,7 +2564,7 @@ main h3,
   &copy; <span id="year"></span> GasBrazil.com &middot;
   <span data-i18n="precosFooter">Data: ANP publicidade dos preços de gás natural. Not an official ANP product.</span>
   &middot; <span data-i18n="contact">Contact</span>: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
-  &middot; <a href="../about/" data-i18n="footerAbout">About</a>
+  &middot; <a href="../about/" data-i18n="footerAbout">About</a> &middot; <button type="button" class="footer-link-btn" id="link-shortcuts" data-i18n="shortcutsBtn">Shortcuts (?)</button>
 </footer>
 </div>
 <div class="tt" id="chart-tt"></div>
@@ -3221,8 +3220,8 @@ const GB_I18N = {
     magoColM3: "m³",
     magoColZone: "Operating Zone",
     magoColSnapshot: "Source snapshot",
-    magoZonesTitle: "Consumption forecast",
-    magoZonesSub: "7-day daily TAG estimates (Mm³/d). Chart updates from the compact filters below.",
+    magoZonesTitle: "TAG Consumption Estimate Analysis",
+    magoZonesSub: "",
     magoByState: "States",
     magoByZone: "Zones",
     magoChartLine: "Lines",
@@ -3444,8 +3443,8 @@ const GB_I18N = {
     magoColM3: "m³",
     magoColZone: "Faixa Operacional",
     magoColSnapshot: "Snapshot de origem",
-    magoZonesTitle: "Previsão de consumo",
-    magoZonesSub: "Estimativas diárias TAG em 7 dias (Mm³/d). O gráfico atualiza pelos filtros abaixo.",
+    magoZonesTitle: "Análise de Estimativa de Consumo TAG",
+    magoZonesSub: "",
     magoByState: "Estados",
     magoByZone: "Zonas",
     magoChartLine: "Linhas",

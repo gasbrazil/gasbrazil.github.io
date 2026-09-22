@@ -333,8 +333,7 @@ __SHARED_TYPO_WEIGHT_CSS__
   <section class="panel panel-tight" id="consume-panel">
     <div class="panel-head-row">
       <div>
-        <h2 data-i18n="magoZonesTitle">Consumption forecast</h2>
-        <p class="sub compact" data-i18n="magoZonesSub">7-day daily TAG estimates (Mm³/d). Chart updates from the compact filters below.</p>
+        <h2 data-i18n="magoZonesTitle">TAG Consumption Estimate Analysis</h2>
       </div>
       <div class="seg-row" role="group" aria-label="Chart options">
         <div class="seg">
@@ -451,6 +450,7 @@ __SHARED_TYPO_WEIGHT_CSS__
   &middot; <a href="../about/" data-i18n="footerAbout">About</a>
   &middot; <button type="button" class="footer-link-btn" id="link-shortcuts" data-i18n="shortcutsBtn">Shortcuts (?)</button>
 </footer>
+<div class="tt" id="chart-tt"></div>
 </div>
 
 <script id="nts-payload" type="application/json">
@@ -508,7 +508,7 @@ if (typeof GB_I18N !== "undefined") {
     magoChartLine: "Lines",
     magoChartStack: "Stack",
     magoSelectAll: "Select all",
-    magoZonesSub: "7-day daily TAG estimates (Mm³/d). Chart updates from filters below.",
+    magoZonesTitle: "TAG Consumption Estimate Analysis",
     magoLpCsv: "Download line pack CSV",
     magoColObserved: "Observed (UTC)",
     magoColMm3: "Mm³",
@@ -556,7 +556,7 @@ if (typeof GB_I18N !== "undefined") {
     magoChartLine: "Linhas",
     magoChartStack: "Empilhado",
     magoSelectAll: "Selecionar tudo",
-    magoZonesSub: "Estimativas diárias TAG (7 dias, Mm³/d). Gráfico acima; filtros compactos abaixo.",
+    magoZonesTitle: "Análise de Estimativa de Consumo TAG",
     magoLpCsv: "Baixar CSV de empacotamento",
     magoColObserved: "Observado (UTC)",
     magoColMm3: "Mm³",
@@ -1002,6 +1002,170 @@ function tsMs(iso) {
   return d.getTime();
 }
 
+const TAG_SERIES_PALETTE = [
+  "#2563eb",
+  "#f97316",
+  "#10b981",
+  "#a855f7",
+  "#ef4444",
+  "#06b6d4",
+  "#eab308",
+  "#ec4899",
+  "#14b8a6",
+  "#6366f1",
+  "#84cc16",
+  "#d97706",
+];
+
+function getOrCreateChartTooltip() {
+  let tt = document.getElementById("chart-tt");
+  if (!tt) {
+    tt = document.createElement("div");
+    tt.id = "chart-tt";
+    tt.className = "tt";
+    document.body.appendChild(tt);
+  }
+  return tt;
+}
+
+function consumptionStateKeys() {
+  return (DATA.groups || []).filter(g => g !== "total");
+}
+
+function formatDayLabel(ms) {
+  const d = new Date(ms);
+  return (d.getUTCMonth() + 1) + "/" + d.getUTCDate();
+}
+
+function updateSelectionHint() {
+  const el = document.getElementById("selection-hint");
+  if (!el) return;
+  if (zoneMode === "stack") {
+    el.textContent = "Stacked view shows all states + total dot.";
+    return;
+  }
+  const n = zoneGran === "state" ? selectedGroups.size : selectedZones.size;
+  el.textContent = n ? (n + " selected") : "Nothing selected";
+}
+
+function drawConsumptionStackedDaily(hostId) {
+  const host = document.getElementById(hostId);
+  if (!host) return;
+  host.innerHTML = "";
+  const totalBag = GROUP_SERIES.total;
+  const stateKeys = consumptionStateKeys();
+  if (!totalBag || !totalBag.times || totalBag.times.length < 1 || !stateKeys.length) {
+    host.innerHTML = '<div class="chart-empty" style="padding:48px 16px;text-align:center;color:var(--muted)">No daily forecast in this snapshot.</div>';
+    return;
+  }
+  const palette = TAG_SERIES_PALETTE;
+  const n = totalBag.times.length;
+  const days = totalBag.times.map((t, i) => ({
+    x: tsMs(t),
+    dateStr: t,
+    total: totalBag.values[i],
+    states: stateKeys.map((g, si) => {
+      const bag = GROUP_SERIES[g];
+      const v = bag && bag.values ? bag.values[i] : null;
+      return {
+        g,
+        v: v != null && isFinite(v) ? v : 0,
+        color: palette[si % palette.length],
+        label: (DATA.groupLabels && DATA.groupLabels[g]) ? DATA.groupLabels[g] : g,
+      };
+    }),
+  }));
+  const maxTot = Math.max(...days.map(d => (d.total != null && isFinite(d.total) ? d.total : 0)), 1);
+  const W = Math.max(640, host.clientWidth || 640), H = 260, ML = 52, MR = 12, MT = 12, MB = 36;
+  const plotW = W - ML - MR;
+  const gap = Math.max(8, (plotW / Math.max(n, 1)) * 0.08);
+  const barW = Math.max(18, (plotW - gap * (n + 1)) / n);
+  const y = v => MT + (H - MT - MB) * (1 - v / maxTot);
+  const svg = chartSvg("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: "img" });
+  svg.style.width = "100%"; svg.style.height = H + "px";
+
+  for (let i = 0; i <= 4; i++) {
+    const t = maxTot * (i / 4);
+    const yy = y(t);
+    svg.appendChild(chartSvg("line", { x1: ML, x2: W - MR, y1: yy, y2: yy, stroke: "var(--border)", "stroke-width": 1 }));
+    const lb = chartSvg("text", { x: ML - 6, y: yy + 4, "text-anchor": "end", fill: "var(--muted)", "font-size": 11, "font-family": "var(--font)" });
+    lb.textContent = t.toFixed(0); svg.appendChild(lb);
+  }
+
+  days.forEach((day, i) => {
+    const x0 = ML + gap + i * (barW + gap);
+    const cx = x0 + barW / 2;
+    let yTop = MT + (H - MT - MB);
+    day.states.forEach(st => {
+      if (!st.v) return;
+      const h = (st.v / maxTot) * (H - MT - MB);
+      yTop -= h;
+      svg.appendChild(chartSvg("rect", {
+        x: x0.toFixed(1), y: yTop.toFixed(1), width: barW.toFixed(1), height: h.toFixed(1),
+        fill: st.color, stroke: "none", "data-state": st.g,
+      }));
+    });
+    if (day.total != null && isFinite(day.total)) {
+      const cy = y(day.total);
+      svg.appendChild(chartSvg("circle", {
+        cx: cx.toFixed(1), cy: cy.toFixed(1), r: 4.5, fill: "var(--text)", stroke: "var(--panel)", "stroke-width": 1.5,
+      }));
+    }
+    const lbl = chartSvg("text", {
+      x: cx.toFixed(1), y: (H - 10).toFixed(1),
+      "text-anchor": "middle", fill: "var(--muted)", "font-size": 10, "font-family": "var(--font)",
+    });
+    lbl.textContent = formatDayLabel(day.x);
+    svg.appendChild(lbl);
+
+    const colHit = chartSvg("rect", {
+      x: (x0 - gap / 2).toFixed(1), y: MT, width: (barW + gap).toFixed(1), height: H - MT - MB,
+      fill: "transparent", style: "cursor:pointer;",
+    });
+    colHit.addEventListener("pointermove", ev => {
+      const tt = getOrCreateChartTooltip();
+      const lang = document.documentElement.getAttribute("data-lang") || "en";
+      const isPt = lang === "pt";
+      const dt = new Date(day.x);
+      const dayHeader = dt.toLocaleDateString(isPt ? "pt-BR" : "en-US", { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" });
+      let rows = "";
+      day.states.forEach(st => {
+        if (st.v > 0) {
+          rows += `<tr><td><span class="sw" style="background:${st.color}"></span> ${escapeHtml(st.label)}</td><td class="v">${st.v.toFixed(2)} Mm³/d</td></tr>`;
+        }
+      });
+      if (day.total != null) {
+        rows += `<tr><td style="font-weight:600"><span class="sw" style="background:var(--text)"></span> Total</td><td class="v" style="font-weight:600">${day.total.toFixed(2)} Mm³/d</td></tr>`;
+      }
+      tt.innerHTML = `<div class="d">${escapeHtml(dayHeader)}</div><table>${rows}</table>`;
+      placeChartTooltip(tt, ev.clientX, ev.clientY);
+    });
+    colHit.addEventListener("pointerleave", () => {
+      const tt = document.getElementById("chart-tt");
+      if (tt) tt.style.display = "none";
+    });
+    svg.appendChild(colHit);
+  });
+
+  const legHost = document.createElement("div");
+  legHost.className = "legend";
+  stateKeys.forEach((g, si) => {
+    const span = document.createElement("span");
+    span.style.color = palette[si % palette.length];
+    span.innerHTML = `<span class="sw" style="background:${palette[si % palette.length]}"></span> ` +
+      escapeHtml((DATA.groupLabels && DATA.groupLabels[g]) ? DATA.groupLabels[g] : g);
+    legHost.appendChild(span);
+  });
+  const totSpan = document.createElement("span");
+  totSpan.style.color = "var(--text)";
+  totSpan.innerHTML = '<span class="sw" style="background:var(--text)"></span> ' +
+    escapeHtml((DATA.groupLabels && DATA.groupLabels.total) ? DATA.groupLabels.total : "Total");
+  legHost.appendChild(totSpan);
+
+  host.appendChild(svg);
+  host.appendChild(legHost);
+}
+
 function drawLines(hostId, seriesList, yFmt, bands) {
   const host = document.getElementById(hostId);
   if (!host) return;
@@ -1078,9 +1242,6 @@ function drawLines(hostId, seriesList, yFmt, bands) {
 
   if (bands) {
     const axisX = plotLeft + plotWidth;
-    const lang = document.documentElement.getAttribute("data-lang") || "en";
-    const isPt = lang === "pt";
-
     svg.appendChild(chartSvg("line", {
       x1: axisX, x2: axisX, y1: plotTop, y2: plotBottom,
       stroke: "var(--border)", "stroke-width": 1,
@@ -1144,6 +1305,105 @@ function drawLines(hostId, seriesList, yFmt, bands) {
     svg.appendChild(path);
   });
 
+  // Crosshair line and hover dots
+  const cross = chartSvg("line", {
+    x1: 0, x2: 0, y1: plotTop, y2: plotBottom,
+    stroke: "var(--muted)", "stroke-width": 1, "stroke-dasharray": "3 3",
+    style: "display:none; pointer-events:none;",
+  });
+  svg.appendChild(cross);
+
+  const dots = usable.map(s => {
+    const dot = chartSvg("circle", {
+      r: 4, fill: s.color || "var(--accent)", stroke: "var(--panel)", "stroke-width": 1.5,
+      style: "display:none; pointer-events:none;",
+    });
+    svg.appendChild(dot);
+    return dot;
+  });
+
+  const hit = chartSvg("rect", {
+    x: plotLeft, y: plotTop, width: plotWidth, height: plotBottom - plotTop,
+    fill: "transparent", style: "cursor:crosshair;",
+  });
+  svg.appendChild(hit);
+
+  function hideTips() {
+    const tt = document.getElementById("chart-tt");
+    if (tt) tt.style.display = "none";
+    cross.style.display = "none";
+    dots.forEach(d => { d.style.display = "none"; });
+  }
+
+  hit.addEventListener("pointermove", ev => {
+    const r = svg.getBoundingClientRect();
+    const px = (ev.clientX - r.left) / r.width * W;
+    if (px < plotLeft || px > plotLeft + plotWidth) {
+      hideTips();
+      return;
+    }
+    const curX = minX + ((px - plotLeft) / plotWidth) * (maxX - minX);
+
+    let bestT = null;
+    let bestDist = Infinity;
+    usable.forEach(s => {
+      s.points.forEach(p => {
+        const dist = Math.abs(p.x - curX);
+        if (dist < bestDist) {
+          bestDist = dist;
+          bestT = p.x;
+        }
+      });
+    });
+    if (bestT == null) {
+      hideTips();
+      return;
+    }
+
+    const crossX = x(bestT);
+    cross.setAttribute("x1", crossX.toFixed(1));
+    cross.setAttribute("x2", crossX.toFixed(1));
+    cross.style.display = "";
+
+    const d = new Date(bestT);
+    const datePart = (d.getUTCMonth() + 1) + "/" + d.getUTCDate();
+    const timePart = String(d.getUTCHours()).padStart(2, "0") + ":00 UTC";
+    const headerStr = `${datePart} ${timePart}`;
+
+    let rows = "";
+    usable.forEach((s, idx) => {
+      const pt = s.points.find(p => Math.abs(p.x - bestT) < 3600000);
+      const dot = dots[idx];
+      if (pt && pt.y != null && isFinite(pt.y)) {
+        const cy = y(pt.y);
+        dot.setAttribute("cx", crossX.toFixed(1));
+        dot.setAttribute("cy", cy.toFixed(1));
+        dot.style.display = "";
+
+        let valStr = "";
+        if (hostId === "chart-lp" || hostId === "chart-lp-hist") {
+          valStr = (pt.y / 1e6).toFixed(2) + " Mm³";
+        } else {
+          valStr = pt.y.toFixed(2) + " Mm³/d";
+        }
+        rows += `<tr><td><span class="sw" style="background:${s.color}"></span> ${escapeHtml(s.name || "")}</td><td class="v">${valStr}</td></tr>`;
+      } else {
+        dot.style.display = "none";
+      }
+    });
+
+    if (!rows) {
+      hideTips();
+      return;
+    }
+
+    const tt = getOrCreateChartTooltip();
+    tt.innerHTML = `<div class="d">${escapeHtml(headerStr)}</div><table>${rows}</table>`;
+    placeChartTooltip(tt, ev.clientX, ev.clientY);
+  });
+
+  hit.addEventListener("pointerleave", hideTips);
+
   host.appendChild(svg);
 }
 
@@ -1171,18 +1431,32 @@ function packLinepackHistory() {
 
 function packZones() {
   if (!DATA) return;
+  if (zoneMode === "stack") {
+    drawConsumptionStackedDaily("chart-zones");
+    updateSelectionHint();
+    return;
+  }
   const isState = zoneGran === "state";
   const source = isState ? GROUP_SERIES : ZONE_SERIES;
   const selected = isState ? selectedGroups : selectedZones;
-  const pal = chartPalette();
   const keys = [...selected];
+  const host = document.getElementById("chart-zones");
+  if (!keys.length) {
+    if (host) host.innerHTML = '<div class="chart-empty" style="padding:48px 16px;text-align:center;color:var(--muted)">Select states or zones below, or click <strong>Select all</strong>.</div>';
+    updateSelectionHint();
+    return;
+  }
   const series = keys.map((k, idx) => {
     const s = source[k] || { times: [], values: [] };
     const pts = (s.times || []).map((t, i) => ({ x: tsMs(t), y: s.values[i] }));
-    const color = isState ? tsoColorOf(k, idx) : pal[idx % pal.length];
-    return { name: k, color, points: pts };
+    const isTotal = k.toLowerCase() === "total";
+    const label = (DATA.groupLabels && DATA.groupLabels[k]) ? DATA.groupLabels[k] : k;
+    const color = isTotal ? "var(--text)" : TAG_SERIES_PALETTE[idx % TAG_SERIES_PALETTE.length];
+    const dash = isTotal ? "4 3" : undefined;
+    return { name: label, color, points: pts, dash };
   });
   drawLines("chart-zones", series, v => v.toFixed(1));
+  updateSelectionHint();
 }
 
 function renderFaixasTable() {
@@ -1385,6 +1659,10 @@ async function init() {
   segGran.forEach(b => b.addEventListener("click", () => {
     segGran.forEach(x => x.classList.toggle("on", x === b));
     zoneGran = b.dataset.gran;
+    if (zoneGran === "zone" && zoneMode === "stack") {
+      zoneMode = "line";
+      document.querySelectorAll(".seg button[data-mode]").forEach(m => m.classList.toggle("on", m.dataset.mode === "line"));
+    }
     document.getElementById("filter-state").classList.toggle("is-hidden", zoneGran !== "state");
     document.getElementById("filter-zone").classList.toggle("is-hidden", zoneGran !== "zone");
     packZones();
@@ -1393,8 +1671,39 @@ async function init() {
   segMode.forEach(b => b.addEventListener("click", () => {
     segMode.forEach(x => x.classList.toggle("on", x === b));
     zoneMode = b.dataset.mode;
+    if (zoneMode === "stack" && zoneGran !== "state") {
+      zoneGran = "state";
+      segGran.forEach(g => g.classList.toggle("on", g.dataset.gran === "state"));
+      document.getElementById("filter-state").classList.remove("is-hidden");
+      document.getElementById("filter-zone").classList.add("is-hidden");
+    }
     packZones();
   }));
+
+  const btnSelAll = document.getElementById("btn-select-zones");
+  if (btnSelAll) {
+    btnSelAll.addEventListener("click", () => {
+      if (zoneGran === "state") {
+        selectedGroups = new Set(DATA ? (DATA.groups || []) : []);
+      } else {
+        selectedZones = new Set(DATA ? (DATA.zones || []) : []);
+      }
+      renderFilters();
+      packZones();
+    });
+  }
+  const btnClrSel = document.getElementById("btn-clear-zones");
+  if (btnClrSel) {
+    btnClrSel.addEventListener("click", () => {
+      if (zoneGran === "state") {
+        selectedGroups.clear();
+      } else {
+        selectedZones.clear();
+      }
+      renderFilters();
+      packZones();
+    });
+  }
 
   // Initialize telemetry health pulse and periodic update
   updateTelemetryHealth();
