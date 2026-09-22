@@ -10,7 +10,7 @@
 <link rel="preload" href="/shared/fonts/IBMPlexSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/shared/fonts/Pacaembu-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
 <!-- home-page teaser marker, read by ../build_home.py:
-     generated: 2026-09-22 04:56 UTC
+     generated: 2026-09-22 14:26 UTC
      kpi_santos: 18.2
      data_through: 2026-06 -->
 <script>
@@ -2207,6 +2207,7 @@ th.has-filter .th-label {
 
 
 
+
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; font-weight: 300; }
 /* Single-row header: wordmark-menu · title … Wiki/About · PT · theme */
@@ -2487,12 +2488,12 @@ main h3,
   &copy; <span id="year"></span> GasBrazil.com &middot;
   <span data-i18n="precosFooter">Data: ANP publicidade dos preços de gás natural. Not an official ANP product.</span>
   &middot; <span data-i18n="contact">Contact</span>: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
-  &middot; <a href="../about/" data-i18n="footerAbout">About</a> &middot; <button type="button" class="footer-link-btn" id="link-shortcuts" data-i18n="shortcutsBtn">Shortcuts (?)</button>
+  &middot; <a href="../about/" data-i18n="footerAbout">About</a>
 </footer>
 </div>
 <div class="tt" id="chart-tt"></div>
 <script>
-const PAYLOAD_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/precos/payload.json.gz?v=35688777023";
+const PAYLOAD_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/precos/payload.json.gz?v=35740265293";
 
 function b64ToBytes(b64) {
   const bin = atob(b64);
@@ -2943,6 +2944,11 @@ const SITE_LINKS = {
     "custom": "https://gasbrazil.com/supply/",
     "caissonpoint": "https://gasbrazil.com/supply/",
     "hub": "https://gasbrazil.github.io/supply/"
+  },
+  "monitor": {
+    "custom": "https://gasbrazil.com/monitor/",
+    "caissonpoint": "https://gasbrazil.com/monitor/",
+    "hub": "https://gasbrazil.github.io/monitor/"
   }
 };
 function siteFlavor() {
@@ -2963,6 +2969,7 @@ function initCrossLinks() {
   { const el = document.getElementById("link-mago"); if (el) el.href = SITE_LINKS.mago[flavor]; }
   { const el = document.getElementById("link-nts"); if (el) el.href = SITE_LINKS.nts[flavor]; }
   { const el = document.getElementById("link-supply"); if (el) el.href = SITE_LINKS.supply[flavor]; }
+  { const el = document.getElementById("link-monitor"); if (el) el.href = SITE_LINKS.monitor[flavor]; }
 }
 
 
@@ -4186,7 +4193,7 @@ function formatRefreshedLocal(iso, fallback, locale) {
     return fallback || "—";
   }
 }
-const STALE_MAX_LAG_DAYS = {"ons": 7, "pld": 7, "contratos": 7, "flows": 60, "mago": 2, "nts": 2, "supply": 100, "precos": 100, "desk": 14};
+const STALE_MAX_LAG_DAYS = {"ons": 7, "pld": 7, "contratos": 7, "flows": 60, "mago": 2, "nts": 2, "monitor": 2, "supply": 100, "precos": 100, "desk": 14};
 function initStalenessBadgeFor(site, through) {
   try {
     var maxLag = STALE_MAX_LAG_DAYS[site];
