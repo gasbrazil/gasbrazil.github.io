@@ -160,3 +160,38 @@ def test_monitor_national_grid_and_health_pulse():
     assert 'gridStatusPacking: "Grid Packing"' in content
     assert 'gridStatusPacking: "Sistema Empacotando"' in content
 
+
+def test_monitor_tag_charts_palette_stack_and_tooltips():
+    html_path = ROOT / "monitor" / "index.html"
+    content = html_path.read_text(encoding="utf-8")
+
+    # Header and subtitle changes
+    assert "TAG Consumption Estimate Analysis" in content
+    assert '<h2 data-i18n="magoZonesTitle">TAG Consumption Estimate Analysis</h2>' in content
+    assert "7-day daily TAG estimates (Mm³/d). Chart updates from" not in content
+    assert 'data-i18n="magoZonesSub"' not in content
+
+    # Palette and distinction
+    assert "TAG_SERIES_PALETTE" in content
+    assert "#2563eb" in content
+    assert "#f97316" in content
+
+    # Stack chart implementation and mode toggle
+    assert "function drawConsumptionStackedDaily" in content
+    assert 'zoneMode === "stack"' in content
+    assert 'data-mode="stack"' in content
+    assert "consumptionStateKeys" in content
+
+    # Tooltip and interactive crosshair / hover dots
+    assert 'id="chart-tt"' in content
+    assert "getOrCreateChartTooltip" in content
+    assert "placeChartTooltip(tt, ev.clientX, ev.clientY)" in content
+    assert 'stroke-dasharray": "3 3"' in content or 'stroke-dasharray", "3 3"' in content
+    assert "btn-select-zones" in content
+    assert "btn-clear-zones" in content
+
+    # Translations
+    assert 'magoZonesTitle: "TAG Consumption Estimate Analysis"' in content
+    assert 'magoZonesTitle: "Análise de Estimativa de Consumo TAG"' in content
+
+

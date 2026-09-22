@@ -2284,7 +2284,6 @@ th.has-filter .th-label {
     box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
   }
 }
-
 /* Everything below is this dashboard's own layout/components -- the palette
    (neutral tokens + the shared Brazilian-flag accent) now lives entirely in
    shared/theme.css (see ADR-001, Decision 2 Option C). Token names are
@@ -2619,7 +2618,7 @@ main h3,
 <div class="method-row"><span class="method-label" data-i18n="methodAssump">Key assumption</span><span data-i18n="methodAssump_contratos">Master rows enable later nominations; they are not firm capacity bookings.</span></div>
 <div class="method-row"><span class="method-label" data-i18n="methodLimits">Limits</span><span data-i18n="aboutCoverBody">POC Contracts include Transport and Master rows. Legacy and access-connection contracts are not in the public GraphQL feed yet.</span></div>
 </details>
-  &copy; <span id="year"></span> GasBrazil.com &middot; Data: Portal de Oferta de Capacidade (public API) &middot; Contact: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
+  &copy; <span id="year"></span> GasBrazil.com &middot; Data: Portal de Oferta de Capacidade (public API) &middot; <button type="button" class="footer-link-btn" id="link-shortcuts" data-i18n="shortcutsBtn">Shortcuts (?)</button> &middot; Contact: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
   <br><span id="coverage-note">Active Transport &amp; Master contracts</span><button class="infodot" type="button" aria-label="About contract coverage" data-info="Covers the &quot;Transport Contract&quot; and &quot;Master Contract&quot; contract types. &quot;Legacy Transport Contract&quot; and &quot;Access Connection&quot; are small, separately-sourced categories on the source site and are not yet included. Concluded contracts are excluded from the view.">i</button>
 </footer>
 </div>
@@ -4622,8 +4621,8 @@ const GB_I18N = {
     magoColM3: "m³",
     magoColZone: "Operating Zone",
     magoColSnapshot: "Source snapshot",
-    magoZonesTitle: "Consumption forecast",
-    magoZonesSub: "7-day daily TAG estimates (Mm³/d). Chart updates from the compact filters below.",
+    magoZonesTitle: "TAG Consumption Estimate Analysis",
+    magoZonesSub: "",
     magoByState: "States",
     magoByZone: "Zones",
     magoChartLine: "Lines",
@@ -4845,8 +4844,8 @@ const GB_I18N = {
     magoColM3: "m³",
     magoColZone: "Faixa Operacional",
     magoColSnapshot: "Snapshot de origem",
-    magoZonesTitle: "Previsão de consumo",
-    magoZonesSub: "Estimativas diárias TAG em 7 dias (Mm³/d). O gráfico atualiza pelos filtros abaixo.",
+    magoZonesTitle: "Análise de Estimativa de Consumo TAG",
+    magoZonesSub: "",
     magoByState: "Estados",
     magoByZone: "Zonas",
     magoChartLine: "Linhas",

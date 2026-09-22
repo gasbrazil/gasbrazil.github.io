@@ -816,8 +816,7 @@ __SHARED_TYPO_WEIGHT_CSS__
   <section class="panel panel-tight" id="consume-panel">
     <div class="panel-head-row">
       <div>
-        <h2 data-i18n="magoZonesTitle">Consumption forecast</h2>
-        <p class="sub compact" data-i18n="magoZonesSub">7-day daily TAG estimates (Mm³/d). Chart updates from the compact filters below.</p>
+        <h2 data-i18n="magoZonesTitle">TAG Consumption Estimate Analysis</h2>
       </div>
       <div class="seg-row" role="group" aria-label="Chart options">
         <div class="seg">
@@ -854,6 +853,7 @@ __SHARED_TYPO_WEIGHT_CSS__
   <span data-i18n="magoFooter">Data: TAG Mago EMPACOTAMENTOS snapshots. Not an official TAG product.</span>
   &middot; <span data-i18n="contact">Contact</span>: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
 </footer>
+<div class="tt" id="chart-tt"></div>
 </div>
 <script>
 const PAYLOAD_URL = "__PAYLOAD_URL__";
@@ -885,8 +885,8 @@ GB_I18N.en.magoChartStack = "Stack";
 GB_I18N.pt.magoChartStack = "Empilhado";
 GB_I18N.en.magoSelectAll = "Select all";
 GB_I18N.pt.magoSelectAll = "Selecionar tudo";
-GB_I18N.en.magoZonesSub = "7-day daily TAG estimates (Mm³/d). Chart first; use compact filters below.";
-GB_I18N.pt.magoZonesSub = "Estimativas diárias TAG (7 dias, Mm³/d). Gráfico acima; filtros compactos abaixo.";
+GB_I18N.en.magoZonesTitle = "TAG Consumption Estimate Analysis";
+GB_I18N.pt.magoZonesTitle = "Análise de Estimativa de Consumo TAG";
 GB_I18N.en.magoLpCsv = "Download line pack CSV";
 GB_I18N.pt.magoLpCsv = "Baixar CSV de empacotamento";
 GB_I18N.en.magoColObserved = "Observed (UTC)";
@@ -983,6 +983,32 @@ function chartSvg(tag, attrs) {
 function tsMs(iso) {
   const d = new Date(iso.length > 10 ? iso : iso + "T00:00:00Z");
   return d.getTime();
+}
+
+const TAG_SERIES_PALETTE = [
+  "#2563eb",
+  "#f97316",
+  "#10b981",
+  "#a855f7",
+  "#ef4444",
+  "#06b6d4",
+  "#eab308",
+  "#ec4899",
+  "#14b8a6",
+  "#6366f1",
+  "#84cc16",
+  "#d97706",
+];
+
+function getOrCreateChartTooltip() {
+  let tt = document.getElementById("chart-tt");
+  if (!tt) {
+    tt = document.createElement("div");
+    tt.id = "chart-tt";
+    tt.className = "tt";
+    document.body.appendChild(tt);
+  }
+  return tt;
 }
 
 function drawLines(hostId, seriesList, yFmt, bands) {
@@ -1266,12 +1292,112 @@ function drawLines(hostId, seriesList, yFmt, bands) {
     if (s.dashed) attrs["stroke-dasharray"] = "6 4";
     svg.appendChild(chartSvg("path", attrs));
   });
+
+  // Crosshair line and hover dots
+  const cross = chartSvg("line", {
+    x1: 0, x2: 0, y1: plotTop, y2: plotBottom,
+    stroke: "var(--muted)", "stroke-width": 1, "stroke-dasharray": "3 3",
+    style: "display:none; pointer-events:none;",
+  });
+  svg.appendChild(cross);
+
+  const dots = usable.map(s => {
+    const dot = chartSvg("circle", {
+      r: 4, fill: s.color || "var(--accent)", stroke: "var(--panel)", "stroke-width": 1.5,
+      style: "display:none; pointer-events:none;",
+    });
+    svg.appendChild(dot);
+    return dot;
+  });
+
+  const hit = chartSvg("rect", {
+    x: plotLeft, y: plotTop, width: plotWidth, height: plotBottom - plotTop,
+    fill: "transparent", style: "cursor:crosshair;",
+  });
+  svg.appendChild(hit);
+
+  function hideTips() {
+    const tt = document.getElementById("chart-tt");
+    if (tt) tt.style.display = "none";
+    cross.style.display = "none";
+    dots.forEach(d => { d.style.display = "none"; });
+  }
+
+  hit.addEventListener("pointermove", ev => {
+    const r = svg.getBoundingClientRect();
+    const px = (ev.clientX - r.left) / r.width * W;
+    if (px < plotLeft || px > plotLeft + plotWidth) {
+      hideTips();
+      return;
+    }
+    const curX = minX + ((px - plotLeft) / plotWidth) * (maxX - minX);
+
+    let bestT = null;
+    let bestDist = Infinity;
+    usable.forEach(s => {
+      s.points.forEach(p => {
+        const dist = Math.abs(p.x - curX);
+        if (dist < bestDist) {
+          bestDist = dist;
+          bestT = p.x;
+        }
+      });
+    });
+    if (bestT == null) {
+      hideTips();
+      return;
+    }
+
+    const crossX = x(bestT);
+    cross.setAttribute("x1", crossX.toFixed(1));
+    cross.setAttribute("x2", crossX.toFixed(1));
+    cross.style.display = "";
+
+    const d = new Date(bestT);
+    const datePart = (d.getUTCMonth() + 1) + "/" + d.getUTCDate();
+    const timePart = String(d.getUTCHours()).padStart(2, "0") + ":00 UTC";
+    const headerStr = `${datePart} ${timePart}`;
+
+    let rows = "";
+    usable.forEach((s, idx) => {
+      const pt = s.points.find(p => Math.abs(p.x - bestT) < 3600000);
+      const dot = dots[idx];
+      if (pt && pt.y != null && isFinite(pt.y)) {
+        const cy = y(pt.y);
+        dot.setAttribute("cx", crossX.toFixed(1));
+        dot.setAttribute("cy", cy.toFixed(1));
+        dot.style.display = "";
+
+        let valStr = "";
+        if (hostId === "chart-lp" || hostId === "chart-lp-hist") {
+          valStr = (pt.y / 1e6).toFixed(2) + " Mm³";
+        } else {
+          valStr = pt.y.toFixed(2) + " Mm³/d";
+        }
+        rows += `<tr><td><span class="sw" style="background:${s.color}"></span> ${escapeHtml(s.name || s.label || "")}</td><td class="v">${valStr}</td></tr>`;
+      } else {
+        dot.style.display = "none";
+      }
+    });
+
+    if (!rows) {
+      hideTips();
+      return;
+    }
+
+    const tt = getOrCreateChartTooltip();
+    tt.innerHTML = `<div class="d">${escapeHtml(headerStr)}</div><table>${rows}</table>`;
+    placeChartTooltip(tt, ev.clientX, ev.clientY);
+  });
+
+  hit.addEventListener("pointerleave", hideTips);
+
   host.appendChild(svg);
 }
 
 function formatDayLabel(ms) {
   const d = new Date(ms);
-  return (d.getUTCMonth() + 1) + "/" + d.getUTCDate() + "/" + d.getUTCFullYear();
+  return (d.getUTCMonth() + 1) + "/" + d.getUTCDate();
 }
 
 function consumptionStateKeys() {
@@ -1287,7 +1413,7 @@ function drawConsumptionStackedDaily(hostId) {
     host.innerHTML = '<div class="chart-empty">No daily forecast in this snapshot.</div>';
     return;
   }
-  const palette = (window.GB_CHART_PALETTE || ["#0066cc", "#e67e22", "#2ecc71", "#9b59b6", "#c0392b", "#16a085", "#8e44ad", "#d35400", "#2980b9"]);
+  const palette = TAG_SERIES_PALETTE;
   const n = totalBag.times.length;
   const days = totalBag.times.map((t, i) => ({
     x: tsMs(t),
@@ -1306,7 +1432,7 @@ function drawConsumptionStackedDaily(hostId) {
   const maxTot = Math.max(...days.map(d => (d.total != null && isFinite(d.total) ? d.total : 0)), 1);
   const W = Math.max(640, host.clientWidth || 640), H = 260, ML = 52, MR = 12, MT = 12, MB = 36;
   const plotW = W - ML - MR;
-  const gap = Math.max(8, plotW / Math.max(n, 1) * 0.08);
+  const gap = Math.max(8, (plotW / Math.max(n, 1)) * 0.08);
   const barW = Math.max(18, (plotW - gap * (n + 1)) / n);
   const y = v => MT + (H - MT - MB) * (1 - v / maxTot);
   const svg = chartSvg("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: "img" });
@@ -1343,18 +1469,48 @@ function drawConsumptionStackedDaily(hostId) {
     });
     lbl.textContent = formatDayLabel(day.x);
     svg.appendChild(lbl);
+
+    const colHit = chartSvg("rect", {
+      x: (x0 - gap / 2).toFixed(1), y: MT, width: (barW + gap).toFixed(1), height: H - MT - MB,
+      fill: "transparent", style: "cursor:pointer;",
+    });
+    colHit.addEventListener("pointermove", ev => {
+      const tt = getOrCreateChartTooltip();
+      const lang = document.documentElement.getAttribute("data-lang") || "en";
+      const isPt = lang === "pt";
+      const dt = new Date(day.x);
+      const dayHeader = dt.toLocaleDateString(isPt ? "pt-BR" : "en-US", { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" });
+      let rows = "";
+      day.states.forEach(st => {
+        if (st.v > 0) {
+          rows += `<tr><td><span class="sw" style="background:${st.color}"></span> ${escapeHtml(st.label)}</td><td class="v">${st.v.toFixed(2)} Mm³/d</td></tr>`;
+        }
+      });
+      if (day.total != null) {
+        rows += `<tr><td style="font-weight:600"><span class="sw" style="background:var(--text)"></span> Total</td><td class="v" style="font-weight:600">${day.total.toFixed(2)} Mm³/d</td></tr>`;
+      }
+      tt.innerHTML = `<div class="d">${escapeHtml(dayHeader)}</div><table>${rows}</table>`;
+      placeChartTooltip(tt, ev.clientX, ev.clientY);
+    });
+    colHit.addEventListener("pointerleave", () => {
+      const tt = document.getElementById("chart-tt");
+      if (tt) tt.style.display = "none";
+    });
+    svg.appendChild(colHit);
   });
   const legHost = document.createElement("div");
   legHost.className = "legend";
   stateKeys.forEach((g, si) => {
     const span = document.createElement("span");
     span.style.color = palette[si % palette.length];
-    span.textContent = (DATA.groupLabels && DATA.groupLabels[g]) ? DATA.groupLabels[g] : g;
+    span.innerHTML = `<span class="sw" style="background:${palette[si % palette.length]}"></span> ` +
+      escapeHtml((DATA.groupLabels && DATA.groupLabels[g]) ? DATA.groupLabels[g] : g);
     legHost.appendChild(span);
   });
   const totSpan = document.createElement("span");
   totSpan.style.color = "var(--text)";
-  totSpan.textContent = "● " + ((DATA.groupLabels && DATA.groupLabels.total) ? DATA.groupLabels.total : "Total");
+  totSpan.innerHTML = '<span class="sw" style="background:var(--text)"></span> ' +
+    escapeHtml((DATA.groupLabels && DATA.groupLabels.total) ? DATA.groupLabels.total : "Total");
   legHost.appendChild(totSpan);
   host.appendChild(svg);
   host.appendChild(legHost);
@@ -1364,20 +1520,20 @@ function packLinepack() {
   const act = (LP.actual && LP.actual.times || []).map((t, i) => ({ x: tsMs(t), y: LP.actual.values[i] }));
   const fore = (LP.forecast && LP.forecast.times || []).map((t, i) => ({ x: tsMs(t), y: LP.forecast.values[i] }));
   drawLines("chart-lp", [
-    { points: act, color: "var(--tso-tag,#0066cc)", dashed: false },
-    { points: fore, color: "#888", dashed: true },
+    { name: "Actual", points: act, color: "var(--tso-tag,#0066cc)", dashed: false },
+    { name: "Forecast", points: fore, color: "#888", dashed: true },
   ], v => (v / 1e6).toFixed(1), DATA.toleranceBands);
 }
 
 function packLinepackHistory() {
   const pts = (LP_HIST.times || []).map((t, i) => ({ x: tsMs(t), y: LP_HIST.values[i] }));
   drawLines("chart-lp-hist", [
-    { points: pts, color: "var(--tso-tag,#0066cc)", dashed: false },
+    { name: "Line pack", points: pts, color: "var(--tso-tag,#0066cc)", dashed: false },
   ], v => (v / 1e6).toFixed(2), DATA.toleranceBands);
 }
 
 function activeZoneSeries() {
-  const palette = (window.GB_CHART_PALETTE || ["#0066cc", "#e67e22", "#2ecc71", "#9b59b6", "#c0392b"]);
+  const palette = TAG_SERIES_PALETTE;
   let i = 0;
   const series = [];
   if (granularity === "state") {
@@ -1385,15 +1541,18 @@ function activeZoneSeries() {
       const bag = GROUP_SERIES[g];
       if (!bag || !bag.times) return;
       const pts = bag.times.map((t, j) => ({ x: tsMs(t), y: bag.values[j] }));
+      const isTotal = g.toLowerCase() === "total";
       const label = (DATA.groupLabels && DATA.groupLabels[g]) ? DATA.groupLabels[g] : g;
-      series.push({ points: pts, color: palette[i++ % palette.length], label: label });
+      const color = isTotal ? "var(--text)" : palette[i++ % palette.length];
+      const dashed = isTotal;
+      series.push({ points: pts, color, label, dashed, name: label });
     });
   } else {
     selectedZones.forEach(z => {
       const bag = ZONE_SERIES[z];
       if (!bag || !bag.times) return;
       const pts = bag.times.map((t, j) => ({ x: tsMs(t), y: bag.values[j] }));
-      series.push({ points: pts, color: palette[i++ % palette.length], label: z });
+      series.push({ points: pts, color: palette[i++ % palette.length], label: z, name: z });
     });
   }
   return series;
