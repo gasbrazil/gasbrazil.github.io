@@ -520,16 +520,6 @@ __SHARED_TYPO_WEIGHT_CSS__
     </table>
   </div>
 </section>
-<div class="sources">
-  <span class="sources-label" data-i18n="sources">Sources</span>
-  <a href="../ons/">ONS</a>
-  <a href="../pld/">CCEE</a>
-  <a href="../precos/">ANP</a>
-  <a href="../poc/">POC</a>
-  <a href="../contratos/">Contracts</a>
-  <a href="../flows/">Flows</a>
-  <a href="../supply/">Supply</a>
-</div>
 </div>
 
 <section class="analysis-workspace" id="desk-view-analysis" aria-labelledby="analysis-title" hidden>
@@ -584,6 +574,16 @@ __SHARED_TYPO_WEIGHT_CSS__
 </section>
 
 <footer>
+  <div class="sources">
+    <span class="sources-label" data-i18n="sources">Sources</span>
+    <a href="../ons/">ONS</a>
+    <a href="../pld/">CCEE</a>
+    <a href="../precos/">ANP</a>
+    <a href="../poc/">POC</a>
+    <a href="../contratos/">Contracts</a>
+    <a href="../flows/">Flows</a>
+    <a href="../supply/">Supply</a>
+  </div>
   <div class="asof-strip asof-footer" id="asof-strip">
     <span class="asof-label" data-i18n="kpiRefresh">Last refreshed</span>
     <span class="asof-val" id="asof-refreshed">&mdash;</span>

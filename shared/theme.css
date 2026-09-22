@@ -66,7 +66,7 @@ __FONT_FACE__
   --content-w: 80%;
   --content-max: 1280px;
   --card-pad: 14px 16px;
-  --gap: 12px;
+  --gap: 16px;
 
   /* Data-table body text. Was 12.5px across dashboards; dialed down for
      denser grids (POC Results especially). Pages use var(--table-font-size). */
@@ -663,10 +663,13 @@ main.hub .brand-mark-dot,
 }
 .dd-menu .chk { width: 12px; font-size: 11px; color: var(--accent); flex: none; }
 
-/* Source links: short agency name + external icon (ONS Balances look). */
+/* Source links: short agency name + external icon. Relocated to footer/bottom. */
 .sources {
   display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
-  margin: 0 0 var(--gap);
+  margin: var(--gap) 0 10px;
+}
+footer .sources {
+  margin: 0 0 12px;
 }
 .sources-label {
   font-size: 11px; text-transform: uppercase; letter-spacing: .06em;

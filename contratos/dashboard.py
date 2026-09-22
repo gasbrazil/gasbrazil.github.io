@@ -238,10 +238,6 @@ __SHARED_TYPO_WEIGHT_CSS__
   </div>
 </header>
 <div class="flagbar" aria-hidden="true"></div>
-<div class="sources">
-  <span class="sources-label" data-i18n="sources">Sources</span>
-  <a href="https://ofertadecapacidade.com.br/home/contratos" target="_blank" rel="noopener">POC<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
-</div>
 <div class="tso-row" id="tso-row"></div>
 <div class="drill-card" id="drill-card"></div>
 <div class="quick-filters" id="quick-filters"></div>
@@ -249,7 +245,7 @@ __SHARED_TYPO_WEIGHT_CSS__
   <select id="f-category"><option value="">All contract categories</option></select>
   <input id="f-search" type="search" placeholder="Search contract # / shipper / point&hellip;">
   <button class="secondary" id="btn-reset">Reset filters</button>
-  <button class="secondary" id="btn-refresh" title="Reload the latest published build. Data itself refreshes automatically; this does not trigger a new pull.">&#8635; Reload latest</button>
+  <button class="secondary" id="btn-refresh" title="Reload latest data">&#8635; Reload latest</button>
   <button class="secondary" id="btn-columns" title="Show or hide columns">Columns</button>
   <button id="btn-csv">Download CSV</button>
   <button id="btn-xlsx">Export all data (Excel)</button>
@@ -264,11 +260,15 @@ __SHARED_TYPO_WEIGHT_CSS__
 </div>
 <div class="chart-card">
   <p class="panel-title">Allocated Tariff Trend</p>
-  <p class="panel-note">Capacity-weighted avg allocated tariff, R$/MMBtu, by contract start date.</p>
+  <p class="panel-note">Capacity-weighted average allocated tariff (R$/MMBtu)</p>
   <div class="chart-picker" id="chart-picker"></div>
   <div id="chart-host"></div>
 </div>
 <footer>
+  <div class="sources">
+    <span class="sources-label" data-i18n="sources">Sources</span>
+    <a href="https://ofertadecapacidade.com.br/home/contratos" target="_blank" rel="noopener">POC<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+  </div>
   <div class="asof-strip asof-footer" id="asof-strip">
     <span class="asof-label" data-i18n="kpiRefresh">Last refreshed</span>
     <span class="asof-val" id="asof-refreshed">&mdash;</span>
@@ -277,7 +277,7 @@ __SHARED_TYPO_WEIGHT_CSS__
   </div>
   __SHARED_METHODOLOGY__
   &copy; <span id="year"></span> GasBrazil.com &middot; Data: Portal de Oferta de Capacidade (public API) &middot; Contact: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
-  <br><span id="coverage-note">Active Transport &amp; Master contracts</span><button class="infodot" type="button" aria-label="About contract coverage" data-info="Covers the &quot;Transport Contract&quot; and &quot;Master Contract&quot; contract types. &quot;Legacy Transport Contract&quot; and &quot;Access Connection&quot; are small, separately-sourced categories on the source site and are not yet included. Concluded contracts are excluded from the view.">i</button>
+  <br><span id="coverage-note">Active Transport &amp; Master contracts</span>
 </footer>
 </div>
 <div class="tt" id="chart-tt"></div>
@@ -1352,7 +1352,7 @@ function renderDrill() {
   card.innerHTML = `
     <p class="panel-title">Top Shippers by Held Capacity &mdash; ${scope}</p>
     ${tsoSummary}
-    <p class="panel-note">Capacity in 000 m&sup3;/d on active contracts currently within their term &middot;
+    <p class="panel-note">000 m&sup3;/d &middot;
       ${all.length.toLocaleString(numLocale())} shipper${all.length === 1 ? "" : "s"} &middot; ${mix} &middot; total ${fmtNum(all.reduce((a, e) => a + e.total, 0), 0)}</p>
     <div class="drill-table-wrap">
     <table>
