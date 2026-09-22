@@ -2590,9 +2590,9 @@ main h3,
     <a class="kpi-cell" href="monitor/" data-slug="monitor">
       <div class="kpi-label" data-i18n="cardMonitor">Pipeline Monitor</div>
       <div class="kpi-role" data-i18n="cardMonitorDesc">TAG Mago &amp; NTS OnTime operational line pack &amp; SCADA telemetry.</div>
-      <div class="kpi-val" data-en="TAG 68.69 Mm³ · NTS 44.84 Mm³" data-pt="TAG 68.69 Mm³ · NTS 44.84 Mm³">TAG 68.69 Mm³ · NTS 44.84 Mm³</div>
-      <div class="kpi-when" data-refresh="2026-09-22 22:40 UTC"></div>
-      
+      <div class="kpi-val" data-en="NTS 44.19 Mm³" data-pt="NTS 44.19 Mm³">NTS 44.19 Mm³</div>
+      <div class="kpi-when" data-refresh="2026-09-22 22:49 UTC"></div>
+      <svg class="kpi-spark" viewBox="0 0 120 28" width="120" height="28" aria-hidden="true"><polyline points="2.0,2.2 5.0,2.1 7.9,2.0 10.9,2.1 13.9,2.8 16.9,3.5 19.8,4.1 22.8,5.2 25.8,6.1 28.8,6.4 31.7,5.1 34.7,6.2 37.7,7.2 40.7,8.1 43.6,12.9 46.6,13.9 49.6,14.6 52.6,15.5 55.5,16.4 58.5,16.7 61.5,15.5 64.5,16.4 67.4,17.3 70.4,18.3 73.4,19.3 76.4,19.1 79.3,19.5 82.3,20.2 85.3,20.8 88.3,21.2 91.2,21.8 94.2,22.3 97.2,22.8 100.2,23.4 103.1,23.9 106.1,24.4 109.1,24.5 112.1,25.1 115.0,25.7 118.0,26.0"/></svg>
     </a>
     <a class="kpi-cell" href="supply/" data-slug="supply">
       <div class="kpi-label" data-i18n="cardSupply">Gas Supply</div>
@@ -4034,7 +4034,7 @@ initLangToggle("lang-toggle");
 </html>
 
 <script>
-const TEASERS_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/hub/teasers.json.gz?v=35794342401";
+const TEASERS_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/hub/teasers.json.gz?v=35794342423";
 function paintRefreshLabels() {
   document.querySelectorAll(".kpi-when[data-refresh]").forEach(el => {
     const when = el.getAttribute("data-refresh");
