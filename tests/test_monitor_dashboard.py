@@ -125,3 +125,38 @@ def test_build_dashboard_execution(tmp_path):
     assert "Pipeline Monitor" in text
     assert 'id="monitor-view-tag"' in text
     assert 'id="monitor-view-nts"' in text
+
+
+def test_monitor_national_grid_and_health_pulse():
+    html_path = ROOT / "monitor" / "index.html"
+    content = html_path.read_text(encoding="utf-8")
+
+    # Health pulse elements in tabbar
+    assert 'class="health-pulse-group"' in content
+    assert 'id="health-tag-pill"' in content
+    assert 'id="health-nts-pill"' in content
+    assert 'id="health-tag-dot"' in content
+    assert 'id="health-nts-dot"' in content
+    assert "pulse-dot" in content
+
+    # Symmetrical 4-card KPI row on both TAG and NTS
+    assert 'id="tag-nat-lp-val"' in content
+    assert 'id="tag-nat-pack-val"' in content
+    assert 'id="nts-nat-lp-val"' in content
+    assert 'id="nts-nat-pack-val"' in content
+    assert 'data-i18n="gridKpiNationalPack"' in content
+    assert 'data-i18n="gridKpiNetBalance"' in content
+
+    # JavaScript dynamic updates
+    assert "function updateTelemetryHealth()" in content
+    assert "function updateNationalGridKpis()" in content
+    assert "setInterval(updateTelemetryHealth, 60000)" in content
+
+    # Bilingual i18n keys
+    assert 'gridKpiNationalPack: "National Grid Pack"' in content
+    assert 'gridKpiNationalPack: "Empacotamento Nacional"' in content
+    assert 'gridKpiNetBalance: "Net System Balance"' in content
+    assert 'gridKpiNetBalance: "Balanço Líquido do Sistema"' in content
+    assert 'gridStatusPacking: "Grid Packing"' in content
+    assert 'gridStatusPacking: "Sistema Empacotando"' in content
+
