@@ -13,7 +13,7 @@ from pathlib import Path
 import dashboard_kit as kit
 
 ROOT = Path(__file__).resolve().parents[1]
-SITES = ("desk", "ons", "pld", "poc", "contratos", "flows", "supply", "precos", "mago")
+SITES = ("desk", "ons", "pld", "poc", "contratos", "flows", "supply", "precos", "mago", "nts")
 THEME_START = "/*\n * GasBrazil.com shared design tokens"
 TYPO_MARKER = "/* Shared header/label"
 PAGE_CSS_MARKERS: dict[str, str] = {
@@ -23,6 +23,7 @@ PAGE_CSS_MARKERS: dict[str, str] = {
     "precos": "* { box-sizing: border-box; }",
     "supply": "* { box-sizing: border-box; }",
     "mago": "* { box-sizing: border-box; }",
+    "nts": "* { box-sizing: border-box; }",
     "contratos": "/* Everything below is this dashboard's own layout/components",
     "poc": "/* Everything below is this dashboard's own layout/components",
     "ons": "/* Everything below is ons-dashboard's own layout/components",

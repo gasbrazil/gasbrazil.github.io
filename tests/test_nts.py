@@ -108,6 +108,12 @@ def test_nts_dashboard_generation(tmp_path: Path):
     assert "<!doctype html>" in content.lower()
     assert "<html" in content
     assert "NTS OnTime" in content
+    assert 'class="masthead"' in content
+    assert "header.dash-head" in content
+    assert 'id="theme-toggle"' in content
+    assert 'id="lang-toggle"' in content
+    assert "GasBrazil.com shared design tokens" in content
+    assert 'class="wrap"' in content
     assert 'id="linepack-chart"' in content
     assert 'id="telemetry-table"' in content
     assert 'id="kpi-cur-mm3"' in content
