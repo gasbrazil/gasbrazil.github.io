@@ -30,6 +30,19 @@ def _load_module(name: str, path: Path):
     return mod
 
 
+def _parse_ts(ts_str: str | None) -> dt.datetime | None:
+    if not ts_str:
+        return None
+    s = ts_str.strip().replace(" UTC", "+00:00").replace("Z", "+00:00")
+    try:
+        val = dt.datetime.fromisoformat(s)
+        if val.tzinfo is None:
+            val = val.replace(tzinfo=dt.UTC)
+        return val
+    except Exception:
+        return None
+
+
 TEMPLATE = r"""<!doctype html>
 <html lang="en">
 <head>
@@ -80,6 +93,11 @@ h1 { font-size: 25px; margin: 0; letter-spacing: -.01em; }
 .monitor-tabs button[aria-pressed="true"] { color: var(--text); background: var(--panel); border-bottom-color: var(--accent); }
 .monitor-tabs button:hover { background: var(--accent-soft); }
 .monitor-tabs button[aria-pressed="true"]:hover { background: var(--panel-grad-hover, var(--panel)); }
+.monitor-tab-actions { display: inline-flex; align-items: center; gap: 8px; }
+@media (max-width: 680px) {
+  .monitor-tabbar { flex-wrap: wrap; gap: 6px; }
+  .monitor-tab-actions { width: 100%; justify-content: space-between; padding-bottom: 4px; }
+}
 
 .sources { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 16px 0 0; }
 .sources-label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 200; margin-right: 2px; }
@@ -197,14 +215,28 @@ __SHARED_TYPO_WEIGHT_CSS__
     <button type="button" role="tab" data-tab="tag" id="tab-btn-tag" aria-pressed="true" data-i18n="monitorTabTag">TAG Mago</button>
     <button type="button" role="tab" data-tab="nts" id="tab-btn-nts" aria-pressed="false" data-i18n="monitorTabNts">NTS OnTime</button>
   </div>
-  <div class="monitor-tab-actions">__SHARED_SHARE_BUTTON__</div>
+  <div class="monitor-tab-actions">
+    <div class="health-pulse-group" id="health-pulse-group">
+      <span class="health-pill" id="health-tag-pill" title="TAG Mago telemetry status">
+        <span class="__TAG_DOT_CLASS__" id="health-tag-dot"></span>
+        <span class="tso-code">TAG</span>
+        <span class="health-time" id="health-tag-time">__TAG_HEALTH_TIME__</span>
+      </span>
+      <span class="health-pill" id="health-nts-pill" title="NTS OnTime telemetry status">
+        <span class="__NTS_DOT_CLASS__" id="health-nts-dot"></span>
+        <span class="tso-code">NTS</span>
+        <span class="health-time" id="health-nts-time">__NTS_HEALTH_TIME__</span>
+      </span>
+    </div>
+    __SHARED_SHARE_BUTTON__
+  </div>
 </div>
 
 <!-- ======================= TAG MAGO SUBPAGE ======================= -->
 <div id="monitor-view-tag">
   <div class="kpi-row">
     <div class="kpi">
-      <div class="label" data-i18n="magoKpiLinepack">Integrated line pack</div>
+      <div class="label" data-i18n="magoKpiLinepack">TAG Line Pack</div>
       <div class="val" id="kpi-lp">—</div>
       <div class="sub-val" id="kpi-lp-m3">—</div>
     </div>
@@ -214,9 +246,14 @@ __SHARED_TYPO_WEIGHT_CSS__
       <div class="sub-val" id="kpi-zone-sub" data-i18n="magoKpiZoneSub">Commercial tolerance tier</div>
     </div>
     <div class="kpi">
-      <div class="label" data-i18n="magoKpiSnapshot">Snapshot (UTC)</div>
-      <div class="val" id="kpi-snap">—</div>
-      <div class="sub-val" id="kpi-snap-sub" data-i18n="magoKpiSnapSub">Cached Mago telemetry</div>
+      <div class="label" data-i18n="gridKpiNationalPack">National Grid Pack</div>
+      <div class="val" id="tag-nat-lp-val"><span id="tag-nat-lp-num">__NAT_LP_VAL__</span> <span class="unit">Mm³</span></div>
+      <div class="sub-val" id="tag-nat-lp-sub">__NAT_LP_SUB__</div>
+    </div>
+    <div class="kpi">
+      <div class="label" data-i18n="gridKpiNetBalance">Net System Balance</div>
+      <div class="val" id="tag-nat-pack-val"><span class="badge-pack __NAT_PACK_CLASS__" id="tag-nat-pack-badge">__NAT_PACK_ARROW__ <span id="tag-nat-pack-state" data-i18n="__NAT_PACK_I18N__">__NAT_PACK_STATE__</span></span></div>
+      <div class="sub-val" id="tag-nat-bal-sub">__NAT_BAL_SUB__</div>
     </div>
   </div>
 
@@ -330,24 +367,24 @@ __SHARED_TYPO_WEIGHT_CSS__
 <div id="monitor-view-nts" hidden>
   <div class="kpi-row">
     <div class="kpi">
-      <div class="label" data-i18n="ntsKpiCurrent">Linepack Inventory</div>
+      <div class="label" data-i18n="ntsKpiCurrent">NTS Line Pack</div>
       <div class="val" id="nts-kpi-cur"><span id="nts-cur-mm3">__CUR_MM3__</span> <span class="unit">Mm³</span></div>
       <div class="sub-val" id="nts-cur-m3">__CUR_M3__ m³</div>
     </div>
     <div class="kpi">
-      <div class="label" data-i18n="ntsKpiState">Packing State</div>
+      <div class="label" data-i18n="ntsKpiState">Packing State & Rate</div>
       <div class="val" id="nts-kpi-state"><span class="badge-pack __PACK_CLASS__" id="nts-pack-badge">__PACK_ARROW__ <span id="nts-pack-state" data-i18n="__PACK_STATE_I18N__">__PACK_STATE__</span></span></div>
-      <div class="sub-val" id="nts-rate-daily">__RATE_DAILY__ Mm³/d eq.</div>
+      <div class="sub-val" id="nts-rate-sub"><span id="nts-rate-val">__RATE_VAL__</span> m³/h · <span id="nts-rate-daily">__RATE_DAILY__</span> Mm³/d eq.</div>
     </div>
     <div class="kpi">
-      <div class="label" data-i18n="ntsKpiRate">Packing Rate</div>
-      <div class="val" id="nts-kpi-rate"><span id="nts-rate-val">__RATE_VAL__</span> <span class="unit">m³/h</span></div>
-      <div class="sub-val" id="nts-delta-24h">24h: __DELTA_24H_VAL__ m³ (__DELTA_24H_PCT__)</div>
+      <div class="label" data-i18n="gridKpiNationalPack">National Grid Pack</div>
+      <div class="val" id="nts-nat-lp-val"><span id="nts-nat-lp-num">__NAT_LP_VAL__</span> <span class="unit">Mm³</span></div>
+      <div class="sub-val" id="nts-nat-lp-sub">__NAT_LP_SUB__</div>
     </div>
     <div class="kpi">
-      <div class="label" data-i18n="kpiEnvelope24h">24h Envelope</div>
-      <div class="val" id="nts-kpi-env"><span id="nts-avg-24h">__AVG_24H__</span> <span class="unit">Mm³ avg</span></div>
-      <div class="sub-val" id="nts-span-24h">Min: __MIN_24H__ · Max: __MAX_24H__</div>
+      <div class="label" data-i18n="gridKpiNetBalance">Net System Balance</div>
+      <div class="val" id="nts-nat-pack-val"><span class="badge-pack __NAT_PACK_CLASS__" id="nts-nat-pack-badge">__NAT_PACK_ARROW__ <span id="nts-nat-pack-state" data-i18n="__NAT_PACK_I18N__">__NAT_PACK_STATE__</span></span></div>
+      <div class="sub-val" id="nts-nat-bal-sub">__NAT_BAL_SUB__</div>
     </div>
   </div>
 
@@ -442,8 +479,16 @@ if (typeof GB_I18N !== "undefined") {
     ntsLinepackTitle: "NTS Line Pack — Transmission Network",
     magoKpiZoneSub: "Commercial tolerance tier",
     magoKpiSnapSub: "Cached Mago telemetry",
-    ntsKpiCurrent: "Linepack Inventory",
-    ntsKpiState: "Packing State",
+    magoKpiLinepack: "TAG Line Pack",
+    ntsKpiCurrent: "NTS Line Pack",
+    ntsKpiState: "Packing State & Rate",
+    gridKpiNationalPack: "National Grid Pack",
+    gridKpiNetBalance: "Net System Balance",
+    gridStatusPacking: "Grid Packing",
+    gridStatusDrafting: "Grid Drafting",
+    gridStatusBalanced: "In-Balance",
+    healthTag: "TAG Telemetry",
+    healthNts: "NTS Telemetry",
     kpiDelta24h: "24h Change",
     kpiEnvelope24h: "24h Range",
     chartDesc: "SCADA line pack telemetry (solid amber) with historical mean guideline (dashed).",
@@ -482,8 +527,16 @@ if (typeof GB_I18N !== "undefined") {
     ntsLinepackTitle: "NTS Line Pack — Malha de Transporte",
     magoKpiZoneSub: "Faixa de tolerância comercial",
     magoKpiSnapSub: "Telemetria em cache do Mago",
-    ntsKpiCurrent: "Estoque de Empacotamento",
-    ntsKpiState: "Estado de Empacotamento",
+    magoKpiLinepack: "Line Pack TAG",
+    ntsKpiCurrent: "Line Pack NTS",
+    ntsKpiState: "Estado e Taxa de Empacotamento",
+    gridKpiNationalPack: "Empacotamento Nacional",
+    gridKpiNetBalance: "Balanço Líquido do Sistema",
+    gridStatusPacking: "Sistema Empacotando",
+    gridStatusDrafting: "Sistema Desempacotando",
+    gridStatusBalanced: "Em Equilíbrio",
+    healthTag: "Telemetria TAG",
+    healthNts: "Telemetria NTS",
     kpiDelta24h: "Variação 24h",
     kpiEnvelope24h: "Faixa 24h",
     chartDesc: "Telemetria SCADA de empacotamento (âmbar) com linha-guia da média histórica (tracejado).",
@@ -820,6 +873,122 @@ function setMagoKpis() {
       pillEl.textContent = label;
     }
   }
+}
+
+function updateTelemetryHealth() {
+  const now = Date.now();
+  // TAG telemetry health
+  if (DATA) {
+    const snapStr = DATA.snapshotIso || DATA.snapshotAt;
+    if (snapStr) {
+      const snapTs = new Date(snapStr.length > 10 && !snapStr.endsWith("Z") && !snapStr.includes("+") ? snapStr + "Z" : snapStr).getTime();
+      const diffMin = Math.round((now - snapTs) / 60000);
+      const el = document.getElementById("health-tag-time");
+      const dot = document.getElementById("health-tag-dot");
+      const pill = document.getElementById("health-tag-pill");
+      if (el && dot) {
+        if (isNaN(diffMin) || diffMin < 0) {
+          el.textContent = "Live";
+        } else if (diffMin < 60) {
+          el.textContent = diffMin + "m ago";
+        } else {
+          el.textContent = Math.floor(diffMin / 60) + "h ago";
+        }
+        dot.className = "pulse-dot" + (diffMin > 360 ? " stale" : (diffMin > 180 ? " amber" : ""));
+        if (pill) pill.title = "TAG Mago: " + (DATA.snapshotAt || snapStr);
+      }
+    }
+  }
+  // NTS telemetry health
+  const ntsKpis = (NTS_PAYLOAD && NTS_PAYLOAD.kpis) || {};
+  const ntsSnapStr = NTS_PAYLOAD.last_updated_iso || NTS_PAYLOAD.last_updated_utc || ntsKpis.last_updated_iso || ntsKpis.last_updated_utc;
+  if (ntsSnapStr) {
+    const snapTs = new Date(ntsSnapStr.length > 10 && !ntsSnapStr.endsWith("Z") && !ntsSnapStr.includes("+") ? ntsSnapStr + "Z" : ntsSnapStr).getTime();
+    const diffMin = Math.round((now - snapTs) / 60000);
+    const el = document.getElementById("health-nts-time");
+    const dot = document.getElementById("health-nts-dot");
+    const pill = document.getElementById("health-nts-pill");
+    if (el && dot) {
+      if (isNaN(diffMin) || diffMin < 0) {
+        el.textContent = "Live";
+      } else if (diffMin < 60) {
+        el.textContent = diffMin + "m ago";
+      } else {
+        el.textContent = Math.floor(diffMin / 60) + "h ago";
+      }
+      dot.className = "pulse-dot" + (diffMin > 360 ? " stale" : (diffMin > 180 ? " amber" : ""));
+      if (pill) pill.title = "NTS OnTime: " + (NTS_PAYLOAD.last_updated_utc || ntsSnapStr);
+    }
+  }
+}
+
+function updateNationalGridKpis() {
+  let tagLpMm3 = null;
+  if (DATA) {
+    if (DATA.kpiLinepackMm3 != null) tagLpMm3 = DATA.kpiLinepackMm3;
+    else if (DATA.kpiLinepackM3 != null) tagLpMm3 = DATA.kpiLinepackM3 / 1e6;
+  }
+  let ntsLpMm3 = null;
+  if (NTS_PAYLOAD) {
+    if (NTS_PAYLOAD.current_mm3 != null) ntsLpMm3 = NTS_PAYLOAD.current_mm3;
+    else if (NTS_PAYLOAD.kpis && NTS_PAYLOAD.kpis.current_mm3 != null) ntsLpMm3 = NTS_PAYLOAD.kpis.current_mm3;
+    else if (NTS_PAYLOAD.series && NTS_PAYLOAD.series.length) {
+      ntsLpMm3 = NTS_PAYLOAD.series[NTS_PAYLOAD.series.length - 1][1];
+    }
+  }
+
+  // Combined Linepack
+  if (tagLpMm3 != null && ntsLpMm3 != null) {
+    const totalMm3 = tagLpMm3 + ntsLpMm3;
+    const tagPct = Math.round((tagLpMm3 / totalMm3) * 100);
+    const ntsPct = 100 - tagPct;
+    ["tag-nat-lp-num", "nts-nat-lp-num"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = totalMm3.toFixed(2);
+    });
+    ["tag-nat-lp-sub", "nts-nat-lp-sub"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = `TAG ${tagPct}% · NTS ${ntsPct}%`;
+    });
+  }
+
+  // Combined Packing Rate
+  let ntsRate = 0;
+  if (NTS_PAYLOAD) {
+    if (NTS_PAYLOAD.rate_m3_h != null) ntsRate = NTS_PAYLOAD.rate_m3_h;
+    else if (NTS_PAYLOAD.kpis && NTS_PAYLOAD.kpis.rate_m3_h != null) ntsRate = NTS_PAYLOAD.kpis.rate_m3_h;
+  }
+  let tagRate = 0;
+  if (DATA && DATA.linepack && DATA.linepack.actual && DATA.linepack.actual.values && DATA.linepack.actual.values.length >= 2) {
+    const vals = DATA.linepack.actual.values;
+    tagRate = vals[vals.length - 1] - vals[vals.length - 2];
+  }
+  const combRate = Math.round(tagRate + ntsRate);
+  const combDaily = ((combRate * 24) / 1e6).toFixed(2);
+  const isPack = combRate > 2000;
+  const isDraft = combRate < -2000;
+  const packClass = isPack ? "packing" : (isDraft ? "unpacking" : "packing");
+  const arrow = isPack ? "▲" : (isDraft ? "▼" : "◆");
+  const stateKey = isPack ? "gridStatusPacking" : (isDraft ? "gridStatusDrafting" : "gridStatusBalanced");
+  const lang = document.documentElement.getAttribute("data-lang") || "en";
+  const dict = (typeof GB_I18N !== "undefined" && GB_I18N[lang]) || {};
+  const stateLabel = dict[stateKey] || (isPack ? "Grid Packing" : (isDraft ? "Grid Drafting" : "In-Balance"));
+  const sign = combRate >= 0 ? "+" : "";
+  const rateFmt = sign + Math.round(combRate).toLocaleString("pt-BR");
+  const dailyFmt = sign + combDaily;
+  const subText = `${rateFmt} m³/h · ${dailyFmt} Mm³/d eq.`;
+
+  ["tag-nat-pack-badge", "nts-nat-pack-badge"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.className = "badge-pack " + packClass;
+      el.innerHTML = `${arrow} <span data-i18n="${stateKey}">${escapeHtml(stateLabel)}</span>`;
+    }
+  });
+  ["tag-nat-bal-sub", "nts-nat-bal-sub"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = subText;
+  });
 }
 
 function chartSvg(tag, attrs) {
@@ -1227,6 +1396,12 @@ async function init() {
     packZones();
   }));
 
+  // Initialize telemetry health pulse and periodic update
+  updateTelemetryHealth();
+  setInterval(updateTelemetryHealth, 60000);
+  const langToggle = document.getElementById("lang-toggle");
+  if (langToggle) langToggle.addEventListener("click", () => setTimeout(updateNationalGridKpis, 60));
+
   // Fetch TAG Mago JSON in background
   try {
     const json = await fetchMagoPayloadJson();
@@ -1256,6 +1431,8 @@ async function init() {
     packLinepackHistory();
     packZones();
     paintAsof();
+    updateTelemetryHealth();
+    updateNationalGridKpis();
   } catch (err) {
     console.error("TAG Mago payload could not be loaded:", err);
   }
@@ -1321,6 +1498,74 @@ def build_dashboard(out_path: Path | str = DEFAULT_OUT) -> Path:
     max_24h = f"{nts_kpis['max_24h']:.2f}"
     avg_24h = f"{nts_kpis['avg_24h']:.2f}"
 
+    # National Grid Pack metrics
+    tag_lp_float = tag_payload.get("kpiLinepackMm3") if tag_payload else None
+    nts_lp_float = nts_kpis.get("current_mm3") if nts_kpis else None
+    if tag_lp_float is not None and nts_lp_float is not None:
+        nat_lp_total = tag_lp_float + nts_lp_float
+        nat_lp_val = f"{nat_lp_total:.2f}"
+        tag_pct = round((tag_lp_float / nat_lp_total) * 100)
+        nts_pct = 100 - tag_pct
+        nat_lp_sub = f"TAG {tag_pct}% · NTS {nts_pct}%"
+    elif nts_lp_float is not None:
+        nat_lp_val = f"{nts_lp_float:.2f}"
+        nat_lp_sub = "NTS 100%"
+    else:
+        nat_lp_val = "—"
+        nat_lp_sub = "—"
+
+    # National Packing Rate & System Balance
+    tag_rate_m3_h = 0.0
+    if tag_payload:
+        lp_actual_vals = tag_payload.get("linepack", {}).get("actual", {}).get("values", [])
+        if len(lp_actual_vals) >= 2 and lp_actual_vals[-1] is not None and lp_actual_vals[-2] is not None:
+            tag_rate_m3_h = float(lp_actual_vals[-1] - lp_actual_vals[-2])
+    nts_rate_m3_h = float(nts_kpis.get("rate_m3_h", 0.0))
+    comb_rate_m3_h = round(tag_rate_m3_h + nts_rate_m3_h)
+    comb_rate_mm3_d = (comb_rate_m3_h * 24.0) / 1_000_000.0
+    is_nat_pack = comb_rate_m3_h > 2000
+    is_nat_draft = comb_rate_m3_h < -2000
+    nat_pack_class = "packing" if is_nat_pack else ("unpacking" if is_nat_draft else "packing")
+    nat_pack_arrow = "▲" if is_nat_pack else ("▼" if is_nat_draft else "◆")
+    nat_pack_state = "Grid Packing" if is_nat_pack else ("Grid Drafting" if is_nat_draft else "In-Balance")
+    nat_pack_i18n = "gridStatusPacking" if is_nat_pack else ("gridStatusDrafting" if is_nat_draft else "gridStatusBalanced")
+
+    comb_sign = "+" if comb_rate_m3_h >= 0 else ""
+    comb_rate_fmt = f"{comb_sign}{int(round(comb_rate_m3_h)):,}".replace(",", ".")
+    comb_daily_fmt = f"{comb_sign}{comb_rate_mm3_d:.2f}"
+    nat_bal_sub = f"{comb_rate_fmt} m³/h · {comb_daily_fmt} Mm³/d eq."
+
+    # Telemetry Health & Freshness Timestamps
+    tag_snap_str = tag_payload.get("snapshotIso") or tag_payload.get("snapshotAt") if tag_payload else None
+    tag_health_time = "Live"
+    tag_dot_class = "pulse-dot"
+    if tag_snap_str:
+        dt_tag = _parse_ts(tag_snap_str)
+        if dt_tag:
+            diff_m = int((now - dt_tag).total_seconds() / 60)
+            if diff_m < 0:
+                tag_health_time = "Live"
+            elif diff_m < 60:
+                tag_health_time = f"{diff_m}m ago"
+            else:
+                tag_health_time = f"{diff_m // 60}h ago"
+            tag_dot_class = "pulse-dot" + (" stale" if diff_m > 360 else (" amber" if diff_m > 180 else ""))
+
+    nts_snap_str = nts_kpis.get("last_updated_iso") or nts_kpis.get("last_updated_utc") if nts_kpis else None
+    nts_health_time = "Live"
+    nts_dot_class = "pulse-dot"
+    if nts_snap_str:
+        dt_nts = _parse_ts(nts_snap_str)
+        if dt_nts:
+            diff_m = int((now - dt_nts).total_seconds() / 60)
+            if diff_m < 0:
+                nts_health_time = "Live"
+            elif diff_m < 60:
+                nts_health_time = f"{diff_m}m ago"
+            else:
+                nts_health_time = f"{diff_m // 60}h ago"
+            nts_dot_class = "pulse-dot" + (" stale" if diff_m > 360 else (" amber" if diff_m > 180 else ""))
+
     combined_payload = {
         "generated": now_str,
         "generatedIso": now.isoformat(),
@@ -1349,6 +1594,17 @@ def build_dashboard(out_path: Path | str = DEFAULT_OUT) -> Path:
         KPI_NTS_LP=cur_mm3,
         KPI_NTS_RATE=rate_val,
         PAYLOAD_URL=payload_href,
+        TAG_HEALTH_TIME=tag_health_time,
+        TAG_DOT_CLASS=tag_dot_class,
+        NTS_HEALTH_TIME=nts_health_time,
+        NTS_DOT_CLASS=nts_dot_class,
+        NAT_LP_VAL=nat_lp_val,
+        NAT_LP_SUB=nat_lp_sub,
+        NAT_PACK_CLASS=nat_pack_class,
+        NAT_PACK_ARROW=nat_pack_arrow,
+        NAT_PACK_STATE=nat_pack_state,
+        NAT_PACK_I18N=nat_pack_i18n,
+        NAT_BAL_SUB=nat_bal_sub,
         CUR_MM3=cur_mm3,
         CUR_M3=cur_m3,
         PACK_CLASS=pack_class,
