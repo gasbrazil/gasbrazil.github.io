@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import json
 import sys
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from pathlib import Path
 
 import pandas as pd
@@ -65,6 +65,7 @@ def test_build_from_mock(tmp_path, monkeypatch):
     monkeypatch.setattr(mp, "MANIFEST_PATH", tmp_path / "raw" / "_manifest.json")
     monkeypatch.setattr(mp, "DATA_DIR", tmp_path / "data")
     monkeypatch.setattr(mp, "PARQUET_PATH", tmp_path / "data" / "tag_mago_series.parquet")
+    monkeypatch.setattr(mp, "_utc_today", lambda: date(2026, 9, 19))
 
     mp.RAW_DIR.mkdir(parents=True)
     name = "EMPACOTAMENTOS_19_09_2026_08_08_24.json"
@@ -118,7 +119,7 @@ def test_load_payload_groups_and_history(tmp_path, monkeypatch):
 
     md = _load_mago_dashboard()
     monkeypatch.setattr(md, "PARQUET_PATH", mp.PARQUET_PATH)
-
+    monkeypatch.setattr(mp, "_utc_today", lambda: date(2026, 9, 19))
 
     mp.RAW_DIR.mkdir(parents=True)
     name = "EMPACOTAMENTOS_19_09_2026_08_08_24.json"

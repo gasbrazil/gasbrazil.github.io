@@ -17,6 +17,7 @@ on:
       - "precos/**"
       - "mago/**"
       - "desk/**"
+      - "nts/**"
       - "build_home.py"
       - "build_wiki.py"
       - ".github/workflows/ci.yml"
@@ -44,7 +45,7 @@ jobs:
       - name: Install
         run: uv pip install -r tests/requirements.txt -c shared/constraints.txt
       - name: Lint with ruff
-        run: uvx ruff check shared api tests
+        run: uvx ruff check shared api tests nts
       - name: Run tests
         run: python -m pytest -q
 

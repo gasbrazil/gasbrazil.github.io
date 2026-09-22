@@ -2207,7 +2207,6 @@ th.has-filter .th-label {
 
 
 
-
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; font-weight: 300; }
 /* Single-row header: wordmark-menu · title … Wiki/About · PT · theme */
@@ -2327,7 +2326,7 @@ main h3,
 <header class="dash-head">
   <div class="masthead">
       <div class="masthead-ident">
-      <div class="products-dd"><span class="brand-lockup"><a class="masthead-brand" id="link-home" href="https://gasbrazil.com" data-i18n="navHome">GasBrazil</a><button type="button" class="dd-trigger brand-mark" aria-haspopup="menu" aria-expanded="false" aria-controls="gb-products-menu" id="gb-products-trigger" data-i18n-aria="navMenu" aria-label="Menu"><span class="brand-mark-dot" aria-hidden="true"></span><span class="dd-caret" aria-hidden="true"></span></button></span><div class="dd-menu" id="gb-products-menu" role="menu" aria-labelledby="gb-products-trigger"><a id="link-desk" href="https://gasbrazil.com/desk/" role="menuitem" data-i18n="navDesk"><span class="chk"></span>The Desk</a><a id="link-ons" href="https://gasbrazil.com/ons/" role="menuitem" data-i18n="navOns"><span class="chk"></span>ONS Balances</a><a id="link-pld" href="https://gasbrazil.com/pld/" role="menuitem" data-i18n="navPld"><span class="chk"></span>PLD Prices</a><a id="link-poc" href="https://gasbrazil.com/poc/" role="menuitem" data-i18n="navPoc"><span class="chk"></span>POC Results</a><a id="link-contratos" href="https://gasbrazil.com/contratos/" role="menuitem" data-i18n="navContratos"><span class="chk"></span>POC Contracts</a><a id="link-flows" href="https://gasbrazil.com/flows/" role="menuitem" data-i18n="navFlows"><span class="chk"></span>Pipeline Flows</a><a id="link-mago" href="https://gasbrazil.com/mago/" role="menuitem" data-i18n="navMago"><span class="chk"></span>TAG Mago</a><a id="link-supply" href="https://gasbrazil.com/supply/" role="menuitem" data-i18n="navSupply"><span class="chk"></span>Gas Supply</a><span class="is-current" role="menuitem" aria-current="page" data-i18n="navPrecos"><span class="chk">✓</span>ANP Prices</span></div></div>
+      <div class="products-dd"><span class="brand-lockup"><a class="masthead-brand" id="link-home" href="https://gasbrazil.com" data-i18n="navHome">GasBrazil</a><button type="button" class="dd-trigger brand-mark" aria-haspopup="menu" aria-expanded="false" aria-controls="gb-products-menu" id="gb-products-trigger" data-i18n-aria="navMenu" aria-label="Menu"><span class="brand-mark-dot" aria-hidden="true"></span><span class="dd-caret" aria-hidden="true"></span></button></span><div class="dd-menu" id="gb-products-menu" role="menu" aria-labelledby="gb-products-trigger"><a id="link-desk" href="https://gasbrazil.com/desk/" role="menuitem" data-i18n="navDesk"><span class="chk"></span>The Desk</a><a id="link-ons" href="https://gasbrazil.com/ons/" role="menuitem" data-i18n="navOns"><span class="chk"></span>ONS Balances</a><a id="link-pld" href="https://gasbrazil.com/pld/" role="menuitem" data-i18n="navPld"><span class="chk"></span>PLD Prices</a><a id="link-poc" href="https://gasbrazil.com/poc/" role="menuitem" data-i18n="navPoc"><span class="chk"></span>POC Results</a><a id="link-contratos" href="https://gasbrazil.com/contratos/" role="menuitem" data-i18n="navContratos"><span class="chk"></span>POC Contracts</a><a id="link-flows" href="https://gasbrazil.com/flows/" role="menuitem" data-i18n="navFlows"><span class="chk"></span>Pipeline Flows</a><a id="link-mago" href="https://gasbrazil.com/mago/" role="menuitem" data-i18n="navMago"><span class="chk"></span>TAG Mago</a><a id="link-nts" href="https://gasbrazil.com/nts/" role="menuitem" data-i18n="navNts"><span class="chk"></span>NTS OnTime</a><a id="link-supply" href="https://gasbrazil.com/supply/" role="menuitem" data-i18n="navSupply"><span class="chk"></span>Gas Supply</a><span class="is-current" role="menuitem" aria-current="page" data-i18n="navPrecos"><span class="chk">✓</span>ANP Prices</span></div></div>
       <span class="crumb-sep" aria-hidden="true"></span>
       <h1 data-i18n="navPrecos">ANP Prices</h1>
       </div>
@@ -2488,7 +2487,7 @@ main h3,
   &copy; <span id="year"></span> GasBrazil.com &middot;
   <span data-i18n="precosFooter">Data: ANP publicidade dos preços de gás natural. Not an official ANP product.</span>
   &middot; <span data-i18n="contact">Contact</span>: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
-  &middot; <a href="../about/" data-i18n="footerAbout">About</a>
+  &middot; <a href="../about/" data-i18n="footerAbout">About</a> &middot; <button type="button" class="footer-link-btn" id="link-shortcuts" data-i18n="shortcutsBtn">Shortcuts (?)</button>
 </footer>
 </div>
 <div class="tt" id="chart-tt"></div>
@@ -3010,6 +3009,7 @@ const GB_I18N = {
     navPld: "PLD Prices",
     navPrecos: "ANP Prices",
     navMago: "TAG Mago",
+    navNts: "NTS OnTime",
     navDesk: "The Desk",
     navProducts: "Products", // retained for previously deployed pages cached in browsers
     navMenu: "Menu",
@@ -3071,8 +3071,16 @@ const GB_I18N = {
     sourcePrecos: "ANP",
     sourcePld: "CCEE",
     sourceMago: "TAG Mago",
+    sourceNts: "NTS OnTime",
     methodAssump_mago: "One EMPACOTAMENTOS snapshot feeds both line pack and zone forecasts; values are stored as published (m³ line pack, Mm³/d zones).",
+    methodAssump_nts: "NTS SCADA telemetry snapshot; values are stored as published (m³ line pack and calculated packing rate).",
     magoKpiLinepack: "Integrated line pack",
+    ntsKpiLinepack: "NTS Line pack",
+    ntsKpiRate: "Packing Rate",
+    ntsKpiPacking: "Packing",
+    ntsKpiUnpacking: "Unpacking",
+    ntsLinepackTitle: "NTS Line pack — Southeast transmission mesh",
+    ntsLinepackSub: "Real-time pipeline line pack inventory and hourly packing/unpacking rate.",
     magoKpiZone: "Operating Zone",
     magoKpiSnapshot: "Snapshot (UTC)",
     magoLinepackTitle: "Line pack — integrated mesh",
@@ -3162,6 +3170,9 @@ const GB_I18N = {
     aboutCoverMago: "TAG Mago: hourly line pack and 7-day balancing-zone consumption forecasts from EMPACOTAMENTOS API snapshots.",
     cardMago: "TAG Mago",
     cardMagoDesc: "TAG operational line pack and zone consumption forecasts.",
+    cardNts: "NTS OnTime",
+    cardNtsDesc: "NTS operational line pack and network packing/unpacking rate.",
+    aboutCoverNts: "NTS OnTime: real-time line pack telemetry and hourly network packing/unpacking rate for the NTS pipeline grid.",
     aboutCoverDesk: "The Desk: cross-product headline series. Full history and filters live on each product page.",
     notFound: "This page is not here.",
     notFoundBody: "The hub and dashboards are linked below.",
@@ -3212,6 +3223,7 @@ const GB_I18N = {
     navPld: "Preços PLD",
     navPrecos: "Preços ANP",
     navMago: "TAG Mago",
+    navNts: "NTS OnTime",
     navDesk: "The Desk",
     navProducts: "Produtos", // retained for previously deployed pages cached in browsers
     navMenu: "Menu",
@@ -3273,8 +3285,16 @@ const GB_I18N = {
     sourcePrecos: "ANP",
     sourcePld: "CCEE",
     sourceMago: "TAG Mago",
+    sourceNts: "NTS OnTime",
     methodAssump_mago: "Um snapshot EMPACOTAMENTOS alimenta empacotamento e previsão por zona; valores como publicados (m³ e Mm³/d).",
+    methodAssump_nts: "Telemetria de empacotamento em tempo real publicada pelo sistema SCADA da NTS (m³ e Mm³).",
     magoKpiLinepack: "Empacotamento integrado",
+    ntsKpiLinepack: "Empacotamento NTS",
+    ntsKpiRate: "Taxa de Variação",
+    ntsKpiPacking: "Empacotando",
+    ntsKpiUnpacking: "Desempacotando",
+    ntsLinepackTitle: "Empacotamento NTS — Malha Sudeste",
+    ntsLinepackSub: "Estoque de gás em tempo real na malha de transporte e taxa horária de empacotamento/desempacotamento.",
     magoKpiZone: "Faixa Operacional",
     magoKpiSnapshot: "Snapshot (UTC)",
     magoLinepackTitle: "Empacotamento — malha integrada",
@@ -3364,6 +3384,9 @@ const GB_I18N = {
     aboutCoverMago: "TAG Mago: empacotamento horário e previsões de consumo por zona de balanceamento (snapshots EMPACOTAMENTOS).",
     cardMago: "TAG Mago",
     cardMagoDesc: "Empacotamento operacional TAG e previsões de consumo por zona.",
+    cardNts: "NTS OnTime",
+    cardNtsDesc: "Empacotamento operacional da malha NTS e taxa horária de empacotamento.",
+    aboutCoverNts: "NTS OnTime: telemetria de estoque de empacotamento (linepack) e taxa de variação da malha NTS.",
     aboutCoverDesk: "The Desk: séries-resumo entre produtos. Histórico e filtros ficam em cada painel.",
     notFound: "Esta página não existe.",
     notFoundBody: "O hub e os painéis estão nos links abaixo.",

@@ -58,7 +58,7 @@ def _domain_meta(domain: str) -> dict:
             "kpi_gas_mwmed", "generated", "kpi_price_7d", "kpi_trades_7d", "kpi_when",
             "kpi_contracts", "kpi_capacity", "kpi_total_7d", "kpi_production", "data_through",
             "kpi_santos", "kpi_se", "latest_date", "kpi_pld_se", "kpi_gen_gas", "kpi_linepack",
-            "kpi_snapshot",
+            "kpi_rate", "kpi_snapshot",
         ):
             v = _marker(html, k)
             if v is not None and k not in meta:
@@ -190,6 +190,18 @@ def collect() -> dict:
                 "when": when or snap or "",
             }
 
+    nts = _domain_meta("nts")
+    if nts:
+        lp = _floatish(str(nts.get("kpi_linepack"))) if nts.get("kpi_linepack") is not None else None
+        rate = _floatish(str(nts.get("kpi_rate"))) if nts.get("kpi_rate") is not None else None
+        when = nts.get("generated")
+        if lp is not None:
+            rate_str = f" · {int(rate):+,} m³/h" if rate is not None else ""
+            items["nts"] = {
+                "kpiEn": f"{lp:.2f} Mm³ line pack{rate_str}",
+                "kpiPt": f"{lp:.2f} Mm³ empacotamento{rate_str}",
+                "when": when or "",
+            }
 
     return {
         "generated": dt.datetime.now(dt.UTC).strftime("%Y-%m-%d %H:%M UTC"),
@@ -211,6 +223,7 @@ def status_from_teasers(payload: dict | None = None) -> dict:
         "precos": ("precos_kpi", "precos_kpi_pt", "precos_when"),
         "desk": ("desk_kpi", "desk_kpi_pt", "desk_when"),
         "mago": ("mago_kpi", "mago_kpi_pt", "mago_when"),
+        "nts": ("nts_kpi", "nts_kpi_pt", "nts_when"),
     }
     out: dict = {}
     for slug, (en, pt, when) in mapping.items():
