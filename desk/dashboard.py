@@ -14,7 +14,6 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "shared"))
 import dashboard_kit as kit  # noqa: E402
-
 from build_payload import build_payload  # noqa: E402
 
 HERE = Path(__file__).parent
@@ -92,23 +91,32 @@ body.desk-analysis-active footer { margin-top: 12px; }
 }
 .analysis-workspace { margin: 0 0 var(--gap); }
 .analysis-workspace-inner {
-  display: grid;
-  grid-template-columns: minmax(268px, 300px) minmax(0, 1fr);
-  min-height: calc(100vh - 168px);
+  display: flex;
+  flex-direction: row;
+  height: calc(100vh - 168px);
+  min-height: 480px;
   max-height: calc(100vh - 168px);
   border: 1px solid var(--border);
   border-radius: 8px;
   overflow: hidden;
   background: var(--bg);
+  position: relative;
 }
 .analysis-sidebar {
+  width: var(--desk-sidebar-w, 290px);
+  min-width: 200px;
+  max-width: 600px;
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
+  height: 100%;
   min-height: 0;
-  border-right: 1px solid var(--border);
+  border-right: 0;
   background: var(--panel);
+  overflow: hidden;
 }
 .analysis-sidebar-head {
+  flex: 0 0 auto;
   display: flex;
   align-items: baseline;
   justify-content: space-between;
@@ -119,6 +127,7 @@ body.desk-analysis-active footer { margin-top: 12px; }
 .analysis-sidebar-title { font-size: 13px; font-weight: 400; margin: 0; }
 .analysis-pick-count { font-size: 11px; color: var(--muted2); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .analysis-sidebar-tools {
+  flex: 0 0 auto;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -128,8 +137,10 @@ body.desk-analysis-active footer { margin-top: 12px; }
 }
 .analysis-sidebar-tools .sm-pick { flex: 1 1 auto; min-width: 120px; }
 .analysis-filter {
+  flex: 0 0 auto;
+  box-sizing: border-box;
   width: calc(100% - 24px);
-  margin: 0 12px 8px;
+  margin: 8px 12px;
   padding: 7px 10px;
   font: 400 12.5px var(--font);
   color: var(--text);
@@ -139,11 +150,88 @@ body.desk-analysis-active footer { margin-top: 12px; }
 }
 .analysis-filter::placeholder { color: var(--muted); }
 .analysis-catalog {
-  flex: 1 1 auto;
+  flex: 1 1 0;
   min-height: 0;
-  overflow: auto;
+  height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
   padding: 4px 8px 12px;
   overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+.analysis-catalog::-webkit-scrollbar {
+  width: 6px;
+}
+.analysis-catalog::-webkit-scrollbar-track {
+  background: transparent;
+}
+.analysis-catalog::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 3px;
+}
+.analysis-catalog::-webkit-scrollbar-thumb:hover {
+  background: var(--muted);
+}
+.analysis-resizer {
+  width: 9px;
+  margin: 0 -4px;
+  flex: 0 0 9px;
+  position: relative;
+  z-index: 5;
+  cursor: col-resize;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  background: transparent;
+}
+.analysis-resizer::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 4px;
+  width: 1px;
+  background: var(--border);
+  transition: background 0.15s ease, width 0.15s ease, left 0.15s ease;
+}
+.analysis-resizer:hover::before,
+.analysis-resizer:focus-visible::before,
+.analysis-resizer.is-dragging::before {
+  background: var(--accent);
+  left: 3px;
+  width: 3px;
+}
+.analysis-resizer:focus-visible {
+  outline: none;
+}
+.analysis-resizer-handle {
+  width: 3px;
+  height: 28px;
+  border-radius: 2px;
+  background: var(--border-strong);
+  opacity: 0;
+  transition: opacity 0.15s ease, background 0.15s ease;
+  pointer-events: none;
+  position: relative;
+  z-index: 1;
+}
+.analysis-resizer:hover .analysis-resizer-handle,
+.analysis-resizer.is-dragging .analysis-resizer-handle {
+  opacity: 1;
+  background: var(--accent);
+}
+body.is-resizing {
+  cursor: col-resize !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+}
+body.is-resizing iframe,
+body.is-resizing svg {
+  pointer-events: none;
 }
 .analysis-group { margin: 0 0 4px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); overflow: hidden; }
 .analysis-group[open] { border-color: var(--border-strong); }
@@ -273,12 +361,27 @@ body.desk-analysis-active footer { margin-top: 12px; }
 .btn-clear:hover { background: var(--accent-soft); color: var(--text); }
 @media (max-width: 960px) {
   .analysis-workspace-inner {
-    grid-template-columns: 1fr;
-    grid-template-rows: minmax(200px, 38vh) minmax(320px, 1fr);
-    max-height: none;
+    flex-direction: column;
+    height: auto;
     min-height: calc(100vh - 168px);
+    max-height: none;
   }
-  .analysis-sidebar { border-right: 0; border-bottom: 1px solid var(--border); max-height: 38vh; }
+  .analysis-sidebar {
+    width: 100% !important;
+    max-width: none;
+    min-width: 0;
+    height: 38vh;
+    max-height: 38vh;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .analysis-resizer {
+    display: none;
+  }
+  .analysis-stage {
+    min-height: 400px;
+    height: auto;
+  }
 }
 @media (max-width: 720px) {
   .sources, .series-picker { flex-direction: column; align-items: stretch; }
@@ -444,6 +547,10 @@ __SHARED_TYPO_WEIGHT_CSS__
         data-i18n-placeholder="deskAnalysisFilterPh" placeholder="Filter series…">
       <div class="analysis-catalog" id="picker-analysis"></div>
     </aside>
+    <div class="analysis-resizer" id="analysis-resizer" role="separator" aria-orientation="vertical"
+      aria-label="Resize series catalog" tabindex="0" title="Drag to resize (double-click to reset)">
+      <div class="analysis-resizer-handle"></div>
+    </div>
     <div class="analysis-stage" id="analysis-stage" data-pane="split">
       <div class="analysis-stage-head">
         <div class="analysis-stage-toolbar">
@@ -1240,7 +1347,7 @@ function drawAnalysisChart(days, plotSeries, dualMeta) {
   const rightSeries = plotSeries.filter(s => s.axis === "right");
   const leftExt = analysisAxisExtents(leftSeries.length ? leftSeries : plotSeries);
   const rightExt = analysisAxisExtents(rightSeries.length ? rightSeries : plotSeries);
-  const xAt = i => pad.l + (days.length <= 1 ? iw / 2 : i / (dates.length - 1) * iw);
+  const xAt = i => pad.l + (days.length <= 1 ? iw / 2 : (i / (days.length - 1)) * iw);
   const yLeft = v => pad.t + (1 - (v - leftExt.lo) / (leftExt.hi - leftExt.lo)) * ih;
   const yRight = v => pad.t + (1 - (v - rightExt.lo) / (rightExt.hi - rightExt.lo)) * ih;
 
@@ -1829,6 +1936,123 @@ function renderAll() {
   applyI18n();
 }
 
+function initAnalysisResizer() {
+  const inner = document.querySelector(".analysis-workspace-inner");
+  const resizer = document.getElementById("analysis-resizer");
+  const sidebar = document.querySelector(".analysis-sidebar");
+  if (!inner || !resizer || !sidebar) return;
+
+  const STORAGE_KEY = "gasbrazil-desk-sidebar-w";
+  const DEFAULT_WIDTH = 290;
+  const MIN_WIDTH = 200;
+
+  function getMaxWidth() {
+    const total = inner.clientWidth || 1000;
+    return Math.max(MIN_WIDTH + 100, total - 360);
+  }
+
+  function setWidth(w, save) {
+    const maxW = getMaxWidth();
+    const clamped = Math.round(Math.max(MIN_WIDTH, Math.min(maxW, w)));
+    inner.style.setProperty("--desk-sidebar-w", clamped + "px");
+    resizer.setAttribute("aria-valuenow", clamped);
+    resizer.setAttribute("aria-valuemin", MIN_WIDTH);
+    resizer.setAttribute("aria-valuemax", maxW);
+    if (save) {
+      try { localStorage.setItem(STORAGE_KEY, String(clamped)); } catch (_) {}
+    }
+  }
+
+  try {
+    const saved = parseInt(localStorage.getItem(STORAGE_KEY), 10);
+    if (isFinite(saved) && saved >= MIN_WIDTH) {
+      setWidth(saved, false);
+    } else {
+      setWidth(DEFAULT_WIDTH, false);
+    }
+  } catch (_) {
+    setWidth(DEFAULT_WIDTH, false);
+  }
+
+  let isDragging = false;
+  let startX = 0;
+  let startW = 0;
+  let rafId = null;
+
+  function onPointerMove(e) {
+    if (!isDragging) return;
+    const delta = e.clientX - startX;
+    const newW = startW + delta;
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(() => {
+      setWidth(newW, false);
+      if (deskTab === "analysis" && (analysisPane === "chart" || analysisPane === "split")) {
+        const seriesList = analysisCatalog().filter(s => pickedAnalysis.has(s.id));
+        renderAnalysisChart(analysisDays(), seriesList);
+      }
+    });
+  }
+
+  function onPointerUp(e) {
+    if (!isDragging) return;
+    isDragging = false;
+    if (rafId) {
+      cancelAnimationFrame(rafId);
+      rafId = null;
+    }
+    resizer.classList.remove("is-dragging");
+    document.body.classList.remove("is-resizing");
+    window.removeEventListener("pointermove", onPointerMove);
+    window.removeEventListener("pointerup", onPointerUp);
+    window.removeEventListener("pointercancel", onPointerUp);
+    const finalW = sidebar.getBoundingClientRect().width;
+    setWidth(finalW, true);
+    if (deskTab === "analysis" && (analysisPane === "chart" || analysisPane === "split")) {
+      const seriesList = analysisCatalog().filter(s => pickedAnalysis.has(s.id));
+      renderAnalysisChart(analysisDays(), seriesList);
+    }
+  }
+
+  resizer.addEventListener("pointerdown", e => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    isDragging = true;
+    startX = e.clientX;
+    startW = sidebar.getBoundingClientRect().width;
+    resizer.classList.add("is-dragging");
+    document.body.classList.add("is-resizing");
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp);
+    window.addEventListener("pointercancel", onPointerUp);
+  });
+
+  resizer.addEventListener("dblclick", () => {
+    setWidth(DEFAULT_WIDTH, true);
+    if (deskTab === "analysis" && (analysisPane === "chart" || analysisPane === "split")) {
+      const seriesList = analysisCatalog().filter(s => pickedAnalysis.has(s.id));
+      renderAnalysisChart(analysisDays(), seriesList);
+    }
+  });
+
+  resizer.addEventListener("keydown", e => {
+    const curW = sidebar.getBoundingClientRect().width;
+    const step = e.shiftKey ? 60 : 20;
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      setWidth(curW - step, true);
+      renderAnalysis();
+    } else if (e.key === "ArrowRight") {
+      e.preventDefault();
+      setWidth(curW + step, true);
+      renderAnalysis();
+    } else if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      setWidth(DEFAULT_WIDTH, true);
+      renderAnalysis();
+    }
+  });
+}
+
 async function init() {
   document.getElementById("year").textContent = new Date().getFullYear();
   initThemeToggle("theme-toggle", () => {
@@ -1850,6 +2074,7 @@ async function init() {
   if (tabFromUrl) deskTab = tabFromUrl;
   buildDeskTabs();
   setDeskTab(deskTab);
+  initAnalysisResizer();
   try {
     const json = await inflateGzipUrl(PAYLOAD_URL);
     DATA = JSON.parse(json);
