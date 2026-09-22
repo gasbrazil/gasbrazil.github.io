@@ -10,7 +10,7 @@
 <link rel="preload" href="/shared/fonts/IBMPlexSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/shared/fonts/Pacaembu-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
 <!-- home-page teaser marker, read by ../build_home.py:
-     generated: 2026-09-21 22:00 UTC
+     generated: 2026-09-22 02:45 UTC
      kpi_price_7d: 30.34
      kpi_trades_7d: 5
      kpi_when: 2026-09-21 -->
@@ -2208,6 +2208,7 @@ th.has-filter .th-label {
 
 
 
+
 /* Everything below is this dashboard's own layout/components -- the palette
    (neutral tokens + the shared Brazilian-flag accent) now lives entirely in
    shared/theme.css (see ADR-001, Decision 2 Option C). Token names are
@@ -2533,12 +2534,12 @@ main h3,
 <div class="method-row"><span class="method-label" data-i18n="methodAssump">Key assumption</span><span data-i18n="methodAssump_poc">R$/m³ is R$/MMBtu divided by 26.8081 m³ per MMBtu (assumptions v2).</span></div>
 <div class="method-row"><span class="method-label" data-i18n="methodLimits">Limits</span><span data-i18n="methodLimits_poc">A few hundred records total; full-history rebuild each run.</span></div>
 </details>
-  &copy; <span id="year"></span> GasBrazil.com &middot; Data: Portal de Oferta de Capacidade (public API) &middot; <button type="button" class="footer-link-btn" id="link-shortcuts" data-i18n="shortcutsBtn">Shortcuts (?)</button> &middot; Contact: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
+  &copy; <span id="year"></span> GasBrazil.com &middot; Data: Portal de Oferta de Capacidade (public API) &middot; Contact: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
 </footer>
 </div>
 <div class="tt" id="chart-tt"></div>
 <script>
-const PAYLOAD_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/poc/payload.json.gz?v=35660323554";
+const PAYLOAD_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/poc/payload.json.gz?v=35680583980";
 
 
 function b64ToBytes(b64) {
@@ -3484,6 +3485,11 @@ const SITE_LINKS = {
     "caissonpoint": "https://gasbrazil.com/mago/",
     "hub": "https://gasbrazil.github.io/mago/"
   },
+  "nts": {
+    "custom": "https://gasbrazil.com/nts/",
+    "caissonpoint": "https://gasbrazil.com/nts/",
+    "hub": "https://gasbrazil.github.io/nts/"
+  },
   "supply": {
     "custom": "https://gasbrazil.com/supply/",
     "caissonpoint": "https://gasbrazil.com/supply/",
@@ -3510,6 +3516,7 @@ function initCrossLinks() {
   { const el = document.getElementById("link-contratos"); if (el) el.href = SITE_LINKS.contratos[flavor]; }
   { const el = document.getElementById("link-flows"); if (el) el.href = SITE_LINKS.flows[flavor]; }
   { const el = document.getElementById("link-mago"); if (el) el.href = SITE_LINKS.mago[flavor]; }
+  { const el = document.getElementById("link-nts"); if (el) el.href = SITE_LINKS.nts[flavor]; }
   { const el = document.getElementById("link-supply"); if (el) el.href = SITE_LINKS.supply[flavor]; }
   { const el = document.getElementById("link-precos"); if (el) el.href = SITE_LINKS.precos[flavor]; }
 }
@@ -5336,7 +5343,7 @@ function formatRefreshedLocal(iso, fallback, locale) {
     return fallback || "—";
   }
 }
-const STALE_MAX_LAG_DAYS = {"ons": 7, "pld": 7, "contratos": 7, "flows": 60, "mago": 2, "supply": 100, "precos": 100, "desk": 14};
+const STALE_MAX_LAG_DAYS = {"ons": 7, "pld": 7, "contratos": 7, "flows": 60, "mago": 2, "nts": 2, "supply": 100, "precos": 100, "desk": 14};
 function initStalenessBadgeFor(site, through) {
   try {
     var maxLag = STALE_MAX_LAG_DAYS[site];
