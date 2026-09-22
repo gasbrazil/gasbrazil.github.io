@@ -47,3 +47,15 @@ def test_desk_built_shell_contains_fixes():
     assert "initAnalysisResizer" in html
     assert "gasbrazil-desk-sidebar-w" in html
     assert "dates.length - 1" not in html[html.find("drawAnalysisChart") : html.find("compareBlock")]
+
+
+def test_desk_analysis_stage_spans_full_width():
+    src = (ROOT / "desk" / "dashboard.py").read_text(encoding="utf-8")
+    assert ".analysis-stage {" in src
+    stage_idx = src.find(".analysis-stage {")
+    stage_block = src[stage_idx : src.find("}", stage_idx)]
+    assert "flex: 1 1 0;" in stage_block
+    assert "min-width: 0;" in stage_block
+
+    html = (ROOT / "desk" / "index.html").read_text(encoding="utf-8")
+    assert "observeAnalysisResize" in html
