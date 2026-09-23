@@ -11,11 +11,62 @@
 <script>
 (function(){
   try {
+    /* Dark is the site default; only "light" opts out. */
     var theme = localStorage.getItem("gasbrazil-theme");
-    if (theme !== "light") document.documentElement.setAttribute("data-theme", "dark");
+    if (theme !== "light")
+      document.documentElement.setAttribute("data-theme", "dark");
+    var lang = localStorage.getItem("gasbrazil-lang");
+    if (!lang)
+      lang = ((navigator.language || "en").toLowerCase().indexOf("pt") === 0) ? "pt" : "en";
+    document.documentElement.setAttribute("data-lang", lang);
+    document.documentElement.setAttribute("lang", lang === "pt" ? "pt-BR" : "en");
   } catch (e) {
     document.documentElement.setAttribute("data-theme", "dark");
+    document.documentElement.setAttribute("data-lang", "en");
+    document.documentElement.setAttribute("lang", "en");
   }
+
+  /* GasBrazil Auth Guard Check: immediate zero-flicker lock */
+  try {
+    var authCfg = {"enabled": true, "scope": "all", "salt": "gasbrazil-auth-salt-2026", "hash": "e08faeb3ac5faffe44f959ee4ed05c404ba6e3681992051ba6090724e7f5d8ff", "session_days": 30, "updated_at": "2026-09-23T07:30:00Z"};
+    window._gbAuthConfig = authCfg;
+    if (authCfg && authCfg.enabled) {
+      var path = window.location.pathname || "";
+      var isHome = path === "" || path === "/" || (path.indexOf("/index.html") !== -1 && path.split("/").filter(Boolean).length <= 1);
+      var isAdmin = path.indexOf("/admin") !== -1;
+      var requiresAuth = isAdmin || (authCfg.scope === "all") || !isHome;
+      if (requiresAuth) {
+        var raw = localStorage.getItem("gasbrazil-auth-v1");
+        var session = raw ? JSON.parse(raw) : null;
+        var now = Date.now();
+        if (!session || session.token !== authCfg.hash || (session.expires && session.expires < now)) {
+          document.documentElement.classList.add("gb-locked");
+        }
+      }
+    }
+  } catch (e) {
+    if (typeof {"enabled": true, "scope": "all", "salt": "gasbrazil-auth-salt-2026", "hash": "e08faeb3ac5faffe44f959ee4ed05c404ba6e3681992051ba6090724e7f5d8ff", "session_days": 30, "updated_at": "2026-09-23T07:30:00Z"} !== "undefined" && {"enabled": true, "scope": "all", "salt": "gasbrazil-auth-salt-2026", "hash": "e08faeb3ac5faffe44f959ee4ed05c404ba6e3681992051ba6090724e7f5d8ff", "session_days": 30, "updated_at": "2026-09-23T07:30:00Z"}.enabled) {
+      document.documentElement.classList.add("gb-locked");
+    }
+  }
+
+  function bindFlagbarHeaderGlow() {
+    var bar = document.querySelector(".flagbar");
+    if (!bar) return;
+    var heads = document.querySelectorAll(
+      "header.dash-head, header.top, .site-header, .hub-header"
+    );
+    if (!heads.length) return;
+    var io = new IntersectionObserver(function(entries) {
+      var vis = entries[0] && entries[0].isIntersecting;
+      heads.forEach(function(h) { h.classList.toggle("flag-glow", !vis); });
+    }, { threshold: 0, rootMargin: "0px 0px -2px 0px" });
+    io.observe(bar);
+  }
+  if (document.readyState === "loading")
+    document.addEventListener("DOMContentLoaded", bindFlagbarHeaderGlow);
+  else
+    bindFlagbarHeaderGlow();
 })();
 </script>
 <style>/*
@@ -2275,17 +2326,21 @@ html.gb-locked footer {
 }
 
 #gb-auth-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 999999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-  background: color-mix(in srgb, var(--bg) 80%, black 20%);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 2147483647 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 16px !important;
+  background: rgba(10, 14, 20, 0.88);
+  background: color-mix(in srgb, var(--bg) 85%, black 15%) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
   animation: gb-fade-in 0.25s ease-out;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
 }
 #gb-auth-overlay[hidden] {
   display: none !important;
@@ -2829,6 +2884,7 @@ anyone who wants the full picture behind one of the Desk's headline numbers.</p>
   </div>
 </footer>
 <script>
+
 (function(){
   var b=document.getElementById('theme-toggle');
   var sun='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
@@ -2852,6 +2908,1548 @@ anyone who wants the full picture behind one of the Desk's headline numbers.</p>
     paint();
   });
 })();
+
+
+function escapeHtml(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+const LANG_KEY = "gasbrazil-lang";
+const GB_I18N = {
+  en: {
+    themeDark: "Switch to dark mode",
+    themeLight: "Switch to light mode",
+    langSwitch: "Português",
+    skip: "Skip to content",
+    navHome: "GasBrazil",
+    navOns: "ONS Balances",
+    navPoc: "POC Results",
+    navContratos: "POC Contracts",
+    navFlows: "Pipeline Flows",
+    navSupply: "Gas Supply",
+    navPld: "PLD Prices",
+    navPrecos: "ANP Prices",
+    navMago: "TAG Mago",
+    navNts: "NTS OnTime",
+    navMonitor: "Pipeline Monitor",
+    navDesk: "The Desk",
+    navProducts: "Products", // retained for previously deployed pages cached in browsers
+    navMenu: "Menu",
+    navAbout: "About",
+    navWiki: "Wiki",
+    navAdmin: "Admin Panel",
+    filterPlaceholder: "Filter…",
+    contact: "Contact",
+    copyLink: "Copy link",
+    linkCopied: "Copied",
+    clearAllSelections: "Clear all",
+    authTitle: "Private Access",
+    authSubtitle: "Enter the site passcode to access GasBrazil.",
+    authPlaceholder: "Enter passcode…",
+    authSubmit: "Unlock Access",
+    authError: "Incorrect passcode. Please try again.",
+    authSuccess: "Access unlocked",
+    authLocked: "Site locked",
+    authLockBtn: "Lock site",
+    authShowPass: "Show passcode",
+    authHidePass: "Hide passcode",
+    tagline: "Analytical Firepower for Brazil's Energy Markets",
+    hubDashboards: "Live dashboards",
+    hubHint: "Every card below opens a live dashboard — pick a product to explore.",
+    aboutLead: "Independent public-data dashboards. Not an official ONS, ANP, CCEE, or transportadora product.",
+    aboutBody: "GasBrazil republishes open Brazilian gas and power data as filterable dashboards. Caveats are on each page and on About.",
+    cardOns: "ONS Balances",
+    cardOnsDesc: "Daily SIN balances and gas-fired dispatch.",
+    cardPoc: "POC Results",
+    cardPocDesc: "Capacity offer results — balancing, GUS, and linepack.",
+    cardContratos: "POC Contracts",
+    cardContratosDesc: "Active transport and master contracts (TBG, TAG, NTS).",
+    cardFlows: "Pipeline Flows",
+    cardFlowsDesc: "Daily receipt and delivery flows on the transport network.",
+    cardSupply: "Gas Supply",
+    cardSupplyDesc: "ANP national monthly supply balance.",
+    cardPld: "PLD Prices",
+    cardPldDesc: "CCEE daily-average and hourly PLD by submarket.",
+    cardPrecos: "ANP Prices",
+    cardPrecosDesc: "ANP Resolution 52/2011 disclosed gas prices.",
+    cardDesk: "The Desk",
+    cardDeskDesc: "Cross-product snapshot across gas and power.",
+    cardMonitor: "Pipeline Monitor",
+    cardMonitorDesc: "TAG Mago & NTS OnTime real-time line pack, forecasts & packing rates.",
+    monitorTabTag: "TAG Mago",
+    monitorTabNts: "NTS OnTime",
+    monitorFooter: "Pipeline Monitor: Real-time and operational linepack telemetry across Brazilian gas transmission systems.",
+    deskLinkOns: "ONS",
+    deskLinkPld: "CCEE PLD",
+    deskLinkPrecos: "ANP prices",
+    deskLinkPoc: "POC",
+    deskLinkFlows: "ANP flows",
+    kpiRefresh: "Last refreshed",
+    dataThrough: "Data through",
+    staleBadge: "Data may be stale",
+    methodTitle: "Methodology",
+    methodSources: "Sources",
+    methodAssump: "Key assumption",
+    methodLimits: "Limits",
+    methodAssump_ons: "Gas consumption estimated from verified dispatch (9,400 kcal/m³ standard heat content; CCGT 1,800 kcal/kWh, OCGT 2,500 kcal/kWh).",
+    methodAssump_poc: "R$/m³ conversion uses standard natural gas factor of 26.8081 m³ per MMBtu.",
+    methodAssump_contratos: "Master contracts establish framework terms; specific nominations are governed by active transport schedules.",
+    methodAssump_flows: "For overlapping reporting points, pipeline operator (TAG/TBG/NTS) telemetry takes precedence over monthly ANP filings.",
+    methodAssump_supply: "National monthly aggregation of gross and net domestic gas production plus imported gas supplies.",
+    methodAssump_precos: "Contract prices disclosed under ANP Resolution 52/2011 (monthly weighted average, tax-inclusive R$/MMBtu).",
+    methodAssump_pld: "Peak hours are 18:00–20:00 on weekdays per ANEEL time-of-use definitions; SIN represents the unweighted submarket average.",
+    methodAssump_desk: "Executive cross-market synthesis across natural gas prices, power dispatch, pipeline flows, and grid inventory.",
+    methodLimits_ons: "Thermal dispatch updates intraday; subsystem balances finalize in the evening (UTC).",
+    methodLimits_poc: "Covers capacity products offered on the POC portal with active trading history.",
+    sources: "Sources",
+    sourceOns: "ONS",
+    sourcePoc: "POC",
+    sourceFlows: "ANP",
+    sourceSupply: "ANP",
+    sourcePrecos: "ANP",
+    sourcePld: "CCEE",
+    sourceMago: "TAG Mago",
+    sourceNts: "NTS OnTime",
+    sourceMonitor: "Pipeline Monitor",
+    methodAssump_mago: "Line pack and 7-day balancing zone estimates are ingested directly from TAG EMPACOTAMENTOS telemetry snapshots.",
+    methodAssump_nts: "Real-time pipeline line pack inventory and net packing rates calculated from NTS SCADA telemetry.",
+    methodAssump_monitor: "Combines operational telemetry from TAG Mago and NTS OnTime into a synchronized national grid perspective.",
+    aboutCoverMonitor: "TBG and local distribution networks are not yet integrated into the live line pack monitor.",
+    magoKpiLinepack: "Integrated line pack",
+    ntsKpiLinepack: "NTS Line pack",
+    ntsKpiRate: "Packing Rate",
+    ntsKpiPacking: "Packing",
+    ntsKpiUnpacking: "Unpacking",
+    ntsLinepackTitle: "NTS Line Pack — Transmission Network",
+    ntsLinepackSub: "Real-time pipeline line pack inventory and hourly packing/unpacking rate.",
+    magoKpiZone: "Operating Zone",
+    magoKpiSnapshot: "Snapshot (UTC)",
+    magoLinepackTitle: "TAG Line Pack — Integrated Network",
+    magoLinepackSub: "Hourly actual (solid) and short-horizon forecast (dashed) with TAG commercial tolerance risk bands.",
+    magoLegendActual: "Actual",
+    magoLegendForecast: "Forecast",
+    magoLegendSev: "Severe",
+    magoLegendAlt: "High Alert",
+    magoLegendMarg: "Target",
+    magoAxisSevere: "Severe",
+    magoAxisHigh: "High",
+    magoAxisMild: "Mild",
+    magoAxisTarget: "Target",
+    magoAxisLow: "Low",
+    magoFaixasTitle: "Operating Risk & Imbalance Tolerance Bands",
+    magoFaixasSub: "Commercial balancing tolerance thresholds established for TAG's integrated pipeline system. Exceeding marginal thresholds incurs imbalance penalties or triggers operational balancing actions.",
+    magoHeatmapTitle: "Operating Risk & Imbalance Breach Heatmap",
+    magoHeatmapSub: "Daily historical tracking of TAG integrated inventory across commercial tolerance tiers and correlation with transport balancing actions.",
+    magoHmAll: "All Days",
+    magoHmAlerts: "Alerts & Breaches",
+    magoHmCritical: "Critical Only",
+    magoHmCompliance: "Envelope Compliance",
+    magoHmAlertHours: "Alert Hours",
+    magoHmCriticalHours: "Critical Hours",
+    magoHmDaysMonitored: "Days Monitored",
+    magoHmViewPoc: "View TAG Balancing on POC",
+    magoHmClickHint: "Click day to inspect hourly line pack history",
+    magoHmPeakZone: "Peak Operating Zone",
+    magoHmRange: "Inventory Range",
+    magoHmAvg: "Daily Mean",
+    magoHmBalancingPoc: "POC Balancing Auction",
+    magoLinepackHistTitle: "Line pack history",
+    magoLinepackHistSub: "Hourly integrated inventory from cached snapshots (newest wins on overlap).",
+    magoLpCsv: "Download line pack CSV",
+    magoHistAll: "All Hours",
+    magoHistAlerts: "Alerts & Breaches Only",
+    magoColObserved: "Observed (UTC)",
+    magoColMm3: "Mm³",
+    magoColM3: "m³",
+    magoColZone: "Operating Zone",
+    magoColSnapshot: "Source snapshot",
+    magoZonesTitle: "TAG Consumption Estimate Analysis",
+    magoZonesSub: "",
+    magoByState: "States",
+    magoByZone: "Zones",
+    magoChartLine: "Lines",
+    magoChartStack: "Stack",
+    magoSelectAll: "Select all",
+    pldSubtitle: "CCEE daily-average and hourly PLD by submarket (R$/MWh).",
+    pldNote: "PLD (CCEE) is not the same series as ONS CMO. See",
+    pldNoteLink: "ONS Balances",
+    pldChartTitle: "Daily PLD by submarket",
+    pldChartTitleHourly: "Hourly PLD by submarket",
+    pldChartTitlePeak: "Peak vs off-peak PLD",
+    pldChartNote: "",
+    pldHourlyNote: "Last ~31 days of hourly PLD (hour beginning, Brazil local). CCEE publishes the next day’s 24 hours each day.",
+    pldPeakNote: "Peak (ponta) is hours 18:00–21:00 on Monday–Friday. All other hours, including weekends, are off-peak. CCEE does not publish a ponta flag.",
+    pldViewDaily: "Daily average",
+    pldViewHourly: "Hourly",
+    pldViewPeak: "Peak / off-peak",
+    pldKpiPeak: "Peak",
+    pldKpiOffPeak: "Off-peak",
+    pldCompareTitle: "PLD vs CMO vs gas CVU",
+    pldCompareNote: "",
+    pldWindow: "Window",
+    pldCsv: "Download CSV",
+    pldXlsx: "Export all data (Excel)",
+    pldFooter: "Data: CCEE (daily-average and hourly PLD). Not an official CCEE product.",
+    footerAbout: "About & Methodology",
+    aboutH1: "About GasBrazil",
+    aboutWho: "What this is",
+    aboutWhoBody: "Independent public-data dashboards for Brazilian gas and power. Not affiliated with ONS, ANP, CCEE, TBG, TAG, or NTS.",
+    aboutHow: "How the data is built",
+    aboutHowBody: "Static pages on GitHub Pages. Actions fetch sources, transform, and publish HTML plus gzip artifacts on Cloudflare R2.",
+    aboutGloss: "Glossary",
+    glossGus: "GUS — gas acquired by a transportadora for system use.",
+    glossLinepack: "Linepack — inventory held inside the pipeline.",
+    glossBal: "Residual / operational balancing — short-term PEG imbalance clearing.",
+    glossCmo: "CMO — ONS marginal operating cost (R$/MWh). Not CCEE PLD.",
+    glossMaster: "Master transport contract — framework for later nominations; not firm capacity itself.",
+    aboutCover: "Coverage limits",
+    aboutCoverBody: "Includes active Transport and Master contracts published on the POC API. Legacy and local access contracts are excluded.",
+    aboutCoverFlows: "Operator telemetry provides real-time and daily observations; consolidated ANP open data lags by several weeks.",
+    aboutCoverSupply: "Based on ANP PPGN-EL disclosures; imported LNG and pipeline gas are reported as combined national imports.",
+    aboutCoverPrecos: "Published ex-post monthly by ANP; certain state/distributor volumes are withheld for commercial confidentiality.",
+    aboutCoverPld: "CCEE settlement prices are published hourly per regional submarket (SE/CO, S, NE, N).",
+    aboutCoverMago: "Data reflects TAG's integrated pipeline network and published operational balancing tolerance bands.",
+    cardMago: "TAG Mago",
+    cardMagoDesc: "TAG operational line pack and zone consumption forecasts.",
+    cardNts: "NTS OnTime",
+    cardNtsDesc: "NTS operational line pack and network packing/unpacking rate.",
+    aboutCoverNts: "Data reflects the NTS pipeline grid, updated hourly as published by NTS OnTime.",
+    aboutCoverDesk: "Provides executive cross-market summaries; granular data and interactive filters reside on individual dashboards.",
+    notFound: "This page is not here.",
+    notFoundBody: "The hub and dashboards are linked below.",
+    backHome: "Back to GasBrazil",
+    bootLoading: "Loading dashboard data…",
+    bootErrorTitle: "Unable to load dashboard data",
+    bootErrorBody: "A network issue prevented the latest data from loading. Please check your connection and try again.",
+    bootErrorDetails: "Technical details",
+    bootRetry: "Retry",
+    copyTable: "Copy table (TSV)",
+    tableCopied: "Copied {n} rows to clipboard (TSV for Excel)",
+    shortcutsTitle: "Keyboard Shortcuts",
+    shortcutsGeneral: "General",
+    shortcutsGoTo: "Go To (press \"g\" then key)",
+    shortcutHelp: "Show keyboard shortcuts",
+    shortcutPalette: "Command search palette",
+    shortcutFilter: "Focus search or table filter",
+    shortcutTheme: "Toggle dark / light theme",
+    shortcutLang: "Toggle EN / PT language",
+    shortcutEsc: "Clear filter or close menu",
+    shortcutsBtn: "Shortcuts (?)",
+    searchBtn: "Search",
+    searchPlaceholder: "Search dashboards, transport points, contracts, topics… (Ctrl+K)",
+    paletteDashboards: "Dashboards",
+    palettePoints: "Transport Hubs & Points",
+    paletteActions: "Actions & Settings",
+    paletteTopics: "Market & Regulatory Topics",
+    paletteNoResults: "No results matching \"{q}\"",
+    exportPng: "PNG",
+    exportPngTitle: "Download chart as high-resolution PNG (2x)",
+    chartCopied: "Chart image copied to clipboard & downloaded",
+    chartDownloaded: "Chart image downloaded (PNG)",
+    freshLive: "Live & fresh",
+    freshDelayed: "Awaiting update",
+    freshScheduled: "Scheduled monthly"
+  },
+  pt: {
+    themeDark: "Mudar para o modo escuro",
+    themeLight: "Mudar para o modo claro",
+    langSwitch: "English",
+    skip: "Ir para o conteúdo",
+    navHome: "GasBrazil",
+    navOns: "Balanços ONS",
+    navPoc: "Resultados POC",
+    navContratos: "Contratos POC",
+    navFlows: "Fluxos de Gasodutos",
+    navSupply: "Oferta de Gás",
+    navPld: "Preços PLD",
+    navPrecos: "Preços ANP",
+    navMago: "TAG Mago",
+    navNts: "NTS OnTime",
+    navMonitor: "Monitor de Gasodutos",
+    navDesk: "The Desk",
+    navProducts: "Produtos", // retained for previously deployed pages cached in browsers
+    navMenu: "Menu",
+    navAbout: "Sobre",
+    navWiki: "Wiki",
+    navAdmin: "Painel de Administração",
+    filterPlaceholder: "Filtrar…",
+    contact: "Contato",
+    copyLink: "Copiar link",
+    linkCopied: "Copiado",
+    clearAllSelections: "Limpar tudo",
+    authTitle: "Acesso Restrito",
+    authSubtitle: "Digite a senha de acesso para acessar o GasBrazil.",
+    authPlaceholder: "Digite a senha…",
+    authSubmit: "Entrar",
+    authError: "Senha incorreta. Tente novamente.",
+    authSuccess: "Acesso liberado",
+    authLocked: "Acesso bloqueado",
+    authLockBtn: "Bloquear",
+    authShowPass: "Mostrar senha",
+    authHidePass: "Ocultar senha",
+    tagline: "Potência analítica para os mercados de energia do Brasil",
+    hubDashboards: "Painéis ao vivo",
+    hubHint: "Cada cartão abaixo abre um painel ao vivo — escolha um produto para explorar.",
+    aboutLead: "Painéis independentes com dados públicos. Não é produto oficial da ONS, ANP, CCEE ou transportadoras.",
+    aboutBody: "O GasBrazil republica dados abertos de gás e energia em painéis filtráveis. Ressalvas em cada página e em Sobre.",
+    cardOns: "Balanços ONS",
+    cardOnsDesc: "Balanços diários do SIN e despacho a gás.",
+    cardPoc: "Resultados POC",
+    cardPocDesc: "Resultados da oferta de capacidade — balanceamento, GUS e linepack.",
+    cardContratos: "Contratos POC",
+    cardContratosDesc: "Contratos de transporte e master ativos (TBG, TAG, NTS).",
+    cardFlows: "Fluxos de Gasodutos",
+    cardFlowsDesc: "Fluxos diários de recebimento e entrega na malha de transporte.",
+    cardSupply: "Oferta de Gás",
+    cardSupplyDesc: "Balanço mensal nacional de gás da ANP.",
+    cardPld: "Preços PLD",
+    cardPldDesc: "PLD médio diário e horário da CCEE por submercado.",
+    cardPrecos: "Preços ANP",
+    cardPrecosDesc: "Preços divulgados pela ANP (Resolução 52/2011).",
+    cardDesk: "The Desk",
+    cardDeskDesc: "Retrato cruzado de gás e energia.",
+    cardMonitor: "Monitor de Gasodutos",
+    cardMonitorDesc: "Empacotamento e previsões da TAG Mago e taxas de empacotamento em tempo real do NTS OnTime.",
+    monitorTabTag: "TAG Mago",
+    monitorTabNts: "NTS OnTime",
+    monitorFooter: "Monitor de Gasodutos: Telemetria de empacotamento em tempo real nos sistemas de transporte de gás do Brasil.",
+    deskLinkOns: "ONS",
+    deskLinkPld: "PLD CCEE",
+    deskLinkPrecos: "Preços ANP",
+    deskLinkPoc: "POC",
+    deskLinkFlows: "Fluxos ANP",
+    kpiRefresh: "Última atualização",
+    dataThrough: "Dados até",
+    staleBadge: "Dados possivelmente desatualizados",
+    methodTitle: "Metodologia",
+    methodSources: "Fontes",
+    methodAssump: "Premissa-chave",
+    methodLimits: "Limites",
+    methodAssump_ons: "Consumo de gás estimado a partir do despacho verificado (9.400 kcal/m³; CC 1.800 / CA 2.500 kcal/kWh).",
+    methodAssump_poc: "Conversão para R$/m³ utiliza o fator padrão de gás natural de 26,8081 m³ por MMBtu.",
+    methodAssump_contratos: "Contratos master definem termos gerais; nomeações específicas seguem cronogramas de transporte ativos.",
+    methodAssump_flows: "Onde ANP e operadoras se sobrepõem, dados de telemetria das transportadoras (TAG/TBG/NTS) têm precedência.",
+    methodAssump_supply: "Agregação mensal nacional da produção bruta e líquida de gás natural mais importações.",
+    methodAssump_precos: "Preços contratuais divulgados pela Resolução ANP 52/2011 (médias mensais ponderadas, R$/MMBtu com impostos).",
+    methodAssump_pld: "Horário de ponta compreende 18h às 20h em dias úteis (convenção ANEEL); SIN representa a média dos submercados.",
+    methodAssump_desk: "Síntese executiva cruzada entre preços de gás, despacho termelétrico, fluxos de transporte e empacotamento.",
+    methodLimits_ons: "Despacho térmico atualizado ao longo do dia; balanços por subsistema fecham no final da tarde (UTC).",
+    methodLimits_poc: "Abrange produtos de capacidade ofertados no portal POC com histórico de negociação ativo.",
+    sources: "Fontes",
+    sourceOns: "ONS",
+    sourcePoc: "POC",
+    sourceFlows: "ANP",
+    sourceSupply: "ANP",
+    sourcePrecos: "ANP",
+    sourcePld: "CCEE",
+    sourceMago: "TAG Mago",
+    sourceNts: "NTS OnTime",
+    sourceMonitor: "Monitor de Gasodutos",
+    methodAssump_mago: "Estoque de gás e previsões de consumo de 7 dias obtidos diretamente da telemetria EMPACOTAMENTOS da TAG.",
+    methodAssump_nts: "Estoque em linha e taxa horária líquida de empacotamento calculados a partir da telemetria SCADA da NTS.",
+    methodAssump_monitor: "Combina telemetria operacional da TAG Mago e NTS OnTime em uma perspectiva integrada da malha nacional.",
+    aboutCoverMonitor: "Combina telemetria operacional da TAG Mago e NTS OnTime em uma perspectiva integrada da malha nacional.",
+    magoKpiLinepack: "Empacotamento integrado",
+    ntsKpiLinepack: "Empacotamento NTS",
+    ntsKpiRate: "Taxa de Variação",
+    ntsKpiPacking: "Empacotando",
+    ntsKpiUnpacking: "Desempacotando",
+    ntsLinepackTitle: "NTS Line Pack — Malha de Transporte",
+    ntsLinepackSub: "Estoque de gás em tempo real na malha de transporte e taxa horária de empacotamento/desempacotamento.",
+    magoKpiZone: "Faixa Operacional",
+    magoKpiSnapshot: "Snapshot (UTC)",
+    magoLinepackTitle: "TAG Line Pack — Malha Integrada",
+    magoLinepackSub: "Realizado horário (sólido) e previsão de curto prazo (tracejado) com faixas de tolerância comercial da TAG.",
+    magoLegendActual: "Realizado",
+    magoLegendForecast: "Previsão",
+    magoLegendSev: "Severo",
+    magoLegendAlt: "Alto (Alerta)",
+    magoLegendMarg: "Marginal (Ideal)",
+    magoAxisSevere: "Severo",
+    magoAxisHigh: "Alto",
+    magoAxisMild: "Baixo",
+    magoAxisTarget: "Marginal",
+    magoAxisLow: "Alerta",
+    magoFaixasTitle: "Faixas de Tolerância Operacional e Desbalanço",
+    magoFaixasSub: "Limites comerciais de tolerância de balanceamento estabelecidos para a malha integrada da TAG. Desvios além da faixa marginal geram penalidades ou ações de balanceamento operacional.",
+    magoHeatmapTitle: "Mapa de Risco Operacional e Violações de Desbalanço",
+    magoHeatmapSub: "Acompanhamento diário do empacotamento integrado da TAG nas faixas de tolerância comercial e correlação com ações de balanceamento.",
+    magoHmAll: "Todos os Dias",
+    magoHmAlerts: "Alertas e Violações",
+    magoHmCritical: "Apenas Crítico",
+    magoHmCompliance: "Conformidade Operacional",
+    magoHmAlertHours: "Horas em Alerta (Alto)",
+    magoHmCriticalHours: "Horas Críticas (Severo)",
+    magoHmDaysMonitored: "Dias Monitorados",
+    magoHmViewPoc: "Ver Balanceamento da TAG no POC",
+    magoHmClickHint: "Clique no dia para inspecionar histórico horário",
+    magoHmPeakZone: "Faixa Operacional Máxima",
+    magoHmRange: "Faixa de Inventário",
+    magoHmAvg: "Média Diária",
+    magoHmBalancingPoc: "Leilão de Balanceamento POC",
+    magoLinepackHistTitle: "Histórico de empacotamento",
+    magoLinepackHistSub: "Inventário horário integrado de snapshots armazenados (o mais recente prevalece em sobreposições).",
+    magoLpCsv: "Baixar CSV de empacotamento",
+    magoHistAll: "Todas as Horas",
+    magoHistAlerts: "Apenas Alertas e Violações (Alto e Severo)",
+    magoColObserved: "Observado (UTC)",
+    magoColMm3: "Mm³",
+    magoColM3: "m³",
+    magoColZone: "Faixa Operacional",
+    magoColSnapshot: "Snapshot de origem",
+    magoZonesTitle: "Análise de Estimativa de Consumo TAG",
+    magoZonesSub: "",
+    magoByState: "Estados",
+    magoByZone: "Zonas",
+    magoChartLine: "Linhas",
+    magoChartStack: "Empilhado",
+    magoSelectAll: "Selecionar todos",
+    pldSubtitle: "PLD médio diário e horário da CCEE por submercado (R$/MWh).",
+    pldNote: "O PLD (CCEE) não é a mesma série do CMO da ONS. Veja",
+    pldNoteLink: "Balanços ONS",
+    pldChartTitle: "PLD diário por submercado",
+    pldChartTitleHourly: "PLD horário por submercado",
+    pldChartTitlePeak: "PLD ponta vs fora ponta",
+    pldChartNote: "",
+    pldHourlyNote: "Últimos ~31 dias de PLD horário (hora inicial, horário de Brasília). A CCEE publica as 24 horas do dia seguinte a cada dia.",
+    pldPeakNote: "Ponta são as horas 18:00–21:00 de segunda a sexta. As demais horas, inclusive fins de semana, são fora ponta. A CCEE não publica um flag de ponta.",
+    pldViewDaily: "Média diária",
+    pldViewHourly: "Horário",
+    pldViewPeak: "Ponta / fora ponta",
+    pldKpiPeak: "Ponta",
+    pldKpiOffPeak: "Fora ponta",
+    pldCompareTitle: "PLD vs CMO vs CVU a gás",
+    pldCompareNote: "",
+    pldWindow: "Janela",
+    pldCsv: "Baixar CSV",
+    pldXlsx: "Exportar tudo (Excel)",
+    pldFooter: "Dados: CCEE (PLD médio diário e horário). Não é um produto oficial da CCEE.",
+    footerAbout: "Sobre & Metodologia",
+    aboutH1: "Sobre o GasBrazil",
+    aboutWho: "O que é isto",
+    aboutWhoBody: "Painéis independentes com dados públicos de gás e energia no Brasil. Sem vínculo com ONS, ANP, CCEE, TBG, TAG ou NTS.",
+    aboutHow: "Como os dados são montados",
+    aboutHowBody: "Páginas estáticas no GitHub Pages. O Actions busca, transforma e publica HTML mais artefatos gzip no Cloudflare R2.",
+    aboutGloss: "Glossário",
+    glossGus: "GUS — gás adquirido pela transportadora para uso do sistema.",
+    glossLinepack: "Linepack — estoque dentro do gasoduto.",
+    glossBal: "Balanceamento residual / operacional — processos de curto prazo da PEG.",
+    glossCmo: "CMO — custo marginal de operação da ONS (R$/MWh). Não é o PLD da CCEE.",
+    glossMaster: "Contrato master de transporte — quadro para nomeações posteriores; não é capacidade firme.",
+    aboutCover: "Limites de cobertura",
+    aboutCoverBody: "Inclui contratos vigentes de Transporte e Master publicados na API do POC. Contratos legados e locais estão excluídos.",
+    aboutCoverFlows: "Telemetria das transportadoras oferece visão diária e em tempo real; dados abertos da ANP possuem defasagem de semanas.",
+    aboutCoverSupply: "Baseado nas divulgações PPGN-EL da ANP; GNL e gás via gasoduto são agregados em importações nacionais.",
+    aboutCoverPrecos: "Divulgado mensalmente ex-post pela ANP; determinados volumes estaduais/distribuidoras são omitidos por sigilo comercial.",
+    aboutCoverPld: "Preços de liquidação da CCEE publicados em base horária para cada submercado regional (SE/CO, S, NE, N).",
+    aboutCoverMago: "Dados refletem a malha integrada da TAG e faixas operacionais de tolerância para balanceamento comercial.",
+    cardMago: "TAG Mago",
+    cardMagoDesc: "Empacotamento operacional TAG e previsões de consumo por zona.",
+    cardNts: "NTS OnTime",
+    cardNtsDesc: "Empacotamento operacional da malha NTS e taxa horária de empacotamento.",
+    aboutCoverNts: "Dados refletem a malha de transporte da NTS, atualizados de hora em hora via NTS OnTime.",
+    aboutCoverDesk: "Apresenta resumos executivos entre mercados; dados detalhados e filtros interativos residem nos painéis específicos.",
+    notFound: "Esta página não existe.",
+    notFoundBody: "O hub e os painéis estão nos links abaixo.",
+    backHome: "Voltar ao GasBrazil",
+    bootLoading: "Carregando dados do painel…",
+    bootErrorTitle: "Não foi possível carregar os dados do painel",
+    bootErrorBody: "Ocorreu uma falha de rede ao carregar os dados mais recentes. Verifique sua conexão e tente novamente.",
+    bootErrorDetails: "Detalhes técnicos",
+    bootRetry: "Tentar novamente",
+    copyTable: "Copiar tabela (TSV)",
+    tableCopied: "{n} linhas copiadas para a área de transferência (TSV para Excel)",
+    shortcutsTitle: "Atalhos de Teclado",
+    shortcutsGeneral: "Geral",
+    shortcutsGoTo: "Navegação (pressione \"g\" e a tecla)",
+    shortcutHelp: "Mostrar atalhos de teclado",
+    shortcutPalette: "Busca de comandos",
+    shortcutFilter: "Focar busca ou filtro da tabela",
+    shortcutTheme: "Alternar modo claro / escuro",
+    shortcutLang: "Alternar idioma EN / PT",
+    shortcutEsc: "Limpar filtro ou fechar menu",
+    shortcutsBtn: "Atalhos (?)",
+    searchBtn: "Buscar",
+    searchPlaceholder: "Buscar painéis, pontos de transporte, contratos, tópicos… (Ctrl+K)",
+    paletteDashboards: "Painéis",
+    palettePoints: "Pontos & Hubs de Transporte",
+    paletteActions: "Ações & Configurações",
+    paletteTopics: "Tópicos de Mercado & Regulatórios",
+    paletteNoResults: "Nenhum resultado para \"{q}\"",
+    exportPng: "PNG",
+    exportPngTitle: "Baixar gráfico em alta resolução PNG (2x)",
+    chartCopied: "Gráfico copiado e imagem baixada (PNG)",
+    chartDownloaded: "Gráfico baixado (PNG)",
+    freshLive: "Ao vivo & atualizado",
+    freshDelayed: "Aguardando atualização",
+    freshScheduled: "Publicação mensal"
+  }
+};
+function currentLang() {
+  return document.documentElement.getAttribute("data-lang") === "pt" ? "pt" : "en";
+}
+function t(key) {
+  const pack = GB_I18N[currentLang()] || GB_I18N.en;
+  return pack[key] || GB_I18N.en[key] || key;
+}
+function applyI18n() {
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const key = el.getAttribute("data-i18n");
+    if (key) el.textContent = t(key);
+  });
+  document.querySelectorAll("[data-i18n-aria]").forEach(el => {
+    const key = el.getAttribute("data-i18n-aria");
+    if (key) el.setAttribute("aria-label", t(key));
+  });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+    const key = el.getAttribute("data-i18n-placeholder");
+    if (key) el.setAttribute("placeholder", t(key));
+  });
+  document.querySelectorAll("[data-i18n-title]").forEach(el => {
+    const key = el.getAttribute("data-i18n-title");
+    if (key) el.setAttribute("title", t(key));
+  });
+  const langBtn = document.getElementById("lang-toggle");
+  if (langBtn) {
+    langBtn.textContent = currentLang() === "pt" ? "EN" : "PT";
+    langBtn.title = t("langSwitch");
+    langBtn.setAttribute("aria-label", t("langSwitch"));
+  }
+}
+function initLangToggle(buttonId, onChange) {
+  const btn = document.getElementById(buttonId || "lang-toggle");
+  applyI18n();
+  if (!btn) return;
+  btn.addEventListener("click", () => {
+    const next = currentLang() === "pt" ? "en" : "pt";
+    document.documentElement.setAttribute("data-lang", next);
+    document.documentElement.setAttribute("lang", next === "pt" ? "pt-BR" : "en");
+    try { localStorage.setItem(LANG_KEY, next); } catch (e) {}
+    applyI18n();
+    if (onChange) onChange(next);
+  });
+}
+
+// Phase 3: Trader productivity tools (toasts, clipboard copy, shortcuts)
+function gbShowToast(msg, durationMs = 2200) {
+  let container = document.getElementById("gb-toast-container");
+  if (!container) {
+    container = document.createElement("div");
+    container.id = "gb-toast-container";
+    container.className = "gb-toast-container";
+    container.setAttribute("aria-live", "polite");
+    document.body.appendChild(container);
+  }
+  const toast = document.createElement("div");
+  toast.className = "gb-toast";
+  toast.textContent = msg;
+  container.appendChild(toast);
+  toast.offsetHeight;
+  toast.classList.add("is-visible");
+  setTimeout(() => {
+    toast.classList.remove("is-visible");
+    setTimeout(() => toast.remove(), 250);
+  }, durationMs);
+}
+
+async function gbCopyTableAsTsv(tableOrWrap) {
+  const table = (tableOrWrap && tableOrWrap.tagName === "TABLE")
+    ? tableOrWrap
+    : (tableOrWrap ? tableOrWrap.querySelector("table") : document.querySelector("table"));
+  if (!table) return false;
+
+  const rows = [];
+  const headers = [];
+  const ths = table.querySelectorAll("thead th");
+  ths.forEach(th => {
+    if (th.classList.contains("no-export") || th.hidden) return;
+    const labelEl = th.querySelector(".th-label") || th;
+    let text = (labelEl.childNodes[0] ? labelEl.childNodes[0].textContent : labelEl.textContent) || "";
+    text = text.replace(/[\t\r\n]/g, " ").trim();
+    headers.push(text);
+  });
+  if (headers.length) rows.push(headers.join("\t"));
+
+  const trs = table.querySelectorAll("tbody tr");
+  let rowCount = 0;
+  trs.forEach(tr => {
+    if (tr.hidden || tr.style.display === "none" || tr.classList.contains("no-export")) return;
+    const cells = [];
+    tr.querySelectorAll("td").forEach(td => {
+      if (td.classList.contains("no-export") || td.hidden) return;
+      let text = (td.textContent || "").replace(/[\t\r\n]/g, " ").trim();
+      cells.push(text);
+    });
+    if (cells.length) {
+      rows.push(cells.join("\t"));
+      rowCount++;
+    }
+  });
+
+  const tsv = rows.join("\n");
+  let ok = false;
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(tsv);
+      ok = true;
+    }
+  } catch (e) {}
+  if (!ok) {
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = tsv;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      ok = document.execCommand("copy");
+      ta.remove();
+    } catch (e) {}
+  }
+  const tmpl = (typeof t === "function") ? t("tableCopied") : "Copied {n} rows to clipboard (TSV for Excel)";
+  const msg = ok ? tmpl.replace("{n}", rowCount) : "Failed to copy table";
+  if (typeof gbShowToast === "function") gbShowToast(msg);
+  return ok;
+}
+
+function gbBindTableCopyButtons() {
+  document.querySelectorAll(".table-wrap").forEach(wrap => {
+    if (wrap.querySelector(".table-copy-btn")) return;
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "table-copy-btn";
+    btn.setAttribute("data-i18n-title", "copyTable");
+    btn.title = (typeof t === "function") ? t("copyTable") : "Copy table (TSV)";
+    btn.innerHTML = '&#x1F4CB; TSV';
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      gbCopyTableAsTsv(wrap);
+    });
+    wrap.appendChild(btn);
+  });
+}
+
+function toggleShortcutsModal() {
+  let modal = document.getElementById("gb-shortcuts-modal");
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "gb-shortcuts-modal";
+    modal.className = "shortcuts-modal-backdrop";
+    modal.setAttribute("role", "dialog");
+    modal.setAttribute("aria-modal", "true");
+    modal.setAttribute("aria-labelledby", "gb-shortcuts-title");
+
+    modal.innerHTML =
+      '<div class="shortcuts-modal-card">' +
+        '<div class="shortcuts-modal-head">' +
+          '<h3 id="gb-shortcuts-title" class="shortcuts-modal-title" data-i18n="shortcutsTitle">Keyboard Shortcuts</h3>' +
+          '<button type="button" class="shortcuts-modal-close" aria-label="Close">&times;</button>' +
+        '</div>' +
+        '<div class="shortcuts-modal-grid">' +
+          '<div class="shortcuts-section">' +
+            '<h4 class="shortcuts-sec-title" data-i18n="shortcutsGeneral">General</h4>' +
+            '<div class="shortcut-row"><kbd>Ctrl</kbd> <kbd>K</kbd> <span data-i18n="shortcutPalette">Command search palette</span></div>' +
+            '<div class="shortcut-row"><kbd>?</kbd> <span data-i18n="shortcutHelp">Show this help dialog</span></div>' +
+            '<div class="shortcut-row"><kbd>/</kbd> or <kbd>f</kbd> <span data-i18n="shortcutFilter">Focus search / table filter</span></div>' +
+            '<div class="shortcut-row"><kbd>t</kbd> <span data-i18n="shortcutTheme">Toggle light / dark theme</span></div>' +
+            '<div class="shortcut-row"><kbd>l</kbd> or <kbd>p</kbd> <span data-i18n="shortcutLang">Toggle EN / PT language</span></div>' +
+            '<div class="shortcut-row"><kbd>Esc</kbd> <span data-i18n="shortcutEsc">Clear filter or close menu</span></div>' +
+          '</div>' +
+          '<div class="shortcuts-section">' +
+            '<h4 class="shortcuts-sec-title" data-i18n="shortcutsGoTo">Go To (press "g" then key)</h4>' +
+            '<div class="shortcut-row"><kbd>g</kbd> <kbd>h</kbd> <span>Home (Hub)</span></div>' +
+            '<div class="shortcut-row"><kbd>g</kbd> <kbd>d</kbd> <span>The Desk</span></div>' +
+            '<div class="shortcut-row"><kbd>g</kbd> <kbd>m</kbd> <span>TAG Mago</span></div>' +
+            '<div class="shortcut-row"><kbd>g</kbd> <kbd>o</kbd> <span>ONS Balances</span></div>' +
+            '<div class="shortcut-row"><kbd>g</kbd> <kbd>p</kbd> <span>POC Results</span></div>' +
+            '<div class="shortcut-row"><kbd>g</kbd> <kbd>c</kbd> <span>POC Contracts</span></div>' +
+            '<div class="shortcut-row"><kbd>g</kbd> <kbd>f</kbd> <span>Pipeline Flows</span></div>' +
+            '<div class="shortcut-row"><kbd>g</kbd> <kbd>s</kbd> <span>Gas Supply</span></div>' +
+            '<div class="shortcut-row"><kbd>g</kbd> <kbd>l</kbd> <span>PLD Prices</span></div>' +
+            '<div class="shortcut-row"><kbd>g</kbd> <kbd>r</kbd> <span>ANP Prices</span></div>' +
+            '<div class="shortcut-row"><kbd>g</kbd> <kbd>a</kbd> <span data-i18n="navAdmin">Admin Panel</span></div>' +
+            '<div class="shortcut-row"><kbd>g</kbd> <kbd>b</kbd> <span data-i18n="navAbout">About</span></div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(modal);
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal || e.target.closest(".shortcuts-modal-close")) {
+        modal.hidden = true;
+      }
+    });
+    if (typeof applyI18n === "function") applyI18n();
+  }
+  modal.hidden = !modal.hidden;
+}
+
+// -----------------------------------------------------------------------------
+// Global Command Palette (Ctrl+K)
+// -----------------------------------------------------------------------------
+let GB_PALETTE_ITEMS = null;
+let gbPaletteActiveIdx = 0;
+let gbPaletteVisibleItems = [];
+
+function getPaletteCatalog() {
+  if (GB_PALETTE_ITEMS) return GB_PALETTE_ITEMS;
+  GB_PALETTE_ITEMS = [
+    // Dashboards
+    { cat: "dashboards", id: "desk", title: "The Desk", titlePt: "The Desk", desc: "Cross-product snapshot, spark calculator, and market balance", descPt: "Visão integrada mercado de gás e energia, calculadora spark spread", tag: "Live", url: "/desk/", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>' },
+    { cat: "dashboards", id: "mago", title: "TAG Mago", titlePt: "TAG Mago", desc: "Operational line pack, 7-risk tolerance bands, and zone forecasts", descPt: "Empacotamento operacional, faixas de tolerância e previsão de consumo", tag: "Real-time", url: "/mago/", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>' },
+    { cat: "dashboards", id: "ons", title: "ONS Balances", titlePt: "Balanços ONS", desc: "SIN electricity grid balance and gas-fired thermal dispatch", descPt: "Balanço do SIN e despacho térmico a gás natural", tag: "Daily", url: "/ons/", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>' },
+    { cat: "dashboards", id: "pld", title: "PLD Prices", titlePt: "Preços PLD", desc: "CCEE spot electricity settlement prices (hourly & peak/off-peak)", descPt: "Preço de Liquidação das Diferenças CCEE (horário e ponta)", tag: "Daily", url: "/pld/", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>' },
+    { cat: "dashboards", id: "poc", title: "POC Results", titlePt: "Resultados POC", desc: "Capacity auctions, balancing trades, GUS, and linepack tenders", descPt: "Leilões de capacidade de transporte, balanceamento e aquisição GUS", tag: "Daily", url: "/poc/", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>' },
+    { cat: "dashboards", id: "contratos", title: "POC Contracts", titlePt: "Contratos POC", desc: "Active firm transport and master capacity contracts (TBG, TAG, NTS)", descPt: "Contratos de transporte e contratos master ativos", tag: "Transport", url: "/contratos/", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>' },
+    { cat: "dashboards", id: "flows", title: "Pipeline Flows", titlePt: "Fluxos de Gasodutos", desc: "Physical receipt and delivery volumes across national gas transport network", descPt: "Movimentação física de gás nos pontos de entrada e saída", tag: "ANP / TSO", url: "/flows/", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>' },
+    { cat: "dashboards", id: "supply", title: "Gas Supply", titlePt: "Oferta de Gás", desc: "National monthly natural gas balance (production, imports, flaring)", descPt: "Balanço nacional de suprimento (produção, importação, queima)", tag: "Monthly", url: "/supply/", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>' },
+    { cat: "dashboards", id: "precos", title: "ANP Prices", titlePt: "Preços ANP", desc: "ANP Resolution 52/2011 disclosed gas contract prices (R$/MMBtu)", descPt: "Preços de venda de gás natural divulgados sob a Resolução ANP 52/2011", tag: "Monthly", url: "/precos/", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>' },
+    { cat: "dashboards", id: "wiki", title: "Wiki & Glossary", titlePt: "Wiki & Glossário", desc: "Methodologies, regulatory background, and market definitions", descPt: "Metodologias, contexto regulatório e definições de mercado", tag: "Docs", url: "/wiki/", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>' },
+    { cat: "dashboards", id: "about", title: "About & Methodology", titlePt: "Sobre & Metodologia", desc: "Data sources, pipelines, and architecture overview", descPt: "Fontes de dados, pipelines e arquitetura técnica", tag: "Info", url: "/about/", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>' },
+
+    // Transport Hubs & Points
+    { cat: "points", id: "cabiunas", title: "Cabiúnas (Terminal Cabiúnas / Macaé)", titlePt: "Cabiúnas (Terminal Cabiúnas / Macaé)", desc: "Major offshore pre-salt receipt and processing hub (Rio de Janeiro)", descPt: "Principal hub de recebimento e escoamento do pré-sal (RJ)", tag: "Pre-salt Hub", url: "/flows/?point=Cabi", keywords: ["macae", "upgn", "pre-sal", "rio", "terminal"] },
+    { cat: "points", id: "paulinia", title: "Paulínia (REPLAN)", titlePt: "Paulínia (REPLAN)", desc: "Key interconnection between TBG (Gasbol), NTS, and São Paulo demand", descPt: "Interconexão estratégica TBG, NTS e demanda paulista", tag: "SP Hub", url: "/flows/?point=Paulinia", keywords: ["replan", "gasbol", "sp", "tbg", "nts"] },
+    { cat: "points", id: "caraguatatuba", title: "Caraguatatuba (UTGCA)", titlePt: "Caraguatatuba (UTGCA)", desc: "Pre-salt Santos basin gas treatment unit and delivery point", descPt: "Unidade de Tratamento de Gás de Caraguatatuba (Bacia de Santos)", tag: "Santos Basin", url: "/flows/?point=Caraguatatuba", keywords: ["utgca", "santos", "mexilhao", "pre-sal"] },
+    { cat: "points", id: "guanabara", title: "Terminal Baía de Guanabara (TRBG)", titlePt: "Terminal Baía de Guanabara (TRBG)", desc: "FSRU LNG regasification terminal in Rio de Janeiro", descPt: "Terminal de Regaseificação de GNL da Baía de Guanabara (FSRU)", tag: "LNG Terminal", url: "/flows/?point=Guanabara", keywords: ["gnl", "lng", "fsru", "regas", "rio"] },
+    { cat: "points", id: "pecem", title: "Terminal Pecém", titlePt: "Terminal de Pecém", desc: "Ceará LNG import and regasification terminal (Northeast)", descPt: "Terminal de GNL e regaseificação no Ceará (Nordeste)", tag: "LNG Terminal", url: "/flows/?point=Pecem", keywords: ["gnl", "lng", "ceara", "nordeste"] },
+    { cat: "points", id: "sergipe", title: "Terminal Sergipe (Barra dos Coqueiros)", titlePt: "Terminal de Sergipe (Barra dos Coqueiros)", desc: "Private LNG import terminal connected to Porto de Sergipe I power plant", descPt: "Terminal privado de GNL conectado à UTE Porto de Sergipe I", tag: "LNG Terminal", url: "/flows/?point=Sergipe", keywords: ["gnl", "lng", "ute", "celse", "aracaju"] },
+    { cat: "points", id: "tgs", title: "Terminal Gás Sul (TGS)", titlePt: "Terminal Gás Sul (TGS)", desc: "Offshore LNG regasification terminal in Santa Catarina connected to TBG", descPt: "Terminal de GNL em Santa Catarina conectado à malha da TBG", tag: "LNG Terminal", url: "/flows/?point=TGS", keywords: ["gnl", "lng", "santa catarina", "sul", "tbg"] },
+    { cat: "points", id: "mutum", title: "Corumbá / Mutum (Gasbol)", titlePt: "Corumbá / Mutum (Gasbol)", desc: "Bolivia-Brazil international border entry point on TBG pipeline", descPt: "Ponto de entrada na fronteira Bolívia-Brasil no Gasbol (TBG)", tag: "Border Entry", url: "/flows/?point=Mutum", keywords: ["bolivia", "gasbol", "fronteira", "tbg"] },
+    { cat: "points", id: "catu", title: "Catu (Bahia)", titlePt: "Catu (Bahia)", desc: "TAG pipeline network balancing hub and junction in Bahia", descPt: "Hub e entroncamento principal da malha TAG na Bahia", tag: "TAG Hub", url: "/mago/?zone=BA1", keywords: ["bahia", "tag", "nordeste", "mago"] },
+    { cat: "points", id: "atalaia", title: "Atalaia (Sergipe)", titlePt: "Atalaia (Sergipe)", desc: "TAG coastal pipeline receiving point in Sergipe", descPt: "Ponto de recebimento da TAG em Sergipe", tag: "TAG Point", url: "/mago/?zone=SE", keywords: ["sergipe", "tag", "nordeste"] },
+
+    // Regulatory & Market Topics
+    { cat: "topics", id: "linepack", title: "Linepack & Tolerance Bands (Faixas de Tolerância)", titlePt: "Empacotamento & Faixas de Tolerância", desc: "TAG 7-tier balancing risk thresholds (Severe, High, Mild, Target)", descPt: "Faixas comerciais de tolerância da TAG (Severo, Alto, Baixo, Marginal)", tag: "Balancing", url: "/mago/", keywords: ["faixa", "severo", "alto", "marginal", "penalidade", "desequilibrio", "imbalance"] },
+    { cat: "topics", id: "spark", title: "Spark Spread Calculator", titlePt: "Calculadora de Spark Spread", desc: "Thermal generation fuel margin (PLD vs Implied CVU)", descPt: "Margem de geração térmica (PLD vs CVU Implícito)", tag: "Power / Gas", url: "/desk/", keywords: ["cvu", "calorifico", "heat rate", "pld", "geracao", "termica"] },
+    { cat: "topics", id: "gus", title: "GUS (Gás de Uso do Sistema)", titlePt: "GUS (Gás de Uso do Sistema)", desc: "Fuel gas purchased by transportadoras for pipeline compressor stations", descPt: "Gás de combustível para estações de compressão das transportadoras", tag: "Transport", url: "/poc/?q=GUS", keywords: ["compressao", "combustivel", "leilao", "tso"] },
+    { cat: "topics", id: "pld-cmo", title: "PLD vs CMO Spread", titlePt: "Diferencial PLD vs CMO", desc: "CCEE market clearing price compared to ONS marginal operational cost", descPt: "Preço de liquidação CCEE comparado ao custo marginal ONS", tag: "Power", url: "/pld/", keywords: ["ccee", "ons", "cmo", "submercado", "sudeste", "sul"] },
+    { cat: "topics", id: "res52", title: "Resolução ANP 52/2011", titlePt: "Resolução ANP 52/2011", desc: "Mandatory public disclosures of natural gas purchase and sale prices", descPt: "Publicação obrigatória de preços de compra e venda de gás natural", tag: "Regulation", url: "/precos/", keywords: ["anp", "resolucao 52", "contrato", "precos"] },
+
+    // Actions & Tools
+    { cat: "actions", id: "act-theme", title: "Toggle Theme (Dark / Light)", titlePt: "Alternar Tema (Escuro / Claro)", desc: "Switch between terminal dark desk and paper light theme", descPt: "Alternar entre modo escuro de terminal e modo claro", tag: "Action", action: "theme", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>' },
+    { cat: "actions", id: "act-lang", title: "Toggle Language (PT / EN)", titlePt: "Alternar Idioma (PT / EN)", desc: "Switch UI language between English and Portuguese", descPt: "Alternar idioma da interface entre português e inglês", tag: "Action", action: "lang", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>' },
+    { cat: "actions", id: "act-shortcuts", title: "Keyboard Shortcuts (?)", titlePt: "Atalhos de Teclado (?)", desc: "View all available keyboard navigation shortcuts", descPt: "Ver todos os atalhos de navegação disponíveis", tag: "Help", action: "shortcuts", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="6" y1="8" x2="6.01" y2="8"/><line x1="10" y1="8" x2="10.01" y2="8"/><line x1="14" y1="8" x2="14.01" y2="8"/><line x1="18" y1="8" x2="18.01" y2="8"/><line x1="8" y1="12" x2="8.01" y2="12"/><line x1="12" y1="12" x2="12.01" y2="12"/><line x1="16" y1="12" x2="16.01" y2="12"/><line x1="18" y1="16" x2="6" y2="16"/></svg>' },
+    { cat: "actions", id: "act-share", title: "Copy Page Link", titlePt: "Copiar Link da Página", desc: "Copy the current page URL with all active filters to clipboard", descPt: "Copiar o endereço da página com todos os filtros ativos", tag: "Tool", action: "share", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>' },
+    { cat: "actions", id: "act-lock", title: "Lock Site / Log Out", titlePt: "Bloquear Site / Sair", desc: "Lock access and require site passcode", descPt: "Bloquear acesso e exigir senha", tag: "Security", action: "lock", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' },
+    { cat: "actions", id: "act-admin", title: "Admin Panel", titlePt: "Painel de Administração", desc: "Manage site passcode and security settings", descPt: "Gerenciar senha do site e configurações de segurança", tag: "Admin", url: "/admin/", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>' }
+  ];
+  return GB_PALETTE_ITEMS;
+}
+
+function executePaletteItem(item) {
+  toggleCommandPalette(false);
+  if (!item) return;
+  if (item.url) {
+    window.location.href = item.url;
+  } else if (item.action === "theme") {
+    const themeBtn = document.getElementById("theme-toggle");
+    if (themeBtn) themeBtn.click();
+  } else if (item.action === "lang") {
+    const langBtn = document.getElementById("lang-toggle");
+    if (langBtn) langBtn.click();
+  } else if (item.action === "shortcuts") {
+    toggleShortcutsModal();
+  } else if (item.action === "lock") {
+    if (typeof gbLockSite === "function") gbLockSite();
+  } else if (item.action === "share") {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(window.location.href);
+      gbShowToast(t("linkCopied") || "Link copied");
+    }
+  }
+}
+
+function renderPaletteResults(query) {
+  const container = document.getElementById("gb-palette-results");
+  if (!container) return;
+  const catalog = getPaletteCatalog();
+  const q = (query || "").trim().toLowerCase();
+  const isPt = currentLang() === "pt";
+
+  const matches = catalog.filter(item => {
+    if (!q) return true;
+    const title = (isPt ? item.titlePt : item.title).toLowerCase();
+    const desc = (isPt ? item.descPt : item.desc).toLowerCase();
+    const tag = (item.tag || "").toLowerCase();
+    const kw = (item.keywords || []).map(k => k.toLowerCase()).join(" ");
+    return title.includes(q) || desc.includes(q) || tag.includes(q) || kw.includes(q);
+  });
+
+  gbPaletteVisibleItems = matches;
+  gbPaletteActiveIdx = 0;
+
+  if (matches.length === 0) {
+    const noRes = (t("paletteNoResults") || 'No results matching "{q}"').replace("{q}", escapeHtml(q));
+    container.innerHTML = '<div class="gb-palette-empty">' + noRes + '</div>';
+    return;
+  }
+
+  const categoryNames = {
+    dashboards: t("paletteDashboards") || "Dashboards",
+    points: t("palettePoints") || "Transport Hubs & Points",
+    topics: t("paletteTopics") || "Market & Regulatory Topics",
+    actions: t("paletteActions") || "Actions & Settings"
+  };
+
+  const groups = {};
+  matches.forEach(item => {
+    const cat = item.cat || "dashboards";
+    if (!groups[cat]) groups[cat] = [];
+    groups[cat].push(item);
+  });
+
+  let html = "";
+  let itemIdx = 0;
+  for (const cat of ["dashboards", "points", "topics", "actions"]) {
+    const list = groups[cat];
+    if (!list || !list.length) continue;
+    html += '<div class="gb-palette-group-title">' + escapeHtml(categoryNames[cat] || cat) + '</div>';
+    list.forEach(item => {
+      const idx = itemIdx++;
+      const isSel = idx === gbPaletteActiveIdx;
+      const title = isPt ? item.titlePt : item.title;
+      const desc = isPt ? item.descPt : item.desc;
+      const icon = item.icon || '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>';
+      html +=
+        '<div class="gb-palette-item' + (isSel ? ' is-selected' : '') + '" data-idx="' + idx + '" role="option" aria-selected="' + (isSel ? 'true' : 'false') + '">' +
+          '<div class="gb-palette-item-icon">' + icon + '</div>' +
+          '<div class="gb-palette-item-body">' +
+            '<div class="gb-palette-item-title">' + escapeHtml(title) + '</div>' +
+            '<div class="gb-palette-item-desc">' + escapeHtml(desc) + '</div>' +
+          '</div>' +
+          (item.tag ? '<span class="gb-palette-item-tag">' + escapeHtml(item.tag) + '</span>' : '') +
+        '</div>';
+    });
+  }
+  container.innerHTML = html;
+
+  container.querySelectorAll(".gb-palette-item").forEach(el => {
+    el.addEventListener("mouseenter", () => {
+      gbPaletteActiveIdx = parseInt(el.getAttribute("data-idx"), 10);
+      updatePaletteSelection();
+    });
+    el.addEventListener("click", () => {
+      const idx = parseInt(el.getAttribute("data-idx"), 10);
+      if (gbPaletteVisibleItems[idx]) executePaletteItem(gbPaletteVisibleItems[idx]);
+    });
+  });
+}
+
+function updatePaletteSelection() {
+  const container = document.getElementById("gb-palette-results");
+  if (!container) return;
+  const items = container.querySelectorAll(".gb-palette-item");
+  items.forEach((el, idx) => {
+    const isSel = idx === gbPaletteActiveIdx;
+    el.classList.toggle("is-selected", isSel);
+    el.setAttribute("aria-selected", isSel ? "true" : "false");
+    if (isSel) {
+      el.scrollIntoView({ block: "nearest" });
+    }
+  });
+}
+
+function toggleCommandPalette(forceOpen) {
+  let modal = document.getElementById("gb-command-palette");
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "gb-command-palette";
+    modal.className = "gb-palette-backdrop";
+    modal.setAttribute("role", "dialog");
+    modal.setAttribute("aria-modal", "true");
+    modal.setAttribute("aria-label", "Command Palette");
+
+    const placeholder = t("searchPlaceholder") || "Search dashboards, transport points, contracts, topics… (Ctrl+K)";
+    modal.innerHTML =
+      '<div class="gb-palette-card">' +
+        '<div class="gb-palette-search-row">' +
+          '<svg class="gb-palette-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
+          '<input type="text" id="gb-palette-input" class="gb-palette-input" placeholder="' + escapeHtml(placeholder) + '" autocomplete="off" spellcheck="false" aria-autocomplete="list" aria-controls="gb-palette-results">' +
+          '<span class="gb-palette-badge">ESC</span>' +
+        '</div>' +
+        '<div id="gb-palette-results" class="gb-palette-results" role="listbox"></div>' +
+        '<div class="gb-palette-footer">' +
+          '<span><kbd>&uarr;</kbd><kbd>&darr;</kbd> Navigate</span>' +
+          '<span><kbd>&crarr;</kbd> Open</span>' +
+          '<span><kbd>Esc</kbd> Close</span>' +
+        '</div>' +
+      '</div>';
+
+    document.body.appendChild(modal);
+
+    const input = document.getElementById("gb-palette-input");
+    input.addEventListener("input", (e) => {
+      renderPaletteResults(e.target.value);
+    });
+
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        if (gbPaletteVisibleItems.length > 0) {
+          gbPaletteActiveIdx = (gbPaletteActiveIdx + 1) % gbPaletteVisibleItems.length;
+          updatePaletteSelection();
+        }
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        if (gbPaletteVisibleItems.length > 0) {
+          gbPaletteActiveIdx = (gbPaletteActiveIdx - 1 + gbPaletteVisibleItems.length) % gbPaletteVisibleItems.length;
+          updatePaletteSelection();
+        }
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        if (gbPaletteVisibleItems[gbPaletteActiveIdx]) {
+          executePaletteItem(gbPaletteVisibleItems[gbPaletteActiveIdx]);
+        }
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        toggleCommandPalette(false);
+      }
+    });
+
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) {
+        toggleCommandPalette(false);
+      }
+    });
+  }
+
+  const shouldOpen = (forceOpen !== undefined) ? forceOpen : modal.hidden;
+  modal.hidden = !shouldOpen;
+  if (shouldOpen) {
+    const input = document.getElementById("gb-palette-input");
+    if (input) {
+      input.value = "";
+      renderPaletteResults("");
+      setTimeout(() => input.focus(), 25);
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// 1-Click Chart PNG Exporter
+// -----------------------------------------------------------------------------
+async function gbExportChartPng(svgEl, title, customFilename) {
+  if (!svgEl) return;
+  try {
+    const rect = svgEl.getBoundingClientRect();
+    const width = Math.max(svgEl.viewBox?.baseVal?.width || 0, rect.width || 800);
+    const height = Math.max(svgEl.viewBox?.baseVal?.height || 0, rect.height || 400);
+
+    const scale = 2;
+    const padTop = 64;
+    const padBottom = 38;
+    const padSide = 24;
+    const canvas = document.createElement("canvas");
+    canvas.width = (width + padSide * 2) * scale;
+    canvas.height = (height + padTop + padBottom) * scale;
+    const ctx = canvas.getContext("2d");
+    ctx.scale(scale, scale);
+
+    const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+    ctx.fillStyle = isDark ? "#06080c" : "#ffffff";
+    ctx.fillRect(0, 0, width + padSide * 2, height + padTop + padBottom);
+
+    // Subtle border
+    ctx.strokeStyle = isDark ? "#2a303c" : "#d2d5da";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(0.5, 0.5, width + padSide * 2 - 1, height + padTop + padBottom - 1);
+
+    // Header banner: GasBrazil wordmark + flag accent
+    ctx.font = "600 16px 'IBM Plex Sans', -apple-system, sans-serif";
+    ctx.fillStyle = isDark ? "#ffffff" : "#0b0b0b";
+    ctx.fillText("GasBrazil", padSide, 28);
+
+    ctx.font = "400 12px 'IBM Plex Sans', -apple-system, sans-serif";
+    ctx.fillStyle = isDark ? "#9aa0ab" : "#6a6e75";
+    const chartTitle = title || "Chart Export";
+    ctx.fillText(chartTitle, padSide + 85, 28);
+
+    // Brazil Flag accent line
+    ctx.fillStyle = "#009C3B"; ctx.fillRect(padSide, 38, 20, 2.5);
+    ctx.fillStyle = "#FFDF00"; ctx.fillRect(padSide + 20, 38, 20, 2.5);
+    ctx.fillStyle = "#002776"; ctx.fillRect(padSide + 40, 38, 20, 2.5);
+
+    // Footer attribution
+    ctx.font = "300 10.5px 'IBM Plex Sans', -apple-system, sans-serif";
+    ctx.fillStyle = isDark ? "#9aa0ab" : "#6a6e75";
+    const nowUtc = new Date().toISOString().replace("T", " ").substring(0, 16) + " UTC";
+    ctx.fillText("Source: GasBrazil.com · Generated " + nowUtc, padSide, height + padTop + padBottom - 14);
+
+    // Clone SVG and inline styles
+    const clone = svgEl.cloneNode(true);
+    clone.setAttribute("width", width);
+    clone.setAttribute("height", height);
+
+    const origElements = svgEl.querySelectorAll("*");
+    const cloneElements = clone.querySelectorAll("*");
+    for (let i = 0; i < origElements.length; i++) {
+      const orig = origElements[i];
+      const cl = cloneElements[i];
+      if (!orig || !cl) continue;
+      const comp = window.getComputedStyle(orig);
+      if (comp.fill && comp.fill !== "none") cl.style.fill = comp.fill;
+      if (comp.stroke && comp.stroke !== "none") cl.style.stroke = comp.stroke;
+      if (comp.strokeWidth) cl.style.strokeWidth = comp.strokeWidth;
+      if (comp.strokeDasharray) cl.style.strokeDasharray = comp.strokeDasharray;
+      if (comp.opacity) cl.style.opacity = comp.opacity;
+      if (comp.fontFamily) cl.style.fontFamily = comp.fontFamily;
+      if (comp.fontSize) cl.style.fontSize = comp.fontSize;
+      if (comp.fontWeight) cl.style.fontWeight = comp.fontWeight;
+    }
+
+    const xml = new XMLSerializer().serializeToString(clone);
+    const svgBlob = new Blob([xml], { type: "image/svg+xml;charset=utf-8" });
+    const blobUrl = URL.createObjectURL(svgBlob);
+
+    const img = new Image();
+    img.onload = function() {
+      ctx.drawImage(img, padSide, padTop, width, height);
+      URL.revokeObjectURL(blobUrl);
+
+      canvas.toBlob(async function(blob) {
+        if (!blob) return;
+        const slug = (chartTitle.toLowerCase().replace(/[^a-z0-9]+/g, "_").slice(0, 24) || "chart");
+        const filename = (customFilename || "gasbrazil_" + slug + "_" + new Date().toISOString().slice(0, 10)) + ".png";
+
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+
+        let copied = false;
+        try {
+          if (navigator.clipboard && window.ClipboardItem) {
+            await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+            copied = true;
+          }
+        } catch (e) {}
+
+        const msg = copied ? t("chartCopied") : t("chartDownloaded");
+        gbShowToast(msg);
+      }, "image/png");
+    };
+    img.src = blobUrl;
+  } catch (err) {
+    console.error("Export chart error:", err);
+    gbShowToast("Failed to export chart image");
+  }
+}
+
+function gbBindChartExportButtons() {
+  document.querySelectorAll("svg").forEach(svg => {
+    if (svg.classList.contains("kpi-spark") || svg.classList.contains("ext-icon") || svg.classList.contains("gb-palette-search-icon")) return;
+    const rect = svg.getBoundingClientRect();
+    const w = svg.viewBox?.baseVal?.width || rect.width || 0;
+    const h = svg.viewBox?.baseVal?.height || rect.height || 0;
+    if (w < 200 && h < 100) return;
+
+    const container = svg.closest(".chart-wrap, .chart-card, .analysis-chart-panel, .panel, .stage, .desk-stage, main");
+    if (!container) return;
+    if (container.querySelector(".chart-export-btn")) return;
+
+    let target = container.querySelector(".chart-toolbar, .chart-toolbar-actions, .panel-title, .chart-title, .infotitle");
+    if (!target) {
+      target = document.createElement("div");
+      target.className = "chart-toolbar-actions";
+      container.insertBefore(target, svg);
+    }
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "chart-export-btn";
+    btn.setAttribute("data-i18n-title", "exportPngTitle");
+    btn.title = (typeof t === "function") ? t("exportPngTitle") : "Download chart as high-resolution PNG (2x)";
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>PNG</span>';
+
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      let title = "GasBrazil Chart";
+      const titleEl = container.querySelector(".panel-title, .chart-title, h2, h3");
+      if (titleEl) {
+        title = titleEl.childNodes[0]?.textContent?.trim() || titleEl.textContent?.trim() || title;
+      }
+      gbExportChartPng(svg, title);
+    });
+
+    target.appendChild(btn);
+  });
+}
+
+// -----------------------------------------------------------------------------
+// GasBrazil Auth Guard & Private Access Modal
+// -----------------------------------------------------------------------------
+const GB_AUTH_KEY = "gasbrazil-auth-v1";
+
+function _gbSha256Pure(ascii) {
+  function rrot(v, n) { return (v >>> n) | (v << (32 - n)); }
+  var i, j, res = "", w = new Array(64);
+  var h = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19];
+  var k = [
+    0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+    0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+    0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+    0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+    0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+    0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+    0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+    0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+  ];
+  var comp = unescape(encodeURIComponent(ascii));
+  var len = comp.length, words = [];
+  for (i = 0; i < len; i++) words[i >> 2] |= (comp.charCodeAt(i) & 255) << (8 * (3 - (i % 4)));
+  words[len >> 2] |= 128 << (8 * (3 - (len % 4)));
+  words[(((len + 8) >> 6) << 4) + 15] = len * 8;
+  for (i = 0; i < words.length; i += 16) {
+    var a = h[0], b = h[1], c = h[2], d = h[3], e = h[4], f = h[5], g = h[6], m = h[7];
+    for (j = 0; j < 64; j++) {
+      if (j < 16) w[j] = words[i + j] | 0;
+      else {
+        var s0 = rrot(w[j - 15], 7) ^ rrot(w[j - 15], 18) ^ (w[j - 15] >>> 3);
+        var s1 = rrot(w[j - 2], 17) ^ rrot(w[j - 2], 19) ^ (w[j - 2] >>> 10);
+        w[j] = (w[j - 16] + s0 + w[j - 7] + s1) | 0;
+      }
+      var s1_e = rrot(e, 6) ^ rrot(e, 11) ^ rrot(e, 25);
+      var ch = (e & f) ^ ((~e) & g);
+      var t1 = (m + s1_e + ch + k[j] + w[j]) | 0;
+      var s0_a = rrot(a, 2) ^ rrot(a, 13) ^ rrot(a, 22);
+      var maj = (a & b) ^ (a & c) ^ (b & c);
+      var t2 = (s0_a + maj) | 0;
+      m = g; g = f; f = e; e = (d + t1) | 0; d = c; c = b; b = a; a = (t1 + t2) | 0;
+    }
+    h[0] = (h[0] + a) | 0; h[1] = (h[1] + b) | 0; h[2] = (h[2] + c) | 0; h[3] = (h[3] + d) | 0;
+    h[4] = (h[4] + e) | 0; h[5] = (h[5] + f) | 0; h[6] = (h[6] + g) | 0; h[7] = (h[7] + m) | 0;
+  }
+  for (i = 0; i < 8; i++) {
+    for (j = 3; j >= 0; j--) {
+      var bv = (h[i] >> (8 * j)) & 255;
+      res += (bv < 16 ? "0" : "") + bv.toString(16);
+    }
+  }
+  return res;
+}
+
+async function gbSha256(text) {
+  try {
+    if (typeof window !== "undefined" && window.crypto && window.crypto.subtle) {
+      const enc = new TextEncoder().encode(text);
+      const buf = await window.crypto.subtle.digest("SHA-256", enc);
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+    }
+  } catch (e) {}
+  return _gbSha256Pure(text);
+}
+
+function gbGetAuthConfig() {
+  if (typeof window !== "undefined" && window._gbAuthConfig) {
+    return window._gbAuthConfig;
+  }
+  return {"enabled": true, "scope": "all", "salt": "gasbrazil-auth-salt-2026", "hash": "e08faeb3ac5faffe44f959ee4ed05c404ba6e3681992051ba6090724e7f5d8ff", "session_days": 30, "updated_at": "2026-09-23T07:30:00Z"};
+}
+
+function gbIsSessionValid() {
+  const cfg = gbGetAuthConfig();
+  if (!cfg || !cfg.enabled) return true;
+  const path = window.location.pathname || "";
+  const isHome = path === "" || path === "/" || (path.indexOf("/index.html") !== -1 && path.split("/").filter(Boolean).length <= 1);
+  const isAdmin = path.indexOf("/admin") !== -1;
+  const requiresAuth = isAdmin || (cfg.scope === "all") || !isHome;
+  if (!requiresAuth) return true;
+
+  try {
+    const raw = localStorage.getItem(GB_AUTH_KEY);
+    if (!raw) return false;
+    const session = JSON.parse(raw);
+    const now = Date.now();
+    if (!session || session.token !== cfg.hash) return false;
+    if (session.expires && session.expires < now) return false;
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function gbSaveSession(hash, sessionDays) {
+  const days = sessionDays || 30;
+  const expires = Date.now() + days * 86400000;
+  try {
+    localStorage.setItem(GB_AUTH_KEY, JSON.stringify({ token: hash, expires: expires }));
+  } catch (e) {}
+}
+
+function gbLockSite() {
+  try {
+    localStorage.removeItem(GB_AUTH_KEY);
+  } catch (e) {}
+  document.documentElement.classList.add("gb-locked");
+  showAuthModal();
+  if (typeof gbShowToast === "function") {
+    gbShowToast(t("authLocked") || "Site locked");
+  }
+}
+
+function showAuthModal() {
+  try {
+    const _esc = typeof escapeHtml === "function" ? escapeHtml : function(s) {
+      return String(s == null ? "" : s).replace(/[&<>"']/g, function(c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+      });
+    };
+    const _t = function(k, fb) {
+      try {
+        if (typeof t === "function") {
+          const res = t(k);
+          if (res) return res;
+        }
+      } catch (e) {}
+      return fb || "";
+    };
+    const _lang = function() {
+      try {
+        if (typeof currentLang === "function") return currentLang();
+      } catch (e) {}
+      return (document.documentElement && document.documentElement.getAttribute("data-lang")) || "en";
+    };
+    const _isDark = function() {
+      try {
+        if (typeof isDarkTheme === "function") return isDarkTheme();
+      } catch (e) {}
+      return (document.documentElement && document.documentElement.getAttribute("data-theme") === "dark");
+    };
+
+    let overlay = document.getElementById("gb-auth-overlay");
+    if (!overlay) {
+      overlay = document.createElement("div");
+      overlay.id = "gb-auth-overlay";
+      overlay.setAttribute("role", "dialog");
+      overlay.setAttribute("aria-modal", "true");
+      overlay.setAttribute("aria-label", _t("authTitle", "Private Access"));
+      overlay.style.cssText = "display:flex !important; visibility:visible !important; opacity:1 !important; z-index:2147483647 !important; pointer-events:auto !important;";
+
+      const title = _esc(_t("authTitle", "Private Access"));
+      const subtitle = _esc(_t("authSubtitle", "Enter the site passcode to access GasBrazil."));
+      const errorMsg = _esc(_t("authError", "Incorrect passcode. Please try again."));
+      const placeholder = _esc(_t("authPlaceholder", "Enter passcode…"));
+      const showPass = _esc(_t("authShowPass", "Show passcode"));
+      const submitText = _esc(_t("authSubmit", "Unlock Access"));
+      const langText = _lang() === "pt" ? "EN" : "PT";
+
+      overlay.innerHTML =
+        '<div class="gb-auth-card" id="gb-auth-card">' +
+          '<div class="gb-auth-brand">GasBrazil</div>' +
+          '<div class="gb-auth-badge">' +
+            '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' +
+            '<span data-i18n="authTitle">' + title + '</span>' +
+          '</div>' +
+          '<p class="gb-auth-subtitle" data-i18n="authSubtitle">' + subtitle + '</p>' +
+          '<div id="gb-auth-error" class="gb-auth-error" hidden data-i18n="authError">' + errorMsg + '</div>' +
+          '<form id="gb-auth-form" class="gb-auth-form" autocomplete="off">' +
+            '<div class="gb-auth-input-wrap">' +
+              '<input type="password" id="gb-auth-input" class="gb-auth-input" placeholder="' + placeholder + '" autocomplete="current-password" spellcheck="false" required aria-label="' + placeholder + '">' +
+              '<button type="button" id="gb-auth-eye" class="gb-auth-eye-btn" aria-label="' + showPass + '" title="' + showPass + '">' +
+                '<svg class="gb-eye-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>' +
+              '</button>' +
+            '</div>' +
+            '<button type="submit" id="gb-auth-submit" class="gb-auth-submit" data-i18n="authSubmit">' + submitText + '</button>' +
+          '</form>' +
+          '<div class="gb-auth-tools">' +
+            '<span style="opacity:0.7">&copy; ' + new Date().getFullYear() + ' GasBrazil</span>' +
+            '<div class="gb-auth-tools-buttons">' +
+              '<button type="button" id="gb-auth-lang-btn" class="langBtn" style="padding:2px 8px;font-size:11px;">' + langText + '</button>' +
+              '<button type="button" id="gb-auth-theme-btn" class="iconBtn" style="padding:4px 6px;line-height:0;" aria-label="Toggle theme"></button>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+
+      const appendOverlay = () => {
+        if (document.body && !document.getElementById("gb-auth-overlay")) {
+          document.body.appendChild(overlay);
+        }
+      };
+      if (document.body) {
+        appendOverlay();
+      } else {
+        document.addEventListener("DOMContentLoaded", appendOverlay);
+      }
+
+      const form = document.getElementById("gb-auth-form");
+      const input = document.getElementById("gb-auth-input");
+      const errBox = document.getElementById("gb-auth-error");
+      const eyeBtn = document.getElementById("gb-auth-eye");
+      const card = document.getElementById("gb-auth-card");
+      const authLangBtn = document.getElementById("gb-auth-lang-btn");
+      const authThemeBtn = document.getElementById("gb-auth-theme-btn");
+
+      const sunSvg = typeof SUN_SVG !== "undefined" ? SUN_SVG : '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>';
+      const moonSvg = typeof MOON_SVG !== "undefined" ? MOON_SVG : '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+
+      if (eyeBtn && input) {
+        eyeBtn.addEventListener("click", () => {
+          const isPass = input.type === "password";
+          input.type = isPass ? "text" : "password";
+          const lbl = isPass ? _t("authHidePass", "Hide passcode") : _t("authShowPass", "Show passcode");
+          eyeBtn.title = lbl;
+          eyeBtn.setAttribute("aria-label", lbl);
+          eyeBtn.innerHTML = isPass
+            ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'
+            : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+        });
+      }
+
+      if (authLangBtn) {
+        authLangBtn.addEventListener("click", () => {
+          const langToggle = document.getElementById("lang-toggle");
+          if (langToggle) {
+            langToggle.click();
+          } else {
+            const nextLang = _lang() === "pt" ? "en" : "pt";
+            document.documentElement.setAttribute("data-lang", nextLang);
+            try { localStorage.setItem("gasbrazil-lang", nextLang); } catch (e) {}
+          }
+          authLangBtn.textContent = _lang() === "pt" ? "EN" : "PT";
+          if (typeof applyI18n === "function") applyI18n();
+        });
+      }
+
+      if (authThemeBtn) {
+        const updateThemeIcon = () => {
+          authThemeBtn.innerHTML = _isDark() ? sunSvg : moonSvg;
+        };
+        updateThemeIcon();
+        authThemeBtn.addEventListener("click", () => {
+          const themeToggle = document.getElementById("theme-toggle");
+          if (themeToggle) {
+            themeToggle.click();
+          } else {
+            const nextDark = !_isDark();
+            if (nextDark) document.documentElement.setAttribute("data-theme", "dark");
+            else document.documentElement.removeAttribute("data-theme");
+            try { localStorage.setItem("gasbrazil-theme", nextDark ? "dark" : "light"); } catch (e) {}
+          }
+          updateThemeIcon();
+        });
+      }
+
+      if (form) {
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const pwd = (input.value || "").trim();
+          if (!pwd) return;
+
+          const cfg = gbGetAuthConfig();
+          if (!cfg) return;
+
+          try {
+            const salted = pwd + ":" + (cfg.salt || "");
+            const computedHash = await gbSha256(salted);
+            if (computedHash === cfg.hash) {
+              gbSaveSession(cfg.hash, cfg.session_days);
+              document.documentElement.classList.remove("gb-locked");
+              overlay.remove();
+              if (typeof gbShowToast === "function") {
+                gbShowToast(_t("authSuccess", "Access unlocked"));
+              }
+            } else {
+              errBox.hidden = false;
+              card.classList.remove("shake");
+              void card.offsetWidth;
+              card.classList.add("shake");
+              input.value = "";
+              input.focus();
+            }
+          } catch (err) {
+            console.error("Auth error:", err);
+            errBox.textContent = "Error verifying passcode.";
+            errBox.hidden = false;
+          }
+        });
+      }
+    }
+
+    overlay.hidden = false;
+    setTimeout(() => {
+      const inp = document.getElementById("gb-auth-input");
+      if (inp) inp.focus();
+    }, 60);
+  } catch (err) {
+    console.error("showAuthModal error:", err);
+  }
+}
+
+function initAuthGuard() {
+  try {
+    if (!gbIsSessionValid()) {
+      document.documentElement.classList.add("gb-locked");
+      showAuthModal();
+    } else {
+      document.documentElement.classList.remove("gb-locked");
+      const ov = document.getElementById("gb-auth-overlay");
+      if (ov) ov.remove();
+    }
+
+    document.querySelectorAll("#gb-auth-lock, .auth-lock-btn").forEach(btn => {
+      if (btn.dataset.authWired === "1") return;
+      btn.dataset.authWired = "1";
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        gbLockSite();
+      });
+    });
+  } catch (err) {
+    console.error("initAuthGuard error:", err);
+  }
+}
+
+if (typeof document !== "undefined") {
+  if (document.body) {
+    initAuthGuard();
+  } else {
+    document.addEventListener("DOMContentLoaded", initAuthGuard);
+  }
+}
+
+function initGlobalShortcuts() {
+  let gPressed = false;
+  let gTimer = null;
+
+  document.addEventListener("keydown", (e) => {
+    const tag = (e.target && e.target.tagName) || "";
+    const isInput = tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (e.target && e.target.isContentEditable);
+
+    if (e.key === "Escape") {
+      const palette = document.getElementById("gb-command-palette");
+      if (palette && !palette.hidden) {
+        palette.hidden = true;
+        e.preventDefault();
+        return;
+      }
+      const modal = document.getElementById("gb-shortcuts-modal");
+      if (modal && !modal.hidden) {
+        modal.hidden = true;
+        e.preventDefault();
+        return;
+      }
+      if (isInput && e.target.classList && e.target.classList.contains("th-filter")) {
+        e.target.value = "";
+        e.target.dispatchEvent(new Event("input", { bubbles: true }));
+        e.target.blur();
+        e.preventDefault();
+        return;
+      }
+    }
+
+    // Ctrl+K or Cmd+K opens Command Palette anywhere (even when focused in input)
+    if ((e.ctrlKey || e.metaKey) && (e.key === "k" || e.key === "K")) {
+      e.preventDefault();
+      toggleCommandPalette();
+      return;
+    }
+
+    if (isInput) return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+    if (e.key === "?" || (e.shiftKey && e.key === "/")) {
+      e.preventDefault();
+      toggleShortcutsModal();
+      return;
+    }
+
+    if (e.key === "/" || e.key === "f") {
+      const firstFilter = document.querySelector(".th-filter, input[type='search'], .analysis-filter, #f-search");
+      if (firstFilter) {
+        e.preventDefault();
+        firstFilter.focus();
+        firstFilter.select();
+      }
+      return;
+    }
+
+    if (e.key === "t" || e.key === "T") {
+      const themeBtn = document.getElementById("theme-toggle");
+      if (themeBtn) {
+        e.preventDefault();
+        themeBtn.click();
+        const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+        gbShowToast(isDark ? "Theme: Dark" : "Theme: Light");
+      }
+      return;
+    }
+
+    if (e.key === "l" || e.key === "L" || e.key === "p" || e.key === "P") {
+      const langBtn = document.getElementById("lang-toggle");
+      if (langBtn) {
+        e.preventDefault();
+        langBtn.click();
+        const lang = document.documentElement.getAttribute("data-lang");
+        gbShowToast(lang === "pt" ? "Idioma: Português" : "Language: English");
+      }
+      return;
+    }
+
+    if (e.key === "g" || e.key === "G") {
+      gPressed = true;
+      clearTimeout(gTimer);
+      gTimer = setTimeout(() => { gPressed = false; }, 1200);
+      return;
+    }
+
+    if (gPressed) {
+      gPressed = false;
+      clearTimeout(gTimer);
+      const routes = {
+        "h": "/",
+        "d": "/desk/",
+        "o": "/ons/",
+        "p": "/poc/",
+        "c": "/contratos/",
+        "f": "/flows/",
+        "s": "/supply/",
+        "l": "/pld/",
+        "r": "/precos/",
+        "m": "/mago/",
+        "w": "/wiki/",
+        "b": "/about/",
+        "a": "/admin/"
+      };
+      const dest = routes[e.key.toLowerCase()];
+      if (dest) {
+        e.preventDefault();
+        gbShowToast("Navigating…");
+        window.location.href = dest;
+      }
+    }
+  });
+
+  const scLink = document.getElementById("link-shortcuts");
+  if (scLink) {
+    scLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      toggleShortcutsModal();
+    });
+  }
+
+  const searchTriggers = document.querySelectorAll("#gb-search-trigger, .gb-search-btn");
+  searchTriggers.forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      toggleCommandPalette(true);
+    });
+  });
+
+  gbBindTableCopyButtons();
+  setTimeout(gbBindChartExportButtons, 500);
+  initAuthGuard();
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initGlobalShortcuts);
+} else {
+  initGlobalShortcuts();
+}
+/* __GB_I18N_END__ */
+
 </script>
 <script>
 (function () {
