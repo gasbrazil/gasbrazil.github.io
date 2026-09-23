@@ -2953,7 +2953,7 @@ main h3,
     <a class="kpi-cell" href="poc/" data-slug="poc">
       <div class="kpi-label" data-i18n="cardPoc">POC Results</div>
       <div class="kpi-role">Capacity auctions</div>
-      <div class="kpi-val" data-en="21.13 R$/MMBtu · 6 trades (7d)" data-pt="21.13 R$/MMBtu · 6 negócios (7d)">21.13 R$/MMBtu · 6 trades (7d)</div>
+      <div class="kpi-val" data-en="19.24 R$/MMBtu · 10 trades (7d)" data-pt="19.24 R$/MMBtu · 10 negócios (7d)">19.24 R$/MMBtu · 10 trades (7d)</div>
       <div class="kpi-when" data-refresh="2026-09-22"></div>
       
     </a>
@@ -2961,7 +2961,7 @@ main h3,
       <div class="kpi-label" data-i18n="cardContratos">POC Contracts</div>
       <div class="kpi-role">Firm transport</div>
       <div class="kpi-val" data-en="882 contracts · 179905.7 thousand m³/d" data-pt="882 contratos · 179905.7 mil m³/d">882 contracts · 179905.7 thousand m³/d</div>
-      <div class="kpi-when" data-refresh="2026-09-23 08:09 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-23 15:24 UTC"></div>
     </a>
     <a class="kpi-cell" href="flows/" data-slug="flows">
       <div class="kpi-label" data-i18n="cardFlows">Pipeline Flows</div>
@@ -2972,9 +2972,9 @@ main h3,
     <a class="kpi-cell" href="monitor/" data-slug="monitor">
       <div class="kpi-label" data-i18n="cardMonitor">Pipeline Monitor</div>
       <div class="kpi-role" data-i18n="cardMonitorDesc">TAG Mago &amp; NTS OnTime operational line pack &amp; SCADA telemetry.</div>
-      <div class="kpi-val" data-en="NTS 43.90 Mm³" data-pt="NTS 43.90 Mm³">NTS 43.90 Mm³</div>
-      <div class="kpi-when" data-refresh="2026-09-23 13:50 UTC"></div>
-      <svg class="kpi-spark" viewBox="0 0 120 28" width="120" height="28" aria-hidden="true"><polyline points="2.0,16.3 5.0,6.5 7.9,2.0 10.9,2.0 13.9,2.5 16.9,15.6 19.8,16.9 22.8,16.3 25.8,17.1 28.8,18.6 31.7,18.6 34.7,18.1 37.7,14.4 40.7,15.2 43.6,14.8 46.6,13.2 49.6,14.3 52.6,14.9 55.5,14.7 58.5,12.5 61.5,19.7 64.5,20.1 67.4,20.8 70.4,14.8 73.4,19.0 76.4,21.2 79.3,22.1 82.3,24.1 85.3,25.3 88.3,26.0 91.2,18.3 94.2,18.5 97.2,20.4 100.2,22.0 103.1,22.7 106.1,22.7 109.1,22.2 112.1,22.6 115.0,22.9 118.0,22.2"/></svg>
+      <div class="kpi-val" data-en="TAG 71.27 Mm³ · NTS 43.49 Mm³" data-pt="TAG 71.27 Mm³ · NTS 43.49 Mm³">TAG 71.27 Mm³ · NTS 43.49 Mm³</div>
+      <div class="kpi-when" data-refresh="2026-09-23 17:20 UTC"></div>
+      <svg class="kpi-spark" viewBox="0 0 120 28" width="120" height="28" aria-hidden="true"><polyline points="2.0,26.0 5.0,23.9 7.9,23.9 10.9,24.1 13.9,24.6 16.9,23.4 19.8,20.6 22.8,20.5 25.8,21.7 28.8,5.9 31.7,5.9 34.7,6.0 37.7,6.0 40.7,5.8 43.6,2.0 46.6,3.8 49.6,4.9 52.6,4.9 55.5,5.3 58.5,5.1 61.5,4.3 64.5,4.5 67.4,4.7 70.4,11.1 73.4,12.8 76.4,13.5 79.3,15.5 82.3,15.0 85.3,14.2 88.3,17.7 91.2,17.6 94.2,13.6 97.2,13.4 100.2,13.8 103.1,13.4 106.1,17.8 109.1,18.3 112.1,15.2 115.0,16.6 118.0,17.7"/></svg>
     </a>
     <a class="kpi-cell" href="supply/" data-slug="supply">
       <div class="kpi-label" data-i18n="cardSupply">Gas Supply</div>
@@ -4786,7 +4786,7 @@ initLangToggle("lang-toggle");
 </html>
 
 <script>
-const TEASERS_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/hub/teasers.json.gz?v=35869882816";
+const TEASERS_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/hub/teasers.json.gz?v=35894782228";
 function paintRefreshLabels() {
   document.querySelectorAll(".kpi-when[data-refresh]").forEach(el => {
     const when = el.getAttribute("data-refresh");
