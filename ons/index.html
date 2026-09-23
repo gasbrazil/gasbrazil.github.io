@@ -10,7 +10,7 @@
 <link rel="preload" href="/shared/fonts/IBMPlexSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/shared/fonts/Pacaembu-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
 <!-- home-page teaser marker, read by ../build_home.py -- not otherwise used by this page:
-     generated: 2026-09-22 23:16 UTC
+     generated: 2026-09-23 01:40 UTC
      kpi_gas_mwmed: 3840 -->
 <script>
 (function(){
@@ -2286,6 +2286,7 @@ th.has-filter .th-label {
     box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
   }
 }
+
 /* Everything below is ons-dashboard's own layout/components. The palette
    (neutral tokens + the shared Brazilian-flag accent) now lives entirely in
    shared/theme.css -- see ADR-001, Decision 2 Option C -- this file only
@@ -2647,11 +2648,6 @@ main h3,
 
 <div class="flagbar" aria-hidden="true"></div>
 
-<div class="sources">
-  <span class="sources-label" data-i18n="sources">Sources</span>
-  <a href="https://dados.ons.org.br" target="_blank" rel="noopener">ONS<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
-</div>
-
 <div id="boot">Unpacking data&hellip;</div>
 <div id="app" hidden>
 
@@ -2664,7 +2660,6 @@ main h3,
   </div>
 </div>
 
-<div id="viewInfo"></div>
 <div class="tiles" id="kpiTiles"></div>
 <div id="mixStrip" style="margin:0 0 var(--gap)"></div>
 <div id="resSummary"></div>
@@ -2692,6 +2687,10 @@ main h3,
 </div>
 </div>
 
+<div class="sources">
+  <span class="sources-label" data-i18n="sources">Sources</span>
+  <a href="https://dados.ons.org.br" target="_blank" rel="noopener">ONS<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+</div>
 <div class="asof-strip asof-footer" id="asof-strip">
   <span class="asof-label" data-i18n="kpiRefresh">Last refreshed</span>
   <span class="asof-val" id="asof-refreshed">Loading&hellip;</span>
@@ -2699,9 +2698,9 @@ main h3,
   <span class="asof-val" id="asof-through">&mdash;</span>
 </div>
 <details class="method">
-<summary data-i18n="methodTitle">How this is built</summary>
+<summary data-i18n="methodTitle">Methodology</summary>
 <div class="method-row"><span class="method-label" data-i18n="methodSources">Sources</span><span><span data-i18n="sourceOns">ONS</span></span></div>
-<div class="method-row"><span class="method-label" data-i18n="methodAssump">Key assumption</span><span data-i18n="methodAssump_ons">Gas burn is estimated from verified generation (9,400 kcal/m³; CCGT 1,800 / OCGT 2,500 kcal/kWh; assumptions v1).</span></div>
+<div class="method-row"><span class="method-label" data-i18n="methodAssump">Key assumption</span><span data-i18n="methodAssump_ons">Gas consumption estimated from verified dispatch (9,400 kcal/m³ standard heat content; CCGT 1,800 kcal/kWh, OCGT 2,500 kcal/kWh).</span></div>
 <div class="method-row"><span class="method-label" data-i18n="methodLimits">Limits</span><span data-i18n="methodLimits_ons">Thermal dispatch updates intraday; subsystem balances finalize in the evening (UTC).</span></div>
 </details>
 <div class="foot" id="foot"></div>
@@ -2710,7 +2709,7 @@ main h3,
 <div class="tt" id="tt"></div>
 
 <script>
-const PAYLOAD_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/ons/payload.json.gz?v=35796561087";
+const PAYLOAD_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/ons/payload.json.gz?v=35807199649";
 
 function b64ToBytes(b64) {
   const bin = atob(b64);
@@ -5880,35 +5879,9 @@ const lastIdx=arr=>{ for(let i=arr.length-1;i>=0;i--) if(arr[i]!=null) return i;
   return -1; };
 
 // One orientation line per tab, carried on the KPI strip: what this view
-// shows and how to read its headline numbers. Copy lives in ONS_I18N so EN/PT
-// stay in sync with the rest of the chrome.
-const VIEW_INFO_KEYS={
-  subsystems:"tipSubsystems",
-  plants:"tipPlants",
-  reservoirs:"tipReservoirs"
-};
-function renderViewInfo(){
-  const hostv=document.getElementById("viewInfo");
-  if(!hostv) return;
-  hostv.innerHTML="";
-  const key=VIEW_INFO_KEYS[state.view];
-  if(!key){ hostv.hidden=true; return; }
-  const text=ot(key);
-  hostv.hidden=false;
-  const wrap=el("div");
-  wrap.style.cssText="display:flex;align-items:center;gap:0;margin:0 0 6px";
-  const lab=el("span");
-  lab.style.cssText="font-size:11px;text-transform:uppercase;letter-spacing:.06em;"+
-    "color:var(--muted);font-weight:200";
-  lab.textContent=ot("aboutView");
-  wrap.appendChild(lab);
-  wrap.appendChild(infodot(text,ot("aboutView")));
-  hostv.appendChild(wrap);
-}
 function renderKpis(){
   const host=document.getElementById("kpiTiles");
   const extra=document.getElementById("resSummary");
-  renderViewInfo();
   const mix0=document.getElementById("mixStrip");
   if(mix0){ mix0.hidden=true; mix0.innerHTML=""; }
   if(!host) return;
@@ -6902,7 +6875,7 @@ function render(){
   // per-view "Download CSV" button (which exports the plotted series) has
   // nothing to export, so the tables card carries its own instead.
   const isTables = state.view==="tables";
-  ["controlsCard","pickCard","charts","viewInfo","kpiTiles","mixStrip","resSummary","tableCard"]
+  ["controlsCard","pickCard","charts","kpiTiles","mixStrip","resSummary","tableCard"]
     .forEach(id=>{ const e=document.getElementById(id); if(e) e.hidden=isTables; });
   ["tablesCard","tablesTableCard"].forEach(id=>{
     const e=document.getElementById(id); if(e) e.hidden=!isTables; });
@@ -7095,54 +7068,7 @@ async function boot(){
   // sit here as prose is intact inside the disclosure -- see the sweep
   // proposal (2026-09-05): hidden, not deleted.
   document.getElementById("foot").innerHTML =
-    'Source: <a href="https://dados.ons.org.br" target="_blank" rel="noopener">ONS '+
-    'Dados Abertos</a> (CC-BY) &middot; hourly and semi-hourly series averaged to '+
-    'daily means &middot; built '+DATA.generated+' &middot; '+
-    '<a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>'+
-    '<details><summary>Methodology &amp; assumptions</summary><div>'+
-    '<b>Datasets.</b> Balan\u00e7o de Energia nos Subsistemas \u00b7 Gera\u00e7\u00e3o por '+
-    'Usina em Base Hor\u00e1ria \u00b7 Gera\u00e7\u00e3o T\u00e9rmica por Motivo de Despacho (sheet 09) '+
-    '\u00b7 ENA/EAR Di\u00e1rio por Subsistema \u00b7 EAR Di\u00e1rio por REE \u00b7 Dados Hidr\u00e1ulicos por '+
-    'Reservat\u00f3rio (sheets 23\u201326) \u00b7 CMO Semi-Hor\u00e1rio \u00b7 CVU das Usinas T\u00e9rmicas '+
-    '\u00b7 Capacidade Instalada de Gera\u00e7\u00e3o, all at '+
-    '<a href="https://dados.ons.org.br" target="_blank" rel="noopener">dados.ons.org.br</a>.<br><br>'+
-    '<b>Aggregation.</b> Hourly and semi-hourly sources are averaged to daily '+
-    'means. The national Total row is summed for absolute series; EAR % and '+
-    'ENA %MLT are rebuilt from their components, CMO is an unweighted subsystem '+
-    'mean. Net interchange is positive when the subsystem is a net exporter, '+
-    'matching the bulletin. ONS revises recent days after publication.<br><br>'+
-    '<b>Reservoir usable volume.</b> The hydraulic file\u2019s '+
-    '<code>val_volumeutilcon</code> is a percentage of each reservoir\u2019s useful '+
-    'capacity, not a volume in hm\u00b3. Readings below 0 (below the minimum operating '+
-    'level, or a data glitch) and above 100 are clipped to that range. Reservoirs '+
-    'whose latest reading is 0% are omitted from basin averages, the lowest-reservoir '+
-    'KPI, and the picker (toggle Show empty to include them).<br><br>'+
-    '<b>CVU.</b> Published weekly per plant (one figure per PMO operative week) '+
-    'and held flat across that week\u2019s days rather than interpolated. The '+
-    'subsystem figures are the cheapest, median and priciest CVU among gas-fired '+
-    'plants with a CVU above zero, since a CVU of exactly zero marks an '+
-    'inflexible/must-run unit rather than the cheapest dispatchable megawatt. '+
-    'CVU is joined to the dispatch data by ONS\u2019s planning-model plant code '+
-    '(cod_usinaplanejamento), not by plant name \u2014 the two datasets name plants '+
-    'differently. SIN CVU is an exact min/max across subsystems; the national '+
-    'Total median is a subsystem mean, as CMO is.<br><br>'+
-    '<b>Capacity &amp; utilization.</b> Installed capacity is joined from ONS\u2019s '+
-    'Capacidade Instalada de Gera\u00e7\u00e3o by ANEEL venture ID (CEG), summing each '+
-    'venture\u2019s active generating units. A plant ONS dispatches as several named '+
-    'phases sharing one CEG (a combined-cycle block, e.g. "Plant P0/P1/P2") is '+
-    'shown as one combined entity with the venture\u2019s real total capacity; the '+
-    'individual phases keep their own generation figures but no capacity or '+
-    'utilization of their own, to avoid overstating either. A plant whose CEG '+
-    'could not be matched (older bulletins predate the ceg column, or the plant '+
-    'has since been deactivated or renamed) shows no capacity, utilization or '+
-    'gas-consumption figure.<br><br>'+
-    '<b>Estimated gas consumption is an assumption, not an ONS figure.</b> It '+
-    'applies a heat rate ONS does not publish per plant \u2014 1,800 kcal/kWh for '+
-    'combined-cycle blocks, 2,500 kcal/kWh for single-phase (simple-cycle) gas '+
-    'plants, both typical industry figures and not plant-specific \u2014 against '+
-    '9,400 kcal/m\u00b3 for natural gas, Brazil\u2019s standard calorific value.<br><br>'+
-    '\u00a9 '+new Date().getFullYear()+' GasBrazil.com.'+
-    '</div></details>';
+    '&copy; ' + (new Date().getFullYear()) + ' GasBrazil.com &middot; Data: <a href="https://dados.ons.org.br" target="_blank" rel="noopener">ONS Dados Abertos</a> &middot; Contact: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>';
 
   ["from","to"].forEach(id=>{
     const inp=document.getElementById(id);
@@ -7165,7 +7091,6 @@ async function boot(){
     applyOnsI18n();
     buildTabs();
     buildSmooth();
-    renderViewInfo();
   });
   applyOnsI18n();
   let rz; window.addEventListener("resize",()=>{
