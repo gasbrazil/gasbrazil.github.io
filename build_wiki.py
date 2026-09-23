@@ -222,16 +222,7 @@ def page_template(title: str, body_html: str, current_out: str, slug: str | None
 <link rel="icon" href="{kit.embed_favicon()}">
 <meta name="theme-color" content="#06080c">
 {kit.font_preload_html()}
-<script>
-(function(){{
-  try {{
-    var theme = localStorage.getItem("gasbrazil-theme");
-    if (theme !== "light") document.documentElement.setAttribute("data-theme", "dark");
-  }} catch (e) {{
-    document.documentElement.setAttribute("data-theme", "dark");
-  }}
-}})();
-</script>
+<script>{kit.JS_BOOT}</script>
 <style>{CSS}</style>
 </head>
 <body>
@@ -268,7 +259,10 @@ def page_template(title: str, body_html: str, current_out: str, slug: str | None
     Questions or feedback: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>.
   </div>
 </footer>
-<script>{THEME_JS}</script>
+<script>
+{THEME_JS}
+{kit.JS_I18N}
+</script>
 {kit._PRODUCTS_DROPDOWN_JS}
 </body>
 </html>
