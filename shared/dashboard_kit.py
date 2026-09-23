@@ -34,10 +34,28 @@ from collections.abc import Iterable
 from pathlib import Path
 
 HERE = Path(__file__).parent
+ROOT = HERE.parent
 THEME_CSS_PATH = HERE / "theme.css"
 FONTS_DIR = HERE / "fonts"
 DEFAULT_FONT_PATH = FONTS_DIR / "Pacaembu-Light.ttf"
 DEFAULT_FAVICON_PATH = HERE / "favicon.png"
+AUTH_CONFIG_PATH = ROOT / "config" / "auth.json"
+
+
+def get_auth_config() -> dict:
+    if AUTH_CONFIG_PATH.exists():
+        try:
+            return json.loads(AUTH_CONFIG_PATH.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    return {
+        "enabled": True,
+        "scope": "all",
+        "salt": "gasbrazil-auth-salt-2026",
+        "hash": "e08faeb3ac5faffe44f959ee4ed05c404ba6e3681992051ba6090724e7f5d8ff",
+        "session_days": 30,
+    }
+
 
 # Site-root path for self-hosted fonts (GitHub Pages + custom domain).
 FONTS_URL_PREFIX = "/shared/fonts"
@@ -403,8 +421,7 @@ function escapeHtml(s) {
 # Same sun/moon icon convention on every dashboard: the icon shown is the
 # mode a click switches TO. initThemeToggle wires a button to toggle
 # document.documentElement's data-theme attribute and calls onChange (if
-# given) after each toggle so callers can repaint charts/colors.
-JS_BOOT = r"""
+_JS_BOOT_TEMPLATE = r"""
 (function(){
   try {
     /* Dark is the site default; only "light" opts out. */
@@ -421,6 +438,31 @@ JS_BOOT = r"""
     document.documentElement.setAttribute("data-lang", "en");
     document.documentElement.setAttribute("lang", "en");
   }
+
+  /* GasBrazil Auth Guard Check: immediate zero-flicker lock */
+  try {
+    var authCfg = __AUTH_CONFIG_JSON__;
+    window._gbAuthConfig = authCfg;
+    if (authCfg && authCfg.enabled) {
+      var path = window.location.pathname || "";
+      var isHome = path === "" || path === "/" || (path.indexOf("/index.html") !== -1 && path.split("/").filter(Boolean).length <= 1);
+      var isAdmin = path.indexOf("/admin") !== -1;
+      var requiresAuth = isAdmin || (authCfg.scope === "all") || !isHome;
+      if (requiresAuth) {
+        var raw = localStorage.getItem("gasbrazil-auth-v1");
+        var session = raw ? JSON.parse(raw) : null;
+        var now = Date.now();
+        if (!session || session.token !== authCfg.hash || (session.expires && session.expires < now)) {
+          document.documentElement.classList.add("gb-locked");
+        }
+      }
+    }
+  } catch (e) {
+    if (typeof __AUTH_CONFIG_JSON__ !== "undefined" && __AUTH_CONFIG_JSON__.enabled) {
+      document.documentElement.classList.add("gb-locked");
+    }
+  }
+
   function bindFlagbarHeaderGlow() {
     var bar = document.querySelector(".flagbar");
     if (!bar) return;
@@ -440,6 +482,14 @@ JS_BOOT = r"""
     bindFlagbarHeaderGlow();
 })();
 """
+
+
+def _render_js_boot() -> str:
+    cfg = get_auth_config()
+    return _JS_BOOT_TEMPLATE.replace("__AUTH_CONFIG_JSON__", json.dumps(cfg))
+
+
+JS_BOOT = _render_js_boot()
 
 JS_THEME_TOGGLE = r"""
 const SUN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>';
@@ -475,7 +525,7 @@ function initThemeToggle(buttonId, onChange) {
 if (document.getElementById("theme-toggle")) initThemeToggle("theme-toggle");
 """
 
-JS_I18N = r"""
+_JS_I18N_TEMPLATE = r"""
 const LANG_KEY = "gasbrazil-lang";
 const GB_I18N = {
   en: {
@@ -499,11 +549,22 @@ const GB_I18N = {
     navMenu: "Menu",
     navAbout: "About",
     navWiki: "Wiki",
+    navAdmin: "Admin Panel",
     filterPlaceholder: "Filter…",
     contact: "Contact",
     copyLink: "Copy link",
     linkCopied: "Copied",
     clearAllSelections: "Clear all",
+    authTitle: "Private Access",
+    authSubtitle: "Enter the site passcode to access GasBrazil.",
+    authPlaceholder: "Enter passcode…",
+    authSubmit: "Unlock Access",
+    authError: "Incorrect passcode. Please try again.",
+    authSuccess: "Access unlocked",
+    authLocked: "Site locked",
+    authLockBtn: "Lock site",
+    authShowPass: "Show passcode",
+    authHidePass: "Hide passcode",
     tagline: "Analytical Firepower for Brazil's Energy Markets",
     hubDashboards: "Live dashboards",
     hubHint: "Every card below opens a live dashboard — pick a product to explore.",
@@ -722,11 +783,22 @@ const GB_I18N = {
     navMenu: "Menu",
     navAbout: "Sobre",
     navWiki: "Wiki",
+    navAdmin: "Painel de Administração",
     filterPlaceholder: "Filtrar…",
     contact: "Contato",
     copyLink: "Copiar link",
     linkCopied: "Copiado",
     clearAllSelections: "Limpar tudo",
+    authTitle: "Acesso Restrito",
+    authSubtitle: "Digite a senha de acesso para acessar o GasBrazil.",
+    authPlaceholder: "Digite a senha…",
+    authSubmit: "Entrar",
+    authError: "Senha incorreta. Tente novamente.",
+    authSuccess: "Acesso liberado",
+    authLocked: "Acesso bloqueado",
+    authLockBtn: "Bloquear",
+    authShowPass: "Mostrar senha",
+    authHidePass: "Ocultar senha",
     tagline: "Potência analítica para os mercados de energia do Brasil",
     hubDashboards: "Painéis ao vivo",
     hubHint: "Cada cartão abaixo abre um painel ao vivo — escolha um produto para explorar.",
@@ -1107,6 +1179,8 @@ function toggleShortcutsModal() {
             '<div class="shortcut-row"><kbd>g</kbd> <kbd>s</kbd> <span>Gas Supply</span></div>' +
             '<div class="shortcut-row"><kbd>g</kbd> <kbd>l</kbd> <span>PLD Prices</span></div>' +
             '<div class="shortcut-row"><kbd>g</kbd> <kbd>r</kbd> <span>ANP Prices</span></div>' +
+            '<div class="shortcut-row"><kbd>g</kbd> <kbd>a</kbd> <span data-i18n="navAdmin">Admin Panel</span></div>' +
+            '<div class="shortcut-row"><kbd>g</kbd> <kbd>b</kbd> <span data-i18n="navAbout">About</span></div>' +
           '</div>' +
         '</div>' +
       '</div>';
@@ -1167,7 +1241,9 @@ function getPaletteCatalog() {
     { cat: "actions", id: "act-theme", title: "Toggle Theme (Dark / Light)", titlePt: "Alternar Tema (Escuro / Claro)", desc: "Switch between terminal dark desk and paper light theme", descPt: "Alternar entre modo escuro de terminal e modo claro", tag: "Action", action: "theme", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>' },
     { cat: "actions", id: "act-lang", title: "Toggle Language (PT / EN)", titlePt: "Alternar Idioma (PT / EN)", desc: "Switch UI language between English and Portuguese", descPt: "Alternar idioma da interface entre português e inglês", tag: "Action", action: "lang", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>' },
     { cat: "actions", id: "act-shortcuts", title: "Keyboard Shortcuts (?)", titlePt: "Atalhos de Teclado (?)", desc: "View all available keyboard navigation shortcuts", descPt: "Ver todos os atalhos de navegação disponíveis", tag: "Help", action: "shortcuts", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="6" y1="8" x2="6.01" y2="8"/><line x1="10" y1="8" x2="10.01" y2="8"/><line x1="14" y1="8" x2="14.01" y2="8"/><line x1="18" y1="8" x2="18.01" y2="8"/><line x1="8" y1="12" x2="8.01" y2="12"/><line x1="12" y1="12" x2="12.01" y2="12"/><line x1="16" y1="12" x2="16.01" y2="12"/><line x1="18" y1="16" x2="6" y2="16"/></svg>' },
-    { cat: "actions", id: "act-share", title: "Copy Page Link", titlePt: "Copiar Link da Página", desc: "Copy the current page URL with all active filters to clipboard", descPt: "Copiar o endereço da página com todos os filtros ativos", tag: "Tool", action: "share", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>' }
+    { cat: "actions", id: "act-share", title: "Copy Page Link", titlePt: "Copiar Link da Página", desc: "Copy the current page URL with all active filters to clipboard", descPt: "Copiar o endereço da página com todos os filtros ativos", tag: "Tool", action: "share", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>' },
+    { cat: "actions", id: "act-lock", title: "Lock Site / Log Out", titlePt: "Bloquear Site / Sair", desc: "Lock access and require site passcode", descPt: "Bloquear acesso e exigir senha", tag: "Security", action: "lock", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' },
+    { cat: "actions", id: "act-admin", title: "Admin Panel", titlePt: "Painel de Administração", desc: "Manage site passcode and security settings", descPt: "Gerenciar senha do site e configurações de segurança", tag: "Admin", url: "/admin/", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>' }
   ];
   return GB_PALETTE_ITEMS;
 }
@@ -1185,6 +1261,8 @@ function executePaletteItem(item) {
     if (langBtn) langBtn.click();
   } else if (item.action === "shortcuts") {
     toggleShortcutsModal();
+  } else if (item.action === "lock") {
+    if (typeof gbLockSite === "function") gbLockSite();
   } else if (item.action === "share") {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(window.location.href);
@@ -1513,6 +1591,210 @@ function gbBindChartExportButtons() {
   });
 }
 
+// -----------------------------------------------------------------------------
+// GasBrazil Auth Guard & Private Access Modal
+// -----------------------------------------------------------------------------
+const GB_AUTH_KEY = "gasbrazil-auth-v1";
+
+async function gbSha256(text) {
+  if (window.crypto && window.crypto.subtle) {
+    const enc = new TextEncoder().encode(text);
+    const buf = await window.crypto.subtle.digest("SHA-256", enc);
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+  }
+  throw new Error("Web Cryptography API not available");
+}
+
+function gbGetAuthConfig() {
+  if (typeof window !== "undefined" && window._gbAuthConfig) {
+    return window._gbAuthConfig;
+  }
+  return __AUTH_CONFIG_JSON__;
+}
+
+function gbIsSessionValid() {
+  const cfg = gbGetAuthConfig();
+  if (!cfg || !cfg.enabled) return true;
+  const path = window.location.pathname || "";
+  const isHome = path === "" || path === "/" || (path.indexOf("/index.html") !== -1 && path.split("/").filter(Boolean).length <= 1);
+  const isAdmin = path.indexOf("/admin") !== -1;
+  const requiresAuth = isAdmin || (cfg.scope === "all") || !isHome;
+  if (!requiresAuth) return true;
+
+  try {
+    const raw = localStorage.getItem(GB_AUTH_KEY);
+    if (!raw) return false;
+    const session = JSON.parse(raw);
+    const now = Date.now();
+    if (!session || session.token !== cfg.hash) return false;
+    if (session.expires && session.expires < now) return false;
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function gbSaveSession(hash, sessionDays) {
+  const days = sessionDays || 30;
+  const expires = Date.now() + days * 86400000;
+  try {
+    localStorage.setItem(GB_AUTH_KEY, JSON.stringify({ token: hash, expires: expires }));
+  } catch (e) {}
+}
+
+function gbLockSite() {
+  try {
+    localStorage.removeItem(GB_AUTH_KEY);
+  } catch (e) {}
+  document.documentElement.classList.add("gb-locked");
+  showAuthModal();
+  if (typeof gbShowToast === "function") {
+    gbShowToast(t("authLocked") || "Site locked");
+  }
+}
+
+function showAuthModal() {
+  let overlay = document.getElementById("gb-auth-overlay");
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.id = "gb-auth-overlay";
+    overlay.setAttribute("role", "dialog");
+    overlay.setAttribute("aria-modal", "true");
+    overlay.setAttribute("aria-label", t("authTitle") || "Private Access");
+
+    overlay.innerHTML =
+      '<div class="gb-auth-card" id="gb-auth-card">' +
+        '<div class="gb-auth-brand">GasBrazil</div>' +
+        '<div class="gb-auth-badge">' +
+          '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' +
+          '<span data-i18n="authTitle">' + escapeHtml(t("authTitle") || "Private Access") + '</span>' +
+        '</div>' +
+        '<p class="gb-auth-subtitle" data-i18n="authSubtitle">' + escapeHtml(t("authSubtitle") || "Enter the site passcode to access GasBrazil.") + '</p>' +
+        '<div id="gb-auth-error" class="gb-auth-error" hidden data-i18n="authError">' + escapeHtml(t("authError") || "Incorrect passcode. Please try again.") + '</div>' +
+        '<form id="gb-auth-form" class="gb-auth-form" autocomplete="off">' +
+          '<div class="gb-auth-input-wrap">' +
+            '<input type="password" id="gb-auth-input" class="gb-auth-input" placeholder="' + escapeHtml(t("authPlaceholder") || "Enter passcode…") + '" autocomplete="current-password" spellcheck="false" required aria-label="' + escapeHtml(t("authPlaceholder") || "Passcode") + '">' +
+            '<button type="button" id="gb-auth-eye" class="gb-auth-eye-btn" aria-label="' + escapeHtml(t("authShowPass") || "Show passcode") + '" title="' + escapeHtml(t("authShowPass") || "Show passcode") + '">' +
+              '<svg class="gb-eye-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>' +
+            '</button>' +
+          '</div>' +
+          '<button type="submit" id="gb-auth-submit" class="gb-auth-submit" data-i18n="authSubmit">' + escapeHtml(t("authSubmit") || "Unlock Access") + '</button>' +
+        '</form>' +
+        '<div class="gb-auth-tools">' +
+          '<span style="opacity:0.7">&copy; ' + new Date().getFullYear() + ' GasBrazil</span>' +
+          '<div class="gb-auth-tools-buttons">' +
+            '<button type="button" id="gb-auth-lang-btn" class="langBtn" style="padding:2px 8px;font-size:11px;">' + (currentLang() === "pt" ? "EN" : "PT") + '</button>' +
+            '<button type="button" id="gb-auth-theme-btn" class="iconBtn" style="padding:4px 6px;line-height:0;" aria-label="Toggle theme"></button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    document.body.appendChild(overlay);
+
+    const form = document.getElementById("gb-auth-form");
+    const input = document.getElementById("gb-auth-input");
+    const errBox = document.getElementById("gb-auth-error");
+    const eyeBtn = document.getElementById("gb-auth-eye");
+    const card = document.getElementById("gb-auth-card");
+    const authLangBtn = document.getElementById("gb-auth-lang-btn");
+    const authThemeBtn = document.getElementById("gb-auth-theme-btn");
+
+    if (eyeBtn && input) {
+      eyeBtn.addEventListener("click", () => {
+        const isPass = input.type === "password";
+        input.type = isPass ? "text" : "password";
+        eyeBtn.title = isPass ? (t("authHidePass") || "Hide passcode") : (t("authShowPass") || "Show passcode");
+        eyeBtn.setAttribute("aria-label", eyeBtn.title);
+        eyeBtn.innerHTML = isPass
+          ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'
+          : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+      });
+    }
+
+    if (authLangBtn) {
+      authLangBtn.addEventListener("click", () => {
+        const langToggle = document.getElementById("lang-toggle");
+        if (langToggle) langToggle.click();
+        authLangBtn.textContent = currentLang() === "pt" ? "EN" : "PT";
+        if (typeof applyI18n === "function") applyI18n();
+      });
+    }
+
+    if (authThemeBtn) {
+      const updateThemeIcon = () => {
+        authThemeBtn.innerHTML = isDarkTheme() ? SUN_SVG : MOON_SVG;
+      };
+      updateThemeIcon();
+      authThemeBtn.addEventListener("click", () => {
+        const themeToggle = document.getElementById("theme-toggle");
+        if (themeToggle) themeToggle.click();
+        updateThemeIcon();
+      });
+    }
+
+    if (form) {
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const pwd = (input.value || "").trim();
+        if (!pwd) return;
+
+        const cfg = gbGetAuthConfig();
+        if (!cfg) return;
+
+        try {
+          const salted = pwd + ":" + (cfg.salt || "");
+          const computedHash = await gbSha256(salted);
+          if (computedHash === cfg.hash) {
+            gbSaveSession(cfg.hash, cfg.session_days);
+            document.documentElement.classList.remove("gb-locked");
+            overlay.remove();
+            if (typeof gbShowToast === "function") {
+              gbShowToast(t("authSuccess") || "Access unlocked");
+            }
+          } else {
+            errBox.hidden = false;
+            card.classList.remove("shake");
+            void card.offsetWidth;
+            card.classList.add("shake");
+            input.value = "";
+            input.focus();
+          }
+        } catch (err) {
+          console.error("Auth error:", err);
+          errBox.textContent = "Error verifying passcode.";
+          errBox.hidden = false;
+        }
+      });
+    }
+  }
+
+  overlay.hidden = false;
+  setTimeout(() => {
+    const inp = document.getElementById("gb-auth-input");
+    if (inp) inp.focus();
+  }, 50);
+}
+
+function initAuthGuard() {
+  if (!gbIsSessionValid()) {
+    document.documentElement.classList.add("gb-locked");
+    showAuthModal();
+  } else {
+    document.documentElement.classList.remove("gb-locked");
+    const ov = document.getElementById("gb-auth-overlay");
+    if (ov) ov.remove();
+  }
+
+  document.querySelectorAll("#gb-auth-lock, .auth-lock-btn").forEach(btn => {
+    if (btn.dataset.authWired === "1") return;
+    btn.dataset.authWired = "1";
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      gbLockSite();
+    });
+  });
+}
+
 function initGlobalShortcuts() {
   let gPressed = false;
   let gTimer = null;
@@ -1613,7 +1895,8 @@ function initGlobalShortcuts() {
         "r": "/precos/",
         "m": "/mago/",
         "w": "/wiki/",
-        "a": "/about/"
+        "b": "/about/",
+        "a": "/admin/"
       };
       const dest = routes[e.key.toLowerCase()];
       if (dest) {
@@ -1642,6 +1925,7 @@ function initGlobalShortcuts() {
 
   gbBindTableCopyButtons();
   setTimeout(gbBindChartExportButtons, 500);
+  initAuthGuard();
 }
 
 if (document.readyState === "loading") {
@@ -1651,6 +1935,14 @@ if (document.readyState === "loading") {
 }
 /* __GB_I18N_END__ */
 """
+
+
+def _render_js_i18n() -> str:
+    cfg = get_auth_config()
+    return _JS_I18N_TEMPLATE.replace("__AUTH_CONFIG_JSON__", json.dumps(cfg))
+
+
+JS_I18N = _render_js_i18n()
 
 # CSV escaping + a generic "download this text as a file" trigger. Column/row
 # construction stays project-specific (each dashboard's data model differs).
@@ -2471,11 +2763,18 @@ def masthead_html(
         '<span data-i18n="searchBtn">Search</span> <kbd>Ctrl+K</kbd>'
         '</button>'
     )
+    lock_btn = (
+        '<button type="button" class="auth-lock-btn" id="gb-auth-lock" aria-label="Lock site" title="Lock site" data-i18n-title="authLockBtn">'
+        '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>'
+        '<span data-i18n="authLockBtn">Lock</span>'
+        '</button>'
+    )
     trail = (
         '<div class="nav-trail">'
         f'<a class="navlink" href="{wiki_href_esc}" data-i18n="navWiki">Wiki</a>'
         f'<a class="navlink" href="{about_href_esc}" data-i18n="navAbout">About</a>'
         f'{search_btn}'
+        f'{lock_btn}'
         "</div>"
     )
     return (

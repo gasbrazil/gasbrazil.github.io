@@ -1,3 +1,4 @@
 User-agent: *
+Disallow: /admin/
 Allow: /
 Sitemap: https://gasbrazil.com/sitemap.xml

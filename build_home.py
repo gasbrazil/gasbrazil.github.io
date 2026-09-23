@@ -463,6 +463,10 @@ def _hub_controls(wiki_href: str, about_href: str) -> str:
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <span data-i18n="searchBtn">Search</span> <kbd>Ctrl+K</kbd>
         </button>
+        <button type="button" class="auth-lock-btn" id="gb-auth-lock" aria-label="Lock site" title="Lock site" data-i18n-title="authLockBtn">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <span data-i18n="authLockBtn">Lock</span>
+        </button>
       </div>
       <button type="button" id="lang-toggle" class="langBtn" aria-label="Português">PT</button>
       <button id="theme-toggle" title="Toggle theme" aria-label="Toggle theme"></button>
@@ -835,7 +839,7 @@ def write_404(out_path: Path | None = None) -> Path:
 
 def write_robots_and_sitemap() -> None:
     (ROOT / "robots.txt").write_text(
-        "User-agent: *\nAllow: /\nSitemap: https://gasbrazil.com/sitemap.xml\n",
+        "User-agent: *\nDisallow: /admin/\nAllow: /\nSitemap: https://gasbrazil.com/sitemap.xml\n",
         encoding="utf-8",
     )
     today = dt.date.today().isoformat()
@@ -849,6 +853,16 @@ def write_robots_and_sitemap() -> None:
     body += "</urlset>\n"
     (ROOT / "sitemap.xml").write_text(body, encoding="utf-8")
     print("Wrote robots.txt and sitemap.xml")
+
+
+def write_admin_page() -> None:
+    """Build /admin/index.html."""
+    try:
+        sys.path.insert(0, str(ROOT / "admin"))
+        import admin  # noqa: E402
+        admin.write_admin()
+    except Exception as exc:
+        print(f"admin build failed: {exc}")
 
 
 def publish_teasers_best_effort() -> None:
@@ -870,6 +884,7 @@ def write_all() -> None:
     write_home()
     write_about()
     write_404()
+    write_admin_page()
     write_robots_and_sitemap()
     publish_teasers_best_effort()
 
@@ -879,6 +894,7 @@ if __name__ == "__main__":
         write_home(sys.argv[1])
         write_about()
         write_404()
+        write_admin_page()
         write_robots_and_sitemap()
         publish_teasers_best_effort()
     else:

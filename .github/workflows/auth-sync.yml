@@ -1,0 +1,45 @@
+name: Auth Sync & Shell Rebuild
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths:
+      - "config/auth.json"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: auth-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5.4.2
+        with:
+          enable-cache: true
+          python-version: "3.12"
+          cache-dependency-glob: "shared/constraints.txt"
+
+      - name: Rebuild home and admin
+        run: python build_home.py
+
+      - name: Resync all built shells
+        run: python shared/resync_built_shells.py
+
+      - name: Commit and push updated shells
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html about/index.html 404.html admin/index.html robots.txt sitemap.xml */index.html
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git commit -m "chore(auth): rebuild shells with updated auth config [skip ci]"
+          bash .github/scripts/push-with-rebase.sh

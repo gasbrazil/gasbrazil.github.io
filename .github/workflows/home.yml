@@ -11,6 +11,8 @@ on:
     paths:
       - "shared/**"
       - "build_home.py"
+      - "admin/**"
+      - "config/**"
       - "mago/index.html"
       - "mago/dashboard.py"
       - ".github/workflows/home.yml"
@@ -57,7 +59,7 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html about/index.html 404.html robots.txt sitemap.xml
+          git add index.html about/index.html 404.html admin/index.html robots.txt sitemap.xml
           if git diff --cached --quiet; then
             echo "No changes to commit."
             exit 0

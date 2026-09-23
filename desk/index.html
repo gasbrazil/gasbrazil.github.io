@@ -31,6 +31,31 @@
     document.documentElement.setAttribute("data-lang", "en");
     document.documentElement.setAttribute("lang", "en");
   }
+
+  /* GasBrazil Auth Guard Check: immediate zero-flicker lock */
+  try {
+    var authCfg = {"enabled": true, "scope": "all", "salt": "gasbrazil-auth-salt-2026", "hash": "e08faeb3ac5faffe44f959ee4ed05c404ba6e3681992051ba6090724e7f5d8ff", "session_days": 30, "updated_at": "2026-09-23T07:30:00Z"};
+    window._gbAuthConfig = authCfg;
+    if (authCfg && authCfg.enabled) {
+      var path = window.location.pathname || "";
+      var isHome = path === "" || path === "/" || (path.indexOf("/index.html") !== -1 && path.split("/").filter(Boolean).length <= 1);
+      var isAdmin = path.indexOf("/admin") !== -1;
+      var requiresAuth = isAdmin || (authCfg.scope === "all") || !isHome;
+      if (requiresAuth) {
+        var raw = localStorage.getItem("gasbrazil-auth-v1");
+        var session = raw ? JSON.parse(raw) : null;
+        var now = Date.now();
+        if (!session || session.token !== authCfg.hash || (session.expires && session.expires < now)) {
+          document.documentElement.classList.add("gb-locked");
+        }
+      }
+    }
+  } catch (e) {
+    if (typeof {"enabled": true, "scope": "all", "salt": "gasbrazil-auth-salt-2026", "hash": "e08faeb3ac5faffe44f959ee4ed05c404ba6e3681992051ba6090724e7f5d8ff", "session_days": 30, "updated_at": "2026-09-23T07:30:00Z"} !== "undefined" && {"enabled": true, "scope": "all", "salt": "gasbrazil-auth-salt-2026", "hash": "e08faeb3ac5faffe44f959ee4ed05c404ba6e3681992051ba6090724e7f5d8ff", "session_days": 30, "updated_at": "2026-09-23T07:30:00Z"}.enabled) {
+      document.documentElement.classList.add("gb-locked");
+    }
+  }
+
   function bindFlagbarHeaderGlow() {
     var bar = document.querySelector(".flagbar");
     if (!bar) return;
@@ -2289,6 +2314,351 @@ th.has-filter .th-label {
   }
 }
 
+/* -----------------------------------------------------------------------------
+   GasBrazil Authentication Guard & Stealth Gate
+----------------------------------------------------------------------------- */
+html.gb-locked body {
+  overflow: hidden !important;
+}
+html.gb-locked .wrap,
+html.gb-locked main,
+html.gb-locked #app,
+html.gb-locked #boot,
+html.gb-locked footer {
+  filter: blur(24px) grayscale(30%);
+  pointer-events: none !important;
+  user-select: none !important;
+  opacity: 0.2;
+  transition: filter 0.4s ease, opacity 0.4s ease;
+}
+
+#gb-auth-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: color-mix(in srgb, var(--bg) 80%, black 20%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  animation: gb-fade-in 0.25s ease-out;
+}
+#gb-auth-overlay[hidden] {
+  display: none !important;
+}
+
+.gb-auth-card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--panel-grad);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--elevate-lg);
+  padding: 32px 28px 24px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+.gb-auth-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, #009C3B 0%, #009C3B 33%, #FFDF00 33%, #FFDF00 66%, #002776 66%, #002776 100%);
+}
+
+.gb-auth-brand {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin: 0 0 6px;
+}
+.gb-auth-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  padding: 3px 8px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+.gb-auth-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 6px;
+}
+.gb-auth-subtitle {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.45;
+  margin: 0 0 22px;
+}
+
+.gb-auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+}
+.gb-auth-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.gb-auth-input {
+  width: 100%;
+  padding: 10px 42px 10px 14px;
+  font-size: 14px;
+  font-family: var(--font-ui);
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.gb-auth-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+.gb-auth-eye-btn {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+.gb-auth-eye-btn:hover {
+  color: var(--text);
+}
+
+.gb-auth-submit {
+  width: 100%;
+  padding: 11px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: var(--font-ui);
+  background: var(--accent);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: filter 0.18s ease, transform 0.1s ease;
+  margin-top: 4px;
+}
+.gb-auth-submit:hover {
+  filter: brightness(1.1);
+}
+.gb-auth-submit:active {
+  transform: scale(0.99);
+}
+
+.gb-auth-error {
+  font-size: 12px;
+  color: var(--err-ink, #ef4444);
+  background: color-mix(in srgb, #ef4444 10%, transparent);
+  border: 1px solid color-mix(in srgb, #ef4444 25%, transparent);
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 10px;
+  text-align: center;
+}
+.gb-auth-error[hidden] {
+  display: none !important;
+}
+
+.gb-auth-tools {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--muted);
+}
+.gb-auth-tools-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.auth-lock-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+  font-size: 11.5px;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+.auth-lock-btn:hover {
+  color: var(--text);
+  background: var(--panel-hover);
+  border-color: var(--border);
+}
+
+.gb-auth-card.shake {
+  animation: gb-shake 0.4s ease-in-out;
+}
+
+@keyframes gb-fade-in {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes gb-shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
+/* -----------------------------------------------------------------------------
+   Admin Panel Styles
+----------------------------------------------------------------------------- */
+.admin-wrap {
+  width: var(--content-w);
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 0 64px;
+}
+.admin-card {
+  background: var(--panel-grad);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: var(--elevate-sm);
+}
+.admin-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.admin-card-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.admin-form-group {
+  margin-bottom: 16px;
+}
+.admin-form-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.admin-form-help {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.admin-input {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-family: var(--font-ui);
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  outline: none;
+  box-sizing: border-box;
+}
+.admin-input:focus {
+  border-color: var(--accent);
+}
+.admin-btn {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--font-ui);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid transparent;
+}
+.admin-btn-primary {
+  background: var(--accent);
+  color: #fff;
+}
+.admin-btn-primary:hover {
+  filter: brightness(1.1);
+}
+.admin-btn-secondary {
+  background: var(--panel);
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+.admin-btn-secondary:hover {
+  background: var(--panel-hover);
+}
+.admin-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.admin-status-badge.active {
+  background: color-mix(in srgb, #10b981 15%, transparent);
+  color: #10b981;
+  border: 1px solid color-mix(in srgb, #10b981 30%, transparent);
+}
+.admin-status-badge.disabled {
+  background: color-mix(in srgb, #6b7280 15%, transparent);
+  color: #9ca3af;
+  border: 1px solid color-mix(in srgb, #6b7280 30%, transparent);
+}
+.admin-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  padding: 2px 6px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--accent);
+}
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; font-weight: 300; }
 /* Single-row header: wordmark-menu · title … Wiki/About · PT · theme */
@@ -2746,7 +3116,8 @@ main h3,
       <span class="crumb-sep" aria-hidden="true"></span>
       <h1 data-i18n="navDesk">The Desk</h1>
       </div>
-      <div class="nav-trail"><a class="navlink" href="../wiki/" data-i18n="navWiki">Wiki</a><a class="navlink" href="../about/" data-i18n="navAbout">About</a><button type="button" class="gb-search-btn" id="gb-search-trigger" aria-label="Search (Ctrl+K)" title="Search (Ctrl+K)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><span data-i18n="searchBtn">Search</span> <kbd>Ctrl+K</kbd></button></div>
+      <div class="nav-trail"><a class="navlink" href="../wiki/" data-i18n="navWiki">Wiki</a><a class="navlink" href="../about/" data-i18n="navAbout">About</a><button type="button" class="gb-search-btn" id="gb-search-trigger" aria-label="Search (Ctrl+K)" title="Search (Ctrl+K)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><span data-i18n="searchBtn">Search</span> <kbd>Ctrl+K</kbd></button>
+      <button type="button" class="auth-lock-btn" id="gb-auth-lock" aria-label="Lock site" title="Lock site" data-i18n-title="authLockBtn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span data-i18n="authLockBtn">Lock</span></button></div>
       <script>
 (function () {
   var OPEN_MS = 120;
@@ -3010,7 +3381,7 @@ main h3,
 </details>
   &copy; <span id="year"></span> GasBrazil.com
   &middot; <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
-  &middot; <a href="../about/" data-i18n="footerAbout">About</a>
+  &middot; <a href="../about/" data-i18n="footerAbout">About</a> &middot; <button type="button" class="footer-link-btn" id="link-shortcuts" data-i18n="shortcutsBtn">Shortcuts (?)</button>
 </footer>
 </div>
 <div class="tt" id="chart-tt"></div>
@@ -3322,11 +3693,22 @@ const GB_I18N = {
     navMenu: "Menu",
     navAbout: "About",
     navWiki: "Wiki",
+    navAdmin: "Admin Panel",
     filterPlaceholder: "Filter…",
     contact: "Contact",
     copyLink: "Copy link",
     linkCopied: "Copied",
     clearAllSelections: "Clear all",
+    authTitle: "Private Access",
+    authSubtitle: "Enter the site passcode to access GasBrazil.",
+    authPlaceholder: "Enter passcode…",
+    authSubmit: "Unlock Access",
+    authError: "Incorrect passcode. Please try again.",
+    authSuccess: "Access unlocked",
+    authLocked: "Site locked",
+    authLockBtn: "Lock site",
+    authShowPass: "Show passcode",
+    authHidePass: "Hide passcode",
     tagline: "Analytical Firepower for Brazil's Energy Markets",
     hubDashboards: "Live dashboards",
     hubHint: "Every card below opens a live dashboard — pick a product to explore.",
@@ -3545,11 +3927,22 @@ const GB_I18N = {
     navMenu: "Menu",
     navAbout: "Sobre",
     navWiki: "Wiki",
+    navAdmin: "Painel de Administração",
     filterPlaceholder: "Filtrar…",
     contact: "Contato",
     copyLink: "Copiar link",
     linkCopied: "Copiado",
     clearAllSelections: "Limpar tudo",
+    authTitle: "Acesso Restrito",
+    authSubtitle: "Digite a senha de acesso para acessar o GasBrazil.",
+    authPlaceholder: "Digite a senha…",
+    authSubmit: "Entrar",
+    authError: "Senha incorreta. Tente novamente.",
+    authSuccess: "Acesso liberado",
+    authLocked: "Acesso bloqueado",
+    authLockBtn: "Bloquear",
+    authShowPass: "Mostrar senha",
+    authHidePass: "Ocultar senha",
     tagline: "Potência analítica para os mercados de energia do Brasil",
     hubDashboards: "Painéis ao vivo",
     hubHint: "Cada cartão abaixo abre um painel ao vivo — escolha um produto para explorar.",
@@ -3930,6 +4323,8 @@ function toggleShortcutsModal() {
             '<div class="shortcut-row"><kbd>g</kbd> <kbd>s</kbd> <span>Gas Supply</span></div>' +
             '<div class="shortcut-row"><kbd>g</kbd> <kbd>l</kbd> <span>PLD Prices</span></div>' +
             '<div class="shortcut-row"><kbd>g</kbd> <kbd>r</kbd> <span>ANP Prices</span></div>' +
+            '<div class="shortcut-row"><kbd>g</kbd> <kbd>a</kbd> <span data-i18n="navAdmin">Admin Panel</span></div>' +
+            '<div class="shortcut-row"><kbd>g</kbd> <kbd>b</kbd> <span data-i18n="navAbout">About</span></div>' +
           '</div>' +
         '</div>' +
       '</div>';
@@ -3990,7 +4385,9 @@ function getPaletteCatalog() {
     { cat: "actions", id: "act-theme", title: "Toggle Theme (Dark / Light)", titlePt: "Alternar Tema (Escuro / Claro)", desc: "Switch between terminal dark desk and paper light theme", descPt: "Alternar entre modo escuro de terminal e modo claro", tag: "Action", action: "theme", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>' },
     { cat: "actions", id: "act-lang", title: "Toggle Language (PT / EN)", titlePt: "Alternar Idioma (PT / EN)", desc: "Switch UI language between English and Portuguese", descPt: "Alternar idioma da interface entre português e inglês", tag: "Action", action: "lang", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>' },
     { cat: "actions", id: "act-shortcuts", title: "Keyboard Shortcuts (?)", titlePt: "Atalhos de Teclado (?)", desc: "View all available keyboard navigation shortcuts", descPt: "Ver todos os atalhos de navegação disponíveis", tag: "Help", action: "shortcuts", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="6" y1="8" x2="6.01" y2="8"/><line x1="10" y1="8" x2="10.01" y2="8"/><line x1="14" y1="8" x2="14.01" y2="8"/><line x1="18" y1="8" x2="18.01" y2="8"/><line x1="8" y1="12" x2="8.01" y2="12"/><line x1="12" y1="12" x2="12.01" y2="12"/><line x1="16" y1="12" x2="16.01" y2="12"/><line x1="18" y1="16" x2="6" y2="16"/></svg>' },
-    { cat: "actions", id: "act-share", title: "Copy Page Link", titlePt: "Copiar Link da Página", desc: "Copy the current page URL with all active filters to clipboard", descPt: "Copiar o endereço da página com todos os filtros ativos", tag: "Tool", action: "share", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>' }
+    { cat: "actions", id: "act-share", title: "Copy Page Link", titlePt: "Copiar Link da Página", desc: "Copy the current page URL with all active filters to clipboard", descPt: "Copiar o endereço da página com todos os filtros ativos", tag: "Tool", action: "share", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>' },
+    { cat: "actions", id: "act-lock", title: "Lock Site / Log Out", titlePt: "Bloquear Site / Sair", desc: "Lock access and require site passcode", descPt: "Bloquear acesso e exigir senha", tag: "Security", action: "lock", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' },
+    { cat: "actions", id: "act-admin", title: "Admin Panel", titlePt: "Painel de Administração", desc: "Manage site passcode and security settings", descPt: "Gerenciar senha do site e configurações de segurança", tag: "Admin", url: "/admin/", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>' }
   ];
   return GB_PALETTE_ITEMS;
 }
@@ -4008,6 +4405,8 @@ function executePaletteItem(item) {
     if (langBtn) langBtn.click();
   } else if (item.action === "shortcuts") {
     toggleShortcutsModal();
+  } else if (item.action === "lock") {
+    if (typeof gbLockSite === "function") gbLockSite();
   } else if (item.action === "share") {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(window.location.href);
@@ -4336,6 +4735,210 @@ function gbBindChartExportButtons() {
   });
 }
 
+// -----------------------------------------------------------------------------
+// GasBrazil Auth Guard & Private Access Modal
+// -----------------------------------------------------------------------------
+const GB_AUTH_KEY = "gasbrazil-auth-v1";
+
+async function gbSha256(text) {
+  if (window.crypto && window.crypto.subtle) {
+    const enc = new TextEncoder().encode(text);
+    const buf = await window.crypto.subtle.digest("SHA-256", enc);
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+  }
+  throw new Error("Web Cryptography API not available");
+}
+
+function gbGetAuthConfig() {
+  if (typeof window !== "undefined" && window._gbAuthConfig) {
+    return window._gbAuthConfig;
+  }
+  return {"enabled": true, "scope": "all", "salt": "gasbrazil-auth-salt-2026", "hash": "e08faeb3ac5faffe44f959ee4ed05c404ba6e3681992051ba6090724e7f5d8ff", "session_days": 30, "updated_at": "2026-09-23T07:30:00Z"};
+}
+
+function gbIsSessionValid() {
+  const cfg = gbGetAuthConfig();
+  if (!cfg || !cfg.enabled) return true;
+  const path = window.location.pathname || "";
+  const isHome = path === "" || path === "/" || (path.indexOf("/index.html") !== -1 && path.split("/").filter(Boolean).length <= 1);
+  const isAdmin = path.indexOf("/admin") !== -1;
+  const requiresAuth = isAdmin || (cfg.scope === "all") || !isHome;
+  if (!requiresAuth) return true;
+
+  try {
+    const raw = localStorage.getItem(GB_AUTH_KEY);
+    if (!raw) return false;
+    const session = JSON.parse(raw);
+    const now = Date.now();
+    if (!session || session.token !== cfg.hash) return false;
+    if (session.expires && session.expires < now) return false;
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function gbSaveSession(hash, sessionDays) {
+  const days = sessionDays || 30;
+  const expires = Date.now() + days * 86400000;
+  try {
+    localStorage.setItem(GB_AUTH_KEY, JSON.stringify({ token: hash, expires: expires }));
+  } catch (e) {}
+}
+
+function gbLockSite() {
+  try {
+    localStorage.removeItem(GB_AUTH_KEY);
+  } catch (e) {}
+  document.documentElement.classList.add("gb-locked");
+  showAuthModal();
+  if (typeof gbShowToast === "function") {
+    gbShowToast(t("authLocked") || "Site locked");
+  }
+}
+
+function showAuthModal() {
+  let overlay = document.getElementById("gb-auth-overlay");
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.id = "gb-auth-overlay";
+    overlay.setAttribute("role", "dialog");
+    overlay.setAttribute("aria-modal", "true");
+    overlay.setAttribute("aria-label", t("authTitle") || "Private Access");
+
+    overlay.innerHTML =
+      '<div class="gb-auth-card" id="gb-auth-card">' +
+        '<div class="gb-auth-brand">GasBrazil</div>' +
+        '<div class="gb-auth-badge">' +
+          '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' +
+          '<span data-i18n="authTitle">' + escapeHtml(t("authTitle") || "Private Access") + '</span>' +
+        '</div>' +
+        '<p class="gb-auth-subtitle" data-i18n="authSubtitle">' + escapeHtml(t("authSubtitle") || "Enter the site passcode to access GasBrazil.") + '</p>' +
+        '<div id="gb-auth-error" class="gb-auth-error" hidden data-i18n="authError">' + escapeHtml(t("authError") || "Incorrect passcode. Please try again.") + '</div>' +
+        '<form id="gb-auth-form" class="gb-auth-form" autocomplete="off">' +
+          '<div class="gb-auth-input-wrap">' +
+            '<input type="password" id="gb-auth-input" class="gb-auth-input" placeholder="' + escapeHtml(t("authPlaceholder") || "Enter passcode…") + '" autocomplete="current-password" spellcheck="false" required aria-label="' + escapeHtml(t("authPlaceholder") || "Passcode") + '">' +
+            '<button type="button" id="gb-auth-eye" class="gb-auth-eye-btn" aria-label="' + escapeHtml(t("authShowPass") || "Show passcode") + '" title="' + escapeHtml(t("authShowPass") || "Show passcode") + '">' +
+              '<svg class="gb-eye-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>' +
+            '</button>' +
+          '</div>' +
+          '<button type="submit" id="gb-auth-submit" class="gb-auth-submit" data-i18n="authSubmit">' + escapeHtml(t("authSubmit") || "Unlock Access") + '</button>' +
+        '</form>' +
+        '<div class="gb-auth-tools">' +
+          '<span style="opacity:0.7">&copy; ' + new Date().getFullYear() + ' GasBrazil</span>' +
+          '<div class="gb-auth-tools-buttons">' +
+            '<button type="button" id="gb-auth-lang-btn" class="langBtn" style="padding:2px 8px;font-size:11px;">' + (currentLang() === "pt" ? "EN" : "PT") + '</button>' +
+            '<button type="button" id="gb-auth-theme-btn" class="iconBtn" style="padding:4px 6px;line-height:0;" aria-label="Toggle theme"></button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    document.body.appendChild(overlay);
+
+    const form = document.getElementById("gb-auth-form");
+    const input = document.getElementById("gb-auth-input");
+    const errBox = document.getElementById("gb-auth-error");
+    const eyeBtn = document.getElementById("gb-auth-eye");
+    const card = document.getElementById("gb-auth-card");
+    const authLangBtn = document.getElementById("gb-auth-lang-btn");
+    const authThemeBtn = document.getElementById("gb-auth-theme-btn");
+
+    if (eyeBtn && input) {
+      eyeBtn.addEventListener("click", () => {
+        const isPass = input.type === "password";
+        input.type = isPass ? "text" : "password";
+        eyeBtn.title = isPass ? (t("authHidePass") || "Hide passcode") : (t("authShowPass") || "Show passcode");
+        eyeBtn.setAttribute("aria-label", eyeBtn.title);
+        eyeBtn.innerHTML = isPass
+          ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'
+          : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+      });
+    }
+
+    if (authLangBtn) {
+      authLangBtn.addEventListener("click", () => {
+        const langToggle = document.getElementById("lang-toggle");
+        if (langToggle) langToggle.click();
+        authLangBtn.textContent = currentLang() === "pt" ? "EN" : "PT";
+        if (typeof applyI18n === "function") applyI18n();
+      });
+    }
+
+    if (authThemeBtn) {
+      const updateThemeIcon = () => {
+        authThemeBtn.innerHTML = isDarkTheme() ? SUN_SVG : MOON_SVG;
+      };
+      updateThemeIcon();
+      authThemeBtn.addEventListener("click", () => {
+        const themeToggle = document.getElementById("theme-toggle");
+        if (themeToggle) themeToggle.click();
+        updateThemeIcon();
+      });
+    }
+
+    if (form) {
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const pwd = (input.value || "").trim();
+        if (!pwd) return;
+
+        const cfg = gbGetAuthConfig();
+        if (!cfg) return;
+
+        try {
+          const salted = pwd + ":" + (cfg.salt || "");
+          const computedHash = await gbSha256(salted);
+          if (computedHash === cfg.hash) {
+            gbSaveSession(cfg.hash, cfg.session_days);
+            document.documentElement.classList.remove("gb-locked");
+            overlay.remove();
+            if (typeof gbShowToast === "function") {
+              gbShowToast(t("authSuccess") || "Access unlocked");
+            }
+          } else {
+            errBox.hidden = false;
+            card.classList.remove("shake");
+            void card.offsetWidth;
+            card.classList.add("shake");
+            input.value = "";
+            input.focus();
+          }
+        } catch (err) {
+          console.error("Auth error:", err);
+          errBox.textContent = "Error verifying passcode.";
+          errBox.hidden = false;
+        }
+      });
+    }
+  }
+
+  overlay.hidden = false;
+  setTimeout(() => {
+    const inp = document.getElementById("gb-auth-input");
+    if (inp) inp.focus();
+  }, 50);
+}
+
+function initAuthGuard() {
+  if (!gbIsSessionValid()) {
+    document.documentElement.classList.add("gb-locked");
+    showAuthModal();
+  } else {
+    document.documentElement.classList.remove("gb-locked");
+    const ov = document.getElementById("gb-auth-overlay");
+    if (ov) ov.remove();
+  }
+
+  document.querySelectorAll("#gb-auth-lock, .auth-lock-btn").forEach(btn => {
+    if (btn.dataset.authWired === "1") return;
+    btn.dataset.authWired = "1";
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      gbLockSite();
+    });
+  });
+}
+
 function initGlobalShortcuts() {
   let gPressed = false;
   let gTimer = null;
@@ -4436,7 +5039,8 @@ function initGlobalShortcuts() {
         "r": "/precos/",
         "m": "/mago/",
         "w": "/wiki/",
-        "a": "/about/"
+        "b": "/about/",
+        "a": "/admin/"
       };
       const dest = routes[e.key.toLowerCase()];
       if (dest) {
@@ -4465,6 +5069,7 @@ function initGlobalShortcuts() {
 
   gbBindTableCopyButtons();
   setTimeout(gbBindChartExportButtons, 500);
+  initAuthGuard();
 }
 
 if (document.readyState === "loading") {
