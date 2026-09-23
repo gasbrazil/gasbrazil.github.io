@@ -3,24 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>GasBrazil.com</title>
-<meta name="description" content="Independent data tools for Brazil&#x27;s natural gas market: ONS grid balances, POC capacity results, transport contracts, pipeline flows, and CCEE PLD prices.">
-<link rel="canonical" href="https://gasbrazil.com/">
-<link rel="preconnect" href="https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev" crossorigin>
-<link rel="dns-prefetch" href="https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev">
-<meta name="theme-color" content="#06080c">
-<link rel="preload" href="/shared/fonts/IBMPlexSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/shared/fonts/Pacaembu-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="GasBrazil.com">
-<meta property="og:title" content="GasBrazil.com">
-<meta property="og:description" content="Independent data tools for Brazil&#x27;s natural gas market: ONS grid balances, POC capacity results, transport contracts, pipeline flows, and CCEE PLD prices.">
-<meta property="og:url" content="https://gasbrazil.com/">
-<meta property="og:locale" content="en_US">
-<meta property="og:locale:alternate" content="pt_BR">
-<link rel="alternate" hreflang="x-default" href="https://gasbrazil.com/">
-<link rel="alternate" href="https://gasbrazil.github.io">
-<link rel="icon" href="/shared/favicon.png">
+<title>Admin Panel — GasBrazil</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="favicon.png">
 <script>
 (function(){
   try {
@@ -98,7 +83,7 @@
  * @font-face rules for Pacaembu (wordmark / titles) and IBM Plex Sans (UI)
  * from /shared/fonts/*.ttf (or left blank if that directory is empty).
  */
-@font-face{font-family:'Pacaembu';font-weight:200;font-style:normal;font-display:swap;src:url('/shared/fonts/Pacaembu-ExtraLight.woff2') format('woff2'), url('/shared/fonts/Pacaembu-ExtraLight.ttf') format('truetype');}@font-face{font-family:'Pacaembu';font-weight:300;font-style:normal;font-display:swap;src:url('/shared/fonts/Pacaembu-Light.woff2') format('woff2'), url('/shared/fonts/Pacaembu-Light.ttf') format('truetype');}@font-face{font-family:'Pacaembu';font-weight:400;font-style:normal;font-display:swap;src:url('/shared/fonts/Pacaembu-Regular.woff2') format('woff2'), url('/shared/fonts/Pacaembu-Regular.ttf') format('truetype');}@font-face{font-family:'Pacaembu';font-weight:600;font-style:normal;font-display:swap;src:url('/shared/fonts/Pacaembu-SemiBold.woff2') format('woff2'), url('/shared/fonts/Pacaembu-SemiBold.ttf') format('truetype');}@font-face{font-family:'IBM Plex Sans';font-weight:300;font-style:normal;font-display:swap;src:url('/shared/fonts/IBMPlexSans-Light.woff2') format('woff2'), url('/shared/fonts/IBMPlexSans-Light.ttf') format('truetype');}@font-face{font-family:'IBM Plex Sans';font-weight:400;font-style:normal;font-display:swap;src:url('/shared/fonts/IBMPlexSans-Regular.woff2') format('woff2'), url('/shared/fonts/IBMPlexSans-Regular.ttf') format('truetype');}@font-face{font-family:'IBM Plex Sans';font-weight:500;font-style:normal;font-display:swap;src:url('/shared/fonts/IBMPlexSans-Medium.woff2') format('woff2'), url('/shared/fonts/IBMPlexSans-Medium.ttf') format('truetype');}@font-face{font-family:'IBM Plex Sans';font-weight:600;font-style:normal;font-display:swap;src:url('/shared/fonts/IBMPlexSans-SemiBold.woff2') format('woff2'), url('/shared/fonts/IBMPlexSans-SemiBold.ttf') format('truetype');}
+__FONT_FACE__
 :root {
   /* Tells the browser which palette its OWN native UI should use -- select
      dropdown popups, date pickers, scrollbars -- so those aren't stuck
@@ -2668,183 +2653,6 @@ html.gb-locked footer {
 }
 
 
-* { box-sizing: border-box; }
-html, body { height: 100%; }
-body {
-  margin: 0; background-color: var(--bg); background-image: var(--bg-grad);
-  background-attachment: fixed; color: var(--text); font-family: var(--font);
-  font-weight: 300; display: flex; flex-direction: column; min-height: 100vh;
-}
-/* Match dashboard .wrap: shared --content-w / --content-max (~1280px). */
-main.hub { flex: 1; width: var(--content-w); max-width: var(--content-max); margin: 0 auto;
-  padding: 40px 0 48px; }
-@media (max-width: 900px) { main.hub { width: auto; padding: 28px 16px 40px; } }
-/* Home header: same sticky blur treatment as dashboard mastheads. */
-.hub-header {
-  position: sticky; top: 0; z-index: 40;
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  background: var(--header-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
-  padding: 10px 0 10px;
-  margin: 0 0 4px;
-  isolation: isolate;
-  transition: background-color .2s ease, border-color .2s ease;
-}
-@media (max-width: 720px) {
-  .hub-header { flex-wrap: wrap; }
-  .hub-controls { margin-left: auto; }
-}
-.hub-header .products-dd { align-items: center; }
-.hub-header .brand-mark { min-height: 0; }
-.hub-controls #theme-toggle { position: static; }
-.hub-section-title {
-  font-size: 11px; text-transform: uppercase; letter-spacing: .06em;
-  color: var(--muted); font-weight: 600; margin: 18px 0 8px;
-  font-family: var(--font-display);
-}
-.wordmark { font-size: 30px; font-weight: 600; letter-spacing: -.02em; line-height: 1.1; }
-.wordmark .dot { color: var(--accent); }
-.wordmark a { color: inherit; text-decoration: none; }
-.tagline { color: var(--text); font-weight: 600; font-size: 15px; margin: 10px 0 0;
-  max-width: 36em; line-height: 1.45; }
-/* Full-width flagband — do not override shared .flagbar width. */
-.flagbar { margin: 18px 0 0; }
-/* KPI strip is the only product launcher on the hub (description cards removed). */
-.kpi-strip {
-  display: grid; grid-template-columns: repeat(3, 1fr);
-  gap: 8px; margin-top: 16px;
-}
-@media (max-width: 900px) { .kpi-strip { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 480px) { .kpi-strip { grid-template-columns: 1fr; } }
-a.kpi-cell { cursor: pointer; }
-.kpi-cell {
-  position: relative; overflow: hidden;
-  background: var(--panel-grad); border: 1px solid var(--border); border-radius: var(--radius-sm);
-  padding: 8px 10px; text-decoration: none; color: var(--text);
-  display: flex; flex-direction: column; gap: 2px; min-width: 0;
-  box-shadow: 0 1px 0 rgba(255,255,255,.55) inset, 0 1px 3px rgba(0,39,118,.04);
-  transition: border-color .18s ease, transform .18s ease, background .18s ease, box-shadow .18s ease;
-}
-.kpi-cell::before {
-  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-  background: var(--brz-blue); opacity: 0; transition: opacity .25s ease;
-}
-.kpi-cell:nth-child(3n+1)::before { background: var(--brz-green); }
-.kpi-cell:nth-child(3n+2)::before { background: var(--brz-yellow); }
-.kpi-cell:nth-child(3n+3)::before { background: var(--brz-blue); }
-.kpi-cell:hover {
-  border-color: var(--border-strong); background: var(--panel-grad-hover);
-  transform: translateY(-2px); box-shadow: var(--elevate);
-}
-.kpi-cell:active { transform: translateY(0); }
-.kpi-cell:hover::before { opacity: 1; }
-.kpi-cell .kpi-label { font-size: 13px; font-weight: 600; color: var(--text); letter-spacing: -.01em;
-  display: flex; align-items: baseline; gap: 6px; }
-/* Wayfinding affordance: KPI cells are links that open dashboards. The arrow
-   slides in on hover/focus so the cards read as launchers, not stat widgets. */
-.kpi-cell .kpi-label::after {
-  content: "\2192"; color: var(--accent); font-weight: 400; font-size: 12px;
-  opacity: 0; transform: translateX(-4px);
-  transition: opacity .25s ease, transform .25s ease;
-}
-.kpi-cell:hover .kpi-label::after, .kpi-cell:focus-visible .kpi-label::after {
-  opacity: 1; transform: none;
-}
-[data-theme="dark"] .kpi-cell .kpi-label::after { color: var(--brz-yellow); }
-.kpi-cell .kpi-role { font-size: 11px; font-weight: 300; color: var(--muted); line-height: 1.3; }
-.kpi-cell .kpi-val { font-size: 12px; font-weight: 400; color: var(--muted2);
-  line-height: 1.35; min-height: 1.1em; margin-top: 2px; font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
-.kpi-cell .kpi-when { font-size: 10px; font-weight: 300; color: var(--muted); min-height: 1em; margin-top: auto; padding-top: 4px; }
-.kpi-spark { display: block; width: 100%; height: 20px; margin-top: 2px; color: var(--accent); }
-.kpi-spark polyline { fill: none; stroke: currentColor; stroke-width: 1.5;
-  stroke-linejoin: round; stroke-linecap: round; }
-.cards { display: grid; grid-template-columns: repeat(3, 1fr);
-  gap: 12px; margin-top: 20px; }
-@media (max-width: 720px) { .cards { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 480px) { .cards { grid-template-columns: 1fr; } }
-.card {
-  position: relative; overflow: hidden;
-  background: var(--panel-grad); border: 1px solid var(--border); border-radius: var(--radius);
-  padding: var(--card-pad);
-  text-align: left; text-decoration: none; color: var(--text);
-  box-shadow: 0 1px 0 rgba(255,255,255,.55) inset, 0 1px 3px rgba(0,39,118,.04);
-  transition: border-color .18s ease, transform .18s ease, background .18s ease, box-shadow .18s ease;
-  display: flex; flex-direction: column;
-}
-.card:hover {
-  border-color: var(--border-strong); background: var(--panel-grad-hover);
-  transform: translateY(-2px); box-shadow: var(--elevate);
-}
-.card:active { transform: translateY(0); }
-.card .name { font-size: 14px; font-weight: 600; display: flex; align-items: center;
-  gap: 8px; }
-.card .name .dot { width: 6px; height: 6px; border-radius: 50%; flex: none; background: var(--accent); }
-.card .desc { color: var(--muted); font-weight: 300; font-size: 12.5px; margin-top: 6px;
-  line-height: 1.45; flex: 1; }
-.hub-page-title { font-size: 22px; font-weight: 600; margin: 20px 0 0; letter-spacing: -.01em; }
-.sources-block { margin-top: 28px; }
-.sources-block .label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em;
-  color: var(--muted); font-weight: 300; margin-bottom: 10px; }
-.sources-block .row { display: flex; flex-wrap: wrap; gap: 8px; }
-.sources-block a {
-  font-size: 12px; font-weight: 400; color: var(--muted2); text-decoration: none;
-  border: 1px solid var(--ring); border-radius: var(--radius-sm); padding: 5px 12px;
-  white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;
-  background: var(--panel-grad);
-  transition: border-color .15s ease, transform .15s ease, background .15s ease, box-shadow .15s ease, color .15s ease;
-}
-.sources-block a:hover {
-  background: var(--panel-grad-hover); color: var(--text); border-color: var(--border-strong);
-  transform: translateY(-1.5px); box-shadow: var(--elevate-sm);
-}
-.sources-block a:active { transform: translateY(0); }
-[data-theme="dark"] .sources-block a:hover {
-  border-color: rgba(255, 223, 0, .35);
-  box-shadow: var(--elevate-sm), 0 0 0 1px rgba(255, 223, 0, .12);
-}
-.sources-block .ext-icon { width: 10px; height: 10px; display: inline-block; flex: none; opacity: .75; }
-.prose { margin-top: 8px; max-width: 42em; }
-.prose h2 { font-size: 16px; font-weight: 400; margin: 22px 0 6px; }
-.prose p, .prose li { font-size: 14px; font-weight: 300; line-height: 1.6; color: var(--muted2); }
-.prose ul { padding-left: 1.2em; }
-[data-theme="dark"] .kpi-cell,
-[data-theme="dark"] .card {
-  box-shadow: 0 1px 0 rgba(255,255,255,.05) inset, 0 1px 3px rgba(0,0,0,.35);
-  border-color: rgba(255,255,255,.08);
-}
-[data-theme="dark"] .kpi-cell:hover,
-[data-theme="dark"] .card:hover {
-  border-color: rgba(255, 223, 0, .35);
-  box-shadow: var(--elevate), 0 0 0 1px rgba(255, 223, 0, .12);
-}
-footer.site { padding: 20px 24px; color: var(--muted); font-weight: 300; font-size: 13px; text-align: center; line-height: 1.7; font-family: var(--font-display); }
-/* Keyboard users: every hub link and control gets a visible focus ring. */
-.kpi-cell:focus-visible, .card:focus-visible,
-.sources-block a:focus-visible, .hub-controls button:focus-visible,
-footer.site a:focus-visible {
-  outline: 2px solid var(--accent); outline-offset: 2px;
-}
-[data-theme="dark"] .kpi-cell:focus-visible, [data-theme="dark"] .card:focus-visible,
-[data-theme="dark"] .sources-block a:focus-visible,
-[data-theme="dark"] .hub-controls button:focus-visible,
-[data-theme="dark"] footer.site a:focus-visible {
-  outline-color: var(--brz-yellow);
-}
-@media (max-width: 480px) {
-  .kpi-cell { padding: 12px 14px; }
-  .sources-block a { padding: 9px 14px; }
-}
-footer.site a {
-  color: var(--accent); text-decoration: none;
-  border-bottom: 1px solid transparent;
-  transition: color .25s ease, border-color .25s ease;
-}
-footer.site a:hover { color: var(--text); border-bottom-color: var(--brz-yellow); }
-[data-theme="dark"] footer.site a:hover { color: var(--brz-yellow); border-bottom-color: var(--brz-yellow); }
-
-
 /* Shared header/label typography — last in cascade (Pacaembu SemiBold on chrome labels). */
 .wrap h1,
 .wrap h2,
@@ -2897,114 +2705,421 @@ main h3,
   font-weight: 600;
 }
 
+/* Specific Admin UI Enhancements */
+.admin-badge-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.admin-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 680px) {
+  .admin-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+.admin-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 6px;
+}
+.admin-radio-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  transition: all 0.18s ease;
+}
+.admin-radio-label:hover {
+  border-color: var(--accent);
+  background: var(--panel-hover);
+}
+.admin-radio-label input[type="radio"] {
+  margin-top: 3px;
+}
+.admin-radio-desc {
+  font-size: 11.5px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.admin-switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.admin-switch-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+}
+.admin-switch-sub {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.admin-alert {
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 12.5px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.admin-alert.info {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  color: var(--text);
+}
+.admin-alert.success {
+  background: color-mix(in srgb, #10b981 12%, transparent);
+  border: 1px solid color-mix(in srgb, #10b981 30%, transparent);
+  color: #10b981;
+}
+.admin-alert.error {
+  background: color-mix(in srgb, #ef4444 12%, transparent);
+  border: 1px solid color-mix(in srgb, #ef4444 30%, transparent);
+  color: #ef4444;
+}
+.admin-hash-box {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11.5px;
+  padding: 8px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--accent);
+  word-break: break-all;
+}
 </style>
 </head>
 
 <body>
-<a class="skip-link" href="#main" data-i18n="skip">Skip to content</a>
-<main class="hub" id="main">
-  <div class="hub-header">
-    <div class="products-dd"><span class="brand-lockup"><div class="wordmark">GasBrazil</div><button type="button" class="dd-trigger brand-mark" aria-haspopup="menu" aria-expanded="false" aria-controls="gb-products-menu" id="gb-products-trigger" data-i18n-aria="navMenu" aria-label="Menu"><span class="brand-mark-dot" aria-hidden="true"></span><span class="dd-caret" aria-hidden="true"></span></button></span><div class="dd-menu" id="gb-products-menu" role="menu" aria-labelledby="gb-products-trigger"><a id="link-desk" href="https://gasbrazil.com/desk/" role="menuitem" data-i18n="navDesk"><span class="chk"></span>The Desk</a><a id="link-ons" href="https://gasbrazil.com/ons/" role="menuitem" data-i18n="navOns"><span class="chk"></span>ONS Balances</a><a id="link-pld" href="https://gasbrazil.com/pld/" role="menuitem" data-i18n="navPld"><span class="chk"></span>PLD Prices</a><a id="link-poc" href="https://gasbrazil.com/poc/" role="menuitem" data-i18n="navPoc"><span class="chk"></span>POC Results</a><a id="link-contratos" href="https://gasbrazil.com/contratos/" role="menuitem" data-i18n="navContratos"><span class="chk"></span>POC Contracts</a><a id="link-flows" href="https://gasbrazil.com/flows/" role="menuitem" data-i18n="navFlows"><span class="chk"></span>Pipeline Flows</a><a id="link-mago" href="https://gasbrazil.com/mago/" role="menuitem" data-i18n="navMago"><span class="chk"></span>TAG Mago</a><a id="link-nts" href="https://gasbrazil.com/nts/" role="menuitem" data-i18n="navNts"><span class="chk"></span>NTS OnTime</a><a id="link-supply" href="https://gasbrazil.com/supply/" role="menuitem" data-i18n="navSupply"><span class="chk"></span>Gas Supply</a><a id="link-precos" href="https://gasbrazil.com/precos/" role="menuitem" data-i18n="navPrecos"><span class="chk"></span>ANP Prices</a><a id="link-monitor" href="https://gasbrazil.com/monitor/" role="menuitem" data-i18n="navMonitor"><span class="chk"></span>Pipeline Monitor</a></div></div>
-    <div class="hub-controls">
-      <div class="nav-trail">
-        <a class="navlink" href="wiki/" data-i18n="navWiki">Wiki</a>
-        <a class="navlink" href="about/" data-i18n="navAbout">About</a>
-        <button type="button" class="gb-search-btn" id="gb-search-trigger" aria-label="Search (Ctrl+K)" title="Search (Ctrl+K)">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <span data-i18n="searchBtn">Search</span> <kbd>Ctrl+K</kbd>
-        </button>
-        <button type="button" class="auth-lock-btn" id="gb-auth-lock" aria-label="Lock site" title="Lock site" data-i18n-title="authLockBtn">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          <span data-i18n="authLockBtn">Lock</span>
-        </button>
+<a class="skip-link" href="#admin-main">Skip to main content</a>
+<header class="dash-head">
+  <div class="masthead">
+    <div class="masthead-ident">
+      <div class="products-dd"><span class="brand-lockup"><a class="masthead-brand" id="link-home" href="../" data-i18n="navHome">GasBrazil</a><button type="button" class="dd-trigger brand-mark" aria-haspopup="menu" aria-expanded="false" aria-controls="gb-products-menu" id="gb-products-trigger" data-i18n-aria="navMenu" aria-label="Menu"><span class="brand-mark-dot" aria-hidden="true"></span><span class="dd-caret" aria-hidden="true"></span></button></span><div class="dd-menu" id="gb-products-menu" role="menu" aria-labelledby="gb-products-trigger"><a id="link-desk" href="https://gasbrazil.com/desk/" role="menuitem" data-i18n="navDesk"><span class="chk"></span>The Desk</a><a id="link-ons" href="https://gasbrazil.com/ons/" role="menuitem" data-i18n="navOns"><span class="chk"></span>ONS Balances</a><a id="link-pld" href="https://gasbrazil.com/pld/" role="menuitem" data-i18n="navPld"><span class="chk"></span>PLD Prices</a><a id="link-poc" href="https://gasbrazil.com/poc/" role="menuitem" data-i18n="navPoc"><span class="chk"></span>POC Results</a><a id="link-contratos" href="https://gasbrazil.com/contratos/" role="menuitem" data-i18n="navContratos"><span class="chk"></span>POC Contracts</a><a id="link-flows" href="https://gasbrazil.com/flows/" role="menuitem" data-i18n="navFlows"><span class="chk"></span>Pipeline Flows</a><a id="link-mago" href="https://gasbrazil.com/mago/" role="menuitem" data-i18n="navMago"><span class="chk"></span>TAG Mago</a><a id="link-nts" href="https://gasbrazil.com/nts/" role="menuitem" data-i18n="navNts"><span class="chk"></span>NTS OnTime</a><a id="link-supply" href="https://gasbrazil.com/supply/" role="menuitem" data-i18n="navSupply"><span class="chk"></span>Gas Supply</a><a id="link-precos" href="https://gasbrazil.com/precos/" role="menuitem" data-i18n="navPrecos"><span class="chk"></span>ANP Prices</a><a id="link-monitor" href="https://gasbrazil.com/monitor/" role="menuitem" data-i18n="navMonitor"><span class="chk"></span>Pipeline Monitor</a></div></div>
+      <span class="crumb-sep" aria-hidden="true"></span>
+      <h1 class="page-title">Admin Panel</h1>
+    </div>
+    <div class="nav-trail">
+      <a class="navlink" href="../wiki/" data-i18n="navWiki">Wiki</a>
+      <a class="navlink" href="../about/" data-i18n="navAbout">About</a>
+      <button type="button" class="gb-search-btn" id="gb-search-trigger" aria-label="Search (Ctrl+K)" title="Search (Ctrl+K)">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <span data-i18n="searchBtn">Search</span> <kbd>Ctrl+K</kbd>
+      </button>
+      <button type="button" class="auth-lock-btn" id="gb-auth-lock" aria-label="Lock site" title="Lock site" data-i18n-title="authLockBtn">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <span data-i18n="authLockBtn">Lock</span>
+      </button>
+    </div>
+    <button type="button" id="lang-toggle" class="langBtn" aria-label="Português">PT</button>
+    <button id="theme-toggle" title="Toggle theme" aria-label="Toggle theme"></button>
+  </div>
+  <script>
+(function () {
+  var OPEN_MS = 120;
+  var CLOSE_MS = 220;
+  var openTimer = null;
+  var closeTimer = null;
+
+  function menuLinks(dd) {
+    return Array.prototype.slice.call(dd.querySelectorAll(".dd-menu a"));
+  }
+  function setOpen(dd, open) {
+    if (!dd) return;
+    var menu = dd.querySelector(".dd-menu");
+    var btn = dd.querySelector(".dd-trigger");
+    if (!menu || !btn) return;
+    menu.classList.toggle("is-open", !!open);
+    btn.setAttribute("aria-expanded", open ? "true" : "false");
+  }
+  function closeAll(except) {
+    document.querySelectorAll(".products-dd").forEach(function (dd) {
+      if (dd !== except) setOpen(dd, false);
+    });
+  }
+  function scheduleOpen(dd) {
+    clearTimeout(closeTimer);
+    clearTimeout(openTimer);
+    openTimer = setTimeout(function () {
+      closeAll(dd);
+      setOpen(dd, true);
+    }, OPEN_MS);
+  }
+  function scheduleClose(dd) {
+    clearTimeout(openTimer);
+    clearTimeout(closeTimer);
+    closeTimer = setTimeout(function () {
+      setOpen(dd, false);
+    }, CLOSE_MS);
+  }
+  function focusLink(dd, idx) {
+    var items = menuLinks(dd);
+    if (!items.length) return;
+    var i = ((idx % items.length) + items.length) % items.length;
+    items[i].focus();
+  }
+  function bind(dd) {
+    if (dd.getAttribute("data-dd-bound") === "1") return;
+    dd.setAttribute("data-dd-bound", "1");
+    dd.addEventListener("mouseenter", function () { scheduleOpen(dd); });
+    dd.addEventListener("mouseleave", function () { scheduleClose(dd); });
+  }
+  function bindAll() {
+    document.querySelectorAll(".products-dd").forEach(bind);
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bindAll);
+  else bindAll();
+
+  document.addEventListener("click", function (e) {
+    var trigger = e.target.closest(".dd-trigger");
+    if (trigger) {
+      var dd = trigger.closest(".products-dd");
+      var menu = dd && dd.querySelector(".dd-menu");
+      if (dd && menu) {
+        clearTimeout(openTimer);
+        clearTimeout(closeTimer);
+        var open = !menu.classList.contains("is-open");
+        closeAll(open ? dd : null);
+        setOpen(dd, open);
+      }
+      return;
+    }
+    if (!e.target.closest(".products-dd")) closeAll(null);
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") {
+      var openDd = document.querySelector(".products-dd .dd-menu.is-open");
+      var dd = openDd && openDd.closest(".products-dd");
+      closeAll(null);
+      if (dd) {
+        var btn = dd.querySelector(".dd-trigger");
+        if (btn) btn.focus();
+      }
+      return;
+    }
+    var inTrigger = e.target.closest && e.target.closest(".dd-trigger");
+    var inMenu = e.target.closest && e.target.closest(".dd-menu");
+    var dd = (inTrigger && inTrigger.closest(".products-dd")) ||
+             (inMenu && e.target.closest(".products-dd"));
+    if (!dd) return;
+    var items = menuLinks(dd);
+    if (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Home" || e.key === "End") {
+      e.preventDefault();
+      setOpen(dd, true);
+      var idx = items.indexOf(document.activeElement);
+      if (e.key === "Home") focusLink(dd, 0);
+      else if (e.key === "End") focusLink(dd, items.length - 1);
+      else if (e.key === "ArrowDown") focusLink(dd, idx < 0 ? 0 : idx + 1);
+      else focusLink(dd, idx < 0 ? items.length - 1 : idx - 1);
+    }
+  });
+})();
+</script>
+</header>
+<div class="flagbar" aria-hidden="true"></div>
+
+<main class="admin-wrap" id="admin-main">
+  <div style="margin-bottom: 24px;">
+    <h2 style="font-size: 24px; font-weight: 600; margin: 0 0 6px;">Site Access &amp; Stealth Settings</h2>
+    <p style="font-size: 13.5px; color: var(--muted); margin: 0;">Configure site passcode, stealth gating mode, and deploy changes directly to GitHub.</p>
+  </div>
+
+  <!-- Status Card -->
+  <div class="admin-card">
+    <div class="admin-card-head">
+      <h3 class="admin-card-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Current Protection Status
+      </h3>
+      <span id="badge-status" class="admin-status-badge active">
+        ● Guard Active
+      </span>
+    </div>
+    <div class="admin-grid-2">
+      <div>
+        <div class="admin-form-label">Scope</div>
+        <div id="stat-scope" style="font-size: 13.5px; font-weight: 500; color: var(--text);">
+          Total Stealth (All pages locked)
+        </div>
       </div>
-      <button type="button" id="lang-toggle" class="langBtn" aria-label="Português">PT</button>
-      <button id="theme-toggle" title="Toggle theme" aria-label="Toggle theme"></button>
+      <div>
+        <div class="admin-form-label">Session Duration</div>
+        <div id="stat-days" style="font-size: 13.5px; font-weight: 500; color: var(--text);">30 days</div>
+      </div>
+    </div>
+    <div style="margin-top: 14px;">
+      <div class="admin-form-label">Salt</div>
+      <div class="admin-code">gasbrazil-auth-salt-2026</div>
+    </div>
+    <div style="margin-top: 12px;">
+      <div class="admin-form-label">Active SHA-256 Hash</div>
+      <div class="admin-hash-box">e08faeb3ac5faffe44f959ee4ed05c404ba6e3681992051ba6090724e7f5d8ff</div>
     </div>
   </div>
-  <p class="tagline" data-i18n="tagline">Analytical Firepower for Brazil's Energy Markets</p>
-  <div class="flagbar" aria-hidden="true"></div>
-  <nav class="hub-launch" aria-labelledby="hub-dash-title">
-  <h2 id="hub-dash-title" class="hub-section-title" data-i18n="hubDashboards">Live dashboards</h2>
-  <div class="kpi-strip">
-    <a class="kpi-cell" href="desk/" data-slug="desk">
-      <div class="kpi-label" data-i18n="cardDesk">The Desk</div>
-      <div class="kpi-role">Cross-product snapshot</div>
-      <div class="kpi-val" data-en="3840 MWmed gas · PLD SE 199.79" data-pt="3840 MWmed a gás · PLD SE 199.79">3840 MWmed gas · PLD SE 199.79</div>
-      <div class="kpi-when" data-refresh="2026-09-23 01:39 UTC"></div>
-    </a>
-    <a class="kpi-cell" href="ons/" data-slug="ons">
-      <div class="kpi-label" data-i18n="cardOns">ONS Balances</div>
-      <div class="kpi-role">Grid &amp; gas dispatch</div>
-      <div class="kpi-val" data-en="3,840 MWmed gas" data-pt="3,840 MWmed a gás">3,840 MWmed gas</div>
-      <div class="kpi-when" data-refresh="2026-09-23 01:40 UTC"></div>
-    </a>
-    <a class="kpi-cell" href="pld/" data-slug="pld">
-      <div class="kpi-label" data-i18n="cardPld">PLD Prices</div>
-      <div class="kpi-role">Power settlement</div>
-      <div class="kpi-val" data-en="SE 199.79 R$/MWh · 2026-09-23" data-pt="SE 199.79 R$/MWh · 2026-09-23">SE 199.79 R$/MWh · 2026-09-23</div>
-      <div class="kpi-when" data-refresh="2026-09-23 01:40 UTC"></div>
-      
-    </a>
-    <a class="kpi-cell" href="poc/" data-slug="poc">
-      <div class="kpi-label" data-i18n="cardPoc">POC Results</div>
-      <div class="kpi-role">Capacity auctions</div>
-      <div class="kpi-val" data-en="21.13 R$/MMBtu · 6 trades (7d)" data-pt="21.13 R$/MMBtu · 6 negócios (7d)">21.13 R$/MMBtu · 6 trades (7d)</div>
-      <div class="kpi-when" data-refresh="2026-09-22"></div>
-      
-    </a>
-    <a class="kpi-cell" href="contratos/" data-slug="contratos">
-      <div class="kpi-label" data-i18n="cardContratos">POC Contracts</div>
-      <div class="kpi-role">Firm transport</div>
-      <div class="kpi-val" data-en="888 contracts · 182601.1 thousand m³/d" data-pt="888 contratos · 182601.1 mil m³/d">888 contracts · 182601.1 thousand m³/d</div>
-      <div class="kpi-when" data-refresh="2026-09-23 01:40 UTC"></div>
-    </a>
-    <a class="kpi-cell" href="flows/" data-slug="flows">
-      <div class="kpi-label" data-i18n="cardFlows">Pipeline Flows</div>
-      <div class="kpi-role">Physical movement</div>
-      <div class="kpi-val" data-en="2765.3M m³ realized (7d)" data-pt="2765.3M m³ realizados (7d)">2765.3M m³ realized (7d)</div>
-      <div class="kpi-when" data-refresh="2026-09-21 18:14 UTC"></div>
-    </a>
-    <a class="kpi-cell" href="monitor/" data-slug="monitor">
-      <div class="kpi-label" data-i18n="cardMonitor">Pipeline Monitor</div>
-      <div class="kpi-role" data-i18n="cardMonitorDesc">TAG Mago &amp; NTS OnTime operational line pack &amp; SCADA telemetry.</div>
-      <div class="kpi-val" data-en="NTS 44.08 Mm³" data-pt="NTS 44.08 Mm³">NTS 44.08 Mm³</div>
-      <div class="kpi-when" data-refresh="2026-09-23 05:09 UTC"></div>
-      <svg class="kpi-spark" viewBox="0 0 120 28" width="120" height="28" aria-hidden="true"><polyline points="2.0,21.1 5.0,23.4 7.9,24.8 10.9,24.4 13.9,24.5 16.9,25.0 19.8,26.0 22.8,24.3 25.8,25.0 28.8,24.9 31.7,25.0 34.7,25.1 37.7,24.5 40.7,24.2 43.6,23.4 46.6,23.8 49.6,22.5 52.6,21.1 55.5,12.2 58.5,9.1 61.5,4.6 64.5,2.0 67.4,3.9 70.4,6.7 73.4,5.8 76.4,5.6 79.3,6.8 82.3,12.0 85.3,12.0 88.3,12.2 91.2,13.8 94.2,13.9 97.2,13.4 100.2,14.3 103.1,14.7 106.1,16.2 109.1,16.0 112.1,15.7 115.0,16.2 118.0,15.3"/></svg>
-    </a>
-    <a class="kpi-cell" href="supply/" data-slug="supply">
-      <div class="kpi-label" data-i18n="cardSupply">Gas Supply</div>
-      <div class="kpi-role">National balance</div>
-      <div class="kpi-val" data-en="6.7M thousand m³ produced · 2026-07" data-pt="6.7M mil m³ produzidos · 2026-07">6.7M thousand m³ produced · 2026-07</div>
-      <div class="kpi-when" data-refresh="2026-09-23 01:39 UTC"></div>
-      
-    </a>
-    <a class="kpi-cell" href="precos/" data-slug="precos">
-      <div class="kpi-label" data-i18n="cardPrecos">ANP Prices</div>
-      <div class="kpi-role">Disclosed R$/MMBtu</div>
-      <div class="kpi-val" data-en="Santos 18.2 R$/MMBtu · 2026-06" data-pt="Santos 18.2 R$/MMBtu · 2026-06">Santos 18.2 R$/MMBtu · 2026-06</div>
-      <div class="kpi-when" data-refresh="2026-09-23 01:39 UTC"></div>
-    </a>
+
+  <!-- Configuration Form -->
+  <div class="admin-card">
+    <div class="admin-card-head">
+      <h3 class="admin-card-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Adjust Protection Settings
+      </h3>
+    </div>
+
+    <!-- Toggle Protection -->
+    <div class="admin-form-group">
+      <div class="admin-switch-row">
+        <div>
+          <div class="admin-switch-label">Passcode Protection Guard</div>
+          <div class="admin-switch-sub">When enabled, visitors must enter the correct passcode to access protected pages.</div>
+        </div>
+        <input type="checkbox" id="field-enabled" checked style="width: 20px; height: 20px; cursor: pointer;">
+      </div>
+    </div>
+
+    <!-- Scope Selection -->
+    <div class="admin-form-group">
+      <label class="admin-form-label">Protection Scope</label>
+      <div class="admin-radio-group">
+        <label class="admin-radio-label">
+          <input type="radio" name="field-scope" value="all" checked>
+          <div>
+            <strong>Total Stealth (Recommended)</strong>
+            <div class="admin-radio-desc">Every page is locked behind the passcode screen, including the landing hub (/) and about page.</div>
+          </div>
+        </label>
+        <label class="admin-radio-label">
+          <input type="radio" name="field-scope" value="dashboards" >
+          <div>
+            <strong>Dashboards Only</strong>
+            <div class="admin-radio-desc">The landing hub (/) is public; individual dashboard pages (/desk/, /ons/, /poc/, etc.) require the passcode.</div>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- Change Passcode -->
+    <div class="admin-form-group">
+      <label class="admin-form-label" for="field-password">New Passcode (Leave blank to keep existing)</label>
+      <div style="position: relative;">
+        <input type="password" id="field-password" class="admin-input" placeholder="Enter new passcode…" autocomplete="new-password">
+        <button type="button" id="btn-toggle-eye" class="gb-auth-eye-btn" style="right: 8px; top: 7px;" aria-label="Toggle password view">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+      <div class="admin-form-help">Passwords are never stored in plaintext. They are salted and hashed with SHA-256.</div>
+    </div>
+
+    <!-- Live Hash Preview -->
+    <div class="admin-form-group" id="wrap-new-hash" style="display: none;">
+      <label class="admin-form-label">Computed SHA-256 Hash Preview</label>
+      <div id="preview-new-hash" class="admin-hash-box"></div>
+    </div>
+
+    <!-- Session Duration -->
+    <div class="admin-form-group">
+      <label class="admin-form-label" for="field-days">Session Expiration (Days)</label>
+      <input type="number" id="field-days" class="admin-input" value="30" min="1" max="365" style="max-width: 140px;">
+      <div class="admin-form-help">How many days an unlocked browser session remains valid before requiring re-entry.</div>
+    </div>
   </div>
-  </nav>
-  <div class="sources-block">
-    <div class="label" data-i18n="sources">Sources</div>
-    <div class="row">
-      <a href="https://dados.ons.org.br" target="_blank" rel="noopener">ONS<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
-      <a href="https://www.ofertadecapacidade.com.br/PEG/resultado" target="_blank" rel="noopener">POC<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
-      <a href="https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/dados-consolidados-movimentacao-de-gas-natural-em-gasodutos-de-transporte" target="_blank" rel="noopener">ANP<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
-      <a href="https://dadosabertos.ccee.org.br/dataset/pld_media_diaria" target="_blank" rel="noopener">CCEE<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
-      <a href="https://www.ntsbrasil.com/ontime/" target="_blank" rel="noopener">NTS<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+
+  <!-- Direct GitHub Sync Card -->
+  <div class="admin-card">
+    <div class="admin-card-head">
+      <h3 class="admin-card-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+        1-Click Publish to Live Site (GitHub Sync)
+      </h3>
+    </div>
+    <div class="admin-alert info">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex: none; margin-top: 1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      <div>
+        Because GasBrazil is hosted on GitHub Pages, publishing updates commits <code>config/auth.json</code> to your repository. GitHub Actions will automatically rebuild and deploy the live site within ~1-2 minutes.
+      </div>
+    </div>
+
+    <div class="admin-form-group">
+      <label class="admin-form-label" for="field-pat">GitHub Personal Access Token (PAT)</label>
+      <input type="password" id="field-pat" class="admin-input" placeholder="ghp_... or github_pat_..." autocomplete="off">
+      <div class="admin-form-help">Needs repository <code>contents:write</code> permission. Stored only in your local browser storage if remembered.</div>
+    </div>
+
+    <div class="admin-form-group" style="display: flex; align-items: center; gap: 8px;">
+      <input type="checkbox" id="field-remember-pat" checked style="cursor: pointer;">
+      <label for="field-remember-pat" style="font-size: 12.5px; color: var(--muted); cursor: pointer;">Remember token in this browser (stored in localStorage only)</label>
+    </div>
+
+    <div id="publish-status-box" style="margin-top: 12px; display: none;"></div>
+
+    <div style="margin-top: 16px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+      <button type="button" id="btn-publish-github" class="admin-btn admin-btn-primary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Publish Changes to GitHub
+      </button>
+      <button type="button" id="btn-download-json" class="admin-btn admin-btn-secondary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download auth.json
+      </button>
+    </div>
+  </div>
+
+  <!-- CLI & Offline Instructions -->
+  <div class="admin-card">
+    <div class="admin-card-head">
+      <h3 class="admin-card-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+        CLI &amp; Offline Management
+      </h3>
+    </div>
+    <p style="font-size: 13px; color: var(--muted); margin: 0 0 12px;">You can also configure security settings directly from the terminal using the repo helper script:</p>
+    <div class="admin-code" style="padding: 10px 14px; font-size: 12.5px; display: block; overflow-x: auto; white-space: pre;">python manage_auth.py --password "your-new-passcode" --scope all --enable</div>
+  </div>
+
+  <!-- Session Diagnostics -->
+  <div class="admin-card">
+    <div class="admin-card-head">
+      <h3 class="admin-card-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Session Diagnostics &amp; Immediate Lock
+      </h3>
+    </div>
+    <p style="font-size: 13px; color: var(--muted); margin: 0 0 14px;">Test entering a passcode against the live config, or immediately lock this browser session to test the login screen.</p>
+    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+      <button type="button" id="btn-lock-now" class="admin-btn admin-btn-secondary" style="color: #ef4444; border-color: color-mix(in srgb, #ef4444 30%, transparent);">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Lock Site Now (Test Lock Screen)
+      </button>
+      <button type="button" id="btn-clear-session" class="admin-btn admin-btn-secondary">
+        Reset Stored Session
+      </button>
     </div>
   </div>
 </main>
+
 <footer class="site">
-  &copy; <span id="year"></span> GasBrazil
-  &middot; <a href="./wiki/" data-i18n="navWiki">Wiki</a>
-  &middot; <a href="./about/" data-i18n="footerAbout">About &amp; methodology</a>
-  &middot; <button type="button" class="footer-link-btn" id="link-shortcuts" data-i18n="shortcutsBtn">Shortcuts (?)</button>
-  &middot; <span data-i18n="contact">Contact</span>: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
+  &copy; <span id="year"></span> GasBrazil &middot; <a href="../">Home</a> &middot; <a href="../wiki/">Wiki</a> &middot; <a href="../about/">About</a>
 </footer>
+
 <script>
 
 function b64ToBytes(b64) {
@@ -4540,168 +4655,200 @@ if (document.readyState === "loading") {
 document.getElementById("year").textContent = new Date().getFullYear();
 initThemeToggle("theme-toggle");
 initLangToggle("lang-toggle");
-</script>
-<script>
-(function () {
-  var OPEN_MS = 120;
-  var CLOSE_MS = 220;
-  var openTimer = null;
-  var closeTimer = null;
 
-  function menuLinks(dd) {
-    return Array.prototype.slice.call(dd.querySelectorAll(".dd-menu a"));
+(function() {
+  const CURRENT_SALT = "gasbrazil-auth-salt-2026";
+  let currentComputedHash = "e08faeb3ac5faffe44f959ee4ed05c404ba6e3681992051ba6090724e7f5d8ff";
+
+  // Restore saved PAT if available
+  const savedPat = localStorage.getItem("gb_admin_pat");
+  if (savedPat) {
+    const patField = document.getElementById("field-pat");
+    if (patField) patField.value = savedPat;
   }
-  function setOpen(dd, open) {
-    if (!dd) return;
-    var menu = dd.querySelector(".dd-menu");
-    var btn = dd.querySelector(".dd-trigger");
-    if (!menu || !btn) return;
-    menu.classList.toggle("is-open", !!open);
-    btn.setAttribute("aria-expanded", open ? "true" : "false");
-  }
-  function closeAll(except) {
-    document.querySelectorAll(".products-dd").forEach(function (dd) {
-      if (dd !== except) setOpen(dd, false);
+
+  // Eye toggle on password
+  const eyeBtn = document.getElementById("btn-toggle-eye");
+  const passField = document.getElementById("field-password");
+  if (eyeBtn && passField) {
+    eyeBtn.addEventListener("click", () => {
+      const isPass = passField.type === "password";
+      passField.type = isPass ? "text" : "password";
+      eyeBtn.innerHTML = isPass
+        ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'
+        : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
     });
   }
-  function scheduleOpen(dd) {
-    clearTimeout(closeTimer);
-    clearTimeout(openTimer);
-    openTimer = setTimeout(function () {
-      closeAll(dd);
-      setOpen(dd, true);
-    }, OPEN_MS);
-  }
-  function scheduleClose(dd) {
-    clearTimeout(openTimer);
-    clearTimeout(closeTimer);
-    closeTimer = setTimeout(function () {
-      setOpen(dd, false);
-    }, CLOSE_MS);
-  }
-  function focusLink(dd, idx) {
-    var items = menuLinks(dd);
-    if (!items.length) return;
-    var i = ((idx % items.length) + items.length) % items.length;
-    items[i].focus();
-  }
-  function bind(dd) {
-    if (dd.getAttribute("data-dd-bound") === "1") return;
-    dd.setAttribute("data-dd-bound", "1");
-    dd.addEventListener("mouseenter", function () { scheduleOpen(dd); });
-    dd.addEventListener("mouseleave", function () { scheduleClose(dd); });
-  }
-  function bindAll() {
-    document.querySelectorAll(".products-dd").forEach(bind);
-  }
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bindAll);
-  else bindAll();
 
-  document.addEventListener("click", function (e) {
-    var trigger = e.target.closest(".dd-trigger");
-    if (trigger) {
-      var dd = trigger.closest(".products-dd");
-      var menu = dd && dd.querySelector(".dd-menu");
-      if (dd && menu) {
-        clearTimeout(openTimer);
-        clearTimeout(closeTimer);
-        var open = !menu.classList.contains("is-open");
-        closeAll(open ? dd : null);
-        setOpen(dd, open);
+  // Live SHA-256 calculation
+  const wrapHash = document.getElementById("wrap-new-hash");
+  const previewHash = document.getElementById("preview-new-hash");
+  if (passField) {
+    passField.addEventListener("input", async () => {
+      const val = passField.value.trim();
+      if (!val) {
+        wrapHash.style.display = "none";
+        currentComputedHash = "e08faeb3ac5faffe44f959ee4ed05c404ba6e3681992051ba6090724e7f5d8ff";
+        return;
       }
-      return;
-    }
-    if (!e.target.closest(".products-dd")) closeAll(null);
-  });
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") {
-      var openDd = document.querySelector(".products-dd .dd-menu.is-open");
-      var dd = openDd && openDd.closest(".products-dd");
-      closeAll(null);
-      if (dd) {
-        var btn = dd.querySelector(".dd-trigger");
-        if (btn) btn.focus();
+      try {
+        const h = await gbSha256(val + ":" + CURRENT_SALT);
+        currentComputedHash = h;
+        previewHash.textContent = h;
+        wrapHash.style.display = "block";
+      } catch (err) {
+        console.error(err);
       }
-      return;
-    }
-    var inTrigger = e.target.closest && e.target.closest(".dd-trigger");
-    var inMenu = e.target.closest && e.target.closest(".dd-menu");
-    var dd = (inTrigger && inTrigger.closest(".products-dd")) ||
-             (inMenu && e.target.closest(".products-dd"));
-    if (!dd) return;
-    var items = menuLinks(dd);
-    if (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Home" || e.key === "End") {
-      e.preventDefault();
-      setOpen(dd, true);
-      var idx = items.indexOf(document.activeElement);
-      if (e.key === "Home") focusLink(dd, 0);
-      else if (e.key === "End") focusLink(dd, items.length - 1);
-      else if (e.key === "ArrowDown") focusLink(dd, idx < 0 ? 0 : idx + 1);
-      else focusLink(dd, idx < 0 ? items.length - 1 : idx - 1);
-    }
-  });
+    });
+  }
+
+  // Build target config object
+  function getDesiredConfig() {
+    const enabled = document.getElementById("field-enabled").checked;
+    const scopeRadio = document.querySelector('input[name="field-scope"]:checked');
+    const scope = scopeRadio ? scopeRadio.value : "all";
+    const days = parseInt(document.getElementById("field-days").value, 10) || 30;
+    return {
+      enabled: enabled,
+      scope: scope,
+      salt: CURRENT_SALT,
+      hash: currentComputedHash,
+      session_days: days
+    };
+  }
+
+  // Download JSON
+  const downloadBtn = document.getElementById("btn-download-json");
+  if (downloadBtn) {
+    downloadBtn.addEventListener("click", () => {
+      const cfg = getDesiredConfig();
+      const text = JSON.stringify(cfg, null, 2) + "\n";
+      const blob = new Blob([text], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "auth.json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      gbShowToast("Downloaded config/auth.json");
+    });
+  }
+
+  // Lock site now
+  const lockBtn = document.getElementById("btn-lock-now");
+  if (lockBtn) {
+    lockBtn.addEventListener("click", () => {
+      gbLockSite();
+    });
+  }
+
+  // Clear session
+  const clearBtn = document.getElementById("btn-clear-session");
+  if (clearBtn) {
+    clearBtn.addEventListener("click", () => {
+      localStorage.removeItem("gasbrazil-auth-v1");
+      gbShowToast("Local session cleared");
+    });
+  }
+
+  // Publish to GitHub via Contents API
+  const publishBtn = document.getElementById("btn-publish-github");
+  const statusBox = document.getElementById("publish-status-box");
+  if (publishBtn) {
+    publishBtn.addEventListener("click", async () => {
+      const patField = document.getElementById("field-pat");
+      const pat = (patField ? patField.value : "").trim();
+      if (!pat) {
+        statusBox.className = "admin-alert error";
+        statusBox.innerHTML = "<strong>Error:</strong> Please provide a GitHub Personal Access Token (PAT) with repo contents write permission.";
+        statusBox.style.display = "block";
+        if (patField) patField.focus();
+        return;
+      }
+
+      const rememberCheck = document.getElementById("field-remember-pat");
+      if (rememberCheck && rememberCheck.checked) {
+        localStorage.setItem("gb_admin_pat", pat);
+      } else {
+        localStorage.removeItem("gb_admin_pat");
+      }
+
+      publishBtn.disabled = true;
+      publishBtn.textContent = "Publishing to GitHub…";
+      statusBox.className = "admin-alert info";
+      statusBox.innerHTML = "Connecting to GitHub API to update config/auth.json…";
+      statusBox.style.display = "block";
+
+      const repo = "gasbrazil/gasbrazil.github.io";
+      const filePath = "config/auth.json";
+      const apiUrl = "https://api.github.com/repos/" + repo + "/contents/" + filePath;
+
+      try {
+        // 1. Get current file SHA
+        const getRes = await fetch(apiUrl, {
+          headers: {
+            "Authorization": "Bearer " + pat,
+            "Accept": "application/vnd.github.v3+json"
+          }
+        });
+
+        if (!getRes.ok && getRes.status !== 404) {
+          throw new Error("GitHub API Error " + getRes.status + ": " + (await getRes.text()));
+        }
+
+        let currentSha = null;
+        if (getRes.ok) {
+          const getData = await getRes.json();
+          currentSha = getData.sha;
+        }
+
+        // 2. Put updated auth.json
+        const newCfg = getDesiredConfig();
+        const contentStr = JSON.stringify(newCfg, null, 2) + "\n";
+        const contentB64 = btoa(unescape(encodeURIComponent(contentStr)));
+
+        const putBody = {
+          message: "chore(auth): update site passcode & security settings from admin panel",
+          content: contentB64
+        };
+        if (currentSha) putBody.sha = currentSha;
+
+        const putRes = await fetch(apiUrl, {
+          method: "PUT",
+          headers: {
+            "Authorization": "Bearer " + pat,
+            "Accept": "application/vnd.github.v3+json",
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(putBody)
+        });
+
+        if (!putRes.ok) {
+          const errData = await putRes.json().catch(() => ({}));
+          throw new Error(errData.message || ("GitHub API Error " + putRes.status));
+        }
+
+        statusBox.className = "admin-alert success";
+        statusBox.innerHTML = "<strong>Success!</strong> Successfully updated <code>config/auth.json</code> on GitHub. GitHub Actions is now rebuilding and publishing the live site (~1 minute).";
+        gbShowToast("Changes published to GitHub!");
+
+        // Update local session with new hash so admin doesn't get locked out
+        if (newCfg.hash) {
+          gbSaveSession(newCfg.hash, newCfg.session_days);
+        }
+      } catch (err) {
+        console.error(err);
+        statusBox.className = "admin-alert error";
+        statusBox.innerHTML = "<strong>Publish Failed:</strong> " + escapeHtml(err.message || String(err));
+      } finally {
+        publishBtn.disabled = false;
+        publishBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Publish Changes to GitHub';
+      }
+    });
+  }
 })();
 </script>
 </body>
 </html>
-
-<script>
-const TEASERS_URL = "hub/teasers.json.gz";
-function paintRefreshLabels() {
-  document.querySelectorAll(".kpi-when[data-refresh]").forEach(el => {
-    const when = el.getAttribute("data-refresh");
-    if (!when) { el.innerHTML = ""; return; }
-    let dotClass = "pulse-dot";
-    let statusTip = (typeof t === "function" ? t("freshLive") : null) || "Live & fresh";
-    try {
-      const now = new Date();
-      const dt = new Date(when.replace(" ", "T") + (when.includes("Z") ? "" : "Z"));
-      const diffHours = (now - dt) / 3600000;
-      if (isNaN(diffHours) || diffHours > 48) {
-        dotClass = "pulse-dot neutral";
-        statusTip = (typeof t === "function" ? t("freshScheduled") : null) || "Scheduled publication";
-      } else if (diffHours > 24) {
-        dotClass = "pulse-dot delayed";
-        statusTip = (typeof t === "function" ? t("freshDelayed") : null) || "Awaiting update";
-      }
-    } catch (e) {}
-    el.innerHTML = '<span class="' + dotClass + '" title="' + escapeHtml(statusTip) + '" aria-hidden="true"></span> <span>' + escapeHtml(when) + '</span>';
-  });
-  document.querySelectorAll(".kpi-val[data-en]").forEach(el => {
-    const en = el.getAttribute("data-en");
-    const pt = el.getAttribute("data-pt");
-    const val = currentLang() === "pt" ? (pt || en) : en;
-    el.textContent = val || "";
-    el.hidden = !val;
-  });
-}
-async function loadLiveTeasers() {
-  if (!TEASERS_URL || TEASERS_URL.indexOf("teasers") < 0) return;
-  try {
-    const raw = await inflateGzipUrl(TEASERS_URL);
-    const data = JSON.parse(raw);
-    const items = (data && data.items) || data || {};
-    document.querySelectorAll(".kpi-cell[data-slug]").forEach(cell => {
-      const slug = cell.getAttribute("data-slug");
-      const t = items[slug];
-      if (!t) return;
-      const val = cell.querySelector(".kpi-val");
-      const when = cell.querySelector(".kpi-when");
-      if (val && (t.kpi || t.kpiEn)) {
-        const en = t.kpiEn || t.kpi || "";
-        const pt = t.kpiPt || en;
-        val.setAttribute("data-en", en);
-        val.setAttribute("data-pt", pt);
-      }
-      if (when && t.when) when.setAttribute("data-refresh", t.when);
-    });
-    paintRefreshLabels();
-  } catch (e) {
-    /* Build-time markers remain the fallback. */
-  }
-}
-const _apply = applyI18n;
-applyI18n = function() { _apply(); paintRefreshLabels(); };
-paintRefreshLabels();
-loadLiveTeasers();
-</script>

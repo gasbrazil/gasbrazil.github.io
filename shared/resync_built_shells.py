@@ -198,9 +198,42 @@ def resync_search_btn(html: str) -> str:
     return html
 
 
+def resync_boot_js(html: str) -> str:
+    pattern = r"<script>\s*\(function\(\)\{\s*try\s*\{\s*/\* Dark is the site default[\s\S]*?bindFlagbarHeaderGlow\(\);\s*\}\)\(\);\s*</script>"
+    replacement = f"<script>\n{kit.JS_BOOT.strip()}\n</script>"
+    return re.sub(pattern, lambda _: replacement, html, count=1)
+
+
+def resync_lock_btn(html: str) -> str:
+    if 'id="gb-auth-lock"' in html:
+        return html
+    btn = (
+        '<button type="button" class="auth-lock-btn" id="gb-auth-lock" aria-label="Lock site" title="Lock site" data-i18n-title="authLockBtn">'
+        '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>'
+        '<span data-i18n="authLockBtn">Lock</span>'
+        '</button>'
+    )
+    if 'id="gb-search-trigger"' in html:
+        return re.sub(
+            r'(<button[^>]*id="gb-search-trigger"[^>]*>[\s\S]*?</button>)',
+            rf'\1\n      {btn}',
+            html,
+            count=1,
+        )
+    if '<div class="nav-trail">' in html:
+        return re.sub(
+            r'(<div class="nav-trail">[\s\S]*?)(</div>)',
+            rf'\1{btn}\2',
+            html,
+            count=1,
+        )
+    return html
+
+
 def resync_site(site_id: str) -> None:
     path = ROOT / site_id / "index.html"
     html = path.read_text(encoding="utf-8")
+    html = resync_boot_js(html)
     html = resync_theme(html, kit.render_theme_css(), site_id)
     html = resync_typo_weights(html)
     html = resync_products_dd(html, site_id)
@@ -212,6 +245,7 @@ def resync_site(site_id: str) -> None:
     html = resync_boot_resilience(html)
     html = resync_footer_shortcuts(html)
     html = resync_search_btn(html)
+    html = resync_lock_btn(html)
     path.write_text(html, encoding="utf-8")
     print(f"resynced {path.relative_to(ROOT)}")
 
