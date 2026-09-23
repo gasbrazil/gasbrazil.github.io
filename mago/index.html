@@ -16,9 +16,9 @@
 <link rel="preload" href="/shared/fonts/IBMPlexSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/shared/fonts/Pacaembu-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
 <!-- home-page teaser marker, read by ../build_home.py:
-     generated: 2026-09-22 22:40 UTC
-     kpi_linepack: 68.69
-     kpi_snapshot: 2026-09-20 22:08 UTC -->
+     generated: 2026-09-23 04:57 UTC
+     kpi_linepack: 71.19
+     kpi_snapshot: 2026-09-23 01:08 UTC -->
 <script>
 (function(){
   try {
@@ -2293,6 +2293,7 @@ th.has-filter .th-label {
     box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
   }
 }
+
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; font-weight: 300; }
 header.dash-head { display: flex; flex-direction: row; align-items: center; gap: 10px; margin-bottom: 0; }
@@ -2551,10 +2552,6 @@ main h3,
   </div>
 </header>
 <div class="flagbar" aria-hidden="true"></div>
-<div class="sources">
-  <span class="sources-label" data-i18n="sources">Sources</span>
-  <a href="https://mago.ntag.com.br/empacotamento" target="_blank" rel="noopener">TAG Mago<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
-</div>
   <div class="kpi-row">
     <div class="kpi"><div class="label" data-i18n="magoKpiLinepack">Integrated line pack</div><div class="val" id="kpi-lp">—</div></div>
     <div class="kpi"><div class="label" data-i18n="magoKpiZone">Operating Zone</div><div class="val" id="kpi-zone">—</div></div>
@@ -2565,7 +2562,6 @@ main h3,
     <div class="panel-head-row">
       <div style="display:flex;align-items:center;">
         <h2 data-i18n="magoLinepackTitle">TAG Line Pack — Integrated Network</h2>
-        <button type="button" class="infodot" data-info="Hourly actual (solid) and short-horizon forecast (dashed) with TAG commercial tolerance risk bands." title="Hourly actual (solid) and short-horizon forecast (dashed) with TAG commercial tolerance risk bands." aria-label="Info">i</button>
       </div>
       <div id="linepack-zone-pill" class="zone-pill">—</div>
     </div>
@@ -2579,7 +2575,6 @@ main h3,
   <details class="panel-fold" id="faixas-panel">
     <summary style="display:flex;align-items:center;">
       <span data-i18n="magoFaixasTitle">Operating Risk & Imbalance Tolerance Bands</span>
-      <button type="button" class="infodot" data-info="Commercial balancing tolerance thresholds established for TAG's integrated pipeline system. Exceeding marginal thresholds incurs imbalance penalties or triggers operational balancing actions." title="Commercial balancing tolerance thresholds established for TAG's integrated pipeline system. Exceeding marginal thresholds incurs imbalance penalties or triggers operational balancing actions." aria-label="Info" onclick="event.stopPropagation()">i</button>
     </summary>
     <div class="fold-body">
       <div id="faixas-grid"></div>
@@ -2663,6 +2658,10 @@ main h3,
   <button type="button" id="btn-share" data-i18n="copyLink">Copy link</button>
 </div>
 <footer>
+  <div class="sources">
+    <span class="sources-label" data-i18n="sources">Sources</span>
+    <a href="https://mago.ntag.com.br/empacotamento" target="_blank" rel="noopener">TAG Mago<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+  </div>
   <div class="asof-strip asof-footer" id="asof-strip">
     <span class="asof-label" data-i18n="kpiRefresh">Last refreshed</span>
     <span class="asof-val" id="asof-refreshed">&mdash;</span>
@@ -2670,10 +2669,10 @@ main h3,
     <span class="asof-val" id="asof-through">&mdash;</span>
   </div>
   <details class="method">
-<summary data-i18n="methodTitle">How this is built</summary>
+<summary data-i18n="methodTitle">Methodology</summary>
 <div class="method-row"><span class="method-label" data-i18n="methodSources">Sources</span><span><span data-i18n="sourceMago">TAG Mago</span></span></div>
-<div class="method-row"><span class="method-label" data-i18n="methodAssump">Key assumption</span><span data-i18n="methodAssump_mago">One EMPACOTAMENTOS snapshot feeds both line pack and zone forecasts; values are stored as published (m³ line pack, Mm³/d zones).</span></div>
-<div class="method-row"><span class="method-label" data-i18n="methodLimits">Limits</span><span data-i18n="aboutCoverMago">TAG Mago: hourly line pack and 7-day balancing-zone consumption forecasts from EMPACOTAMENTOS API snapshots.</span></div>
+<div class="method-row"><span class="method-label" data-i18n="methodAssump">Key assumption</span><span data-i18n="methodAssump_mago">Line pack and 7-day balancing zone estimates are ingested directly from TAG EMPACOTAMENTOS telemetry snapshots.</span></div>
+<div class="method-row"><span class="method-label" data-i18n="methodLimits">Limits</span><span data-i18n="aboutCoverMago">Data reflects TAG&#x27;s integrated pipeline network and published operational balancing tolerance bands.</span></div>
 </details>
   &copy; <span id="year"></span> GasBrazil.com &middot;
   <span data-i18n="magoFooter">Data: TAG Mago EMPACOTAMENTOS snapshots. Not an official TAG product.</span>
@@ -2682,7 +2681,7 @@ main h3,
 <div class="tt" id="chart-tt"></div>
 </div>
 <script>
-const PAYLOAD_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/mago/payload.json.gz";
+const PAYLOAD_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/mago/payload.json.gz?v=35820359107";
 /** Public R2 artifact (same bucket as other GasBrazil dashboards). Used when the shell still points at a sibling payload.json.gz that is not on Pages. */
 const MAGO_PAYLOAD_R2 = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/mago/payload.json.gz";
 
