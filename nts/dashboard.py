@@ -537,17 +537,6 @@ __SHARED_TYPO_WEIGHT_CSS__
 <div class="flagbar" aria-hidden="true"></div>
 
 <main id="main">
-  <!-- Page Header Intro -->
-  <div class="nts-intro">
-    <div class="sources">
-      <span class="sources-label" data-i18n="sources">Sources</span>
-      <a class="pill" href="https://ntsbrasil.com/ontime" target="_blank" rel="noopener">NTS OnTime<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
-    </div>
-    <div class="nts-intro-sub" data-i18n="ntsLinepackSub">
-      Real-time pipeline line pack inventory and hourly packing/unpacking rate.
-    </div>
-  </div>
-
   <!-- KPI Cards Grid -->
   <div class="kpi-grid">
     <div class="nts-card accent">
@@ -611,9 +600,8 @@ __SHARED_TYPO_WEIGHT_CSS__
   <section class="chart-section" aria-labelledby="chart-title">
     <div class="chart-header">
       <div class="chart-title-group">
-        <h2 id="chart-title" style="display:inline-flex;align-items:center;">
+        <h2 id="chart-title">
           <span data-i18n="ntsLinepackTitle">NTS Line Pack — Transmission Network</span>
-          <button type="button" class="infodot" data-info="SCADA line pack telemetry (solid amber) with historical mean guideline (dashed)." title="SCADA line pack telemetry (solid amber) with historical mean guideline (dashed)." aria-label="Info">i</button>
         </h2>
       </div>
       <div class="range-toggle-group" role="group" aria-label="Chart time window">
@@ -661,6 +649,11 @@ __SHARED_TYPO_WEIGHT_CSS__
       </table>
     </div>
   </section>
+
+  <div class="sources">
+    <span class="sources-label" data-i18n="sources">Sources</span>
+    <a class="pill" href="https://ntsbrasil.com/ontime" target="_blank" rel="noopener">NTS OnTime<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+  </div>
 
   <!-- Methodology trust block -->
   __METHODOLOGY__

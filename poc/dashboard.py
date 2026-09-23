@@ -238,10 +238,6 @@ __SHARED_TYPO_WEIGHT_CSS__
   </div>
 </header>
 <div class="flagbar" aria-hidden="true"></div>
-<div class="sources">
-  <span class="sources-label" data-i18n="sources">Sources</span>
-  <a href="https://www.ofertadecapacidade.com.br/PEG/resultado" target="_blank" rel="noopener">POC<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
-</div>
 <div class="tso-row" id="tso-row"></div>
 <div class="chart-card">
   <p class="panel-title">Price Trend</p>
@@ -256,7 +252,7 @@ __SHARED_TYPO_WEIGHT_CSS__
   <select id="f-timing"><option value="">All trade timing</option></select>
   <input id="f-search" type="search" placeholder="Search process / delivery point&hellip;">
   <button class="secondary" id="btn-reset">Reset filters</button>
-  <button class="secondary" id="btn-refresh" title="Reload the latest published build. Data itself refreshes automatically every 6 hours; this does not trigger a new pull.">&#8635; Reload latest</button>
+  <button class="secondary" id="btn-refresh" title="Reload latest data">&#8635; Reload latest</button>
   <button class="secondary" id="btn-columns" title="Show or hide columns">Columns</button>
   <button id="btn-csv">Download CSV</button>
   <button id="btn-xlsx">Export all data (Excel)</button>
@@ -270,6 +266,10 @@ __SHARED_TYPO_WEIGHT_CSS__
   </table>
 </div>
 <footer>
+  <div class="sources">
+    <span class="sources-label" data-i18n="sources">Sources</span>
+    <a href="https://www.ofertadecapacidade.com.br/PEG/resultado" target="_blank" rel="noopener">POC<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+  </div>
   <div class="asof-strip asof-footer" id="asof-strip">
     <span class="asof-label" data-i18n="kpiRefresh">Last refreshed</span>
     <span class="asof-val" id="asof-refreshed">&mdash;</span>

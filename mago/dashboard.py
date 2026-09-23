@@ -730,10 +730,6 @@ __SHARED_TYPO_WEIGHT_CSS__
   </div>
 </header>
 <div class="flagbar" aria-hidden="true"></div>
-<div class="sources">
-  <span class="sources-label" data-i18n="sources">Sources</span>
-  <a href="https://mago.ntag.com.br/empacotamento" target="_blank" rel="noopener">TAG Mago<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
-</div>
   <div class="kpi-row">
     <div class="kpi"><div class="label" data-i18n="magoKpiLinepack">Integrated line pack</div><div class="val" id="kpi-lp">—</div></div>
     <div class="kpi"><div class="label" data-i18n="magoKpiZone">Operating Zone</div><div class="val" id="kpi-zone">—</div></div>
@@ -744,7 +740,6 @@ __SHARED_TYPO_WEIGHT_CSS__
     <div class="panel-head-row">
       <div style="display:flex;align-items:center;">
         <h2 data-i18n="magoLinepackTitle">TAG Line Pack — Integrated Network</h2>
-        <button type="button" class="infodot" data-info="Hourly actual (solid) and short-horizon forecast (dashed) with TAG commercial tolerance risk bands." title="Hourly actual (solid) and short-horizon forecast (dashed) with TAG commercial tolerance risk bands." aria-label="Info">i</button>
       </div>
       <div id="linepack-zone-pill" class="zone-pill">—</div>
     </div>
@@ -758,7 +753,6 @@ __SHARED_TYPO_WEIGHT_CSS__
   <details class="panel-fold" id="faixas-panel">
     <summary style="display:flex;align-items:center;">
       <span data-i18n="magoFaixasTitle">Operating Risk & Imbalance Tolerance Bands</span>
-      <button type="button" class="infodot" data-info="Commercial balancing tolerance thresholds established for TAG's integrated pipeline system. Exceeding marginal thresholds incurs imbalance penalties or triggers operational balancing actions." title="Commercial balancing tolerance thresholds established for TAG's integrated pipeline system. Exceeding marginal thresholds incurs imbalance penalties or triggers operational balancing actions." aria-label="Info" onclick="event.stopPropagation()">i</button>
     </summary>
     <div class="fold-body">
       <div id="faixas-grid"></div>
@@ -842,6 +836,10 @@ __SHARED_TYPO_WEIGHT_CSS__
   __SHARED_SHARE_BUTTON__
 </div>
 <footer>
+  <div class="sources">
+    <span class="sources-label" data-i18n="sources">Sources</span>
+    <a href="https://mago.ntag.com.br/empacotamento" target="_blank" rel="noopener">TAG Mago<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+  </div>
   <div class="asof-strip asof-footer" id="asof-strip">
     <span class="asof-label" data-i18n="kpiRefresh">Last refreshed</span>
     <span class="asof-val" id="asof-refreshed">&mdash;</span>
