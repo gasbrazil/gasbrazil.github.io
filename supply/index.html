@@ -10,7 +10,7 @@
 <link rel="preload" href="/shared/fonts/IBMPlexSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/shared/fonts/Pacaembu-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
 <!-- home-page teaser marker, read by ../build_home.py:
-     generated: 2026-09-22 22:49 UTC
+     generated: 2026-09-23 01:39 UTC
      kpi_production: 6663999.303
      data_through: 2026-07 -->
 <script>
@@ -2287,6 +2287,7 @@ th.has-filter .th-label {
     box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
   }
 }
+
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; font-weight: 300; }
 /* Single-row header: wordmark-menu · title … Wiki/About · PT · theme */
@@ -2517,16 +2518,11 @@ main h3,
   </div>
 </header>
 <div class="flagbar" aria-hidden="true"></div>
-<div class="sources">
-  <span class="sources-label" data-i18n="sources">Sources</span>
-  <a href="https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/producao-de-petroleo-e-gas-natural-por-estado-e-localizacao" target="_blank" rel="noopener" title="ANP PPGN-EL">ANP<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
-  <a href="https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/importacoes-e-exportacoes" target="_blank" rel="noopener" title="ANP imports / exports">ANP<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
-</div>
 <p class="gap-note" id="import-gap" hidden data-i18n="supplyImportGap">Natural-gas import CSV was not available at build time; chart shows production / availability series only.</p>
 <div class="kpi-row" id="kpi-row"></div>
 <div class="chart-card">
   <p class="panel-title" data-i18n="supplyChartTitle">Monthly supply balance</p>
-  <p class="panel-note" data-i18n="supplyChartNote">National totals (sum of UF × location). LGN is cubic metres; other series are thousand m³.</p>
+  <p class="panel-note" data-i18n="supplyChartNote">National totals (sum of UF × location) &middot; Thousand m³ (LGN in m³)</p>
   <div class="picker-row" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px">
     <button type="button" id="btn-clear-series" class="btn-clear" data-i18n="clearAllSelections">Clear all</button>
     <div class="series-picker" id="series-picker" style="margin-bottom:0"></div>
@@ -2550,6 +2546,11 @@ main h3,
   </div>
 </div>
 <footer>
+  <div class="sources">
+    <span class="sources-label" data-i18n="sources">Sources</span>
+    <a href="https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/producao-de-petroleo-e-gas-natural-por-estado-e-localizacao" target="_blank" rel="noopener" title="ANP PPGN-EL">ANP<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+    <a href="https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/importacoes-e-exportacoes" target="_blank" rel="noopener" title="ANP imports / exports">ANP<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+  </div>
   <div class="asof-strip asof-footer" id="asof-strip">
     <span class="asof-label" data-i18n="kpiRefresh">Last refreshed</span>
     <span class="asof-val" id="asof-refreshed">&mdash;</span>
@@ -2557,10 +2558,10 @@ main h3,
     <span class="asof-val" id="asof-through">&mdash;</span>
   </div>
   <details class="method">
-<summary data-i18n="methodTitle">How this is built</summary>
+<summary data-i18n="methodTitle">Methodology</summary>
 <div class="method-row"><span class="method-label" data-i18n="methodSources">Sources</span><span><span data-i18n="sourceSupply">ANP</span></span></div>
-<div class="method-row"><span class="method-label" data-i18n="methodAssump">Key assumption</span><span data-i18n="methodAssump_supply">Monthly aggregation of ANP PPGN-EL national series plus imports.</span></div>
-<div class="method-row"><span class="method-label" data-i18n="methodLimits">Limits</span><span data-i18n="aboutCoverSupply">Gas Supply: ANP PPGN-EL national monthly series plus national imports (no Bolivia vs LNG split in the open CSV).</span></div>
+<div class="method-row"><span class="method-label" data-i18n="methodAssump">Key assumption</span><span data-i18n="methodAssump_supply">National monthly aggregation of gross and net domestic gas production plus imported gas supplies.</span></div>
+<div class="method-row"><span class="method-label" data-i18n="methodLimits">Limits</span><span data-i18n="aboutCoverSupply">Based on ANP PPGN-EL disclosures; imported LNG and pipeline gas are reported as combined national imports.</span></div>
 </details>
   &copy; <span id="year"></span> GasBrazil.com &middot;
   <span data-i18n="supplyFooter">Data: ANP PPGN-EL and importações de gás natural (open data). Not an official ANP product.</span>
@@ -2569,7 +2570,7 @@ main h3,
 </div>
 <div class="tt" id="chart-tt"></div>
 <script>
-const PAYLOAD_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/supply/payload.json.gz?v=35794342398";
+const PAYLOAD_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/supply/payload.json.gz?v=35807199572";
 
 function b64ToBytes(b64) {
   const bin = atob(b64);
@@ -4370,7 +4371,7 @@ function gbCopyLink(buttonId) {
 GB_I18N.en.navSupply = "Gas Supply";
 GB_I18N.en.supplySubtitle = "ANP national monthly natural gas supply balance — production, available gas, flare, own use, and imports.";
 GB_I18N.en.supplyChartTitle = "Monthly supply balance";
-GB_I18N.en.supplyChartNote = "National totals (sum of UF × location). LGN is cubic metres; other series are thousand m³.";
+GB_I18N.en.supplyChartNote = "National totals (sum of UF × location) · Thousand m³ (LGN in m³)";
 GB_I18N.en.supplyTableTitle = "Monthly series";
 GB_I18N.en.supplyCsv = "Download CSV";
 GB_I18N.en.supplyXlsx = "Export Excel";
@@ -4384,7 +4385,7 @@ GB_I18N.en.supplyKpiImp = "Imports";
 GB_I18N.pt.navSupply = "Oferta de Gás";
 GB_I18N.pt.supplySubtitle = "Balanço mensal nacional de gás natural da ANP (PPGN-EL) — produção, disponível, queima, consumo próprio e importações.";
 GB_I18N.pt.supplyChartTitle = "Balanço mensal de oferta";
-GB_I18N.pt.supplyChartNote = "Totais nacionais (soma UF × localização). LGN em m³; demais séries em mil m³.";
+GB_I18N.pt.supplyChartNote = "Totais nacionais (soma UF × localização) · Mil m³ (LGN em m³)";
 GB_I18N.pt.supplyTableTitle = "Série mensal";
 GB_I18N.pt.supplyCsv = "Baixar CSV";
 GB_I18N.pt.supplyXlsx = "Exportar Excel";
