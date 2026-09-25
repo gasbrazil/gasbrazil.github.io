@@ -554,4 +554,71 @@ def test_mago_heatmap_theme_css_and_i18n():
     assert "magoHmViewPoc:" in kit.JS_I18N
 
 
+def test_mega_menu_structure_and_categories():
+    cat_ids = [c["id"] for c in kit.NAV_CATEGORIES]
+    assert "gas" in cat_ids
+    assert "power" in cat_ids
+    assert "cross" in cat_ids
+
+    menu = kit.products_dropdown_html("desk", '<div class="wordmark">GasBrazil</div>')
+    assert "dd-mega-banner" in menu
+    assert "dd-mega-columns" in menu
+    assert "dd-col-gas" in menu
+    assert "dd-col-power" in menu
+    assert 'data-i18n="navCatCross"' in menu
+    assert 'data-i18n="navCatGas"' in menu
+    assert 'data-i18n="navCatPower"' in menu
+
+    # Monitor is present, TAG & NTS standalone are removed from main dropdown
+    assert 'href="/monitor/"' in menu
+    assert 'href="/mago/"' not in menu
+    assert 'href="/nts/"' not in menu
+
+
+def test_navigation_root_relative_links_for_dual_domain():
+    menu = kit.products_dropdown_html("home", '<div class="wordmark">GasBrazil</div>')
+    # All dashboard product links must be root-relative for dual-domain support
+    assert 'href="/desk/"' in menu
+    assert 'href="/ons/"' in menu
+    assert 'href="/pld/"' in menu
+    assert 'href="/flows/"' in menu
+    assert 'href="/monitor/"' in menu
+    assert 'href="https://gasbrazil.com/desk/"' not in menu
+    assert 'href="https://gasbrazil.com/monitor/"' not in menu
+
+    # Client-side dynamic sync for dual-domain support (gasbrazil.github.io <-> gasbrazil.com)
+    js = kit._PRODUCTS_DROPDOWN_JS
+    assert "syncCrossLinks" in js
+    assert "gasbrazil.github.io" in js
+
+
+def test_command_palette_and_shortcuts_use_monitor():
+    # Palette items catalog inside JS_I18N
+    assert '{ cat: "dashboards", id: "monitor"' in kit.JS_I18N
+    assert 'url: "/monitor/"' in kit.JS_I18N
+    assert '{ cat: "dashboards", id: "mago"' not in kit.JS_I18N
+    assert '{ cat: "dashboards", id: "nts"' not in kit.JS_I18N
+
+    # Keywords indexed for pipeline search
+    assert '"tag", "nts", "mago"' in kit.JS_I18N
+
+    # Shortcuts in JS_I18N
+    assert '"m": "/monitor/"' in kit.JS_I18N
+    assert "Pipeline Monitor" in kit.JS_I18N
+
+
+def test_home_page_category_filters():
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[1]
+    index_html = (root / "index.html").read_text(encoding="utf-8")
+    assert "hub-filter-bar" in index_html
+    assert 'data-filter="all"' in index_html
+    assert 'data-filter="gas"' in index_html
+    assert 'data-filter="power"' in index_html
+    assert 'data-filter="trading"' in index_html
+    assert "data-category=" in index_html
+    assert "initHubFilters" in index_html
+
+
 

@@ -553,6 +553,35 @@ const GB_I18N = {
     navAbout: "About",
     navWiki: "Wiki",
     navAdmin: "Admin Panel",
+    navCatCross: "Cross-Commodity",
+    navCatGas: "Natural Gas & Pipelines",
+    navCatPower: "Electricity & Power Grid",
+    navCatResources: "Resources",
+    navDeskDesc: "Cross-market spark spread, power-to-gas arbitrage & macro balance.",
+    navMonitorDesc: "Real-time TAG & NTS SCADA, linepack inventory & 7-day risk bands.",
+    navFlowsDesc: "Physical network receipt and delivery flow volumes across Brazil.",
+    navContratosDesc: "Master agreements and active booked firm capacity by shipper.",
+    navPocDesc: "Daily capacity auctions, balancing trades and GUS tenders.",
+    navSupplyDesc: "Domestic production, pre-salt processing, LNG and pipeline imports.",
+    navPrecosDesc: "Benchmark contract pricing disclosures (ANP Resolution 52/2011).",
+    navOnsDesc: "SIN grid balance, hydro reservoirs and thermal gas generation dispatch.",
+    navPldDesc: "Hourly spot electricity clearing prices and regional submarket spreads.",
+    badgeDesk: "Spark Spread",
+    badgeMonitor: "SCADA & Linepack",
+    badgeFlows: "ANP Physical",
+    badgeContratos: "Firm Capacity",
+    badgePoc: "Auctions",
+    badgeSupply: "National Balance",
+    badgePrecos: "Res 52",
+    badgeOns: "Grid & Dispatch",
+    badgePld: "CCEE Hourly",
+    badgeCross: "Cross-Commodity",
+    badgeGas: "Natural Gas",
+    badgePower: "Power Grid",
+    filterAll: "All (9)",
+    filterGas: "🔥 Natural Gas (6)",
+    filterPower: "⚡ Power Grid (2)",
+    filterTrading: "📊 Trading (4)",
     filterPlaceholder: "Filter…",
     contact: "Contact",
     copyLink: "Copy link",
@@ -787,6 +816,35 @@ const GB_I18N = {
     navAbout: "Sobre",
     navWiki: "Wiki",
     navAdmin: "Painel de Administração",
+    navCatCross: "Visão Integrada",
+    navCatGas: "Gás Natural & Malha",
+    navCatPower: "Setor Elétrico & Despacho",
+    navCatResources: "Recursos",
+    navDeskDesc: "Spark spread, arbitragem gás-energia e balanço integrado.",
+    navMonitorDesc: "Telemetria TAG & NTS em tempo real, linepack e faixas de risco.",
+    navFlowsDesc: "Pontos de recebimento e entrega física na malha nacional de transporte.",
+    navContratosDesc: "Capacidade firme de transporte contratada e contratos master ativos.",
+    navPocDesc: "Leilões de capacidade de transporte, balanceamento e pregões GUS.",
+    navSupplyDesc: "Produção nacional, processamento no pré-sal e importações de GNL.",
+    navPrecosDesc: "Preços ponderados de contratos declarados sob a Resolução ANP 52/2011.",
+    navOnsDesc: "Balanço do SIN, reservatórios e despacho de térmicas a gás natural.",
+    navPldDesc: "Preço de Liquidação das Diferenças CCEE horário e submercados.",
+    badgeDesk: "Spark Spread",
+    badgeMonitor: "SCADA & Linepack",
+    badgeFlows: "Físico ANP",
+    badgeContratos: "Capacidade Firme",
+    badgePoc: "Leilões",
+    badgeSupply: "Balanço Nacional",
+    badgePrecos: "Res 52",
+    badgeOns: "Despacho & SIN",
+    badgePld: "CCEE Horário",
+    badgeCross: "Visão Integrada",
+    badgeGas: "Gás Natural",
+    badgePower: "Setor Elétrico",
+    filterAll: "Todos (9)",
+    filterGas: "🔥 Gás Natural (6)",
+    filterPower: "⚡ Setor Elétrico (2)",
+    filterTrading: "📊 Trading (4)",
     filterPlaceholder: "Filtrar…",
     contact: "Contato",
     copyLink: "Copiar link",
@@ -1174,7 +1232,7 @@ function toggleShortcutsModal() {
             '<h4 class="shortcuts-sec-title" data-i18n="shortcutsGoTo">Go To (press "g" then key)</h4>' +
             '<div class="shortcut-row"><kbd>g</kbd> <kbd>h</kbd> <span>Home (Hub)</span></div>' +
             '<div class="shortcut-row"><kbd>g</kbd> <kbd>d</kbd> <span>The Desk</span></div>' +
-            '<div class="shortcut-row"><kbd>g</kbd> <kbd>m</kbd> <span>TAG Mago</span></div>' +
+            '<div class="shortcut-row"><kbd>g</kbd> <kbd>m</kbd> <span>Pipeline Monitor</span></div>' +
             '<div class="shortcut-row"><kbd>g</kbd> <kbd>o</kbd> <span>ONS Balances</span></div>' +
             '<div class="shortcut-row"><kbd>g</kbd> <kbd>p</kbd> <span>POC Results</span></div>' +
             '<div class="shortcut-row"><kbd>g</kbd> <kbd>c</kbd> <span>POC Contracts</span></div>' +
@@ -1210,7 +1268,7 @@ function getPaletteCatalog() {
   GB_PALETTE_ITEMS = [
     // Dashboards
     { cat: "dashboards", id: "desk", title: "The Desk", titlePt: "The Desk", desc: "Cross-product snapshot, spark calculator, and market balance", descPt: "Visão integrada mercado de gás e energia, calculadora spark spread", tag: "Live", url: "/desk/", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>' },
-    { cat: "dashboards", id: "mago", title: "TAG Mago", titlePt: "TAG Mago", desc: "Operational line pack, 7-risk tolerance bands, and zone forecasts", descPt: "Empacotamento operacional, faixas de tolerância e previsão de consumo", tag: "Real-time", url: "/mago/", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>' },
+    { cat: "dashboards", id: "monitor", title: "Pipeline Monitor", titlePt: "Monitor de Gasodutos", desc: "Integrated TAG Mago & NTS OnTime operational line pack, SCADA & risk bands", descPt: "Telemetria TAG Mago & NTS OnTime em tempo real, empacotamento operacional e faixas", tag: "Real-time", url: "/monitor/", keywords: ["tag", "nts", "mago", "ontime", "monitor", "scada", "linepack", "malha", "gasoduto"], icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>' },
     { cat: "dashboards", id: "ons", title: "ONS Balances", titlePt: "Balanços ONS", desc: "SIN electricity grid balance and gas-fired thermal dispatch", descPt: "Balanço do SIN e despacho térmico a gás natural", tag: "Daily", url: "/ons/", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>' },
     { cat: "dashboards", id: "pld", title: "PLD Prices", titlePt: "Preços PLD", desc: "CCEE spot electricity settlement prices (hourly & peak/off-peak)", descPt: "Preço de Liquidação das Diferenças CCEE (horário e ponta)", tag: "Daily", url: "/pld/", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>' },
     { cat: "dashboards", id: "poc", title: "POC Results", titlePt: "Resultados POC", desc: "Capacity auctions, balancing trades, GUS, and linepack tenders", descPt: "Leilões de capacidade de transporte, balanceamento e aquisição GUS", tag: "Daily", url: "/poc/", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>' },
@@ -2024,7 +2082,7 @@ function initGlobalShortcuts() {
         "s": "/supply/",
         "l": "/pld/",
         "r": "/precos/",
-        "m": "/mago/",
+        "m": "/monitor/",
         "w": "/wiki/",
         "b": "/about/",
         "a": "/admin/"
@@ -2700,7 +2758,7 @@ _PRODUCTS_DROPDOWN_JS = r"""<script>
   var closeTimer = null;
 
   function menuLinks(dd) {
-    return Array.prototype.slice.call(dd.querySelectorAll(".dd-menu a"));
+    return Array.prototype.slice.call(dd.querySelectorAll(".dd-menu [role='menuitem']"));
   }
   function setOpen(dd, open) {
     if (!dd) return;
@@ -2791,42 +2849,226 @@ _PRODUCTS_DROPDOWN_JS = r"""<script>
       else focusLink(dd, idx < 0 ? items.length - 1 : idx - 1);
     }
   });
+
+  function syncCrossLinks() {
+    var h = window.location.hostname;
+    if (h === "gasbrazil.github.io") {
+      document.querySelectorAll("a[href*='gasbrazil.com']").forEach(function (a) {
+        if (a.hostname === "gasbrazil.com") {
+          a.href = a.href.replace("https://gasbrazil.com", "https://gasbrazil.github.io")
+                         .replace("http://gasbrazil.com", "https://gasbrazil.github.io");
+        }
+      });
+      var homeLink = document.getElementById("link-home");
+      if (homeLink && (homeLink.getAttribute("href") === "/" || homeLink.href.indexOf("gasbrazil.com") >= 0)) {
+        homeLink.href = "https://gasbrazil.github.io/";
+      }
+    } else if (h === "caissonpoint.github.io" && typeof SITE_LINKS !== "undefined") {
+      var homeLink = document.getElementById("link-home");
+      if (homeLink) homeLink.href = "https://caissonpoint.github.io/gasbrazil-com/";
+      Object.keys(SITE_LINKS).forEach(function (k) {
+        var el = document.getElementById("link-" + k);
+        if (el && SITE_LINKS[k] && SITE_LINKS[k].caissonpoint) el.href = SITE_LINKS[k].caissonpoint;
+      });
+    }
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", syncCrossLinks);
+  else syncCrossLinks();
 })();
 </script>"""
 
 
-def _menu_items_html(self_id: str) -> str:
-    """One menu entry per dashboard site (hub order: desk, ons, pld, poc,
-    contratos, flows, supply, precos); the current page renders as a
-    non-clickable current item (checkmark) with aria-current=page."""
-    i18n_keys = {
-        "ons": "navOns",
-        "poc": "navPoc",
-        "contratos": "navContratos",
-        "flows": "navFlows",
-        "mago": "navMago",
-        "nts": "navNts",
-        "monitor": "navMonitor",
-        "supply": "navSupply",
-        "pld": "navPld",
-        "precos": "navPrecos",
-        "desk": "navDesk",
-    }
-    items: list[str] = []
-    for k, v in _SITES.items():
-        if k == "home":
-            continue
-        if k == self_id:
-            items.append(
-                f'<span class="is-current" role="menuitem" aria-current="page" data-i18n="{i18n_keys[k]}">'
-                f'<span class="chk">✓</span>{html.escape(v["label"])}</span>'
-            )
-        else:
-            items.append(
-                f'<a id="link-{k}" href="{html.escape(v["custom"], quote=True)}" role="menuitem" data-i18n="{i18n_keys[k]}">'
-                f'<span class="chk"></span>{html.escape(v["label"])}</a>'
-            )
-    return "".join(items)
+NAV_CATEGORIES = [
+    {
+        "id": "cross",
+        "title_key": "navCatCross",
+        "title_en": "Cross-Commodity",
+        "icon": "⚡",
+        "products": ["desk"],
+    },
+    {
+        "id": "gas",
+        "title_key": "navCatGas",
+        "title_en": "Natural Gas & Pipelines",
+        "icon": "🔥",
+        "products": ["monitor", "flows", "contratos", "poc", "supply", "precos"],
+    },
+    {
+        "id": "power",
+        "title_key": "navCatPower",
+        "title_en": "Electricity & Power Grid",
+        "icon": "🔌",
+        "products": ["ons", "pld"],
+    },
+]
+
+NAV_PRODUCT_META = {
+    "desk": {
+        "nav_key": "navDesk",
+        "desc_key": "navDeskDesc",
+        "desc_en": "Cross-market spark spread, power-to-gas arbitrage & macro balance.",
+        "badge_key": "badgeDesk",
+        "badge_en": "Spark Spread",
+        "badge_class": "dd-badge-cross",
+    },
+    "monitor": {
+        "nav_key": "navMonitor",
+        "desc_key": "navMonitorDesc",
+        "desc_en": "Real-time TAG & NTS SCADA, linepack inventory & 7-day risk bands.",
+        "badge_key": "badgeMonitor",
+        "badge_en": "SCADA & Linepack",
+        "badge_class": "dd-badge-gas",
+    },
+    "flows": {
+        "nav_key": "navFlows",
+        "desc_key": "navFlowsDesc",
+        "desc_en": "Physical network receipt and delivery flow volumes across Brazil.",
+        "badge_key": "badgeFlows",
+        "badge_en": "ANP Physical",
+        "badge_class": "dd-badge-gas",
+    },
+    "contratos": {
+        "nav_key": "navContratos",
+        "desc_key": "navContratosDesc",
+        "desc_en": "Master agreements and active booked firm capacity by shipper.",
+        "badge_key": "badgeContratos",
+        "badge_en": "Firm Capacity",
+        "badge_class": "dd-badge-gas",
+    },
+    "poc": {
+        "nav_key": "navPoc",
+        "desc_key": "navPocDesc",
+        "desc_en": "Daily capacity auctions, balancing trades and GUS tenders.",
+        "badge_key": "badgePoc",
+        "badge_en": "Auctions",
+        "badge_class": "dd-badge-gas",
+    },
+    "supply": {
+        "nav_key": "navSupply",
+        "desc_key": "navSupplyDesc",
+        "desc_en": "Domestic production, pre-salt processing, LNG and pipeline imports.",
+        "badge_key": "badgeSupply",
+        "badge_en": "National Balance",
+        "badge_class": "dd-badge-gas",
+    },
+    "precos": {
+        "nav_key": "navPrecos",
+        "desc_key": "navPrecosDesc",
+        "desc_en": "Benchmark contract pricing disclosures (ANP Resolution 52/2011).",
+        "badge_key": "badgePrecos",
+        "badge_en": "Res 52",
+        "badge_class": "dd-badge-gas",
+    },
+    "ons": {
+        "nav_key": "navOns",
+        "desc_key": "navOnsDesc",
+        "desc_en": "SIN grid balance, hydro reservoirs and thermal gas generation dispatch.",
+        "badge_key": "badgeOns",
+        "badge_en": "Grid & Dispatch",
+        "badge_class": "dd-badge-power",
+    },
+    "pld": {
+        "nav_key": "navPld",
+        "desc_key": "navPldDesc",
+        "desc_en": "Hourly spot electricity clearing prices and regional submarket spreads.",
+        "badge_key": "badgePld",
+        "badge_en": "CCEE Hourly",
+        "badge_class": "dd-badge-power",
+    },
+}
+
+
+def _render_menu_item(k: str, self_id: str) -> str:
+    meta = NAV_PRODUCT_META[k]
+    site = _SITES[k]
+    label = site["label"]
+    nav_key = meta["nav_key"]
+    desc_key = meta["desc_key"]
+    badge_key = meta["badge_key"]
+    desc_en = meta["desc_en"]
+    badge_en = meta["badge_en"]
+    badge_cls = meta["badge_class"]
+
+    if k == self_id:
+        return (
+            f'<div class="dd-item is-current" role="menuitem" tabindex="-1" aria-current="page">\n'
+            f'  <div class="dd-item-content">\n'
+            f'    <div class="dd-item-head">\n'
+            f'      <span class="chk" aria-hidden="true">✓</span>\n'
+            f'      <span class="dd-item-title" data-i18n="{nav_key}">{html.escape(label)}</span>\n'
+            f'      <span class="dd-badge {badge_cls}" data-i18n="{badge_key}">{html.escape(badge_en)}</span>\n'
+            f'    </div>\n'
+            f'    <div class="dd-item-desc" data-i18n="{desc_key}">{html.escape(desc_en)}</div>\n'
+            f'  </div>\n'
+            f'</div>\n'
+        )
+    else:
+        rel_href = f"/{k}/" if k != "home" else "/"
+        return (
+            f'<a id="link-{k}" href="{rel_href}" class="dd-item" role="menuitem" tabindex="-1">\n'
+            f'  <div class="dd-item-content">\n'
+            f'    <div class="dd-item-head">\n'
+            f'      <span class="chk" aria-hidden="true"></span>\n'
+            f'      <span class="dd-item-title" data-i18n="{nav_key}">{html.escape(label)}</span>\n'
+            f'      <span class="dd-badge {badge_cls}" data-i18n="{badge_key}">{html.escape(badge_en)}</span>\n'
+            f'    </div>\n'
+            f'    <div class="dd-item-desc" data-i18n="{desc_key}">{html.escape(desc_en)}</div>\n'
+            f'  </div>\n'
+            f'</a>\n'
+        )
+
+
+def _menu_items_html(
+    self_id: str,
+    wiki_href: str | None = None,
+    about_href: str | None = None,
+) -> str:
+    """Grouped multi-column mega-menu for GasBrazil suite."""
+    if wiki_href is None:
+        wiki_href = "wiki/" if self_id == "home" else "../wiki/"
+    if about_href is None:
+        about_href = "about/" if self_id == "home" else "../about/"
+
+    desk_item = _render_menu_item("desk", self_id)
+    gas_items = "".join(_render_menu_item(k, self_id) for k in NAV_CATEGORIES[1]["products"])
+    power_items = "".join(_render_menu_item(k, self_id) for k in NAV_CATEGORIES[2]["products"])
+
+    wiki_href_esc = html.escape(wiki_href, quote=True)
+    about_href_esc = html.escape(about_href, quote=True)
+
+    return (
+        '<div class="dd-mega-banner">\n'
+        '  <div class="dd-group-header"><span class="dd-group-icon" aria-hidden="true">⚡</span><span class="dd-group-title" data-i18n="navCatCross">Cross-Commodity</span></div>\n'
+        f'  <div class="dd-items">{desk_item}</div>\n'
+        '</div>\n'
+        '<div class="dd-mega-columns">\n'
+        '  <div class="dd-mega-col dd-col-gas">\n'
+        '    <div class="dd-group-header">\n'
+        '      <span class="dd-group-icon" aria-hidden="true">🔥</span>\n'
+        '      <span class="dd-group-title" data-i18n="navCatGas">Natural Gas &amp; Pipelines</span>\n'
+        '    </div>\n'
+        f'    <div class="dd-items">{gas_items}</div>\n'
+        '  </div>\n'
+        '  <div class="dd-mega-col dd-col-power">\n'
+        '    <div class="dd-group-header">\n'
+        '      <span class="dd-group-icon" aria-hidden="true">🔌</span>\n'
+        '      <span class="dd-group-title" data-i18n="navCatPower">Electricity &amp; Power Grid</span>\n'
+        '    </div>\n'
+        f'    <div class="dd-items">{power_items}</div>\n'
+        '    <div class="dd-group-header dd-group-sub"><span class="dd-group-title" data-i18n="navCatResources">Resources</span></div>\n'
+        '    <div class="dd-quick-links">\n'
+        f'      <a href="{wiki_href_esc}" class="dd-quick-link" role="menuitem" tabindex="-1">\n'
+        '        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>\n'
+        '        <span data-i18n="navWiki">Wiki &amp; Glossary</span>\n'
+        '      </a>\n'
+        f'      <a href="{about_href_esc}" class="dd-quick-link" role="menuitem" tabindex="-1">\n'
+        '        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>\n'
+        '        <span data-i18n="navAbout">About &amp; Methodology</span>\n'
+        '      </a>\n'
+        '    </div>\n'
+        '  </div>\n'
+        '</div>'
+    )
 
 
 _BRAND_MARK_BUTTON = (
@@ -2838,8 +3080,13 @@ _BRAND_MARK_BUTTON = (
 )
 
 
-def products_dropdown_html(self_id: str, brand_html: str) -> str:
-    """Wordmark + blue-dot menu control + products menu. brand_html is the
+def products_dropdown_html(
+    self_id: str,
+    brand_html: str,
+    wiki_href: str | None = None,
+    about_href: str | None = None,
+) -> str:
+    """Wordmark + blue-dot menu control + products mega-menu. brand_html is the
     clickable (or static) title without the trailing dot; the dot lives on
     .brand-mark and turns flag-yellow on hover."""
     return (
@@ -2849,7 +3096,7 @@ def products_dropdown_html(self_id: str, brand_html: str) -> str:
         + _BRAND_MARK_BUTTON
         + "</span>"
         '<div class="dd-menu" id="gb-products-menu" role="menu" aria-labelledby="gb-products-trigger">'
-        + _menu_items_html(self_id)
+        + _menu_items_html(self_id, wiki_href=wiki_href, about_href=about_href)
         + "</div></div>"
     )
 
@@ -2883,8 +3130,10 @@ def masthead_html(
     # the menu; the caret is the keyboard/touch target.
     brand_menu = products_dropdown_html(
         self_id,
-        f'<a class="masthead-brand" id="link-home" href="{home["custom"]}" data-i18n="navHome">'
+        f'<a class="masthead-brand" id="link-home" href="/" data-i18n="navHome">'
         f'{html.escape(home["label"])}</a>',
+        wiki_href=wiki_href,
+        about_href=about_href,
     )
     wiki_href_esc = html.escape(wiki_href, quote=True)
     about_href_esc = html.escape(about_href, quote=True)

@@ -34,7 +34,7 @@ PAGE_CSS_MARKERS: dict[str, str] = {
 def _brand_link_html() -> str:
     home = kit._SITES["home"]
     return (
-        f'<a class="masthead-brand" id="link-home" href="{home["custom"]}" '
+        f'<a class="masthead-brand" id="link-home" href="/" '
         f'data-i18n="navHome">{home["label"]}</a>'
     )
 
