@@ -624,6 +624,11 @@ main.hub .brand-mark-dot,
   transform: translateY(-6px);
   transition: opacity .14s ease, transform .16s ease, visibility 0s linear .14s;
 }
+.dd-menu:not(.is-open) {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
 .dd-menu.is-open {
   opacity: 1;
   visibility: visible;
@@ -736,14 +741,37 @@ main.hub .brand-mark-dot,
   transition: opacity .14s ease, transform .16s ease, visibility 0s linear .14s;
 }
 
-.dd-sub-wrap:hover > .dd-sub-menu,
-.dd-sub-wrap:focus-within > .dd-sub-menu,
-.dd-sub-wrap.is-open > .dd-sub-menu {
+/* Invisible bridge so mouse moving from trigger to flyout doesn't flicker closed */
+.dd-sub-menu::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -8px;
+  width: 8px;
+}
+
+/* Sub-menu only visible when the main menu is actively open */
+.dd-menu.is-open .dd-sub-wrap:hover > .dd-sub-menu,
+.dd-menu.is-open .dd-sub-wrap:focus-within > .dd-sub-menu,
+.dd-menu.is-open .dd-sub-wrap.is-open > .dd-sub-menu {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
   transform: translateX(0);
   transition: opacity .14s ease, transform .16s ease, visibility 0s;
+}
+
+.dd-menu:not(.is-open) .dd-sub-menu {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.dd-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 6px;
 }
 
 /* Mobile: accordion downward instead of flyout */
@@ -759,8 +787,8 @@ main.hub .brand-mark-dot,
     visibility: visible;
     pointer-events: auto;
   }
-  .dd-sub-wrap.is-open > .dd-sub-menu {
-    display: block;
+  .dd-menu.is-open .dd-sub-wrap.is-open > .dd-sub-menu {
+    display: block !important;
   }
   .dd-sub-wrap.is-open .dd-arrow {
     transform: rotate(90deg);

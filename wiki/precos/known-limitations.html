@@ -704,6 +704,11 @@ main.hub .brand-mark-dot,
   transform: translateY(-6px);
   transition: opacity .14s ease, transform .16s ease, visibility 0s linear .14s;
 }
+.dd-menu:not(.is-open) {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
 .dd-menu.is-open {
   opacity: 1;
   visibility: visible;
@@ -816,14 +821,37 @@ main.hub .brand-mark-dot,
   transition: opacity .14s ease, transform .16s ease, visibility 0s linear .14s;
 }
 
-.dd-sub-wrap:hover > .dd-sub-menu,
-.dd-sub-wrap:focus-within > .dd-sub-menu,
-.dd-sub-wrap.is-open > .dd-sub-menu {
+/* Invisible bridge so mouse moving from trigger to flyout doesn't flicker closed */
+.dd-sub-menu::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -8px;
+  width: 8px;
+}
+
+/* Sub-menu only visible when the main menu is actively open */
+.dd-menu.is-open .dd-sub-wrap:hover > .dd-sub-menu,
+.dd-menu.is-open .dd-sub-wrap:focus-within > .dd-sub-menu,
+.dd-menu.is-open .dd-sub-wrap.is-open > .dd-sub-menu {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
   transform: translateX(0);
   transition: opacity .14s ease, transform .16s ease, visibility 0s;
+}
+
+.dd-menu:not(.is-open) .dd-sub-menu {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.dd-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 6px;
 }
 
 /* Mobile: accordion downward instead of flyout */
@@ -839,8 +867,8 @@ main.hub .brand-mark-dot,
     visibility: visible;
     pointer-events: auto;
   }
-  .dd-sub-wrap.is-open > .dd-sub-menu {
-    display: block;
+  .dd-menu.is-open .dd-sub-wrap.is-open > .dd-sub-menu {
+    display: block !important;
   }
   .dd-sub-wrap.is-open .dd-arrow {
     transform: rotate(90deg);
@@ -2905,7 +2933,6 @@ main h3,
 <header class="top">
   <div class="masthead-ident">
     <div class="products-dd"><span class="brand-lockup"><a class="masthead-brand" href="/">GasBrazil</a><button type="button" class="dd-trigger brand-mark" aria-haspopup="menu" aria-expanded="false" aria-controls="gb-products-menu" id="gb-products-trigger" data-i18n-aria="navMenu" aria-label="Menu"><span class="brand-mark-dot" aria-hidden="true"></span><span class="dd-caret" aria-hidden="true"></span></button></span><div class="dd-menu" id="gb-products-menu" role="menu" aria-labelledby="gb-products-trigger">
-<a id="link-desk" href="/desk/" role="menuitem" data-i18n="navDesk"><span class="chk"></span>The Desk</a>
 <div class="dd-sub-wrap">
   <button type="button" class="dd-sub-trigger" aria-haspopup="menu" aria-expanded="false">
     <span class="chk"></span><span data-i18n="navCatGas">Natural Gas</span><svg class="dd-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
@@ -2928,6 +2955,8 @@ main h3,
       <a id="link-pld" href="/pld/" role="menuitem" data-i18n="navPld"><span class="chk"></span>PLD Prices</a>
   </div>
 </div>
+<div class="dd-divider" role="separator"></div>
+<a id="link-desk" href="/desk/" role="menuitem" data-i18n="navDesk"><span class="chk"></span>The Desk</a>
 </div></div>
     <span class="crumb-sep" aria-hidden="true"></span>
     <h1>Wiki</h1>
@@ -4592,8 +4621,8 @@ if (document.readyState === "loading") {
 </script>
 <script>
 (function () {
-  var OPEN_MS = 120;
-  var CLOSE_MS = 220;
+  var OPEN_MS = 160;
+  var CLOSE_MS = 250;
   var openTimer = null;
   var closeTimer = null;
 
@@ -4607,6 +4636,13 @@ if (document.readyState === "loading") {
     if (!menu || !btn) return;
     menu.classList.toggle("is-open", !!open);
     btn.setAttribute("aria-expanded", open ? "true" : "false");
+    if (!open) {
+      dd.querySelectorAll(".dd-sub-wrap.is-open").forEach(function (w) {
+        w.classList.remove("is-open");
+        var trig = w.querySelector(".dd-sub-trigger");
+        if (trig) trig.setAttribute("aria-expanded", "false");
+      });
+    }
   }
   function closeAll(except) {
     document.querySelectorAll(".products-dd").forEach(function (dd) {

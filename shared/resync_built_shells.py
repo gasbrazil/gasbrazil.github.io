@@ -110,6 +110,12 @@ def resync_brand_head(html: str, *, social: bool = True) -> str:
     return stripped[:pos] + block + stripped[pos:] + rest
 
 
+def resync_products_dropdown_js(html: str) -> str:
+    pattern = r'<script>\s*\(function \(\) \{\s*var OPEN_MS = [\s\S]*?syncCrossLinks\(\);\s*\}\)\(\);\s*</script>'
+    replacement = kit._PRODUCTS_DROPDOWN_JS.strip()
+    return re.sub(pattern, lambda _: replacement, html, count=1)
+
+
 def resync_font_preloads(html: str) -> str:
     return re.sub(
         r'<link rel="preload" href="/shared/fonts/([^"]+)\.ttf" as="font" type="font/ttf" crossorigin>',
@@ -304,6 +310,7 @@ def resync_site(site_id: str) -> None:
     html = resync_typo_weights(html)
     html = resync_products_dd(html, site_id)
     html = resync_brand_head(html)
+    html = resync_products_dropdown_js(html)
     html = resync_font_preloads(html)
     html = resync_head_hints(html)
     html = resync_decode_js(html)
