@@ -4067,7 +4067,11 @@ function gbBindChartExportButtons() {
     if (!target) {
       target = document.createElement("div");
       target.className = "chart-toolbar-actions";
-      container.insertBefore(target, svg);
+      if (svg.parentNode) {
+        svg.parentNode.insertBefore(target, svg);
+      } else {
+        container.appendChild(target);
+      }
     }
 
     const btn = document.createElement("button");
