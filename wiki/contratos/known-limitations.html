@@ -299,12 +299,7 @@ html, body {
 .dd-menu,
 .dd-menu a,
 .dd-menu .is-current,
-.dd-item,
-.dd-item-title,
-.dd-badge,
-.dd-group-header,
-.hub-filter-btn,
-.card-cat-badge,
+.dd-sub-trigger,
 footer,
 footer.site,
 footer a,
@@ -683,366 +678,166 @@ main.hub .brand-mark-dot,
   /* Kept in-flow for opacity fade (display:none can't animate). Closed
      state is invisible + non-interactive; .is-open reveals with a quick fade.
      Solid panel background, not the gradient: the menu floats over page
-     content and must read near-opaque when open.
-     Option A: Institutional Terminal Multi-Column Mega-Menu. */
+     content and must read near-opaque when open. */
   position: absolute;
   top: calc(100% - 2px);
   left: 0;
-  width: 560px;
-  max-width: min(580px, calc(100vw - 24px));
+  min-width: 196px;
   background: var(--panel);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius);
-  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28), var(--elevate);
-  padding: 10px 12px 12px;
-  z-index: 100;
+  box-shadow: var(--elevate);
+  padding: 5px;
+  z-index: 50;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
   transform: translateY(-6px);
-  transition: opacity .15s ease, transform .16s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s linear .15s;
+  transition: opacity .14s ease, transform .16s ease, visibility 0s linear .14s;
 }
 .dd-menu.is-open {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
   transform: translateY(0);
-  transition: opacity .15s ease, transform .16s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s;
+  transition: opacity .14s ease, transform .16s ease, visibility 0s;
 }
 
-/* Banner for Cross-Commodity */
-.dd-mega-banner {
-  margin-bottom: 8px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--border);
-}
-
-/* 2 Columns: Gas (left) and Power + Resources (right) */
-.dd-mega-columns {
-  display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
-  gap: 12px;
-}
-
-/* Group Headers */
-.dd-group-header {
+.dd-menu a,
+.dd-menu .is-current,
+.dd-sub-trigger {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .07em;
-  color: var(--muted);
-  padding: 4px 6px 6px;
-}
-.dd-group-header .dd-group-icon {
-  font-size: 12px;
-  line-height: 1;
-}
-.dd-group-sub {
-  margin-top: 10px;
-  padding-top: 8px;
-  border-top: 1px solid var(--border);
-}
-
-/* Items list */
-.dd-items {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-/* Menu Items (links and current page indicator) */
-.dd-item,
-.dd-menu a,
-.dd-menu .is-current {
-  display: flex;
-  align-items: flex-start;
-  text-decoration: none;
-  padding: 6px 8px;
-  border-radius: var(--radius-sm);
-  color: var(--text);
-  font-family: var(--font-display);
-  transition: background .12s ease, transform .1s ease;
+  gap: 8px;
+  width: 100%;
   box-sizing: border-box;
-}
-.dd-item:hover,
-.dd-menu a:hover {
-  background: var(--accent-soft);
-  color: var(--accent);
+  font-family: var(--font-display);
+  font-size: 13.5px;
+  font-weight: 400;
+  color: var(--text);
   text-decoration: none;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background .12s ease, color .12s ease;
 }
-.dd-item:focus-visible,
-.dd-menu a:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: -1px;
+.dd-menu a:hover,
+.dd-sub-trigger:hover,
+.dd-sub-wrap:hover > .dd-sub-trigger,
+.dd-sub-wrap:focus-within > .dd-sub-trigger {
   background: var(--accent-soft);
   color: var(--accent);
 }
-[data-theme="dark"] .dd-item:hover,
-[data-theme="dark"] .dd-menu a:hover {
+.dd-menu a:focus-visible,
+.dd-sub-trigger:focus-visible {
+  background: var(--accent-soft);
+  color: var(--accent);
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+[data-theme="dark"] .dd-menu a:hover,
+[data-theme="dark"] .dd-menu a:focus-visible,
+[data-theme="dark"] .dd-sub-trigger:hover,
+[data-theme="dark"] .dd-sub-wrap:hover > .dd-sub-trigger,
+[data-theme="dark"] .dd-sub-wrap:focus-within > .dd-sub-trigger,
+[data-theme="dark"] .dd-sub-trigger:focus-visible {
   color: var(--brz-yellow);
 }
-[data-theme="dark"] .dd-item:focus-visible,
-[data-theme="dark"] .dd-menu a:focus-visible {
+[data-theme="dark"] .dd-menu a:focus-visible,
+[data-theme="dark"] .dd-sub-trigger:focus-visible {
   outline-color: var(--brz-yellow);
-  color: var(--brz-yellow);
 }
 
-.dd-item.is-current,
 .dd-menu .is-current {
-  background: var(--accent-soft);
   color: var(--accent);
-  cursor: default;
+  font-weight: 600;
+  background: var(--accent-soft);
 }
-[data-theme="dark"] .dd-item.is-current,
 [data-theme="dark"] .dd-menu .is-current {
   color: var(--brz-yellow);
 }
-
-.dd-item-content {
-  flex: 1;
-  min-width: 0;
+.dd-sub-trigger.has-current {
+  color: var(--accent);
+  font-weight: 600;
+}
+[data-theme="dark"] .dd-sub-trigger.has-current {
+  color: var(--brz-yellow);
 }
 
-.dd-item-head {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  line-height: 1.25;
-}
-
-.dd-item .chk,
 .dd-menu .chk {
   width: 12px;
   font-size: 11px;
-  font-weight: 700;
   color: var(--accent);
   flex: none;
 }
-[data-theme="dark"] .dd-item .chk,
 [data-theme="dark"] .dd-menu .chk {
   color: var(--brz-yellow);
 }
 
-.dd-item-title {
-  font-family: var(--font-display);
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text);
-  white-space: nowrap;
-}
-.dd-item:hover .dd-item-title,
-.dd-menu a:hover .dd-item-title {
-  color: var(--accent);
-}
-[data-theme="dark"] .dd-item:hover .dd-item-title,
-[data-theme="dark"] .dd-menu a:hover .dd-item-title {
-  color: var(--brz-yellow);
-}
-.dd-item.is-current .dd-item-title,
-.dd-menu .is-current .dd-item-title {
-  color: var(--accent);
-}
-[data-theme="dark"] .dd-item.is-current .dd-item-title,
-[data-theme="dark"] .dd-menu .is-current .dd-item-title {
-  color: var(--brz-yellow);
-}
-
-/* Item Descriptions */
-.dd-item-desc {
-  font-size: 11px;
-  color: var(--muted);
-  line-height: 1.35;
-  margin-top: 2px;
-  padding-left: 18px; /* align with title past chk */
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-/* Badges */
-.dd-badge {
-  display: inline-block;
-  font-family: var(--font-display);
-  font-size: 9.5px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .04em;
-  padding: 1px 5px;
-  border-radius: 3px;
-  line-height: 1.3;
+.dd-arrow {
   margin-left: auto;
-  flex: none;
-  white-space: nowrap;
-}
-.dd-badge-cross {
-  background: rgba(30, 144, 255, 0.15);
-  color: #1e90ff;
-  border: 1px solid rgba(30, 144, 255, 0.3);
-}
-.dd-badge-gas {
-  background: rgba(255, 127, 80, 0.15);
-  color: #e05638;
-  border: 1px solid rgba(255, 127, 80, 0.3);
-}
-.dd-badge-power {
-  background: rgba(255, 193, 7, 0.15);
-  color: #c48b00;
-  border: 1px solid rgba(255, 193, 7, 0.3);
-}
-[data-theme="dark"] .dd-badge-cross {
-  background: rgba(80, 180, 255, 0.15);
-  color: #70c4ff;
-  border-color: rgba(80, 180, 255, 0.25);
-}
-[data-theme="dark"] .dd-badge-gas {
-  background: rgba(255, 140, 90, 0.15);
-  color: #ff9d76;
-  border-color: rgba(255, 140, 90, 0.25);
-}
-[data-theme="dark"] .dd-badge-power {
-  background: rgba(255, 215, 0, 0.15);
-  color: #ffd700;
-  border-color: rgba(255, 215, 0, 0.25);
-}
-
-/* Quick Links inside dropdown */
-.dd-quick-links {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  padding-left: 6px;
-}
-.dd-quick-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  font-family: var(--font-display);
-  font-size: 11.5px;
-  font-weight: 500;
+  font-size: 14px;
+  line-height: 1;
   color: var(--muted);
-  text-decoration: none;
-  padding: 4px 6px;
-  border-radius: var(--radius-sm);
-  transition: color .12s ease, background .12s ease;
-}
-.dd-quick-link:hover {
-  color: var(--text);
-  background: var(--accent-soft);
+  transition: transform .15s ease;
 }
 
-/* Mobile Responsiveness for Mega-Menu */
-@media (max-width: 640px) {
-  .dd-menu {
-    width: min(340px, calc(100vw - 20px));
-    max-width: calc(100vw - 20px);
-    max-height: calc(100vh - 70px);
-    overflow-y: auto;
-    padding: 8px 10px;
-  }
-  .dd-mega-columns {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-  .dd-item-desc {
-    display: none; /* keep compact on small screens */
-  }
+/* Sub-menu wrapper & desktop flyout */
+.dd-sub-wrap {
+  position: relative;
 }
-
-/* =========================================================================
-   Hub Dashboard Filter Tabs & Category Badges
-   ========================================================================= */
-.hub-section-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-.hub-section-head .hub-section-title {
-  margin: 0;
-}
-.hub-filter-bar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  align-items: center;
-}
-.hub-filter-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
+.dd-sub-menu {
+  position: absolute;
+  top: -5px;
+  left: calc(100% + 2px);
+  min-width: 184px;
   background: var(--panel);
-  border: 1px solid var(--border);
-  color: var(--muted);
-  font-family: var(--font-display);
-  font-size: 12px;
-  font-weight: 600;
-  padding: 4px 10px;
-  border-radius: 999px;
-  cursor: pointer;
-  transition: all .15s ease;
-}
-.hub-filter-btn:hover {
-  border-color: var(--border-strong);
-  color: var(--text);
-}
-.hub-filter-btn.is-active {
-  background: var(--accent-soft);
-  border-color: var(--accent);
-  color: var(--accent);
-}
-[data-theme="dark"] .hub-filter-btn.is-active {
-  border-color: var(--brz-yellow);
-  color: var(--brz-yellow);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--elevate);
+  padding: 5px;
+  z-index: 60;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateX(-4px);
+  transition: opacity .14s ease, transform .16s ease, visibility 0s linear .14s;
 }
 
-.card-cat-badge {
-  display: inline-block;
-  font-family: var(--font-display);
-  font-size: 9.5px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .04em;
-  padding: 1px 6px;
-  border-radius: 3px;
-  margin-bottom: 6px;
-  align-self: flex-start;
-  line-height: 1.4;
-}
-.card-cat-badge.badge-cross {
-  background: rgba(30, 144, 255, 0.12);
-  color: #1e90ff;
-  border: 1px solid rgba(30, 144, 255, 0.25);
-}
-.card-cat-badge.badge-gas {
-  background: rgba(255, 127, 80, 0.12);
-  color: #e05638;
-  border: 1px solid rgba(255, 127, 80, 0.25);
-}
-.card-cat-badge.badge-power {
-  background: rgba(255, 193, 7, 0.12);
-  color: #c48b00;
-  border: 1px solid rgba(255, 193, 7, 0.25);
-}
-[data-theme="dark"] .card-cat-badge.badge-cross {
-  color: #70c4ff;
-}
-[data-theme="dark"] .card-cat-badge.badge-gas {
-  color: #ff9d76;
-}
-[data-theme="dark"] .card-cat-badge.badge-power {
-  color: #ffd700;
+.dd-sub-wrap:hover > .dd-sub-menu,
+.dd-sub-wrap:focus-within > .dd-sub-menu,
+.dd-sub-wrap.is-open > .dd-sub-menu {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(0);
+  transition: opacity .14s ease, transform .16s ease, visibility 0s;
 }
 
-.kpi-cell[data-hidden="true"] {
-  display: none !important;
+/* Mobile: accordion downward instead of flyout */
+@media (max-width: 640px) {
+  .dd-sub-menu {
+    position: static;
+    border: none;
+    box-shadow: none;
+    padding: 0 0 0 12px;
+    display: none;
+    transform: none;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+  .dd-sub-wrap.is-open > .dd-sub-menu {
+    display: block;
+  }
+  .dd-sub-wrap.is-open .dd-arrow {
+    transform: rotate(90deg);
+  }
 }
+
 
 /* Source links: short agency name + external icon. Relocated to footer/bottom. */
 .sources {
@@ -3088,127 +2883,31 @@ main h3,
 <body>
 <header class="top">
   <div class="masthead-ident">
-    <div class="products-dd"><span class="brand-lockup"><a class="masthead-brand" href="/">GasBrazil</a><button type="button" class="dd-trigger brand-mark" aria-haspopup="menu" aria-expanded="false" aria-controls="gb-products-menu" id="gb-products-trigger" data-i18n-aria="navMenu" aria-label="Menu"><span class="brand-mark-dot" aria-hidden="true"></span><span class="dd-caret" aria-hidden="true"></span></button></span><div class="dd-menu" id="gb-products-menu" role="menu" aria-labelledby="gb-products-trigger"><div class="dd-mega-banner">
-  <div class="dd-group-header"><span class="dd-group-icon" aria-hidden="true">⚡</span><span class="dd-group-title" data-i18n="navCatCross">Cross-Commodity</span></div>
-  <div class="dd-items"><a id="link-desk" href="/desk/" class="dd-item" role="menuitem" tabindex="-1">
-  <div class="dd-item-content">
-    <div class="dd-item-head">
-      <span class="chk" aria-hidden="true"></span>
-      <span class="dd-item-title" data-i18n="navDesk">The Desk</span>
-      <span class="dd-badge dd-badge-cross" data-i18n="badgeDesk">Spark Spread</span>
-    </div>
-    <div class="dd-item-desc" data-i18n="navDeskDesc">Cross-market spark spread, power-to-gas arbitrage &amp; macro balance.</div>
+    <div class="products-dd"><span class="brand-lockup"><a class="masthead-brand" href="/">GasBrazil</a><button type="button" class="dd-trigger brand-mark" aria-haspopup="menu" aria-expanded="false" aria-controls="gb-products-menu" id="gb-products-trigger" data-i18n-aria="navMenu" aria-label="Menu"><span class="brand-mark-dot" aria-hidden="true"></span><span class="dd-caret" aria-hidden="true"></span></button></span><div class="dd-menu" id="gb-products-menu" role="menu" aria-labelledby="gb-products-trigger">
+<a id="link-desk" href="/desk/" role="menuitem" data-i18n="navDesk"><span class="chk"></span>The Desk</a>
+<div class="dd-sub-wrap">
+  <button type="button" class="dd-sub-trigger" aria-haspopup="menu" aria-expanded="false">
+    <span class="chk"></span><span data-i18n="navCatGas">Natural Gas</span><svg class="dd-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+  </button>
+  <div class="dd-sub-menu" role="menu" aria-label="Natural Gas">
+      <a id="link-monitor" href="/monitor/" role="menuitem" data-i18n="navMonitor"><span class="chk"></span>Pipeline Monitor</a>
+      <a id="link-flows" href="/flows/" role="menuitem" data-i18n="navFlows"><span class="chk"></span>Pipeline Flows</a>
+      <a id="link-contratos" href="/contratos/" role="menuitem" data-i18n="navContratos"><span class="chk"></span>POC Contracts</a>
+      <a id="link-poc" href="/poc/" role="menuitem" data-i18n="navPoc"><span class="chk"></span>POC Results</a>
+      <a id="link-supply" href="/supply/" role="menuitem" data-i18n="navSupply"><span class="chk"></span>Gas Supply</a>
+      <a id="link-precos" href="/precos/" role="menuitem" data-i18n="navPrecos"><span class="chk"></span>ANP Prices</a>
   </div>
-</a>
 </div>
+<div class="dd-sub-wrap">
+  <button type="button" class="dd-sub-trigger" aria-haspopup="menu" aria-expanded="false">
+    <span class="chk"></span><span data-i18n="navCatPower">Power</span><svg class="dd-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+  </button>
+  <div class="dd-sub-menu" role="menu" aria-label="Power">
+      <a id="link-ons" href="/ons/" role="menuitem" data-i18n="navOns"><span class="chk"></span>ONS Balances</a>
+      <a id="link-pld" href="/pld/" role="menuitem" data-i18n="navPld"><span class="chk"></span>PLD Prices</a>
+  </div>
 </div>
-<div class="dd-mega-columns">
-  <div class="dd-mega-col dd-col-gas">
-    <div class="dd-group-header">
-      <span class="dd-group-icon" aria-hidden="true">🔥</span>
-      <span class="dd-group-title" data-i18n="navCatGas">Natural Gas &amp; Pipelines</span>
-    </div>
-    <div class="dd-items"><a id="link-monitor" href="/monitor/" class="dd-item" role="menuitem" tabindex="-1">
-  <div class="dd-item-content">
-    <div class="dd-item-head">
-      <span class="chk" aria-hidden="true"></span>
-      <span class="dd-item-title" data-i18n="navMonitor">Pipeline Monitor</span>
-      <span class="dd-badge dd-badge-gas" data-i18n="badgeMonitor">SCADA &amp; Linepack</span>
-    </div>
-    <div class="dd-item-desc" data-i18n="navMonitorDesc">Real-time TAG &amp; NTS SCADA, linepack inventory &amp; 7-day risk bands.</div>
-  </div>
-</a>
-<a id="link-flows" href="/flows/" class="dd-item" role="menuitem" tabindex="-1">
-  <div class="dd-item-content">
-    <div class="dd-item-head">
-      <span class="chk" aria-hidden="true"></span>
-      <span class="dd-item-title" data-i18n="navFlows">Pipeline Flows</span>
-      <span class="dd-badge dd-badge-gas" data-i18n="badgeFlows">ANP Physical</span>
-    </div>
-    <div class="dd-item-desc" data-i18n="navFlowsDesc">Physical network receipt and delivery flow volumes across Brazil.</div>
-  </div>
-</a>
-<a id="link-contratos" href="/contratos/" class="dd-item" role="menuitem" tabindex="-1">
-  <div class="dd-item-content">
-    <div class="dd-item-head">
-      <span class="chk" aria-hidden="true"></span>
-      <span class="dd-item-title" data-i18n="navContratos">POC Contracts</span>
-      <span class="dd-badge dd-badge-gas" data-i18n="badgeContratos">Firm Capacity</span>
-    </div>
-    <div class="dd-item-desc" data-i18n="navContratosDesc">Master agreements and active booked firm capacity by shipper.</div>
-  </div>
-</a>
-<a id="link-poc" href="/poc/" class="dd-item" role="menuitem" tabindex="-1">
-  <div class="dd-item-content">
-    <div class="dd-item-head">
-      <span class="chk" aria-hidden="true"></span>
-      <span class="dd-item-title" data-i18n="navPoc">POC Results</span>
-      <span class="dd-badge dd-badge-gas" data-i18n="badgePoc">Auctions</span>
-    </div>
-    <div class="dd-item-desc" data-i18n="navPocDesc">Daily capacity auctions, balancing trades and GUS tenders.</div>
-  </div>
-</a>
-<a id="link-supply" href="/supply/" class="dd-item" role="menuitem" tabindex="-1">
-  <div class="dd-item-content">
-    <div class="dd-item-head">
-      <span class="chk" aria-hidden="true"></span>
-      <span class="dd-item-title" data-i18n="navSupply">Gas Supply</span>
-      <span class="dd-badge dd-badge-gas" data-i18n="badgeSupply">National Balance</span>
-    </div>
-    <div class="dd-item-desc" data-i18n="navSupplyDesc">Domestic production, pre-salt processing, LNG and pipeline imports.</div>
-  </div>
-</a>
-<a id="link-precos" href="/precos/" class="dd-item" role="menuitem" tabindex="-1">
-  <div class="dd-item-content">
-    <div class="dd-item-head">
-      <span class="chk" aria-hidden="true"></span>
-      <span class="dd-item-title" data-i18n="navPrecos">ANP Prices</span>
-      <span class="dd-badge dd-badge-gas" data-i18n="badgePrecos">Res 52</span>
-    </div>
-    <div class="dd-item-desc" data-i18n="navPrecosDesc">Benchmark contract pricing disclosures (ANP Resolution 52/2011).</div>
-  </div>
-</a>
-</div>
-  </div>
-  <div class="dd-mega-col dd-col-power">
-    <div class="dd-group-header">
-      <span class="dd-group-icon" aria-hidden="true">🔌</span>
-      <span class="dd-group-title" data-i18n="navCatPower">Electricity &amp; Power Grid</span>
-    </div>
-    <div class="dd-items"><a id="link-ons" href="/ons/" class="dd-item" role="menuitem" tabindex="-1">
-  <div class="dd-item-content">
-    <div class="dd-item-head">
-      <span class="chk" aria-hidden="true"></span>
-      <span class="dd-item-title" data-i18n="navOns">ONS Balances</span>
-      <span class="dd-badge dd-badge-power" data-i18n="badgeOns">Grid &amp; Dispatch</span>
-    </div>
-    <div class="dd-item-desc" data-i18n="navOnsDesc">SIN grid balance, hydro reservoirs and thermal gas generation dispatch.</div>
-  </div>
-</a>
-<a id="link-pld" href="/pld/" class="dd-item" role="menuitem" tabindex="-1">
-  <div class="dd-item-content">
-    <div class="dd-item-head">
-      <span class="chk" aria-hidden="true"></span>
-      <span class="dd-item-title" data-i18n="navPld">PLD Prices</span>
-      <span class="dd-badge dd-badge-power" data-i18n="badgePld">CCEE Hourly</span>
-    </div>
-    <div class="dd-item-desc" data-i18n="navPldDesc">Hourly spot electricity clearing prices and regional submarket spreads.</div>
-  </div>
-</a>
-</div>
-    <div class="dd-group-header dd-group-sub"><span class="dd-group-title" data-i18n="navCatResources">Resources</span></div>
-    <div class="dd-quick-links">
-      <a href="wiki/" class="dd-quick-link" role="menuitem" tabindex="-1">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-        <span data-i18n="navWiki">Wiki &amp; Glossary</span>
-      </a>
-      <a href="about/" class="dd-quick-link" role="menuitem" tabindex="-1">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-        <span data-i18n="navAbout">About &amp; Methodology</span>
-      </a>
-    </div>
-  </div>
-</div></div></div>
+</div></div>
     <span class="crumb-sep" aria-hidden="true"></span>
     <h1>Wiki</h1>
   </div>
@@ -3354,35 +3053,8 @@ const GB_I18N = {
     navAbout: "About",
     navWiki: "Wiki",
     navAdmin: "Admin Panel",
-    navCatCross: "Cross-Commodity",
-    navCatGas: "Natural Gas & Pipelines",
-    navCatPower: "Electricity & Power Grid",
-    navCatResources: "Resources",
-    navDeskDesc: "Cross-market spark spread, power-to-gas arbitrage & macro balance.",
-    navMonitorDesc: "Real-time TAG & NTS SCADA, linepack inventory & 7-day risk bands.",
-    navFlowsDesc: "Physical network receipt and delivery flow volumes across Brazil.",
-    navContratosDesc: "Master agreements and active booked firm capacity by shipper.",
-    navPocDesc: "Daily capacity auctions, balancing trades and GUS tenders.",
-    navSupplyDesc: "Domestic production, pre-salt processing, LNG and pipeline imports.",
-    navPrecosDesc: "Benchmark contract pricing disclosures (ANP Resolution 52/2011).",
-    navOnsDesc: "SIN grid balance, hydro reservoirs and thermal gas generation dispatch.",
-    navPldDesc: "Hourly spot electricity clearing prices and regional submarket spreads.",
-    badgeDesk: "Spark Spread",
-    badgeMonitor: "SCADA & Linepack",
-    badgeFlows: "ANP Physical",
-    badgeContratos: "Firm Capacity",
-    badgePoc: "Auctions",
-    badgeSupply: "National Balance",
-    badgePrecos: "Res 52",
-    badgeOns: "Grid & Dispatch",
-    badgePld: "CCEE Hourly",
-    badgeCross: "Cross-Commodity",
-    badgeGas: "Natural Gas",
-    badgePower: "Power Grid",
-    filterAll: "All (9)",
-    filterGas: "🔥 Natural Gas (6)",
-    filterPower: "⚡ Power Grid (2)",
-    filterTrading: "📊 Trading (4)",
+    navCatGas: "Natural Gas",
+    navCatPower: "Power",
     filterPlaceholder: "Filter…",
     contact: "Contact",
     copyLink: "Copy link",
@@ -3617,35 +3289,8 @@ const GB_I18N = {
     navAbout: "Sobre",
     navWiki: "Wiki",
     navAdmin: "Painel de Administração",
-    navCatCross: "Visão Integrada",
-    navCatGas: "Gás Natural & Malha",
-    navCatPower: "Setor Elétrico & Despacho",
-    navCatResources: "Recursos",
-    navDeskDesc: "Spark spread, arbitragem gás-energia e balanço integrado.",
-    navMonitorDesc: "Telemetria TAG & NTS em tempo real, linepack e faixas de risco.",
-    navFlowsDesc: "Pontos de recebimento e entrega física na malha nacional de transporte.",
-    navContratosDesc: "Capacidade firme de transporte contratada e contratos master ativos.",
-    navPocDesc: "Leilões de capacidade de transporte, balanceamento e pregões GUS.",
-    navSupplyDesc: "Produção nacional, processamento no pré-sal e importações de GNL.",
-    navPrecosDesc: "Preços ponderados de contratos declarados sob a Resolução ANP 52/2011.",
-    navOnsDesc: "Balanço do SIN, reservatórios e despacho de térmicas a gás natural.",
-    navPldDesc: "Preço de Liquidação das Diferenças CCEE horário e submercados.",
-    badgeDesk: "Spark Spread",
-    badgeMonitor: "SCADA & Linepack",
-    badgeFlows: "Físico ANP",
-    badgeContratos: "Capacidade Firme",
-    badgePoc: "Leilões",
-    badgeSupply: "Balanço Nacional",
-    badgePrecos: "Res 52",
-    badgeOns: "Despacho & SIN",
-    badgePld: "CCEE Horário",
-    badgeCross: "Visão Integrada",
-    badgeGas: "Gás Natural",
-    badgePower: "Setor Elétrico",
-    filterAll: "Todos (9)",
-    filterGas: "🔥 Gás Natural (6)",
-    filterPower: "⚡ Setor Elétrico (2)",
-    filterTrading: "📊 Trading (4)",
+    navCatGas: "Gás Natural",
+    navCatPower: "Energia Elétrica",
     filterPlaceholder: "Filtrar…",
     contact: "Contato",
     copyLink: "Copiar link",
@@ -4934,7 +4579,7 @@ if (document.readyState === "loading") {
   var closeTimer = null;
 
   function menuLinks(dd) {
-    return Array.prototype.slice.call(dd.querySelectorAll(".dd-menu [role='menuitem']"));
+    return Array.prototype.slice.call(dd.querySelectorAll(".dd-menu [role='menuitem'], .dd-sub-trigger"));
   }
   function setOpen(dd, open) {
     if (!dd) return;
@@ -4965,7 +4610,7 @@ if (document.readyState === "loading") {
     }, CLOSE_MS);
   }
   function focusLink(dd, idx) {
-    var items = menuLinks(dd);
+    var items = menuLinks(dd).filter(function (el) { return el.offsetParent !== null; });
     if (!items.length) return;
     var i = ((idx % items.length) + items.length) % items.length;
     items[i].focus();
@@ -4983,6 +4628,17 @@ if (document.readyState === "loading") {
   else bindAll();
 
   document.addEventListener("click", function (e) {
+    var subTrigger = e.target.closest(".dd-sub-trigger");
+    if (subTrigger) {
+      e.preventDefault();
+      var wrap = subTrigger.closest(".dd-sub-wrap");
+      if (wrap) {
+        var isOpen = wrap.classList.contains("is-open");
+        wrap.classList.toggle("is-open", !isOpen);
+        subTrigger.setAttribute("aria-expanded", !isOpen ? "true" : "false");
+      }
+      return;
+    }
     var trigger = e.target.closest(".dd-trigger");
     if (trigger) {
       var dd = trigger.closest(".products-dd");
@@ -4998,6 +4654,7 @@ if (document.readyState === "loading") {
     }
     if (!e.target.closest(".products-dd")) closeAll(null);
   });
+
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") {
       var openDd = document.querySelector(".products-dd .dd-menu.is-open");
@@ -5014,7 +4671,39 @@ if (document.readyState === "loading") {
     var dd = (inTrigger && inTrigger.closest(".products-dd")) ||
              (inMenu && e.target.closest(".products-dd"));
     if (!dd) return;
-    var items = menuLinks(dd);
+
+    if (e.key === "ArrowRight") {
+      var activeSubTrigger = document.activeElement && document.activeElement.closest(".dd-sub-trigger");
+      if (activeSubTrigger) {
+        e.preventDefault();
+        var wrap = activeSubTrigger.closest(".dd-sub-wrap");
+        if (wrap) {
+          wrap.classList.add("is-open");
+          activeSubTrigger.setAttribute("aria-expanded", "true");
+          var firstSub = wrap.querySelector(".dd-sub-menu [role='menuitem']");
+          if (firstSub) firstSub.focus();
+        }
+        return;
+      }
+    }
+    if (e.key === "ArrowLeft") {
+      var inSub = document.activeElement && document.activeElement.closest(".dd-sub-menu");
+      if (inSub) {
+        e.preventDefault();
+        var wrap = inSub.closest(".dd-sub-wrap");
+        if (wrap) {
+          wrap.classList.remove("is-open");
+          var trig = wrap.querySelector(".dd-sub-trigger");
+          if (trig) {
+            trig.setAttribute("aria-expanded", "false");
+            trig.focus();
+          }
+        }
+        return;
+      }
+    }
+
+    var items = menuLinks(dd).filter(function (el) { return el.offsetParent !== null; });
     if (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Home" || e.key === "End") {
       e.preventDefault();
       setOpen(dd, true);
