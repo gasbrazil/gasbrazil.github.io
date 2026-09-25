@@ -2766,7 +2766,6 @@ html.gb-locked footer {
   border-radius: var(--radius-sm);
   color: var(--accent);
 }
-
 /* Everything below is ons-dashboard's own layout/components. The palette
    (neutral tokens + the shared Brazilian-flag accent) now lives entirely in
    shared/theme.css -- see ADR-001, Decision 2 Option C -- this file only
@@ -3694,6 +3693,9 @@ function placeChartTooltip(tt, clientX, clientY) {
 }
 
 
+function escapeHtml(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
 function escapeHtml(s) {
   return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
@@ -4737,7 +4739,11 @@ function gbBindChartExportButtons() {
     if (!target) {
       target = document.createElement("div");
       target.className = "chart-toolbar-actions";
-      container.insertBefore(target, svg);
+      if (svg.parentNode) {
+        svg.parentNode.insertBefore(target, svg);
+      } else {
+        container.appendChild(target);
+      }
     }
 
     const btn = document.createElement("button");

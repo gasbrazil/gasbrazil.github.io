@@ -758,10 +758,10 @@ function renderChart() {
   if (!svg || !pts.length) return;
 
   const W = 1000, H = 380;
-  const L = 56, R = 24, T = 20, B = 36;
+  const avg7d = (PAYLOAD.kpis && PAYLOAD.kpis.avg_7d) || (PAYLOAD.ref && PAYLOAD.ref.mean) || 46.2;
   const vals = pts.map(p => p[1]);
-  let minV = Math.min(...vals);
-  let maxV = Math.max(...vals);
+  let minV = Math.min(...vals, avg7d);
+  let maxV = Math.max(...vals, avg7d);
 
   // Add 8% padding top and bottom
   const pad = (maxV - minV) * 0.12 || 1.0;
@@ -782,14 +782,13 @@ function renderChart() {
     gridSvg += `<text x="${L - 10}" y="${yPos + 4}" fill="var(--muted)" font-size="11.5" font-family="var(--font-mono)" text-anchor="end">${fmtNum(v, 1)}</text>`;
   }
 
-  // Mean Reference Line
-  const refMean = (PAYLOAD.ref && PAYLOAD.ref.mean) || 46.2;
+  // 7-day Average Reference Line
   let refSvg = "";
-  if (refMean >= minV && refMean <= maxV) {
-    const yMean = y(refMean);
+  if (avg7d >= minV && avg7d <= maxV) {
+    const yAvg = y(avg7d);
     refSvg = `
-      <line x1="${L}" y1="${yMean}" x2="${W - R}" y2="${yMean}" stroke="var(--muted)" stroke-width="1.2" stroke-dasharray="6 4" opacity="0.65"/>
-      <text x="${W - R - 6}" y="${yMean - 6}" fill="var(--muted)" font-size="10.5" font-family="var(--font-mono)" text-anchor="end">Mean: ${refMean} Mm³</text>
+      <line x1="${L}" y1="${yAvg}" x2="${W - R}" y2="${yAvg}" stroke="var(--muted)" stroke-width="1.2" stroke-dasharray="6 4" opacity="0.75"/>
+      <text x="${W - R - 6}" y="${yAvg - 6}" fill="var(--muted)" font-size="10.5" font-family="var(--font-mono)" text-anchor="end">7d Avg: ${fmtNum(avg7d, 2)} Mm³</text>
     `;
   }
 

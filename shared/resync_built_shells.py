@@ -270,6 +270,12 @@ def resync_lock_btn(html: str) -> str:
     return html
 
 
+def resync_chart_export_safe(html: str) -> str:
+    target_needle = "      container.insertBefore(target, svg);"
+    replacement = "      if (svg.parentNode) {\n        svg.parentNode.insertBefore(target, svg);\n      } else {\n        container.appendChild(target);\n      }"
+    return html.replace(target_needle, replacement)
+
+
 def resync_site(site_id: str) -> None:
     path = ROOT / site_id / "index.html"
     html = path.read_text(encoding="utf-8")
@@ -283,6 +289,7 @@ def resync_site(site_id: str) -> None:
     html = resync_decode_js(html)
     html = resync_i18n_js(html)
     html = resync_boot_resilience(html)
+    html = resync_chart_export_safe(html)
     html = resync_clean_footer(html, site_id)
     html = resync_footer_shortcuts(html)
     html = resync_search_btn(html)
