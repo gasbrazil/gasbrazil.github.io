@@ -10,7 +10,7 @@
 <link rel="preload" href="/shared/fonts/IBMPlexSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/shared/fonts/Pacaembu-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
 <!-- home-page teaser marker, read by ../build_home.py -- not otherwise used by this page:
-     generated: 2026-09-25 01:44 UTC
+     generated: 2026-09-25 02:08 UTC
      kpi_gas_mwmed: 4738 -->
 <script>
 (function(){
@@ -2766,6 +2766,7 @@ html.gb-locked footer {
   border-radius: var(--radius-sm);
   color: var(--accent);
 }
+
 /* Everything below is ons-dashboard's own layout/components. The palette
    (neutral tokens + the shared Brazilian-flag accent) now lives entirely in
    shared/theme.css -- see ADR-001, Decision 2 Option C -- this file only
@@ -3048,7 +3049,7 @@ main h3,
   var closeTimer = null;
 
   function menuLinks(dd) {
-    return Array.prototype.slice.call(dd.querySelectorAll(".dd-menu a"));
+    return Array.prototype.slice.call(dd.querySelectorAll(".dd-menu [role='menuitem'], .dd-sub-trigger"));
   }
   function setOpen(dd, open) {
     if (!dd) return;
@@ -3079,7 +3080,7 @@ main h3,
     }, CLOSE_MS);
   }
   function focusLink(dd, idx) {
-    var items = menuLinks(dd);
+    var items = menuLinks(dd).filter(function (el) { return el.offsetParent !== null; });
     if (!items.length) return;
     var i = ((idx % items.length) + items.length) % items.length;
     items[i].focus();
@@ -3097,6 +3098,17 @@ main h3,
   else bindAll();
 
   document.addEventListener("click", function (e) {
+    var subTrigger = e.target.closest(".dd-sub-trigger");
+    if (subTrigger) {
+      e.preventDefault();
+      var wrap = subTrigger.closest(".dd-sub-wrap");
+      if (wrap) {
+        var isOpen = wrap.classList.contains("is-open");
+        wrap.classList.toggle("is-open", !isOpen);
+        subTrigger.setAttribute("aria-expanded", !isOpen ? "true" : "false");
+      }
+      return;
+    }
     var trigger = e.target.closest(".dd-trigger");
     if (trigger) {
       var dd = trigger.closest(".products-dd");
@@ -3112,6 +3124,7 @@ main h3,
     }
     if (!e.target.closest(".products-dd")) closeAll(null);
   });
+
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") {
       var openDd = document.querySelector(".products-dd .dd-menu.is-open");
@@ -3128,7 +3141,39 @@ main h3,
     var dd = (inTrigger && inTrigger.closest(".products-dd")) ||
              (inMenu && e.target.closest(".products-dd"));
     if (!dd) return;
-    var items = menuLinks(dd);
+
+    if (e.key === "ArrowRight") {
+      var activeSubTrigger = document.activeElement && document.activeElement.closest(".dd-sub-trigger");
+      if (activeSubTrigger) {
+        e.preventDefault();
+        var wrap = activeSubTrigger.closest(".dd-sub-wrap");
+        if (wrap) {
+          wrap.classList.add("is-open");
+          activeSubTrigger.setAttribute("aria-expanded", "true");
+          var firstSub = wrap.querySelector(".dd-sub-menu [role='menuitem']");
+          if (firstSub) firstSub.focus();
+        }
+        return;
+      }
+    }
+    if (e.key === "ArrowLeft") {
+      var inSub = document.activeElement && document.activeElement.closest(".dd-sub-menu");
+      if (inSub) {
+        e.preventDefault();
+        var wrap = inSub.closest(".dd-sub-wrap");
+        if (wrap) {
+          wrap.classList.remove("is-open");
+          var trig = wrap.querySelector(".dd-sub-trigger");
+          if (trig) {
+            trig.setAttribute("aria-expanded", "false");
+            trig.focus();
+          }
+        }
+        return;
+      }
+    }
+
+    var items = menuLinks(dd).filter(function (el) { return el.offsetParent !== null; });
     if (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Home" || e.key === "End") {
       e.preventDefault();
       setOpen(dd, true);
@@ -3139,6 +3184,31 @@ main h3,
       else focusLink(dd, idx < 0 ? items.length - 1 : idx - 1);
     }
   });
+
+  function syncCrossLinks() {
+    var h = window.location.hostname;
+    if (h === "gasbrazil.github.io") {
+      document.querySelectorAll("a[href*='gasbrazil.com']").forEach(function (a) {
+        if (a.hostname === "gasbrazil.com") {
+          a.href = a.href.replace("https://gasbrazil.com", "https://gasbrazil.github.io")
+                         .replace("http://gasbrazil.com", "https://gasbrazil.github.io");
+        }
+      });
+      var homeLink = document.getElementById("link-home");
+      if (homeLink && (homeLink.getAttribute("href") === "/" || homeLink.href.indexOf("gasbrazil.com") >= 0)) {
+        homeLink.href = "https://gasbrazil.github.io/";
+      }
+    } else if (h === "caissonpoint.github.io" && typeof SITE_LINKS !== "undefined") {
+      var homeLink = document.getElementById("link-home");
+      if (homeLink) homeLink.href = "https://caissonpoint.github.io/gasbrazil-com/";
+      Object.keys(SITE_LINKS).forEach(function (k) {
+        var el = document.getElementById("link-" + k);
+        if (el && SITE_LINKS[k] && SITE_LINKS[k].caissonpoint) el.href = SITE_LINKS[k].caissonpoint;
+      });
+    }
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", syncCrossLinks);
+  else syncCrossLinks();
 })();
 </script>
     </div>
@@ -3212,7 +3282,7 @@ main h3,
 <div class="tt" id="tt"></div>
 
 <script>
-const PAYLOAD_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/ons/payload.json.gz?v=36083323027";
+const PAYLOAD_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/ons/payload.json.gz?v=36084954434";
 
 function b64ToBytes(b64) {
   const bin = atob(b64);
@@ -3629,21 +3699,6 @@ function placeChartTooltip(tt, clientX, clientY) {
 }
 
 
-function escapeHtml(s) {
-  return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-}
-function escapeHtml(s) {
-  return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-}
-function escapeHtml(s) {
-  return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-}
-function escapeHtml(s) {
-  return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-}
-function escapeHtml(s) {
-  return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-}
 function escapeHtml(s) {
   return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
@@ -7955,7 +8010,7 @@ async function boot(){
   // sit here as prose is intact inside the disclosure -- see the sweep
   // proposal (2026-09-05): hidden, not deleted.
   document.getElementById("foot").innerHTML =
-    '&copy; ' + (new Date().getFullYear()) + ' GasBrazil.com &middot; Data: <a href="https://dados.ons.org.br" target="_blank" rel="noopener">ONS Dados Abertos</a> &middot; <button type="button" class="footer-link-btn" id="link-shortcuts" data-i18n="shortcutsBtn">Shortcuts (?)</button> &middot; Contact: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>';
+    '&copy; ' + (new Date().getFullYear()) + ' GasBrazil.com &middot; Data: <a href="https://dados.ons.org.br" target="_blank" rel="noopener">ONS Dados Abertos</a> &middot; Contact: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>';
 
   ["from","to"].forEach(id=>{
     const inp=document.getElementById(id);
