@@ -507,82 +507,65 @@ HOME_TEMPLATE = """__HEAD__
   <p class="tagline" data-i18n="tagline">Analytical Firepower for Brazil's Energy Markets</p>
   <div class="flagbar" aria-hidden="true"></div>
   <nav class="hub-launch" aria-labelledby="hub-dash-title">
-  <div class="hub-section-head">
-    <h2 id="hub-dash-title" class="hub-section-title" data-i18n="hubDashboards">Live dashboards</h2>
-    <div class="hub-filter-bar" role="tablist" aria-label="Filter dashboards">
-      <button type="button" class="hub-filter-btn is-active" data-filter="all" role="tab" aria-selected="true" data-i18n="filterAll">All (9)</button>
-      <button type="button" class="hub-filter-btn" data-filter="gas" role="tab" aria-selected="false" data-i18n="filterGas">🔥 Natural Gas (6)</button>
-      <button type="button" class="hub-filter-btn" data-filter="power" role="tab" aria-selected="false" data-i18n="filterPower">⚡ Power Grid (2)</button>
-      <button type="button" class="hub-filter-btn" data-filter="trading" role="tab" aria-selected="false" data-i18n="filterTrading">📊 Trading (4)</button>
-    </div>
-  </div>
+  <h2 id="hub-dash-title" class="hub-section-title" data-i18n="hubDashboards">Live dashboards</h2>
   <div class="kpi-strip">
-    <a class="kpi-cell" href="desk/" data-slug="desk" data-category="cross power gas trading">
-      <span class="card-cat-badge badge-cross" data-i18n="badgeCross">Cross-Commodity</span>
+    <a class="kpi-cell" href="desk/" data-slug="desk">
       <div class="kpi-label" data-i18n="cardDesk">The Desk</div>
       <div class="kpi-role">Cross-product snapshot</div>
       <div class="kpi-val" data-en="__DESK_KPI__" data-pt="__DESK_KPI_PT__">__DESK_KPI__</div>
       <div class="kpi-when" data-refresh="__DESK_WHEN__"></div>
     </a>
-    <a class="kpi-cell" href="monitor/" data-slug="monitor" data-category="gas">
-      <span class="card-cat-badge badge-gas" data-i18n="badgeGas">Natural Gas</span>
-      <div class="kpi-label" data-i18n="cardMonitor">Pipeline Monitor</div>
-      <div class="kpi-role" data-i18n="cardMonitorDesc">TAG Mago &amp; NTS OnTime operational line pack &amp; SCADA telemetry.</div>
-      <div class="kpi-val" data-en="__MONITOR_KPI__" data-pt="__MONITOR_KPI_PT__">__MONITOR_KPI__</div>
-      <div class="kpi-when" data-refresh="__MONITOR_WHEN__"></div>
-      __MONITOR_SPARK__
+    <a class="kpi-cell" href="ons/" data-slug="ons">
+      <div class="kpi-label" data-i18n="cardOns">ONS Balances</div>
+      <div class="kpi-role">Grid &amp; gas dispatch</div>
+      <div class="kpi-val" data-en="__ONS_KPI__" data-pt="__ONS_KPI_PT__">__ONS_KPI__</div>
+      <div class="kpi-when" data-refresh="__ONS_WHEN__"></div>
     </a>
-    <a class="kpi-cell" href="flows/" data-slug="flows" data-category="gas">
-      <span class="card-cat-badge badge-gas" data-i18n="badgeGas">Natural Gas</span>
-      <div class="kpi-label" data-i18n="cardFlows">Pipeline Flows</div>
-      <div class="kpi-role">Physical movement</div>
-      <div class="kpi-val" data-en="__FLOWS_KPI__" data-pt="__FLOWS_KPI_PT__">__FLOWS_KPI__</div>
-      <div class="kpi-when" data-refresh="__FLOWS_WHEN__"></div>
+    <a class="kpi-cell" href="pld/" data-slug="pld">
+      <div class="kpi-label" data-i18n="cardPld">PLD Prices</div>
+      <div class="kpi-role">Power settlement</div>
+      <div class="kpi-val" data-en="__PLD_KPI__" data-pt="__PLD_KPI_PT__">__PLD_KPI__</div>
+      <div class="kpi-when" data-refresh="__PLD_WHEN__"></div>
+      __PLD_SPARK__
     </a>
-    <a class="kpi-cell" href="contratos/" data-slug="contratos" data-category="gas">
-      <span class="card-cat-badge badge-gas" data-i18n="badgeGas">Natural Gas</span>
-      <div class="kpi-label" data-i18n="cardContratos">POC Contracts</div>
-      <div class="kpi-role">Firm transport</div>
-      <div class="kpi-val" data-en="__CON_KPI__" data-pt="__CON_KPI_PT__">__CON_KPI__</div>
-      <div class="kpi-when" data-refresh="__CON_WHEN__"></div>
-    </a>
-    <a class="kpi-cell" href="poc/" data-slug="poc" data-category="gas trading">
-      <span class="card-cat-badge badge-gas" data-i18n="badgeGas">Natural Gas</span>
+    <a class="kpi-cell" href="poc/" data-slug="poc">
       <div class="kpi-label" data-i18n="cardPoc">POC Results</div>
       <div class="kpi-role">Capacity auctions</div>
       <div class="kpi-val" data-en="__POC_KPI__" data-pt="__POC_KPI_PT__">__POC_KPI__</div>
       <div class="kpi-when" data-refresh="__POC_WHEN__"></div>
       __POC_SPARK__
     </a>
-    <a class="kpi-cell" href="supply/" data-slug="supply" data-category="gas">
-      <span class="card-cat-badge badge-gas" data-i18n="badgeGas">Natural Gas</span>
+    <a class="kpi-cell" href="contratos/" data-slug="contratos">
+      <div class="kpi-label" data-i18n="cardContratos">POC Contracts</div>
+      <div class="kpi-role">Firm transport</div>
+      <div class="kpi-val" data-en="__CON_KPI__" data-pt="__CON_KPI_PT__">__CON_KPI__</div>
+      <div class="kpi-when" data-refresh="__CON_WHEN__"></div>
+    </a>
+    <a class="kpi-cell" href="flows/" data-slug="flows">
+      <div class="kpi-label" data-i18n="cardFlows">Pipeline Flows</div>
+      <div class="kpi-role">Physical movement</div>
+      <div class="kpi-val" data-en="__FLOWS_KPI__" data-pt="__FLOWS_KPI_PT__">__FLOWS_KPI__</div>
+      <div class="kpi-when" data-refresh="__FLOWS_WHEN__"></div>
+    </a>
+    <a class="kpi-cell" href="monitor/" data-slug="monitor">
+      <div class="kpi-label" data-i18n="cardMonitor">Pipeline Monitor</div>
+      <div class="kpi-role" data-i18n="cardMonitorDesc">TAG Mago &amp; NTS OnTime operational line pack &amp; SCADA telemetry.</div>
+      <div class="kpi-val" data-en="__MONITOR_KPI__" data-pt="__MONITOR_KPI_PT__">__MONITOR_KPI__</div>
+      <div class="kpi-when" data-refresh="__MONITOR_WHEN__"></div>
+      __MONITOR_SPARK__
+    </a>
+    <a class="kpi-cell" href="supply/" data-slug="supply">
       <div class="kpi-label" data-i18n="cardSupply">Gas Supply</div>
       <div class="kpi-role">National balance</div>
       <div class="kpi-val" data-en="__SUPPLY_KPI__" data-pt="__SUPPLY_KPI_PT__">__SUPPLY_KPI__</div>
       <div class="kpi-when" data-refresh="__SUPPLY_WHEN__"></div>
       __SUPPLY_SPARK__
     </a>
-    <a class="kpi-cell" href="precos/" data-slug="precos" data-category="gas trading">
-      <span class="card-cat-badge badge-gas" data-i18n="badgeGas">Natural Gas</span>
+    <a class="kpi-cell" href="precos/" data-slug="precos">
       <div class="kpi-label" data-i18n="cardPrecos">ANP Prices</div>
       <div class="kpi-role">Disclosed R$/MMBtu</div>
       <div class="kpi-val" data-en="__PRECOS_KPI__" data-pt="__PRECOS_KPI_PT__">__PRECOS_KPI__</div>
       <div class="kpi-when" data-refresh="__PRECOS_WHEN__"></div>
-    </a>
-    <a class="kpi-cell" href="ons/" data-slug="ons" data-category="power">
-      <span class="card-cat-badge badge-power" data-i18n="badgePower">Power Grid</span>
-      <div class="kpi-label" data-i18n="cardOns">ONS Balances</div>
-      <div class="kpi-role">Grid &amp; gas dispatch</div>
-      <div class="kpi-val" data-en="__ONS_KPI__" data-pt="__ONS_KPI_PT__">__ONS_KPI__</div>
-      <div class="kpi-when" data-refresh="__ONS_WHEN__"></div>
-    </a>
-    <a class="kpi-cell" href="pld/" data-slug="pld" data-category="power trading">
-      <span class="card-cat-badge badge-power" data-i18n="badgePower">Power Grid</span>
-      <div class="kpi-label" data-i18n="cardPld">PLD Prices</div>
-      <div class="kpi-role">Power settlement</div>
-      <div class="kpi-val" data-en="__PLD_KPI__" data-pt="__PLD_KPI_PT__">__PLD_KPI__</div>
-      <div class="kpi-when" data-refresh="__PLD_WHEN__"></div>
-      __PLD_SPARK__
     </a>
   </div>
   </nav>
@@ -653,29 +636,10 @@ async function loadLiveTeasers() {
     /* Build-time markers remain the fallback. */
   }
 }
-function initHubFilters() {
-  const btns = document.querySelectorAll(".hub-filter-btn");
-  const cells = document.querySelectorAll(".kpi-strip .kpi-cell");
-  btns.forEach(btn => {
-    btn.addEventListener("click", () => {
-      const filter = btn.getAttribute("data-filter");
-      btns.forEach(b => {
-        b.classList.toggle("is-active", b === btn);
-        b.setAttribute("aria-selected", b === btn ? "true" : "false");
-      });
-      cells.forEach(cell => {
-        const cat = cell.getAttribute("data-category") || "";
-        const visible = filter === "all" || cat.split(" ").includes(filter);
-        cell.setAttribute("data-hidden", visible ? "false" : "true");
-      });
-    });
-  });
-}
 const _apply = applyI18n;
 applyI18n = function() { _apply(); paintRefreshLabels(); };
 paintRefreshLabels();
 loadLiveTeasers();
-initHubFilters();
 </script>
 """
 
@@ -817,8 +781,6 @@ def write_home(out_path: Path | str = DEFAULT_OUT) -> Path:
         kit.products_dropdown_html(
             "home",
             '<div class="wordmark"><a href="./" id="link-home" data-i18n="navHome">GasBrazil</a></div>',
-            wiki_href="wiki/",
-            about_href="about/",
         ),
     )
     html = _kit_render(html)
@@ -843,8 +805,6 @@ def write_about(out_path: Path | None = None) -> Path:
         kit.products_dropdown_html(
             "home",
             '<div class="wordmark"><a href="../" id="link-home" data-i18n="navHome">GasBrazil</a></div>',
-            wiki_href="../wiki/",
-            about_href="../about/",
         ),
     )
     # About lives in /about/, so home-relative links in the footer need ../
@@ -871,8 +831,6 @@ def write_404(out_path: Path | None = None) -> Path:
         kit.products_dropdown_html(
             "home",
             '<div class="wordmark"><a href="./" id="link-home" data-i18n="navHome">GasBrazil</a></div>',
-            wiki_href="wiki/",
-            about_href="about/",
         ),
     )
     html = _kit_render(html)
