@@ -27,7 +27,7 @@ TEMPLATE = r"""<!doctype html>
 <title>The Desk — GasBrazil.com</title>
 <meta name="description" content="Cross-product Brazil gas and power desk: PLD, CMO, CVU, GUS, ANP, flows, spark.">
 <link rel="canonical" href="https://gasbrazil.com/desk/">
-<link rel="icon" href="__FAVICON_DATA_URI__">
+__BRAND_HEAD__
 __FONT_PRELOAD__
 <!-- home-page teaser marker, read by ../build_home.py:
      generated: __GENERATED__
@@ -2249,7 +2249,7 @@ def write_dashboard(out_path: Path | str = DEFAULT_OUT) -> Path:
         SHARED_SITE_LINKS_JS=kit.site_links_js("desk"),
         SHARED_MASTHEAD=kit.masthead_html("desk"),
         SHARED_METHODOLOGY=kit.methodology_html("desk"),
-        FAVICON_DATA_URI=kit.embed_favicon(),
+        BRAND_HEAD=kit.brand_head_html(),
         FONT_PRELOAD=kit.font_preload_html(),
     )
     out_path.parent.mkdir(parents=True, exist_ok=True)

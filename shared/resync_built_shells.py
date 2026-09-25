@@ -82,12 +82,32 @@ def resync_products_dd(html: str, site_id: str) -> str:
     return re.sub(pattern, new_dd + '\n      <span class="crumb-sep"', html, count=1)
 
 
-def resync_favicon(html: str) -> str:
-    return re.sub(
-        r'<link rel="icon" href="data:image/png;base64,[A-Za-z0-9+/=]+">',
-        '<link rel="icon" href="/shared/favicon.png">',
-        html,
-    )
+_BRAND_HEAD_LINE = re.compile(
+    r'[ \t]*(?:<link rel="(?:icon|apple-touch-icon|manifest)"[^>]*>'
+    r'|<meta property="og:image(?::[a-z]+)?"[^>]*>'
+    r'|<meta name="twitter:(?:card|image)"[^>]*>)[ \t]*\n?'
+)
+
+
+def resync_brand_head(html: str, *, social: bool = True) -> str:
+    """Replace whatever icon / manifest / social-image tags a shell carries
+    with the current kit.brand_head_html() block, in place of the first one
+    found (else after the canonical link, else before </head>)."""
+    head_end = html.find("</head>")
+    if head_end < 0:
+        return html
+    head, rest = html[:head_end], html[head_end:]
+    first = _BRAND_HEAD_LINE.search(head)
+    stripped = _BRAND_HEAD_LINE.sub("", head)
+    if first:
+        pos = first.start()
+    else:
+        m = re.search(r'<link rel="canonical"[^>]*>\n?', stripped)
+        pos = m.end() if m else len(stripped)
+    block = kit.brand_head_html(social=social) + "\n"
+    if pos and not stripped[:pos].endswith("\n"):
+        block = "\n" + block
+    return stripped[:pos] + block + stripped[pos:] + rest
 
 
 def resync_font_preloads(html: str) -> str:
@@ -283,7 +303,7 @@ def resync_site(site_id: str) -> None:
     html = resync_theme(html, kit.render_theme_css(), site_id)
     html = resync_typo_weights(html)
     html = resync_products_dd(html, site_id)
-    html = resync_favicon(html)
+    html = resync_brand_head(html)
     html = resync_font_preloads(html)
     html = resync_head_hints(html)
     html = resync_decode_js(html)

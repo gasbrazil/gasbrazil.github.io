@@ -176,6 +176,37 @@ def embed_favicon(favicon_path: Path | str = DEFAULT_FAVICON_PATH,
     )
 
 
+SITE_URL = "https://gasbrazil.com"
+SOCIAL_IMAGE_PATH = "/shared/brand/og-image.png"
+
+
+def brand_head_html(*, social: bool = True) -> str:
+    """Icon, manifest and social-card tags shared by every page's <head>.
+
+    The SVG favicon swaps its blue core for the lighter dark-theme blue under
+    prefers-color-scheme: dark; favicon.ico (16/32/48) covers browsers
+    without SVG favicon support; iOS reads apple-touch-icon.png and Android
+    the manifest. social=False drops the Open Graph / Twitter image tags
+    (private pages such as /admin/)."""
+    lines = [
+        '<link rel="icon" href="/favicon.ico" sizes="32x32">',
+        '<link rel="icon" href="/shared/favicon.svg" type="image/svg+xml">',
+        '<link rel="apple-touch-icon" href="/apple-touch-icon.png">',
+        '<link rel="manifest" href="/site.webmanifest">',
+    ]
+    if social:
+        img = SITE_URL + SOCIAL_IMAGE_PATH
+        lines += [
+            f'<meta property="og:image" content="{img}">',
+            '<meta property="og:image:width" content="1200">',
+            '<meta property="og:image:height" content="630">',
+            '<meta property="og:image:alt" content="GasBrazil: Open Data for Brazil\'s Gas and Power Markets">',
+            '<meta name="twitter:card" content="summary_large_image">',
+            f'<meta name="twitter:image" content="{img}">',
+        ]
+    return "\n".join(lines)
+
+
 def encode_payload_b64(payload: dict, *, compresslevel: int = 9) -> str:
     """Standard gzip+base64 encoding for the embedded JSON payload every
     dashboard ships. mtime=0 keeps the gzip header byte-for-byte
@@ -276,7 +307,8 @@ def render(template: str, **replacements: str) -> str:
 
 
 def seo_head(*, title: str, description: str, path: str = "/") -> str:
-    """Title, description, canonical, Open Graph, hreflang, and font preload.
+    """Title, description, canonical, Open Graph, hreflang, font preload, and
+    the shared icon / social-card tags (brand_head_html).
     path is the site-relative path including a leading slash."""
     if not path.startswith("/"):
         path = "/" + path
@@ -308,7 +340,8 @@ def seo_head(*, title: str, description: str, path: str = "/") -> str:
         f'<meta property="og:locale" content="en_US">\n'
         f'<meta property="og:locale:alternate" content="pt_BR">\n'
         f'<link rel="alternate" hreflang="x-default" href="{canonical_esc}">\n'
-        f'<link rel="alternate" href="{alt_esc}">'
+        f'<link rel="alternate" href="{alt_esc}">\n'
+        f'{brand_head_html()}'
     )
 
 
@@ -1758,6 +1791,10 @@ function showAuthModal() {
 
       overlay.innerHTML =
         '<div class="gb-auth-card" id="gb-auth-card">' +
+          '<div class="gb-auth-flame" aria-hidden="true">' +
+            '<img class="fl-l" src="/shared/brand/gasbrazil-flame.svg" alt="" width="34" height="44">' +
+            '<img class="fl-d" src="/shared/brand/gasbrazil-flame-dark.svg" alt="" width="34" height="44">' +
+          '</div>' +
           '<div class="gb-auth-brand">GasBrazil</div>' +
           '<div class="gb-auth-badge">' +
             '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' +

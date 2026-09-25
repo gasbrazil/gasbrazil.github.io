@@ -420,7 +420,6 @@ def _head(title: str, description: str, path: str) -> str:
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 {kit.seo_head(title=title, description=description, path=path)}
-<link rel="icon" href="__FAVICON_DATA_URI__">
 <script>__SHARED_JS_BOOT__</script>
 <style>
 __SHARED_THEME_CSS__
@@ -685,7 +684,6 @@ def _kit_render(template: str, **extra: str) -> str:
         SHARED_JS_BOOT=kit.JS_BOOT,
         SHARED_JS_DECODE=kit.JS_DECODE,
         SHARED_JS_ESCAPE_HTML=kit.JS_ESCAPE_HTML,
-        FAVICON_DATA_URI=kit.embed_favicon(),
         **extra,
     )
 

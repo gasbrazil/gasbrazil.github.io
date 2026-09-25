@@ -2397,8 +2397,20 @@ html.gb-locked footer {
   content: "";
   position: absolute;
   top: 0; left: 0; right: 0; height: 3px;
-  background: linear-gradient(90deg, #009C3B 0%, #009C3B 33%, #FFDF00 33%, #FFDF00 66%, #002776 66%, #002776 100%);
+  /* Same flag proportions and tokens as .flagbar (green field, yellow
+     lozenge, blue disc), not three equal thirds. */
+  background: linear-gradient(90deg,
+    var(--brz-green) 0 46%, var(--brz-yellow) 46% 73%, var(--brz-blue) 73% 100%);
 }
+
+/* Brand flame above the wordmark on the lock screen. Light and dark SVGs
+   swap with the site theme (the dark one lifts the blue core so it reads
+   on the near-black panel). */
+.gb-auth-flame { display: flex; justify-content: center; margin: 0 0 10px; }
+.gb-auth-flame img { display: block; width: 34px; height: 44px; }
+.gb-auth-flame .fl-d { display: none; }
+[data-theme="dark"] .gb-auth-flame .fl-l { display: none; }
+[data-theme="dark"] .gb-auth-flame .fl-d { display: block; }
 
 .gb-auth-brand {
   font-family: var(--font-display);

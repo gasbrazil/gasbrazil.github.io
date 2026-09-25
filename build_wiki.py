@@ -219,7 +219,7 @@ def page_template(title: str, body_html: str, current_out: str, slug: str | None
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{html.escape(title)} &mdash; GasBrazil.com Wiki</title>
-<link rel="icon" href="{kit.embed_favicon()}">
+{kit.brand_head_html()}
 <meta name="theme-color" content="#06080c">
 {kit.font_preload_html()}
 <script>{kit.JS_BOOT}</script>

@@ -416,7 +416,7 @@ def write_dashboard(df: pd.DataFrame, dest: Path,
         SHARED_SITE_LINKS_JS=kit.site_links_js("ons"),
         SHARED_MASTHEAD=kit.masthead_html("ons"),
         SHARED_METHODOLOGY=kit.methodology_html("ons"),
-        FAVICON_DATA_URI=kit.embed_favicon(),
+        BRAND_HEAD=kit.brand_head_html(),
         FONT_PRELOAD=kit.font_preload_html(),
     )
     dest.parent.mkdir(parents=True, exist_ok=True)
@@ -437,7 +437,7 @@ TEMPLATE = r"""<!doctype html>
 <title>ONS Balances</title>
 <meta name="description" content="Daily Brazilian grid balances, thermal generation by plant, and estimated gas-fired dispatch from ONS open data.">
 <link rel="canonical" href="https://gasbrazil.com/ons/">
-<link rel="icon" href="{{FAVICON_DATA_URI}}">
+{{BRAND_HEAD}}
 __FONT_PRELOAD__
 <!-- home-page teaser marker, read by ../build_home.py -- not otherwise used by this page:
      generated: __GENERATED__

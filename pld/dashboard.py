@@ -292,7 +292,7 @@ TEMPLATE = """<!doctype html>
 <title>PLD Prices — GasBrazil.com</title>
 <meta name="description" content="CCEE daily-average and hourly PLD (Preço de Liquidação das Diferenças) by Brazilian electricity submarket — Southeast, South, Northeast, and North.">
 <link rel="canonical" href="https://gasbrazil.com/pld/">
-<link rel="icon" href="__FAVICON_DATA_URI__">
+__BRAND_HEAD__
 __FONT_PRELOAD__
 <!-- home-page teaser marker, read by ../build_home.py:
      generated: __GENERATED__
@@ -1207,7 +1207,7 @@ def write_dashboard(out_path: Path | str = DEFAULT_OUT) -> Path:
         SHARED_SITE_LINKS_JS=kit.site_links_js("pld"),
         SHARED_MASTHEAD=kit.masthead_html("pld"),
         SHARED_METHODOLOGY=kit.methodology_html("pld"),
-        FAVICON_DATA_URI=kit.embed_favicon(),
+        BRAND_HEAD=kit.brand_head_html(),
         FONT_PRELOAD=kit.font_preload_html(),
     )
     out_path = Path(out_path)

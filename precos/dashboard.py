@@ -104,7 +104,7 @@ TEMPLATE = r"""<!doctype html>
 <title>ANP Prices — GasBrazil.com</title>
 <meta name="description" content="ANP Resolution 52/2011 monthly natural gas trading price disclosures — producers by basin, distributors, and marketers. Tax-inclusive R$/MMBtu.">
 <link rel="canonical" href="https://gasbrazil.com/precos/">
-<link rel="icon" href="__FAVICON_DATA_URI__">
+__BRAND_HEAD__
 __FONT_PRELOAD__
 <!-- home-page teaser marker, read by ../build_home.py:
      generated: __GENERATED__
@@ -728,7 +728,7 @@ def write_dashboard(out_path=DEFAULT_OUT):
         SHARED_SITE_LINKS_JS=kit.site_links_js("precos"),
         SHARED_MASTHEAD=kit.masthead_html("precos"),
         SHARED_METHODOLOGY=kit.methodology_html("precos"),
-        FAVICON_DATA_URI=kit.embed_favicon(),
+        BRAND_HEAD=kit.brand_head_html(),
         FONT_PRELOAD=kit.font_preload_html(),
     )
     out_path = Path(out_path)

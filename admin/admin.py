@@ -34,7 +34,7 @@ def build_admin_html() -> str:
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Admin Panel — GasBrazil</title>
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" href="{kit.DEFAULT_FAVICON_PATH.name}">
+{kit.brand_head_html(social=False)}
 <script>{kit.JS_BOOT}</script>
 <style>
 {kit.THEME_CSS}

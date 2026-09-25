@@ -98,7 +98,7 @@ TEMPLATE = """<!doctype html>
 <title>POC Contracts</title>
 <meta name="description" content="Active transport and master transport contracts across TBG, TAG, and NTS from Brazil's Portal de Oferta de Capacidade.">
 <link rel="canonical" href="https://gasbrazil.com/contratos/">
-<link rel="icon" href="{{FAVICON_DATA_URI}}">
+{{BRAND_HEAD}}
 __FONT_PRELOAD__
 <!-- home-page teaser marker, read by ../build_home.py:
      generated: __GENERATED__
@@ -1694,7 +1694,7 @@ def write_dashboard(out_path=DEFAULT_OUT):
         SHARED_SITE_LINKS_JS=kit.site_links_js("contratos"),
         SHARED_MASTHEAD=kit.masthead_html("contratos"),
         SHARED_METHODOLOGY=kit.methodology_html("contratos"),
-        FAVICON_DATA_URI=kit.embed_favicon(),
+        BRAND_HEAD=kit.brand_head_html(),
         FONT_PRELOAD=kit.font_preload_html(),
         M3_PER_MMBTU=str(xf.M3_PER_MMBTU),
     )

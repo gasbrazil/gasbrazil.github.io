@@ -107,7 +107,7 @@ TEMPLATE = """<!doctype html>
 <title>POC Results</title>
 <meta name="description" content="Pipeline capacity offer results from Brazil's Portal de Oferta de Capacidade — balancing, GUS, and linepack trades.">
 <link rel="canonical" href="https://gasbrazil.com/poc/">
-<link rel="icon" href="{{FAVICON_DATA_URI}}">
+{{BRAND_HEAD}}
 __FONT_PRELOAD__
 <!-- home-page teaser marker, read by ../build_home.py:
      generated: __GENERATED__
@@ -1484,7 +1484,7 @@ def write_dashboard(out_path=DEFAULT_OUT):
         SHARED_SITE_LINKS_JS=kit.site_links_js("poc"),
         SHARED_MASTHEAD=kit.masthead_html("poc"),
         SHARED_METHODOLOGY=kit.methodology_html("poc"),
-        FAVICON_DATA_URI=kit.embed_favicon(),
+        BRAND_HEAD=kit.brand_head_html(),
         FONT_PRELOAD=kit.font_preload_html(),
         M3_PER_MMBTU=str(M3_PER_MMBTU),
     )
