@@ -623,6 +623,31 @@ def test_home_page_clean_structure():
     assert "initHubFilters" not in index_html
     assert "kpi-strip" in index_html
     assert "kpi-cell" in index_html
+    assert 'class="sources-block"' not in index_html
+
+
+def test_clean_page_bottoms_and_standard_footers():
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[1]
+    dashboards = ("desk", "ons", "pld", "poc", "contratos", "flows", "supply", "precos", "mago", "nts", "monitor")
+    for site in dashboards:
+        html = (root / site / "index.html").read_text(encoding="utf-8")
+        # No exposed sources block on pages; sources are tucked behind methodology / wiki
+        assert 'class="sources"' not in html, f"found exposed sources bar in {site}"
+        # No AI copy
+        assert "Analytical Firepower" not in html, f"found buzzword in {site}"
+        assert "Executive cross-market synthesis" not in html, f"found buzzword in {site}"
+        # Methodology details has clean link to wiki
+        assert 'data-i18n="navWiki"' in html, f"missing wiki link in {site}"
+
+    # Verify standard footer helper
+    footer = kit.standard_footer_html("../")
+    assert 'data-i18n="navWiki"' in footer
+    assert 'data-i18n="footerAbout"' in footer
+    assert 'id="link-shortcuts"' in footer
+    assert "eb@gasbrazil.com" in footer
+
 
 
 

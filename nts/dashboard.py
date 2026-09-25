@@ -650,26 +650,13 @@ __SHARED_TYPO_WEIGHT_CSS__
     </div>
   </section>
 
-  <div class="sources">
-    <span class="sources-label" data-i18n="sources">Sources</span>
-    <a class="pill" href="https://ntsbrasil.com/ontime" target="_blank" rel="noopener">NTS OnTime<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
-  </div>
-
   <!-- Methodology trust block -->
   __METHODOLOGY__
 
   <!-- Footer -->
   <footer class="nts-footer">
     <div class="nts-footer-inner">
-      <span data-i18n="ntsFooter">Data: NTS OnTime operational line pack telemetry. Not an official NTS product.</span>
-      ·
-      <a href="../mago/" data-i18n="navMago">TAG Mago</a>
-      ·
-      <a href="../flows/" data-i18n="navFlows">Pipeline Flows</a>
-      ·
-      <a href="../about/" data-i18n="footerAbout">About</a>
-      ·
-      <button type="button" class="footer-link-btn" id="link-shortcuts" data-i18n="shortcutsBtn">Shortcuts (?)</button>
+      &copy; <span id="year"></span> GasBrazil.com &middot; <a href="../wiki/" data-i18n="navWiki">Wiki</a> &middot; <a href="../about/" data-i18n="footerAbout">About &amp; methodology</a> &middot; <button type="button" class="footer-link-btn" id="link-shortcuts" data-i18n="shortcutsBtn">Shortcuts (?)</button> &middot; <span data-i18n="contact">Contact</span>: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
     </div>
   </footer>
 

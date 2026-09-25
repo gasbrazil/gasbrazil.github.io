@@ -374,27 +374,6 @@ a.kpi-cell { cursor: pointer; }
 .card .desc { color: var(--muted); font-weight: 300; font-size: 12.5px; margin-top: 6px;
   line-height: 1.45; flex: 1; }
 .hub-page-title { font-size: 22px; font-weight: 600; margin: 20px 0 0; letter-spacing: -.01em; }
-.sources-block { margin-top: 28px; }
-.sources-block .label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em;
-  color: var(--muted); font-weight: 300; margin-bottom: 10px; }
-.sources-block .row { display: flex; flex-wrap: wrap; gap: 8px; }
-.sources-block a {
-  font-size: 12px; font-weight: 400; color: var(--muted2); text-decoration: none;
-  border: 1px solid var(--ring); border-radius: var(--radius-sm); padding: 5px 12px;
-  white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;
-  background: var(--panel-grad);
-  transition: border-color .15s ease, transform .15s ease, background .15s ease, box-shadow .15s ease, color .15s ease;
-}
-.sources-block a:hover {
-  background: var(--panel-grad-hover); color: var(--text); border-color: var(--border-strong);
-  transform: translateY(-1.5px); box-shadow: var(--elevate-sm);
-}
-.sources-block a:active { transform: translateY(0); }
-[data-theme="dark"] .sources-block a:hover {
-  border-color: rgba(255, 223, 0, .35);
-  box-shadow: var(--elevate-sm), 0 0 0 1px rgba(255, 223, 0, .12);
-}
-.sources-block .ext-icon { width: 10px; height: 10px; display: inline-block; flex: none; opacity: .75; }
 .prose { margin-top: 8px; max-width: 42em; }
 .prose h2 { font-size: 16px; font-weight: 400; margin: 22px 0 6px; }
 .prose p, .prose li { font-size: 14px; font-weight: 300; line-height: 1.6; color: var(--muted2); }
@@ -412,19 +391,17 @@ a.kpi-cell { cursor: pointer; }
 footer.site { padding: 20px 24px; color: var(--muted); font-weight: 300; font-size: 13px; text-align: center; line-height: 1.7; font-family: var(--font-display); }
 /* Keyboard users: every hub link and control gets a visible focus ring. */
 .kpi-cell:focus-visible, .card:focus-visible,
-.sources-block a:focus-visible, .hub-controls button:focus-visible,
+.hub-controls button:focus-visible,
 footer.site a:focus-visible {
   outline: 2px solid var(--accent); outline-offset: 2px;
 }
 [data-theme="dark"] .kpi-cell:focus-visible, [data-theme="dark"] .card:focus-visible,
-[data-theme="dark"] .sources-block a:focus-visible,
 [data-theme="dark"] .hub-controls button:focus-visible,
 [data-theme="dark"] footer.site a:focus-visible {
   outline-color: var(--brz-yellow);
 }
 @media (max-width: 480px) {
   .kpi-cell { padding: 12px 14px; }
-  .sources-block a { padding: 9px 14px; }
 }
 footer.site a {
   color: var(--accent); text-decoration: none;
@@ -475,7 +452,7 @@ def _hub_controls(wiki_href: str, about_href: str) -> str:
 
 def _footer(home_href: str = "./") -> str:
     return f"""<footer class="site">
-  &copy; <span id="year"></span> GasBrazil
+  &copy; <span id="year"></span> GasBrazil.com
   &middot; <a href="{home_href}wiki/" data-i18n="navWiki">Wiki</a>
   &middot; <a href="{home_href}about/" data-i18n="footerAbout">About &amp; methodology</a>
   &middot; <button type="button" class="footer-link-btn" id="link-shortcuts" data-i18n="shortcutsBtn">Shortcuts (?)</button>
@@ -504,7 +481,7 @@ HOME_TEMPLATE = """__HEAD__
     __BRAND_MENU__
     __HUB_CONTROLS__
   </div>
-  <p class="tagline" data-i18n="tagline">Analytical Firepower for Brazil's Energy Markets</p>
+  <p class="tagline" data-i18n="tagline">Open Data for Brazil's Gas and Power Markets</p>
   <div class="flagbar" aria-hidden="true"></div>
   <nav class="hub-launch" aria-labelledby="hub-dash-title">
   <h2 id="hub-dash-title" class="hub-section-title" data-i18n="hubDashboards">Live dashboards</h2>
@@ -549,7 +526,7 @@ HOME_TEMPLATE = """__HEAD__
     </a>
     <a class="kpi-cell" href="monitor/" data-slug="monitor">
       <div class="kpi-label" data-i18n="cardMonitor">Pipeline Monitor</div>
-      <div class="kpi-role" data-i18n="cardMonitorDesc">TAG Mago &amp; NTS OnTime operational line pack &amp; SCADA telemetry.</div>
+      <div class="kpi-role" data-i18n="cardMonitorDesc">Operational line pack &amp; SCADA telemetry.</div>
       <div class="kpi-val" data-en="__MONITOR_KPI__" data-pt="__MONITOR_KPI_PT__">__MONITOR_KPI__</div>
       <div class="kpi-when" data-refresh="__MONITOR_WHEN__"></div>
       __MONITOR_SPARK__
@@ -569,16 +546,6 @@ HOME_TEMPLATE = """__HEAD__
     </a>
   </div>
   </nav>
-  <div class="sources-block">
-    <div class="label" data-i18n="sources">Sources</div>
-    <div class="row">
-      <a href="https://dados.ons.org.br" target="_blank" rel="noopener">ONS<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
-      <a href="https://www.ofertadecapacidade.com.br/PEG/resultado" target="_blank" rel="noopener">POC<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
-      <a href="https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/dados-consolidados-movimentacao-de-gas-natural-em-gasodutos-de-transporte" target="_blank" rel="noopener">ANP<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
-      <a href="https://dadosabertos.ccee.org.br/dataset/pld_media_diaria" target="_blank" rel="noopener">CCEE<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
-      <a href="https://www.ntsbrasil.com/ontime/" target="_blank" rel="noopener">NTS<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
-    </div>
-  </div>
 </main>
 __FOOTER__
 <script>
@@ -673,11 +640,7 @@ ABOUT_TEMPLATE = """__HEAD__
     <p data-i18n="aboutCoverSupply">Gas Supply uses ANP PPGN-EL national monthly series plus national natural-gas imports. The open import CSV does not split Bolivia pipeline vs LNG cargoes.</p>
     <p data-i18n="aboutCoverPrecos">ANP Prices are Resolution 52/2011 monthly disclosures (tax-inclusive R$/MMBtu), not assessed spot benchmarks. Some thermal and Other Basins months are suppressed when too few counterparties report.</p>
     <p data-i18n="aboutCoverPld">PLD: CCEE daily averages and hourly prices by submarket; peak is hours 18–20 on weekdays. Optional ONS CMO and median gas CVU when lake data is present.</p>
-    <p data-i18n="aboutCoverDesk">The Desk: cross-product headline series. Full history and filters live on each product page.</p>
-    <p>
-      <a href="../ons/">ONS</a> · <a href="../poc/">POC</a> · <a href="../contratos/">Contratos</a> · <a href="../flows/">Flows</a> · <a href="../mago/">TAG Mago</a> · <a href="../nts/">NTS OnTime</a> · <a href="../supply/">Supply</a> · <a href="../precos/">ANP Prices</a> · <a href="../pld/">PLD</a> · <a href="../desk/">The Desk</a> ·
-      <a href="../ons/wiki-html/">ONS wiki</a>
-    </p>
+    <p data-i18n="aboutCoverDesk">Cross-market summaries; granular data and interactive filters reside on individual dashboards.</p>
   </div>
 </main>
 __FOOTER__

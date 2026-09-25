@@ -684,11 +684,6 @@ __SHARED_TYPO_WEIGHT_CSS__
   <div class="scroll"><table class="data" id="dataTable"></table></div>
 </div>
 </div>
-
-<div class="sources">
-  <span class="sources-label" data-i18n="sources">Sources</span>
-  <a href="https://dados.ons.org.br" target="_blank" rel="noopener">ONS<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
-</div>
 <div class="asof-strip asof-footer" id="asof-strip">
   <span class="asof-label" data-i18n="kpiRefresh">Last refreshed</span>
   <span class="asof-val" id="asof-refreshed">Loading&hellip;</span>
@@ -696,7 +691,7 @@ __SHARED_TYPO_WEIGHT_CSS__
   <span class="asof-val" id="asof-through">&mdash;</span>
 </div>
 __SHARED_METHODOLOGY__
-<div class="foot" id="foot"></div>
+<footer class="foot" id="foot"></footer>
 </div>
 
 <div class="tt" id="tt"></div>
@@ -3344,7 +3339,7 @@ async function boot(){
   // sit here as prose is intact inside the disclosure -- see the sweep
   // proposal (2026-09-05): hidden, not deleted.
   document.getElementById("foot").innerHTML =
-    '&copy; ' + (new Date().getFullYear()) + ' GasBrazil.com &middot; Data: <a href="https://dados.ons.org.br" target="_blank" rel="noopener">ONS Dados Abertos</a> &middot; Contact: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>';
+    '&copy; ' + (new Date().getFullYear()) + ' GasBrazil.com &middot; <a href="../wiki/" data-i18n="navWiki">Wiki</a> &middot; <a href="../about/" data-i18n="footerAbout">About &amp; methodology</a> &middot; <button type="button" class="footer-link-btn" id="link-shortcuts" data-i18n="shortcutsBtn">Shortcuts (?)</button> &middot; <span data-i18n="contact">Contact</span>: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>';
 
   ["from","to"].forEach(id=>{
     const inp=document.getElementById(id);

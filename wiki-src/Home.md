@@ -19,14 +19,28 @@ Limitations** pair covering what's specific to it.
 
 | Dashboard | Live | Using the Dashboard | Known Limitations |
 |---|---|---|---|
-| ONS Balances | [gasbrazil.com/ons](https://gasbrazil.com/ons/) | [Using the Dashboard](/wiki/ons/using-the-dashboard.html) | [Known Limitations](/wiki/ons/known-limitations.html) |
-| POC Results | [gasbrazil.com/poc](https://gasbrazil.com/poc/) | [Using the Dashboard](/wiki/poc/using-the-dashboard.html) | [Known Limitations](/wiki/poc/known-limitations.html) |
-| POC Contracts | [gasbrazil.com/contratos](https://gasbrazil.com/contratos/) | [Using the Dashboard](/wiki/contratos/using-the-dashboard.html) | [Known Limitations](/wiki/contratos/known-limitations.html) |
-| Pipeline Flows | [gasbrazil.com/flows](https://gasbrazil.com/flows/) | [Using the Dashboard](/wiki/flows/using-the-dashboard.html) | [Known Limitations](/wiki/flows/known-limitations.html) |
-| Gas Supply | [gasbrazil.com/supply](https://gasbrazil.com/supply/) | [Using the Dashboard](/wiki/supply/using-the-dashboard.html) | [Known Limitations](/wiki/supply/known-limitations.html) |
-| PLD Prices | [gasbrazil.com/pld](https://gasbrazil.com/pld/) | [Using the Dashboard](/wiki/pld/using-the-dashboard.html) | [Known Limitations](/wiki/pld/known-limitations.html) |
-| ANP Prices | [gasbrazil.com/precos](https://gasbrazil.com/precos/) | [Using the Dashboard](/wiki/precos/using-the-dashboard.html) | [Known Limitations](/wiki/precos/known-limitations.html) |
 | The Desk | [gasbrazil.com/desk](https://gasbrazil.com/desk/) | [Using the Dashboard](/wiki/desk/using-the-dashboard.html) | [Known Limitations](/wiki/desk/known-limitations.html) |
+| Pipeline Monitor | [gasbrazil.com/monitor](https://gasbrazil.com/monitor/) | [Using the Dashboard](/wiki/monitor/using-the-dashboard.html) | [Known Limitations](/wiki/monitor/known-limitations.html) |
+| Pipeline Flows | [gasbrazil.com/flows](https://gasbrazil.com/flows/) | [Using the Dashboard](/wiki/flows/using-the-dashboard.html) | [Known Limitations](/wiki/flows/known-limitations.html) |
+| POC Contracts | [gasbrazil.com/contratos](https://gasbrazil.com/contratos/) | [Using the Dashboard](/wiki/contratos/using-the-dashboard.html) | [Known Limitations](/wiki/contratos/known-limitations.html) |
+| POC Results | [gasbrazil.com/poc](https://gasbrazil.com/poc/) | [Using the Dashboard](/wiki/poc/using-the-dashboard.html) | [Known Limitations](/wiki/poc/known-limitations.html) |
+| Gas Supply | [gasbrazil.com/supply](https://gasbrazil.com/supply/) | [Using the Dashboard](/wiki/supply/using-the-dashboard.html) | [Known Limitations](/wiki/supply/known-limitations.html) |
+| ANP Prices | [gasbrazil.com/precos](https://gasbrazil.com/precos/) | [Using the Dashboard](/wiki/precos/using-the-dashboard.html) | [Known Limitations](/wiki/precos/known-limitations.html) |
+| ONS Balances | [gasbrazil.com/ons](https://gasbrazil.com/ons/) | [Using the Dashboard](/wiki/ons/using-the-dashboard.html) | [Known Limitations](/wiki/ons/known-limitations.html) |
+| PLD Prices | [gasbrazil.com/pld](https://gasbrazil.com/pld/) | [Using the Dashboard](/wiki/pld/using-the-dashboard.html) | [Known Limitations](/wiki/pld/known-limitations.html) |
+
+## Upstream Data Sources
+
+All dashboards republish official open public data and operator telemetry without editorial alteration:
+
+| Source | Organization | Primary Datasets | Update Cadence | Official Portal |
+|---|---|---|---|---|
+| **ONS** | Operador Nacional do Sistema Elétrico | Daily SIN balances, hourly generation by plant, gas dispatch | Daily / Intraday | [dados.ons.org.br](https://dados.ons.org.br) |
+| **CCEE** | Câmara de Comercialização de Energia Elétrica | Daily average and hourly PLD settlement prices by submarket | Hourly / Daily | [dadosabertos.ccee.org.br](https://dadosabertos.ccee.org.br) |
+| **POC** | Portal de Oferta de Capacidade | Capacity auction clearing, balancing bids, active transport contracts | Daily (D-1) | [ofertadecapacidade.com.br](https://www.ofertadecapacidade.com.br) |
+| **ANP** | Agência Nacional do Petróleo, Gás e Biocombustíveis | Pipeline receipts & deliveries, PPGN-EL national supply, Res. 52/2011 prices | Monthly | [gov.br/anp](https://www.gov.br/anp) |
+| **TAG** | Transportadora Associada de Gás | Portal Mago operational line pack, 7-day tolerance bands, zone forecasts | Hourly | [mago.ntag.com.br](https://mago.ntag.com.br) |
+| **NTS** | Nova Transportadora do Sudeste | OnTime SCADA telemetry, real-time line pack, packing/unpacking rates | Hourly | [ntsbrasil.com/ontime](https://www.ntsbrasil.com/ontime) |
 
 ## Repo at a glance
 
