@@ -574,16 +574,6 @@ __SHARED_TYPO_WEIGHT_CSS__
 </section>
 
 <footer>
-  <div class="sources">
-    <span class="sources-label" data-i18n="sources">Sources</span>
-    <a href="../ons/">ONS</a>
-    <a href="../pld/">CCEE</a>
-    <a href="../precos/">ANP</a>
-    <a href="../poc/">POC</a>
-    <a href="../contratos/">Contracts</a>
-    <a href="../flows/">Flows</a>
-    <a href="../supply/">Supply</a>
-  </div>
   <div class="asof-strip asof-footer" id="asof-strip">
     <span class="asof-label" data-i18n="kpiRefresh">Last refreshed</span>
     <span class="asof-val" id="asof-refreshed">&mdash;</span>
@@ -591,9 +581,7 @@ __SHARED_TYPO_WEIGHT_CSS__
     <span class="asof-val" id="asof-through">&mdash;</span>
   </div>
   __SHARED_METHODOLOGY__
-  &copy; <span id="year"></span> GasBrazil.com
-  &middot; <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
-  &middot; <a href="../about/" data-i18n="footerAbout">About</a>
+  &copy; <span id="year"></span> GasBrazil.com &middot; <a href="../wiki/" data-i18n="navWiki">Wiki</a> &middot; <a href="../about/" data-i18n="footerAbout">About &amp; methodology</a> &middot; <button type="button" class="footer-link-btn" id="link-shortcuts" data-i18n="shortcutsBtn">Shortcuts (?)</button> &middot; <span data-i18n="contact">Contact</span>: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
 </footer>
 </div>
 <div class="tt" id="chart-tt"></div>

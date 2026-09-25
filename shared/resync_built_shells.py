@@ -179,6 +179,46 @@ def resync_footer_shortcuts(html: str) -> str:
     return html
 
 
+def resync_clean_footer(html: str, site_id: str) -> str:
+    # 1. Remove exposed sources bar
+    html = re.sub(r'\s*<div class="sources">[\s\S]*?</div>', '', html)
+
+    # 2. Resync methodology disclosure
+    new_method = kit.methodology_html(site_id)
+    if '<details class="method">' in html:
+        html = re.sub(r'<details class="method">[\s\S]*?</details>', new_method, html, count=1)
+    elif '__SHARED_METHODOLOGY__' in html or '__METHODOLOGY__' in html:
+        html = html.replace('__SHARED_METHODOLOGY__', new_method).replace('__METHODOLOGY__', new_method)
+
+    # 3. Standardize footer
+    footer_content = kit.standard_footer_html("../")
+    if site_id == "ons":
+        html = re.sub(
+            r'document\.getElementById\("foot"\)\.innerHTML\s*=\s*[\'"][^\'"]*[\'"];',
+            (
+                'document.getElementById("foot").innerHTML =\n'
+                '    \'&copy; \' + (new Date().getFullYear()) + \' GasBrazil.com &middot; <a href="../wiki/" data-i18n="navWiki">Wiki</a> &middot; <a href="../about/" data-i18n="footerAbout">About &amp; methodology</a> &middot; <button type="button" class="footer-link-btn" id="link-shortcuts" data-i18n="shortcutsBtn">Shortcuts (?)</button> &middot; <span data-i18n="contact">Contact</span>: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>\';'
+            ),
+            html,
+            count=1,
+        )
+    elif site_id == "nts":
+        html = re.sub(
+            r'(<footer class="nts-footer">\s*<div class="nts-footer-inner">)[\s\S]*?(</div>\s*</footer>)',
+            rf'\1\n      {footer_content}\n    \2',
+            html,
+            count=1,
+        )
+    else:
+        html = re.sub(
+            r'(<details class="method">[\s\S]*?</details>)([\s\S]*?)(</footer>)',
+            rf'\1\n  {footer_content}\n\3',
+            html,
+            count=1,
+        )
+    return html
+
+
 def resync_search_btn(html: str) -> str:
     if 'id="gb-search-trigger"' in html:
         return html
@@ -243,6 +283,7 @@ def resync_site(site_id: str) -> None:
     html = resync_decode_js(html)
     html = resync_i18n_js(html)
     html = resync_boot_resilience(html)
+    html = resync_clean_footer(html, site_id)
     html = resync_footer_shortcuts(html)
     html = resync_search_btn(html)
     html = resync_lock_btn(html)

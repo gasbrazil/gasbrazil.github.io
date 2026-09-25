@@ -2767,7 +2767,6 @@ html.gb-locked footer {
   border-radius: var(--radius-sm);
   color: var(--accent);
 }
-
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; font-weight: 300; }
 /* Single-row header: wordmark-menu · title … Wiki/About · PT · theme */
@@ -3119,11 +3118,6 @@ main h3,
   </div>
 </div>
 <footer>
-  <div class="sources">
-    <span class="sources-label" data-i18n="sources">Sources</span>
-    <a href="https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/producao-de-petroleo-e-gas-natural-por-estado-e-localizacao" target="_blank" rel="noopener" title="ANP PPGN-EL">ANP<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
-    <a href="https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/importacoes-e-exportacoes" target="_blank" rel="noopener" title="ANP imports / exports">ANP<svg class="ext-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
-  </div>
   <div class="asof-strip asof-footer" id="asof-strip">
     <span class="asof-label" data-i18n="kpiRefresh">Last refreshed</span>
     <span class="asof-val" id="asof-refreshed">&mdash;</span>
@@ -3132,13 +3126,11 @@ main h3,
   </div>
   <details class="method">
 <summary data-i18n="methodTitle">Methodology</summary>
-<div class="method-row"><span class="method-label" data-i18n="methodSources">Sources</span><span><span data-i18n="sourceSupply">ANP</span></span></div>
+<div class="method-row"><span class="method-label" data-i18n="methodSources">Sources</span><span><span data-i18n="sourceSupply">ANP</span> &middot; <a href="../wiki/" data-i18n="navWiki">Wiki</a></span></div>
 <div class="method-row"><span class="method-label" data-i18n="methodAssump">Key assumption</span><span data-i18n="methodAssump_supply">National monthly aggregation of gross and net domestic gas production plus imported gas supplies.</span></div>
 <div class="method-row"><span class="method-label" data-i18n="methodLimits">Limits</span><span data-i18n="aboutCoverSupply">Based on ANP PPGN-EL disclosures; imported LNG and pipeline gas are reported as combined national imports.</span></div>
 </details>
-  &copy; <span id="year"></span> GasBrazil.com &middot;
-  <span data-i18n="supplyFooter">Data: ANP PPGN-EL and importações de gás natural (open data). Not an official ANP product.</span>
-  &middot; <span data-i18n="contact">Contact</span>: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
+  &copy; <span id="year"></span> GasBrazil.com &middot; <a href="../wiki/" data-i18n="navWiki">Wiki</a> &middot; <a href="../about/" data-i18n="footerAbout">About &amp; methodology</a> &middot; <button type="button" class="footer-link-btn" id="link-shortcuts" data-i18n="shortcutsBtn">Shortcuts (?)</button> &middot; <span data-i18n="contact">Contact</span>: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
 </footer>
 </div>
 <div class="tt" id="chart-tt"></div>
@@ -3659,6 +3651,9 @@ if (document.getElementById("theme-toggle")) initThemeToggle("theme-toggle");
 function escapeHtml(s) {
   return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
+function escapeHtml(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
 const LANG_KEY = "gasbrazil-lang";
 const GB_I18N = {
   en: {
@@ -3700,9 +3695,8 @@ const GB_I18N = {
     authLockBtn: "Lock site",
     authShowPass: "Show passcode",
     authHidePass: "Hide passcode",
-    tagline: "Analytical Firepower for Brazil's Energy Markets",
+    tagline: "Open Data for Brazil's Gas and Power Markets",
     hubDashboards: "Live dashboards",
-    hubHint: "Every card below opens a live dashboard — pick a product to explore.",
     aboutLead: "Independent public-data dashboards. Not an official ONS, ANP, CCEE, or transportadora product.",
     aboutBody: "GasBrazil republishes open Brazilian gas and power data as filterable dashboards. Caveats are on each page and on About.",
     cardOns: "ONS Balances",
@@ -3722,10 +3716,9 @@ const GB_I18N = {
     cardDesk: "The Desk",
     cardDeskDesc: "Cross-product snapshot across gas and power.",
     cardMonitor: "Pipeline Monitor",
-    cardMonitorDesc: "TAG Mago & NTS OnTime real-time line pack, forecasts & packing rates.",
+    cardMonitorDesc: "Operational line pack & SCADA telemetry.",
     monitorTabTag: "TAG Mago",
     monitorTabNts: "NTS OnTime",
-    monitorFooter: "Pipeline Monitor: Real-time and operational linepack telemetry across Brazilian gas transmission systems.",
     deskLinkOns: "ONS",
     deskLinkPld: "CCEE PLD",
     deskLinkPrecos: "ANP prices",
@@ -3745,7 +3738,7 @@ const GB_I18N = {
     methodAssump_supply: "National monthly aggregation of gross and net domestic gas production plus imported gas supplies.",
     methodAssump_precos: "Contract prices disclosed under ANP Resolution 52/2011 (monthly weighted average, tax-inclusive R$/MMBtu).",
     methodAssump_pld: "Peak hours are 18:00–20:00 on weekdays per ANEEL time-of-use definitions; SIN represents the unweighted submarket average.",
-    methodAssump_desk: "Executive cross-market synthesis across natural gas prices, power dispatch, pipeline flows, and grid inventory.",
+    methodAssump_desk: "Cross-market overview across natural gas prices, power dispatch, pipeline flows, and grid inventory.",
     methodLimits_ons: "Thermal dispatch updates intraday; subsystem balances finalize in the evening (UTC).",
     methodLimits_poc: "Covers capacity products offered on the POC portal with active trading history.",
     sources: "Sources",
@@ -3768,7 +3761,7 @@ const GB_I18N = {
     ntsKpiPacking: "Packing",
     ntsKpiUnpacking: "Unpacking",
     ntsLinepackTitle: "NTS Line Pack — Transmission Network",
-    ntsLinepackSub: "Real-time pipeline line pack inventory and hourly packing/unpacking rate.",
+    ntsLinepackSub: "Pipeline line pack inventory and hourly packing rate.",
     magoKpiZone: "Operating Zone",
     magoKpiSnapshot: "Snapshot (UTC)",
     magoLinepackTitle: "TAG Line Pack — Integrated Network",
@@ -3784,9 +3777,9 @@ const GB_I18N = {
     magoAxisTarget: "Target",
     magoAxisLow: "Low",
     magoFaixasTitle: "Operating Risk & Imbalance Tolerance Bands",
-    magoFaixasSub: "Commercial balancing tolerance thresholds established for TAG's integrated pipeline system. Exceeding marginal thresholds incurs imbalance penalties or triggers operational balancing actions.",
+    magoFaixasSub: "Balancing tolerance thresholds for TAG's integrated pipeline system.",
     magoHeatmapTitle: "Operating Risk & Imbalance Breach Heatmap",
-    magoHeatmapSub: "Daily historical tracking of TAG integrated inventory across commercial tolerance tiers and correlation with transport balancing actions.",
+    magoHeatmapSub: "Historical daily line pack inventory across commercial tolerance tiers.",
     magoHmAll: "All Days",
     magoHmAlerts: "Alerts & Breaches",
     magoHmCritical: "Critical Only",
@@ -3801,7 +3794,7 @@ const GB_I18N = {
     magoHmAvg: "Daily Mean",
     magoHmBalancingPoc: "POC Balancing Auction",
     magoLinepackHistTitle: "Line pack history",
-    magoLinepackHistSub: "Hourly integrated inventory from cached snapshots (newest wins on overlap).",
+    magoLinepackHistSub: "Hourly integrated line pack history.",
     magoLpCsv: "Download line pack CSV",
     magoHistAll: "All Hours",
     magoHistAlerts: "Alerts & Breaches Only",
@@ -3861,7 +3854,7 @@ const GB_I18N = {
     cardNts: "NTS OnTime",
     cardNtsDesc: "NTS operational line pack and network packing/unpacking rate.",
     aboutCoverNts: "Data reflects the NTS pipeline grid, updated hourly as published by NTS OnTime.",
-    aboutCoverDesk: "Provides executive cross-market summaries; granular data and interactive filters reside on individual dashboards.",
+    aboutCoverDesk: "Cross-market summaries; granular data and interactive filters reside on individual dashboards.",
     notFound: "This page is not here.",
     notFoundBody: "The hub and dashboards are linked below.",
     backHome: "Back to GasBrazil",
@@ -3936,9 +3929,8 @@ const GB_I18N = {
     authLockBtn: "Bloquear",
     authShowPass: "Mostrar senha",
     authHidePass: "Ocultar senha",
-    tagline: "Potência analítica para os mercados de energia do Brasil",
+    tagline: "Dados Abertos para os Mercados de Gás e Energia do Brasil",
     hubDashboards: "Painéis ao vivo",
-    hubHint: "Cada cartão abaixo abre um painel ao vivo — escolha um produto para explorar.",
     aboutLead: "Painéis independentes com dados públicos. Não é produto oficial da ONS, ANP, CCEE ou transportadoras.",
     aboutBody: "O GasBrazil republica dados abertos de gás e energia em painéis filtráveis. Ressalvas em cada página e em Sobre.",
     cardOns: "Balanços ONS",
@@ -3958,10 +3950,9 @@ const GB_I18N = {
     cardDesk: "The Desk",
     cardDeskDesc: "Retrato cruzado de gás e energia.",
     cardMonitor: "Monitor de Gasodutos",
-    cardMonitorDesc: "Empacotamento e previsões da TAG Mago e taxas de empacotamento em tempo real do NTS OnTime.",
+    cardMonitorDesc: "Empacotamento operacional e telemetria SCADA.",
     monitorTabTag: "TAG Mago",
     monitorTabNts: "NTS OnTime",
-    monitorFooter: "Monitor de Gasodutos: Telemetria de empacotamento em tempo real nos sistemas de transporte de gás do Brasil.",
     deskLinkOns: "ONS",
     deskLinkPld: "PLD CCEE",
     deskLinkPrecos: "Preços ANP",
@@ -3981,7 +3972,7 @@ const GB_I18N = {
     methodAssump_supply: "Agregação mensal nacional da produção bruta e líquida de gás natural mais importações.",
     methodAssump_precos: "Preços contratuais divulgados pela Resolução ANP 52/2011 (médias mensais ponderadas, R$/MMBtu com impostos).",
     methodAssump_pld: "Horário de ponta compreende 18h às 20h em dias úteis (convenção ANEEL); SIN representa a média dos submercados.",
-    methodAssump_desk: "Síntese executiva cruzada entre preços de gás, despacho termelétrico, fluxos de transporte e empacotamento.",
+    methodAssump_desk: "Visão consolidada entre preços de gás, despacho termelétrico, fluxos e empacotamento.",
     methodLimits_ons: "Despacho térmico atualizado ao longo do dia; balanços por subsistema fecham no final da tarde (UTC).",
     methodLimits_poc: "Abrange produtos de capacidade ofertados no portal POC com histórico de negociação ativo.",
     sources: "Fontes",
@@ -4004,7 +3995,7 @@ const GB_I18N = {
     ntsKpiPacking: "Empacotando",
     ntsKpiUnpacking: "Desempacotando",
     ntsLinepackTitle: "NTS Line Pack — Malha de Transporte",
-    ntsLinepackSub: "Estoque de gás em tempo real na malha de transporte e taxa horária de empacotamento/desempacotamento.",
+    ntsLinepackSub: "Estoque de gás na malha e taxa horária de empacotamento.",
     magoKpiZone: "Faixa Operacional",
     magoKpiSnapshot: "Snapshot (UTC)",
     magoLinepackTitle: "TAG Line Pack — Malha Integrada",
@@ -4020,9 +4011,9 @@ const GB_I18N = {
     magoAxisTarget: "Marginal",
     magoAxisLow: "Alerta",
     magoFaixasTitle: "Faixas de Tolerância Operacional e Desbalanço",
-    magoFaixasSub: "Limites comerciais de tolerância de balanceamento estabelecidos para a malha integrada da TAG. Desvios além da faixa marginal geram penalidades ou ações de balanceamento operacional.",
+    magoFaixasSub: "Limiares de tolerância de balanceamento para a malha integrada da TAG.",
     magoHeatmapTitle: "Mapa de Risco Operacional e Violações de Desbalanço",
-    magoHeatmapSub: "Acompanhamento diário do empacotamento integrado da TAG nas faixas de tolerância comercial e correlação com ações de balanceamento.",
+    magoHeatmapSub: "Histórico diário do empacotamento por faixa de tolerância.",
     magoHmAll: "Todos os Dias",
     magoHmAlerts: "Alertas e Violações",
     magoHmCritical: "Apenas Crítico",
@@ -4037,7 +4028,7 @@ const GB_I18N = {
     magoHmAvg: "Média Diária",
     magoHmBalancingPoc: "Leilão de Balanceamento POC",
     magoLinepackHistTitle: "Histórico de empacotamento",
-    magoLinepackHistSub: "Inventário horário integrado de snapshots armazenados (o mais recente prevalece em sobreposições).",
+    magoLinepackHistSub: "Histórico horário de empacotamento integrado.",
     magoLpCsv: "Baixar CSV de empacotamento",
     magoHistAll: "Todas as Horas",
     magoHistAlerts: "Apenas Alertas e Violações (Alto e Severo)",
@@ -4097,7 +4088,7 @@ const GB_I18N = {
     cardNts: "NTS OnTime",
     cardNtsDesc: "Empacotamento operacional da malha NTS e taxa horária de empacotamento.",
     aboutCoverNts: "Dados refletem a malha de transporte da NTS, atualizados de hora em hora via NTS OnTime.",
-    aboutCoverDesk: "Apresenta resumos executivos entre mercados; dados detalhados e filtros interativos residem nos painéis específicos.",
+    aboutCoverDesk: "Resumos consolidados; dados granulares e filtros residem em cada painel individual.",
     notFound: "Esta página não existe.",
     notFoundBody: "O hub e os painéis estão nos links abaixo.",
     backHome: "Voltar ao GasBrazil",
@@ -5171,6 +5162,11 @@ function initGlobalShortcuts() {
       }
     }
   });
+
+  const yrEl = document.getElementById("year");
+  if (yrEl && !yrEl.textContent) {
+    yrEl.textContent = new Date().getFullYear();
+  }
 
   const scLink = document.getElementById("link-shortcuts");
   if (scLink) {

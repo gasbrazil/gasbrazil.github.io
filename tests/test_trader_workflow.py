@@ -35,8 +35,8 @@ def test_desk_kpis_are_links_with_santos_and_unit_toggle():
     src = (ROOT / "desk" / "dashboard.py").read_text(encoding="utf-8")
     assert 'return \'<a class="kpi-cell" href="' in src
     assert 't("deskKpiSantos")' in src
-    assert 'href="../contratos/">Contracts</a>' in src
-    assert 'href="../supply/">Supply</a>' in src
+    assert 'href="../wiki/"' in src
+    assert 'href="../about/"' in src
     assert 'data-unit="mmbtu"' in src
     assert 'let sparkUnit = "mmbtu"' in src
     assert 'id="spark-gas-preset"' in src
