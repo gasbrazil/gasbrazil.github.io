@@ -553,35 +553,8 @@ const GB_I18N = {
     navAbout: "About",
     navWiki: "Wiki",
     navAdmin: "Admin Panel",
-    navCatCross: "Cross-Commodity",
-    navCatGas: "Natural Gas & Pipelines",
-    navCatPower: "Electricity & Power Grid",
-    navCatResources: "Resources",
-    navDeskDesc: "Cross-market spark spread, power-to-gas arbitrage & macro balance.",
-    navMonitorDesc: "Real-time TAG & NTS SCADA, linepack inventory & 7-day risk bands.",
-    navFlowsDesc: "Physical network receipt and delivery flow volumes across Brazil.",
-    navContratosDesc: "Master agreements and active booked firm capacity by shipper.",
-    navPocDesc: "Daily capacity auctions, balancing trades and GUS tenders.",
-    navSupplyDesc: "Domestic production, pre-salt processing, LNG and pipeline imports.",
-    navPrecosDesc: "Benchmark contract pricing disclosures (ANP Resolution 52/2011).",
-    navOnsDesc: "SIN grid balance, hydro reservoirs and thermal gas generation dispatch.",
-    navPldDesc: "Hourly spot electricity clearing prices and regional submarket spreads.",
-    badgeDesk: "Spark Spread",
-    badgeMonitor: "SCADA & Linepack",
-    badgeFlows: "ANP Physical",
-    badgeContratos: "Firm Capacity",
-    badgePoc: "Auctions",
-    badgeSupply: "National Balance",
-    badgePrecos: "Res 52",
-    badgeOns: "Grid & Dispatch",
-    badgePld: "CCEE Hourly",
-    badgeCross: "Cross-Commodity",
-    badgeGas: "Natural Gas",
-    badgePower: "Power Grid",
-    filterAll: "All (9)",
-    filterGas: "🔥 Natural Gas (6)",
-    filterPower: "⚡ Power Grid (2)",
-    filterTrading: "📊 Trading (4)",
+    navCatGas: "Natural Gas",
+    navCatPower: "Power",
     filterPlaceholder: "Filter…",
     contact: "Contact",
     copyLink: "Copy link",
@@ -816,35 +789,8 @@ const GB_I18N = {
     navAbout: "Sobre",
     navWiki: "Wiki",
     navAdmin: "Painel de Administração",
-    navCatCross: "Visão Integrada",
-    navCatGas: "Gás Natural & Malha",
-    navCatPower: "Setor Elétrico & Despacho",
-    navCatResources: "Recursos",
-    navDeskDesc: "Spark spread, arbitragem gás-energia e balanço integrado.",
-    navMonitorDesc: "Telemetria TAG & NTS em tempo real, linepack e faixas de risco.",
-    navFlowsDesc: "Pontos de recebimento e entrega física na malha nacional de transporte.",
-    navContratosDesc: "Capacidade firme de transporte contratada e contratos master ativos.",
-    navPocDesc: "Leilões de capacidade de transporte, balanceamento e pregões GUS.",
-    navSupplyDesc: "Produção nacional, processamento no pré-sal e importações de GNL.",
-    navPrecosDesc: "Preços ponderados de contratos declarados sob a Resolução ANP 52/2011.",
-    navOnsDesc: "Balanço do SIN, reservatórios e despacho de térmicas a gás natural.",
-    navPldDesc: "Preço de Liquidação das Diferenças CCEE horário e submercados.",
-    badgeDesk: "Spark Spread",
-    badgeMonitor: "SCADA & Linepack",
-    badgeFlows: "Físico ANP",
-    badgeContratos: "Capacidade Firme",
-    badgePoc: "Leilões",
-    badgeSupply: "Balanço Nacional",
-    badgePrecos: "Res 52",
-    badgeOns: "Despacho & SIN",
-    badgePld: "CCEE Horário",
-    badgeCross: "Visão Integrada",
-    badgeGas: "Gás Natural",
-    badgePower: "Setor Elétrico",
-    filterAll: "Todos (9)",
-    filterGas: "🔥 Gás Natural (6)",
-    filterPower: "⚡ Setor Elétrico (2)",
-    filterTrading: "📊 Trading (4)",
+    navCatGas: "Gás Natural",
+    navCatPower: "Energia Elétrica",
     filterPlaceholder: "Filtrar…",
     contact: "Contato",
     copyLink: "Copiar link",
@@ -2758,7 +2704,7 @@ _PRODUCTS_DROPDOWN_JS = r"""<script>
   var closeTimer = null;
 
   function menuLinks(dd) {
-    return Array.prototype.slice.call(dd.querySelectorAll(".dd-menu [role='menuitem']"));
+    return Array.prototype.slice.call(dd.querySelectorAll(".dd-menu [role='menuitem'], .dd-sub-trigger"));
   }
   function setOpen(dd, open) {
     if (!dd) return;
@@ -2789,7 +2735,7 @@ _PRODUCTS_DROPDOWN_JS = r"""<script>
     }, CLOSE_MS);
   }
   function focusLink(dd, idx) {
-    var items = menuLinks(dd);
+    var items = menuLinks(dd).filter(function (el) { return el.offsetParent !== null; });
     if (!items.length) return;
     var i = ((idx % items.length) + items.length) % items.length;
     items[i].focus();
@@ -2807,6 +2753,17 @@ _PRODUCTS_DROPDOWN_JS = r"""<script>
   else bindAll();
 
   document.addEventListener("click", function (e) {
+    var subTrigger = e.target.closest(".dd-sub-trigger");
+    if (subTrigger) {
+      e.preventDefault();
+      var wrap = subTrigger.closest(".dd-sub-wrap");
+      if (wrap) {
+        var isOpen = wrap.classList.contains("is-open");
+        wrap.classList.toggle("is-open", !isOpen);
+        subTrigger.setAttribute("aria-expanded", !isOpen ? "true" : "false");
+      }
+      return;
+    }
     var trigger = e.target.closest(".dd-trigger");
     if (trigger) {
       var dd = trigger.closest(".products-dd");
@@ -2822,6 +2779,7 @@ _PRODUCTS_DROPDOWN_JS = r"""<script>
     }
     if (!e.target.closest(".products-dd")) closeAll(null);
   });
+
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") {
       var openDd = document.querySelector(".products-dd .dd-menu.is-open");
@@ -2838,7 +2796,39 @@ _PRODUCTS_DROPDOWN_JS = r"""<script>
     var dd = (inTrigger && inTrigger.closest(".products-dd")) ||
              (inMenu && e.target.closest(".products-dd"));
     if (!dd) return;
-    var items = menuLinks(dd);
+
+    if (e.key === "ArrowRight") {
+      var activeSubTrigger = document.activeElement && document.activeElement.closest(".dd-sub-trigger");
+      if (activeSubTrigger) {
+        e.preventDefault();
+        var wrap = activeSubTrigger.closest(".dd-sub-wrap");
+        if (wrap) {
+          wrap.classList.add("is-open");
+          activeSubTrigger.setAttribute("aria-expanded", "true");
+          var firstSub = wrap.querySelector(".dd-sub-menu [role='menuitem']");
+          if (firstSub) firstSub.focus();
+        }
+        return;
+      }
+    }
+    if (e.key === "ArrowLeft") {
+      var inSub = document.activeElement && document.activeElement.closest(".dd-sub-menu");
+      if (inSub) {
+        e.preventDefault();
+        var wrap = inSub.closest(".dd-sub-wrap");
+        if (wrap) {
+          wrap.classList.remove("is-open");
+          var trig = wrap.querySelector(".dd-sub-trigger");
+          if (trig) {
+            trig.setAttribute("aria-expanded", "false");
+            trig.focus();
+          }
+        }
+        return;
+      }
+    }
+
+    var items = menuLinks(dd).filter(function (el) { return el.offsetParent !== null; });
     if (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Home" || e.key === "End") {
       e.preventDefault();
       setOpen(dd, true);
@@ -2880,194 +2870,86 @@ _PRODUCTS_DROPDOWN_JS = r"""<script>
 
 NAV_CATEGORIES = [
     {
-        "id": "cross",
-        "title_key": "navCatCross",
-        "title_en": "Cross-Commodity",
-        "icon": "⚡",
-        "products": ["desk"],
-    },
-    {
         "id": "gas",
         "title_key": "navCatGas",
-        "title_en": "Natural Gas & Pipelines",
-        "icon": "🔥",
+        "title_en": "Natural Gas",
         "products": ["monitor", "flows", "contratos", "poc", "supply", "precos"],
     },
     {
         "id": "power",
         "title_key": "navCatPower",
-        "title_en": "Electricity & Power Grid",
-        "icon": "🔌",
+        "title_en": "Power",
         "products": ["ons", "pld"],
     },
 ]
 
-NAV_PRODUCT_META = {
-    "desk": {
-        "nav_key": "navDesk",
-        "desc_key": "navDeskDesc",
-        "desc_en": "Cross-market spark spread, power-to-gas arbitrage & macro balance.",
-        "badge_key": "badgeDesk",
-        "badge_en": "Spark Spread",
-        "badge_class": "dd-badge-cross",
-    },
-    "monitor": {
-        "nav_key": "navMonitor",
-        "desc_key": "navMonitorDesc",
-        "desc_en": "Real-time TAG & NTS SCADA, linepack inventory & 7-day risk bands.",
-        "badge_key": "badgeMonitor",
-        "badge_en": "SCADA & Linepack",
-        "badge_class": "dd-badge-gas",
-    },
-    "flows": {
-        "nav_key": "navFlows",
-        "desc_key": "navFlowsDesc",
-        "desc_en": "Physical network receipt and delivery flow volumes across Brazil.",
-        "badge_key": "badgeFlows",
-        "badge_en": "ANP Physical",
-        "badge_class": "dd-badge-gas",
-    },
-    "contratos": {
-        "nav_key": "navContratos",
-        "desc_key": "navContratosDesc",
-        "desc_en": "Master agreements and active booked firm capacity by shipper.",
-        "badge_key": "badgeContratos",
-        "badge_en": "Firm Capacity",
-        "badge_class": "dd-badge-gas",
-    },
-    "poc": {
-        "nav_key": "navPoc",
-        "desc_key": "navPocDesc",
-        "desc_en": "Daily capacity auctions, balancing trades and GUS tenders.",
-        "badge_key": "badgePoc",
-        "badge_en": "Auctions",
-        "badge_class": "dd-badge-gas",
-    },
-    "supply": {
-        "nav_key": "navSupply",
-        "desc_key": "navSupplyDesc",
-        "desc_en": "Domestic production, pre-salt processing, LNG and pipeline imports.",
-        "badge_key": "badgeSupply",
-        "badge_en": "National Balance",
-        "badge_class": "dd-badge-gas",
-    },
-    "precos": {
-        "nav_key": "navPrecos",
-        "desc_key": "navPrecosDesc",
-        "desc_en": "Benchmark contract pricing disclosures (ANP Resolution 52/2011).",
-        "badge_key": "badgePrecos",
-        "badge_en": "Res 52",
-        "badge_class": "dd-badge-gas",
-    },
-    "ons": {
-        "nav_key": "navOns",
-        "desc_key": "navOnsDesc",
-        "desc_en": "SIN grid balance, hydro reservoirs and thermal gas generation dispatch.",
-        "badge_key": "badgeOns",
-        "badge_en": "Grid & Dispatch",
-        "badge_class": "dd-badge-power",
-    },
-    "pld": {
-        "nav_key": "navPld",
-        "desc_key": "navPldDesc",
-        "desc_en": "Hourly spot electricity clearing prices and regional submarket spreads.",
-        "badge_key": "badgePld",
-        "badge_en": "CCEE Hourly",
-        "badge_class": "dd-badge-power",
-    },
-}
 
+def _menu_items_html(self_id: str) -> str:
+    """One menu entry per dashboard site organized into clean sub-menus.
 
-def _render_menu_item(k: str, self_id: str) -> str:
-    meta = NAV_PRODUCT_META[k]
-    site = _SITES[k]
-    label = site["label"]
-    nav_key = meta["nav_key"]
-    desc_key = meta["desc_key"]
-    badge_key = meta["badge_key"]
-    desc_en = meta["desc_en"]
-    badge_en = meta["badge_en"]
-    badge_cls = meta["badge_class"]
+    Top-level: The Desk, Natural Gas (sub-menu), Power (sub-menu).
+    The current page renders with a checkmark and aria-current="page".
+    """
+    i18n_keys = {
+        "desk": "navDesk",
+        "monitor": "navMonitor",
+        "flows": "navFlows",
+        "contratos": "navContratos",
+        "poc": "navPoc",
+        "supply": "navSupply",
+        "precos": "navPrecos",
+        "ons": "navOns",
+        "pld": "navPld",
+    }
 
-    if k == self_id:
-        return (
-            f'<div class="dd-item is-current" role="menuitem" tabindex="-1" aria-current="page">\n'
-            f'  <div class="dd-item-content">\n'
-            f'    <div class="dd-item-head">\n'
-            f'      <span class="chk" aria-hidden="true">✓</span>\n'
-            f'      <span class="dd-item-title" data-i18n="{nav_key}">{html.escape(label)}</span>\n'
-            f'      <span class="dd-badge {badge_cls}" data-i18n="{badge_key}">{html.escape(badge_en)}</span>\n'
-            f'    </div>\n'
-            f'    <div class="dd-item-desc" data-i18n="{desc_key}">{html.escape(desc_en)}</div>\n'
-            f'  </div>\n'
-            f'</div>\n'
-        )
-    else:
+    def render_link(k: str) -> str:
+        label = _SITES[k]["label"]
+        key = i18n_keys[k]
         rel_href = f"/{k}/" if k != "home" else "/"
+        if k == self_id:
+            return (
+                f'<span class="is-current" role="menuitem" aria-current="page" data-i18n="{key}">'
+                f'<span class="chk">✓</span>{html.escape(label)}</span>'
+            )
         return (
-            f'<a id="link-{k}" href="{rel_href}" class="dd-item" role="menuitem" tabindex="-1">\n'
-            f'  <div class="dd-item-content">\n'
-            f'    <div class="dd-item-head">\n'
-            f'      <span class="chk" aria-hidden="true"></span>\n'
-            f'      <span class="dd-item-title" data-i18n="{nav_key}">{html.escape(label)}</span>\n'
-            f'      <span class="dd-badge {badge_cls}" data-i18n="{badge_key}">{html.escape(badge_en)}</span>\n'
-            f'    </div>\n'
-            f'    <div class="dd-item-desc" data-i18n="{desc_key}">{html.escape(desc_en)}</div>\n'
-            f'  </div>\n'
-            f'</a>\n'
+            f'<a id="link-{k}" href="{rel_href}" role="menuitem" data-i18n="{key}">'
+            f'<span class="chk"></span>{html.escape(label)}</a>'
         )
 
+    desk_html = render_link("desk")
 
-def _menu_items_html(
-    self_id: str,
-    wiki_href: str | None = None,
-    about_href: str | None = None,
-) -> str:
-    """Grouped multi-column mega-menu for GasBrazil suite."""
-    if wiki_href is None:
-        wiki_href = "wiki/" if self_id == "home" else "../wiki/"
-    if about_href is None:
-        about_href = "about/" if self_id == "home" else "../about/"
+    gas_keys = ["monitor", "flows", "contratos", "poc", "supply", "precos"]
+    gas_has_current = " has-current" if self_id in gas_keys else ""
+    gas_expanded = "true" if self_id in gas_keys else "false"
+    gas_sub_open = " is-open" if self_id in gas_keys else ""
+    gas_items = "\n      ".join(render_link(k) for k in gas_keys)
 
-    desk_item = _render_menu_item("desk", self_id)
-    gas_items = "".join(_render_menu_item(k, self_id) for k in NAV_CATEGORIES[1]["products"])
-    power_items = "".join(_render_menu_item(k, self_id) for k in NAV_CATEGORIES[2]["products"])
-
-    wiki_href_esc = html.escape(wiki_href, quote=True)
-    about_href_esc = html.escape(about_href, quote=True)
+    power_keys = ["ons", "pld"]
+    power_has_current = " has-current" if self_id in power_keys else ""
+    power_expanded = "true" if self_id in power_keys else "false"
+    power_sub_open = " is-open" if self_id in power_keys else ""
+    power_items = "\n      ".join(render_link(k) for k in power_keys)
 
     return (
-        '<div class="dd-mega-banner">\n'
-        '  <div class="dd-group-header"><span class="dd-group-icon" aria-hidden="true">⚡</span><span class="dd-group-title" data-i18n="navCatCross">Cross-Commodity</span></div>\n'
-        f'  <div class="dd-items">{desk_item}</div>\n'
-        '</div>\n'
-        '<div class="dd-mega-columns">\n'
-        '  <div class="dd-mega-col dd-col-gas">\n'
-        '    <div class="dd-group-header">\n'
-        '      <span class="dd-group-icon" aria-hidden="true">🔥</span>\n'
-        '      <span class="dd-group-title" data-i18n="navCatGas">Natural Gas &amp; Pipelines</span>\n'
-        '    </div>\n'
-        f'    <div class="dd-items">{gas_items}</div>\n'
-        '  </div>\n'
-        '  <div class="dd-mega-col dd-col-power">\n'
-        '    <div class="dd-group-header">\n'
-        '      <span class="dd-group-icon" aria-hidden="true">🔌</span>\n'
-        '      <span class="dd-group-title" data-i18n="navCatPower">Electricity &amp; Power Grid</span>\n'
-        '    </div>\n'
-        f'    <div class="dd-items">{power_items}</div>\n'
-        '    <div class="dd-group-header dd-group-sub"><span class="dd-group-title" data-i18n="navCatResources">Resources</span></div>\n'
-        '    <div class="dd-quick-links">\n'
-        f'      <a href="{wiki_href_esc}" class="dd-quick-link" role="menuitem" tabindex="-1">\n'
-        '        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>\n'
-        '        <span data-i18n="navWiki">Wiki &amp; Glossary</span>\n'
-        '      </a>\n'
-        f'      <a href="{about_href_esc}" class="dd-quick-link" role="menuitem" tabindex="-1">\n'
-        '        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>\n'
-        '        <span data-i18n="navAbout">About &amp; Methodology</span>\n'
-        '      </a>\n'
-        '    </div>\n'
-        '  </div>\n'
-        '</div>'
+        f'{desk_html}\n'
+        f'<div class="dd-sub-wrap{gas_sub_open}">\n'
+        f'  <button type="button" class="dd-sub-trigger{gas_has_current}" aria-haspopup="menu" aria-expanded="{gas_expanded}">\n'
+        f'    <span class="chk"></span><span data-i18n="navCatGas">Natural Gas</span>'
+        f'<svg class="dd-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>\n'
+        f'  </button>\n'
+        f'  <div class="dd-sub-menu" role="menu" aria-label="Natural Gas">\n'
+        f'      {gas_items}\n'
+        f'  </div>\n'
+        f'</div>\n'
+        f'<div class="dd-sub-wrap{power_sub_open}">\n'
+        f'  <button type="button" class="dd-sub-trigger{power_has_current}" aria-haspopup="menu" aria-expanded="{power_expanded}">\n'
+        f'    <span class="chk"></span><span data-i18n="navCatPower">Power</span>'
+        f'<svg class="dd-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>\n'
+        f'  </button>\n'
+        f'  <div class="dd-sub-menu" role="menu" aria-label="Power">\n'
+        f'      {power_items}\n'
+        f'  </div>\n'
+        f'</div>'
     )
 
 
@@ -3080,13 +2962,8 @@ _BRAND_MARK_BUTTON = (
 )
 
 
-def products_dropdown_html(
-    self_id: str,
-    brand_html: str,
-    wiki_href: str | None = None,
-    about_href: str | None = None,
-) -> str:
-    """Wordmark + blue-dot menu control + products mega-menu. brand_html is the
+def products_dropdown_html(self_id: str, brand_html: str) -> str:
+    """Wordmark + blue-dot menu control + products menu. brand_html is the
     clickable (or static) title without the trailing dot; the dot lives on
     .brand-mark and turns flag-yellow on hover."""
     return (
@@ -3095,9 +2972,9 @@ def products_dropdown_html(
         + brand_html
         + _BRAND_MARK_BUTTON
         + "</span>"
-        '<div class="dd-menu" id="gb-products-menu" role="menu" aria-labelledby="gb-products-trigger">'
-        + _menu_items_html(self_id, wiki_href=wiki_href, about_href=about_href)
-        + "</div></div>"
+        '<div class="dd-menu" id="gb-products-menu" role="menu" aria-labelledby="gb-products-trigger">\n'
+        + _menu_items_html(self_id)
+        + "\n</div></div>"
     )
 
 
@@ -3132,8 +3009,6 @@ def masthead_html(
         self_id,
         f'<a class="masthead-brand" id="link-home" href="/" data-i18n="navHome">'
         f'{html.escape(home["label"])}</a>',
-        wiki_href=wiki_href,
-        about_href=about_href,
     )
     wiki_href_esc = html.escape(wiki_href, quote=True)
     about_href_esc = html.escape(about_href, quote=True)
