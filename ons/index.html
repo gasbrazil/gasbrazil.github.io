@@ -10,7 +10,7 @@
 <link rel="preload" href="/shared/fonts/IBMPlexSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/shared/fonts/Pacaembu-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
 <!-- home-page teaser marker, read by ../build_home.py -- not otherwise used by this page:
-     generated: 2026-09-25 02:08 UTC
+     generated: 2026-09-25 03:50 UTC
      kpi_gas_mwmed: 4738 -->
 <script>
 (function(){
@@ -2766,6 +2766,7 @@ html.gb-locked footer {
   border-radius: var(--radius-sm);
   color: var(--accent);
 }
+
 /* Everything below is ons-dashboard's own layout/components. The palette
    (neutral tokens + the shared Brazilian-flag accent) now lives entirely in
    shared/theme.css -- see ADR-001, Decision 2 Option C -- this file only
@@ -3270,13 +3271,13 @@ main h3,
 <div class="method-row"><span class="method-label" data-i18n="methodAssump">Key assumption</span><span data-i18n="methodAssump_ons">Gas consumption estimated from verified dispatch (9,400 kcal/m³ standard heat content; CCGT 1,800 kcal/kWh, OCGT 2,500 kcal/kWh).</span></div>
 <div class="method-row"><span class="method-label" data-i18n="methodLimits">Limits</span><span data-i18n="methodLimits_ons">Thermal dispatch updates intraday; subsystem balances finalize in the evening (UTC).</span></div>
 </details>
-<div class="foot" id="foot"></div>
+<footer class="foot" id="foot"></footer>
 </div>
 
 <div class="tt" id="tt"></div>
 
 <script>
-const PAYLOAD_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/ons/payload.json.gz?v=36084954434";
+const PAYLOAD_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/ons/payload.json.gz?v=36091939531";
 
 function b64ToBytes(b64) {
   const bin = atob(b64);
@@ -3693,9 +3694,6 @@ function placeChartTooltip(tt, clientX, clientY) {
 }
 
 
-function escapeHtml(s) {
-  return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-}
 function escapeHtml(s) {
   return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
@@ -8008,7 +8006,7 @@ async function boot(){
   // sit here as prose is intact inside the disclosure -- see the sweep
   // proposal (2026-09-05): hidden, not deleted.
   document.getElementById("foot").innerHTML =
-    '&copy; ' + (new Date().getFullYear()) + ' GasBrazil.com &middot; Data: <a href="https://dados.ons.org.br" target="_blank" rel="noopener">ONS Dados Abertos</a> &middot; <button type="button" class="footer-link-btn" id="link-shortcuts" data-i18n="shortcutsBtn">Shortcuts (?)</button> &middot; Contact: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>';
+    '&copy; ' + (new Date().getFullYear()) + ' GasBrazil.com &middot; <a href="../wiki/" data-i18n="navWiki">Wiki</a> &middot; <a href="../about/" data-i18n="footerAbout">About &amp; methodology</a> &middot; <button type="button" class="footer-link-btn" id="link-shortcuts" data-i18n="shortcutsBtn">Shortcuts (?)</button> &middot; <span data-i18n="contact">Contact</span>: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>';
 
   ["from","to"].forEach(id=>{
     const inp=document.getElementById(id);
