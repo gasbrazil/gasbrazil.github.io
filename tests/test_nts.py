@@ -120,6 +120,8 @@ def test_nts_dashboard_generation(tmp_path: Path):
     assert 'id="nts-payload"' in content
     assert "generated:" in content
     assert "kpi_linepack:" in content
+    assert "7d Avg:" in content
+    assert "avg_7d" in content
 
     # Ensure no unreplaced template placeholders
     import re

@@ -17,7 +17,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "shared"))
 import dashboard_kit as kit  # noqa: E402
 from mago_client import DEFAULT_FAIXAS_INTEGRATED  # noqa: E402
 
-HERE = Path(__file__).parent
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parent
 PARQUET_PATH = HERE / "data" / "tag_mago_series.parquet"
 DEFAULT_OUT = HERE / "index.html"
 
@@ -449,9 +450,23 @@ def _sum_zone_series(zone_series: dict[str, dict], zones: list[str]) -> dict:
 
 
 def load_payload(*, snapshot_at: pd.Timestamp | None = None) -> dict:
-    if not PARQUET_PATH.exists():
-        raise RuntimeError(f"Missing {PARQUET_PATH} — run make_mock.py or mago_pipeline.py build")
-    df = pd.read_parquet(PARQUET_PATH)
+    candidates = [
+        PARQUET_PATH,
+        ROOT / "lake" / "transport" / "tag_mago_series.parquet",
+        ROOT / "mago" / "data" / "tag_mago_series.parquet",
+    ]
+    p_path = next((p for p in candidates if p.exists()), None)
+    if not p_path:
+        try:
+            import data_kit as dk
+            got = dk.ensure_lake(["tag_mago_series"])
+            if got.get("tag_mago_series") and got["tag_mago_series"].exists():
+                p_path = got["tag_mago_series"]
+        except Exception:
+            pass
+    if not p_path or not p_path.exists():
+        raise RuntimeError(f"Missing tag_mago_series.parquet at {[str(c) for c in candidates]} — run make_mock.py or mago_pipeline.py build")
+    df = pd.read_parquet(p_path)
     df["snapshot_at"] = pd.to_datetime(df["snapshot_at"], utc=True)
     df["observed_at"] = pd.to_datetime(df["observed_at"], utc=True)
 
@@ -497,6 +512,19 @@ def load_payload(*, snapshot_at: pd.Timestamp | None = None) -> dict:
     latest_lp = None
     if len(lp_actual):
         latest_lp = _num(lp_actual.sort_values("observed_at")["value"].iloc[-1])
+
+    # 7-day average line pack
+    lp_integrated = df[(df["series"] == "linepack_actual") & (df["mesh"] == "integrated")].copy()
+    if not lp_integrated.empty:
+        lp_integrated = lp_integrated.sort_values("observed_at").drop_duplicates(subset=["observed_at"], keep="last")
+        max_obs = lp_integrated["observed_at"].max()
+        cutoff_7d = max_obs - pd.Timedelta(days=7)
+        lp_7d = lp_integrated[lp_integrated["observed_at"] >= cutoff_7d]
+        avg_7d_m3 = round(float(lp_7d["value"].mean()), 2) if not lp_7d.empty else latest_lp
+        avg_7d_mm3 = round(avg_7d_m3 / 1_000_000, 2) if avg_7d_m3 is not None else None
+    else:
+        avg_7d_m3 = latest_lp
+        avg_7d_mm3 = round(latest_lp / 1_000_000, 2) if latest_lp is not None else None
 
     current_zone = determine_linepack_zone(latest_lp, tolerance_bands)
 
@@ -601,6 +629,8 @@ def load_payload(*, snapshot_at: pd.Timestamp | None = None) -> dict:
         "zoneSeries": zone_series,
         "kpiLinepackM3": latest_lp,
         "kpiLinepackMm3": None if latest_lp is None else round(latest_lp / 1_000_000, 3),
+        "avg7dLinepackM3": avg_7d_m3,
+        "avg7dLinepackMm3": avg_7d_mm3,
         "source": "TAG Mago — EMPACOTAMENTOS snapshots (api-mago-prod-lb.ntag.com.br)",
         "note": "Zone forecasts are TAG's 7-day daily consumption estimates (Mm³/d). "
         "Hourly PI samples in snapshots are collapsed to one point per UTC day. "
@@ -1003,6 +1033,22 @@ function getOrCreateChartTooltip() {
   return tt;
 }
 
+function getMago7dAvg() {
+  if (typeof DATA === "object" && DATA) {
+    if (DATA.avg7dLinepackM3 != null) return DATA.avg7dLinepackM3;
+    if (DATA.avg7dLinepackMm3 != null) return DATA.avg7dLinepackMm3 * 1e6;
+  }
+  if (typeof LP_ROWS !== "undefined" && LP_ROWS && LP_ROWS.length) {
+    const valid = LP_ROWS.filter(r => r.valueM3 != null && isFinite(r.valueM3));
+    if (valid.length) {
+      const slice = valid.slice(-168);
+      const sum = slice.reduce((acc, r) => acc + r.valueM3, 0);
+      return sum / slice.length;
+    }
+  }
+  return null;
+}
+
 function drawLines(hostId, seriesList, yFmt, bands) {
   const host = document.getElementById(hostId);
   host.innerHTML = "";
@@ -1252,6 +1298,43 @@ function drawLines(hostId, seriesList, yFmt, bands) {
         svg.appendChild(textEl);
       }
     });
+  }
+
+  // 7-day average reference line on linepack charts
+  const avg7d = (hostId === "chart-lp" || hostId === "chart-lp-hist") ? getMago7dAvg() : null;
+  if (avg7d != null && isFinite(avg7d)) {
+    const gy = y(avg7d);
+    if (gy >= plotTop - 2 && gy <= plotBottom + 2) {
+      const line = chartSvg("line", {
+        x1: plotLeft,
+        x2: plotLeft + plotWidth,
+        y1: gy,
+        y2: gy,
+        stroke: "var(--muted, #888)",
+        "stroke-width": 1.2,
+        "stroke-dasharray": "5 4",
+        opacity: 0.8,
+      });
+      const tip = chartSvg("title");
+      tip.textContent = `7-Day Average: ${(avg7d / 1e6).toFixed(2)} Mm³`;
+      line.appendChild(tip);
+      svg.appendChild(line);
+
+      const rLabel = chartSvg("text", {
+        x: plotLeft + plotWidth - 6,
+        y: gy - 5,
+        "text-anchor": "end",
+        fill: "var(--muted, #888)",
+        "font-size": 10,
+        "font-weight": 500,
+        "font-family": "var(--font-mono, monospace)",
+      });
+      rLabel.textContent = `7d Avg: ${(avg7d / 1e6).toFixed(1)}M`;
+      const tipText = chartSvg("title");
+      tipText.textContent = `7-Day Average Line Pack: ${(avg7d / 1e6).toFixed(2)} Mm³`;
+      rLabel.appendChild(tipText);
+      svg.appendChild(rLabel);
+    }
   }
 
   const numTicks = 4;
@@ -1951,11 +2034,17 @@ function showPayloadError() {
 
 async function fetchMagoPayloadJson() {
   const urls = [PAYLOAD_URL];
-  if (!/^https?:/i.test(String(PAYLOAD_URL || ""))) urls.push(MAGO_PAYLOAD_R2);
+  if (!urls.includes(MAGO_PAYLOAD_R2)) urls.push(MAGO_PAYLOAD_R2);
   let lastErr;
   for (const u of urls) {
+    if (!u) continue;
     try {
-      return await inflateGzipUrl(u);
+      const text = await inflateGzipUrl(u);
+      const parsed = parseDashboardJson(text);
+      const tagCandidate = (parsed && parsed.tag) ? parsed.tag : parsed;
+      if (tagCandidate && (tagCandidate.linepack || tagCandidate.kpiLinepackMm3 != null || (tagCandidate.linepackHistoryRows && tagCandidate.linepackHistoryRows.length))) {
+        return tagCandidate;
+      }
     } catch (e) {
       lastErr = e;
     }
@@ -1965,9 +2054,8 @@ async function fetchMagoPayloadJson() {
 
 async function init() {
   document.getElementById("year").textContent = new Date().getFullYear();
-  let json;
   try {
-    json = await fetchMagoPayloadJson();
+    DATA = await fetchMagoPayloadJson();
   } catch (e) {
     console.error(e);
     showPayloadError();
@@ -1978,7 +2066,6 @@ async function init() {
     gbCopyLink("btn-share");
     return;
   }
-  DATA = parseDashboardJson(json);
   LP = DATA.linepack || {};
   LP_HIST = DATA.linepackHistory || {};
   LP_ROWS = DATA.linepackHistoryRows || [];

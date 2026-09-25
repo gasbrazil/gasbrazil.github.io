@@ -16,9 +16,9 @@
 <link rel="preload" href="/shared/fonts/IBMPlexSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/shared/fonts/Pacaembu-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
 <!-- home-page teaser marker, read by ../build_home.py:
-     generated: 2026-09-25 21:44 UTC
-     kpi_linepack: 69.67
-     kpi_snapshot: 2026-09-25 18:08 UTC -->
+     generated: 2026-09-25 22:00 UTC
+     kpi_linepack: 68.69
+     kpi_snapshot: 2026-09-20 22:08 UTC -->
 <script>
 (function(){
   try {
@@ -2773,7 +2773,6 @@ html.gb-locked footer {
   border-radius: var(--radius-sm);
   color: var(--accent);
 }
-
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; font-weight: 300; }
 header.dash-head { display: flex; flex-direction: row; align-items: center; gap: 10px; margin-bottom: 0; }
@@ -3248,7 +3247,7 @@ main h3,
 <div class="tt" id="chart-tt"></div>
 </div>
 <script>
-const PAYLOAD_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/mago/payload.json.gz?v=36193038780";
+const PAYLOAD_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/mago/payload.json.gz";
 /** Public R2 artifact (same bucket as other GasBrazil dashboards). Used when the shell still points at a sibling payload.json.gz that is not on Pages. */
 const MAGO_PAYLOAD_R2 = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/mago/payload.json.gz";
 
@@ -3580,6 +3579,9 @@ function initThemeToggle(buttonId, onChange) {
 if (document.getElementById("theme-toggle")) initThemeToggle("theme-toggle");
 
 
+function escapeHtml(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
 function escapeHtml(s) {
   return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
@@ -4623,7 +4625,11 @@ function gbBindChartExportButtons() {
     if (!target) {
       target = document.createElement("div");
       target.className = "chart-toolbar-actions";
-      container.insertBefore(target, svg);
+      if (svg.parentNode) {
+        svg.parentNode.insertBefore(target, svg);
+      } else {
+        container.appendChild(target);
+      }
     }
 
     const btn = document.createElement("button");
@@ -5376,6 +5382,22 @@ function getOrCreateChartTooltip() {
   return tt;
 }
 
+function getMago7dAvg() {
+  if (typeof DATA === "object" && DATA) {
+    if (DATA.avg7dLinepackM3 != null) return DATA.avg7dLinepackM3;
+    if (DATA.avg7dLinepackMm3 != null) return DATA.avg7dLinepackMm3 * 1e6;
+  }
+  if (typeof LP_ROWS !== "undefined" && LP_ROWS && LP_ROWS.length) {
+    const valid = LP_ROWS.filter(r => r.valueM3 != null && isFinite(r.valueM3));
+    if (valid.length) {
+      const slice = valid.slice(-168);
+      const sum = slice.reduce((acc, r) => acc + r.valueM3, 0);
+      return sum / slice.length;
+    }
+  }
+  return null;
+}
+
 function drawLines(hostId, seriesList, yFmt, bands) {
   const host = document.getElementById(hostId);
   host.innerHTML = "";
@@ -5625,6 +5647,43 @@ function drawLines(hostId, seriesList, yFmt, bands) {
         svg.appendChild(textEl);
       }
     });
+  }
+
+  // 7-day average reference line on linepack charts
+  const avg7d = (hostId === "chart-lp" || hostId === "chart-lp-hist") ? getMago7dAvg() : null;
+  if (avg7d != null && isFinite(avg7d)) {
+    const gy = y(avg7d);
+    if (gy >= plotTop - 2 && gy <= plotBottom + 2) {
+      const line = chartSvg("line", {
+        x1: plotLeft,
+        x2: plotLeft + plotWidth,
+        y1: gy,
+        y2: gy,
+        stroke: "var(--muted, #888)",
+        "stroke-width": 1.2,
+        "stroke-dasharray": "5 4",
+        opacity: 0.8,
+      });
+      const tip = chartSvg("title");
+      tip.textContent = `7-Day Average: ${(avg7d / 1e6).toFixed(2)} Mm³`;
+      line.appendChild(tip);
+      svg.appendChild(line);
+
+      const rLabel = chartSvg("text", {
+        x: plotLeft + plotWidth - 6,
+        y: gy - 5,
+        "text-anchor": "end",
+        fill: "var(--muted, #888)",
+        "font-size": 10,
+        "font-weight": 500,
+        "font-family": "var(--font-mono, monospace)",
+      });
+      rLabel.textContent = `7d Avg: ${(avg7d / 1e6).toFixed(1)}M`;
+      const tipText = chartSvg("title");
+      tipText.textContent = `7-Day Average Line Pack: ${(avg7d / 1e6).toFixed(2)} Mm³`;
+      rLabel.appendChild(tipText);
+      svg.appendChild(rLabel);
+    }
   }
 
   const numTicks = 4;
@@ -6324,11 +6383,17 @@ function showPayloadError() {
 
 async function fetchMagoPayloadJson() {
   const urls = [PAYLOAD_URL];
-  if (!/^https?:/i.test(String(PAYLOAD_URL || ""))) urls.push(MAGO_PAYLOAD_R2);
+  if (!urls.includes(MAGO_PAYLOAD_R2)) urls.push(MAGO_PAYLOAD_R2);
   let lastErr;
   for (const u of urls) {
+    if (!u) continue;
     try {
-      return await inflateGzipUrl(u);
+      const text = await inflateGzipUrl(u);
+      const parsed = parseDashboardJson(text);
+      const tagCandidate = (parsed && parsed.tag) ? parsed.tag : parsed;
+      if (tagCandidate && (tagCandidate.linepack || tagCandidate.kpiLinepackMm3 != null || (tagCandidate.linepackHistoryRows && tagCandidate.linepackHistoryRows.length))) {
+        return tagCandidate;
+      }
     } catch (e) {
       lastErr = e;
     }
@@ -6338,9 +6403,8 @@ async function fetchMagoPayloadJson() {
 
 async function init() {
   document.getElementById("year").textContent = new Date().getFullYear();
-  let json;
   try {
-    json = await fetchMagoPayloadJson();
+    DATA = await fetchMagoPayloadJson();
   } catch (e) {
     console.error(e);
     showPayloadError();
@@ -6351,7 +6415,6 @@ async function init() {
     gbCopyLink("btn-share");
     return;
   }
-  DATA = parseDashboardJson(json);
   LP = DATA.linepack || {};
   LP_HIST = DATA.linepackHistory || {};
   LP_ROWS = DATA.linepackHistoryRows || [];

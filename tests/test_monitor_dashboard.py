@@ -46,9 +46,13 @@ def test_monitor_dashboard_rendered():
     assert "kpi_tag_lp:" in content
     assert "kpi_nts_lp:" in content
 
-    # Payloads
+    # Payloads and 7-day reference line
     assert 'id="nts-payload"' in content
     assert "fetchMagoPayloadJson" in content
+    assert "getMago7dAvg" in content
+    assert "7d Avg:" in content
+    assert "tagCandidate" in content
+    assert "MAGO_PAYLOAD_R2" in content
 
     # No unreplaced placeholders
     unreplaced = [m for m in re.findall(r"__[A-Z0-9_]+__", content) if m != "__GB_I18N_END__"]

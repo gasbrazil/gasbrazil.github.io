@@ -629,9 +629,10 @@ function renderNtsChart() {
 
   const W = 1000, H = 260;
   const L = 56, R = 24, T = 16, B = 32;
+  const avg7d = (NTS_PAYLOAD.kpis && NTS_PAYLOAD.kpis.avg_7d) || (NTS_PAYLOAD.ref && NTS_PAYLOAD.ref.mean) || 46.2;
   const vals = pts.map(p => p[1]);
-  let minV = Math.min(...vals);
-  let maxV = Math.max(...vals);
+  let minV = Math.min(...vals, avg7d);
+  let maxV = Math.max(...vals, avg7d);
 
   const pad = (maxV - minV) * 0.12 || 1.0;
   minV = Math.floor((minV - pad) * 2) / 2;
@@ -650,13 +651,12 @@ function renderNtsChart() {
     gridSvg += `<text x="${L - 8}" y="${yPos + 4}" fill="var(--muted)" font-size="11" font-family="var(--font)" text-anchor="end">${fmtNumNts(v, 1)}</text>`;
   }
 
-  const refMean = (NTS_PAYLOAD.ref && NTS_PAYLOAD.ref.mean) || 46.2;
   let refSvg = "";
-  if (refMean >= minV && refMean <= maxV) {
-    const yMean = y(refMean);
+  if (avg7d >= minV && avg7d <= maxV) {
+    const yAvg = y(avg7d);
     refSvg = `
-      <line x1="${L}" y1="${yMean}" x2="${W - R}" y2="${yMean}" stroke="var(--muted)" stroke-width="1.2" stroke-dasharray="6 4" opacity="0.65"/>
-      <text x="${W - R - 6}" y="${yMean - 6}" fill="var(--muted)" font-size="10" font-family="var(--font)" text-anchor="end">Mean: ${refMean} Mm³</text>
+      <line x1="${L}" y1="${yAvg}" x2="${W - R}" y2="${yAvg}" stroke="var(--muted)" stroke-width="1.2" stroke-dasharray="6 4" opacity="0.75"/>
+      <text x="${W - R - 6}" y="${yAvg - 6}" fill="var(--muted)" font-size="10" font-family="var(--font)" text-anchor="end">7d Avg: ${fmtNumNts(avg7d, 2)} Mm³</text>
     `;
   }
 
@@ -1148,6 +1148,22 @@ function drawConsumptionStackedDaily(hostId) {
   host.appendChild(legHost);
 }
 
+function getMago7dAvg() {
+  if (typeof DATA === "object" && DATA) {
+    if (DATA.avg7dLinepackM3 != null) return DATA.avg7dLinepackM3;
+    if (DATA.avg7dLinepackMm3 != null) return DATA.avg7dLinepackMm3 * 1e6;
+  }
+  if (typeof LP_ROWS !== "undefined" && LP_ROWS && LP_ROWS.length) {
+    const valid = LP_ROWS.filter(r => r.valueM3 != null && isFinite(r.valueM3));
+    if (valid.length) {
+      const slice = valid.slice(-168);
+      const sum = slice.reduce((acc, r) => acc + r.valueM3, 0);
+      return sum / slice.length;
+    }
+  }
+  return null;
+}
+
 function drawLines(hostId, seriesList, yFmt, bands) {
   const host = document.getElementById(hostId);
   if (!host) return;
@@ -1254,6 +1270,43 @@ function drawLines(hostId, seriesList, yFmt, bands) {
       rLabel.textContent = `${(g.val / 1e6).toFixed(1)}M`;
       svg.appendChild(rLabel);
     });
+  }
+
+  // 7-day average reference line on linepack charts
+  const avg7d = (hostId === "chart-lp" || hostId === "chart-lp-hist") ? getMago7dAvg() : null;
+  if (avg7d != null && isFinite(avg7d)) {
+    const gy = y(avg7d);
+    if (gy >= plotTop - 2 && gy <= plotBottom + 2) {
+      const line = chartSvg("line", {
+        x1: plotLeft,
+        x2: plotLeft + plotWidth,
+        y1: gy,
+        y2: gy,
+        stroke: "var(--muted, #888)",
+        "stroke-width": 1.2,
+        "stroke-dasharray": "5 4",
+        opacity: 0.8,
+      });
+      const tip = chartSvg("title");
+      tip.textContent = `7-Day Average: ${(avg7d / 1e6).toFixed(2)} Mm³`;
+      line.appendChild(tip);
+      svg.appendChild(line);
+
+      const rLabel = chartSvg("text", {
+        x: plotLeft + plotWidth - 6,
+        y: gy - 5,
+        "text-anchor": "end",
+        fill: "var(--muted, #888)",
+        "font-size": 10,
+        "font-weight": 500,
+        "font-family": "var(--font)",
+      });
+      rLabel.textContent = `7d Avg: ${(avg7d / 1e6).toFixed(1)}M`;
+      const tipText = chartSvg("title");
+      tipText.textContent = `7-Day Average Line Pack: ${(avg7d / 1e6).toFixed(2)} Mm³`;
+      rLabel.appendChild(tipText);
+      svg.appendChild(rLabel);
+    }
   }
 
   const numTicks = 4;
@@ -1572,7 +1625,18 @@ async function fetchMagoPayloadJson() {
   for (const u of urls) {
     if (!u) continue;
     try {
-      return await inflateGzipUrl(u);
+      const text = await inflateGzipUrl(u);
+      const parsed = parseDashboardJson(text);
+      const tagCandidate = (parsed && parsed.tag) ? parsed.tag : parsed;
+      if (tagCandidate && (tagCandidate.linepack || tagCandidate.kpiLinepackMm3 != null || (tagCandidate.linepackHistoryRows && tagCandidate.linepackHistoryRows.length))) {
+        if (parsed && parsed.nts && parsed.nts.payload) {
+          NTS_PAYLOAD = parsed.nts.payload;
+        }
+        return tagCandidate;
+      }
+      if (parsed && parsed.nts && parsed.nts.payload) {
+        NTS_PAYLOAD = parsed.nts.payload;
+      }
     } catch (e) {
       lastErr = e;
     }
@@ -1695,15 +1759,10 @@ async function init() {
 
   // Fetch TAG Mago JSON in background
   try {
-    const json = await fetchMagoPayloadJson();
-    const raw = parseDashboardJson(json);
-    DATA = (raw && raw.tag) ? raw.tag : raw;
-    if (raw && raw.nts && raw.nts.payload) {
-      NTS_PAYLOAD = raw.nts.payload;
-      if (monitorTab === "nts") {
-        renderNtsChart();
-        populateNtsTable();
-      }
+    DATA = await fetchMagoPayloadJson();
+    if (NTS_PAYLOAD && monitorTab === "nts") {
+      renderNtsChart();
+      populateNtsTable();
     }
     LP = DATA.linepack || {};
     LP_HIST = DATA.linepackHistory || {};
@@ -1741,13 +1800,44 @@ init();
 """
 
 
-def load_tag_data():
+def load_tag_data() -> dict | None:
     mago_dash = _load_module("mago_dash", ROOT / "mago" / "dashboard.py")
     try:
-        return mago_dash.load_payload()
+        tag_data = mago_dash.load_payload()
+        if tag_data and (tag_data.get("linepack") or tag_data.get("kpiLinepackMm3") is not None):
+            return tag_data
     except Exception as exc:
-        print(f"Local TAG Mago parquet not found or failed ({exc}); continuing with fallback.")
-        return None
+        print(f"Local TAG Mago parquet not found or failed ({exc}); trying fallback sources.")
+
+    # Fallback 1: Local sibling payload.json.gz in mago/
+    try:
+        import gzip
+        local_gz = ROOT / "mago" / "payload.json.gz"
+        if local_gz.exists() and local_gz.stat().st_size > 500:
+            data = json.loads(gzip.decompress(local_gz.read_bytes()))
+            if data and (data.get("linepack") or data.get("kpiLinepackMm3") is not None):
+                print(f"Loaded TAG Mago fallback payload from local {local_gz}.")
+                return data
+    except Exception as exc:
+        print(f"Notice: local mago payload read failed: {exc}")
+
+    # Fallback 2: Remote R2 public artifact
+    try:
+        import gzip
+        import urllib.request
+        r2_url = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/mago/payload.json.gz"
+        req = urllib.request.Request(r2_url, headers={"User-Agent": "GasBrazil-PipelineMonitor/1.0"})
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            if resp.status == 200:
+                raw_gz = resp.read()
+                data = json.loads(gzip.decompress(raw_gz))
+                if data and (data.get("linepack") or data.get("kpiLinepackMm3") is not None):
+                    print("Successfully loaded TAG Mago fallback payload from R2.")
+                    return data
+    except Exception as exc:
+        print(f"Warning: remote TAG Mago fallback fetch failed: {exc}")
+
+    return None
 
 
 def load_nts_data():

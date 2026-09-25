@@ -2767,7 +2767,6 @@ html.gb-locked footer {
   border-radius: var(--radius-sm);
   color: var(--accent);
 }
-
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; font-weight: 300; }
 /* Single-row header: wordmark-menu · title … Wiki/About · PT · theme */
@@ -3649,6 +3648,9 @@ function initThemeToggle(buttonId, onChange) {
 if (document.getElementById("theme-toggle")) initThemeToggle("theme-toggle");
 
 
+function escapeHtml(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
 function escapeHtml(s) {
   return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
@@ -4692,7 +4694,11 @@ function gbBindChartExportButtons() {
     if (!target) {
       target = document.createElement("div");
       target.className = "chart-toolbar-actions";
-      container.insertBefore(target, svg);
+      if (svg.parentNode) {
+        svg.parentNode.insertBefore(target, svg);
+      } else {
+        container.appendChild(target);
+      }
     }
 
     const btn = document.createElement("button");
