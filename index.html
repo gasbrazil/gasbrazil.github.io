@@ -3041,19 +3041,19 @@ main h3,
       <div class="kpi-label" data-i18n="cardDesk">The Desk</div>
       <div class="kpi-role">Cross-product snapshot</div>
       <div class="kpi-val" data-en="4738 MWmed gas · PLD SE 106.61" data-pt="4738 MWmed a gás · PLD SE 106.61">4738 MWmed gas · PLD SE 106.61</div>
-      <div class="kpi-when" data-refresh="2026-09-25 18:06 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-25 22:05 UTC"></div>
     </a>
     <a class="kpi-cell" href="ons/" data-slug="ons">
       <div class="kpi-label" data-i18n="cardOns">ONS Balances</div>
       <div class="kpi-role">Grid &amp; gas dispatch</div>
-      <div class="kpi-val" data-en="4,738 MWmed gas" data-pt="4,738 MWmed a gás">4,738 MWmed gas</div>
-      <div class="kpi-when" data-refresh="2026-09-25 03:50 UTC"></div>
+      <div class="kpi-val" data-en="4,375 MWmed gas" data-pt="4,375 MWmed a gás">4,375 MWmed gas</div>
+      <div class="kpi-when" data-refresh="2026-09-25 22:06 UTC"></div>
     </a>
     <a class="kpi-cell" href="pld/" data-slug="pld">
       <div class="kpi-label" data-i18n="cardPld">PLD Prices</div>
       <div class="kpi-role">Power settlement</div>
       <div class="kpi-val" data-en="SE 106.61 R$/MWh · 2026-09-25" data-pt="SE 106.61 R$/MWh · 2026-09-25">SE 106.61 R$/MWh · 2026-09-25</div>
-      <div class="kpi-when" data-refresh="2026-09-25 18:01 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-25 22:06 UTC"></div>
       
     </a>
     <a class="kpi-cell" href="poc/" data-slug="poc">
@@ -3066,8 +3066,8 @@ main h3,
     <a class="kpi-cell" href="contratos/" data-slug="contratos">
       <div class="kpi-label" data-i18n="cardContratos">POC Contracts</div>
       <div class="kpi-role">Firm transport</div>
-      <div class="kpi-val" data-en="886 contracts · 181430.4 thousand m³/d" data-pt="886 contratos · 181430.4 mil m³/d">886 contracts · 181430.4 thousand m³/d</div>
-      <div class="kpi-when" data-refresh="2026-09-25 15:47 UTC"></div>
+      <div class="kpi-val" data-en="891 contracts · 183169.4 thousand m³/d" data-pt="891 contratos · 183169.4 mil m³/d">891 contracts · 183169.4 thousand m³/d</div>
+      <div class="kpi-when" data-refresh="2026-09-25 22:06 UTC"></div>
     </a>
     <a class="kpi-cell" href="flows/" data-slug="flows">
       <div class="kpi-label" data-i18n="cardFlows">Pipeline Flows</div>
@@ -3080,13 +3080,13 @@ main h3,
       <div class="kpi-role" data-i18n="cardMonitorDesc">Operational line pack &amp; SCADA telemetry.</div>
       <div class="kpi-val" data-en="TAG 69.67 Mm³ · NTS 43.15 Mm³" data-pt="TAG 69.67 Mm³ · NTS 43.15 Mm³">TAG 69.67 Mm³ · NTS 43.15 Mm³</div>
       <div class="kpi-when" data-refresh="2026-09-25 22:05 UTC"></div>
-      <svg class="kpi-spark" viewBox="0 0 120 28" width="120" height="28" aria-hidden="true"><polyline points="2.0,26.0 5.0,24.3 7.9,23.5 10.9,20.8 13.9,19.9 16.9,18.2 19.8,16.3 22.8,14.5 25.8,13.2 28.8,11.3 31.7,10.8 34.7,8.6 37.7,6.2 40.7,6.1 43.6,5.5 46.6,5.6 49.6,5.7 52.6,5.4 55.5,4.0 58.5,3.9 61.5,4.0 64.5,6.9 67.4,7.6 70.4,7.8 73.4,6.7 76.4,5.4 79.3,2.0 82.3,2.6 85.3,3.5 88.3,4.2 91.2,5.1 94.2,6.8 97.2,9.2 100.2,10.6 103.1,11.4 106.1,12.8 109.1,13.8 112.1,10.7 115.0,12.3 118.0,14.2"/></svg>
+      
     </a>
     <a class="kpi-cell" href="supply/" data-slug="supply">
       <div class="kpi-label" data-i18n="cardSupply">Gas Supply</div>
       <div class="kpi-role">National balance</div>
       <div class="kpi-val" data-en="6.7M thousand m³ produced · 2026-07" data-pt="6.7M mil m³ produzidos · 2026-07">6.7M thousand m³ produced · 2026-07</div>
-      <div class="kpi-when" data-refresh="2026-09-25 03:50 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-25 22:06 UTC"></div>
       
     </a>
     <a class="kpi-cell" href="precos/" data-slug="precos">
@@ -4960,7 +4960,7 @@ initLangToggle("lang-toggle");
 </html>
 
 <script>
-const TEASERS_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/hub/teasers.json.gz?v=36194984930";
+const TEASERS_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/hub/teasers.json.gz?v=36198008661";
 function paintRefreshLabels() {
   document.querySelectorAll(".kpi-when[data-refresh]").forEach(el => {
     const when = el.getAttribute("data-refresh");
