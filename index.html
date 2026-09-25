@@ -3068,13 +3068,13 @@ main h3,
       <div class="kpi-label" data-i18n="cardOns">ONS Balances</div>
       <div class="kpi-role">Grid &amp; gas dispatch</div>
       <div class="kpi-val" data-en="4,375 MWmed gas" data-pt="4,375 MWmed a gás">4,375 MWmed gas</div>
-      <div class="kpi-when" data-refresh="2026-09-25 22:43 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-25 23:04 UTC"></div>
     </a>
     <a class="kpi-cell" href="pld/" data-slug="pld">
       <div class="kpi-label" data-i18n="cardPld">PLD Prices</div>
       <div class="kpi-role">Power settlement</div>
       <div class="kpi-val" data-en="SE 106.61 R$/MWh · 2026-09-25" data-pt="SE 106.61 R$/MWh · 2026-09-25">SE 106.61 R$/MWh · 2026-09-25</div>
-      <div class="kpi-when" data-refresh="2026-09-25 22:43 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-25 23:04 UTC"></div>
       
     </a>
     <a class="kpi-cell" href="poc/" data-slug="poc">
@@ -3088,7 +3088,7 @@ main h3,
       <div class="kpi-label" data-i18n="cardContratos">POC Contracts</div>
       <div class="kpi-role">Firm transport</div>
       <div class="kpi-val" data-en="891 contracts · 183169.4 thousand m³/d" data-pt="891 contratos · 183169.4 mil m³/d">891 contracts · 183169.4 thousand m³/d</div>
-      <div class="kpi-when" data-refresh="2026-09-25 22:43 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-25 23:04 UTC"></div>
     </a>
     <a class="kpi-cell" href="flows/" data-slug="flows">
       <div class="kpi-label" data-i18n="cardFlows">Pipeline Flows</div>
@@ -3099,9 +3099,9 @@ main h3,
     <a class="kpi-cell" href="monitor/" data-slug="monitor">
       <div class="kpi-label" data-i18n="cardMonitor">Pipeline Monitor</div>
       <div class="kpi-role" data-i18n="cardMonitorDesc">Operational line pack &amp; SCADA telemetry.</div>
-      <div class="kpi-val" data-en="TAG 69.61 Mm³ · NTS 43.04 Mm³" data-pt="TAG 69.61 Mm³ · NTS 43.04 Mm³">TAG 69.61 Mm³ · NTS 43.04 Mm³</div>
-      <div class="kpi-when" data-refresh="2026-09-25 23:04 UTC"></div>
-      <svg class="kpi-spark" viewBox="0 0 120 28" width="120" height="28" aria-hidden="true"><polyline points="2.0,4.8 5.0,4.5 7.9,4.2 10.9,4.3 13.9,3.7 16.9,3.5 19.8,3.2 22.8,5.0 25.8,5.7 28.8,6.1 31.7,5.8 34.7,3.9 37.7,2.0 40.7,2.0 43.6,2.6 46.6,3.3 49.6,4.1 52.6,5.5 55.5,7.5 58.5,8.7 61.5,9.4 64.5,10.8 67.4,11.0 70.4,9.2 73.4,10.8 76.4,12.3 79.3,13.0 82.3,15.9 85.3,17.6 88.3,19.4 91.2,20.8 94.2,23.3 97.2,24.5 100.2,25.5 103.1,25.0 106.1,25.1 109.1,25.1 112.1,25.2 115.0,25.6 118.0,26.0"/></svg>
+      <div class="kpi-val" data-en="TAG 69.61 Mm³ · NTS 43.10 Mm³" data-pt="TAG 69.61 Mm³ · NTS 43.10 Mm³">TAG 69.61 Mm³ · NTS 43.10 Mm³</div>
+      <div class="kpi-when" data-refresh="2026-09-25 23:31 UTC"></div>
+      <svg class="kpi-spark" viewBox="0 0 120 28" width="120" height="28" aria-hidden="true"><polyline points="2.0,3.3 5.0,5.0 7.9,5.7 10.9,6.1 13.9,5.8 16.9,3.9 19.8,2.0 22.8,2.0 25.8,2.7 28.8,4.0 31.7,4.6 34.7,5.8 37.7,7.9 40.7,8.5 43.6,9.8 46.6,11.1 49.6,9.1 52.6,9.7 55.5,11.5 58.5,12.3 61.5,14.9 64.5,16.6 67.4,18.6 70.4,20.0 73.4,21.7 76.4,24.3 79.3,25.5 82.3,25.2 85.3,25.3 88.3,25.2 91.2,25.2 94.2,25.6 97.2,26.0 100.2,26.0 103.1,23.8 106.1,23.9 109.1,24.2 112.1,24.8 115.0,25.1 118.0,17.1"/></svg>
     </a>
     <a class="kpi-cell" href="supply/" data-slug="supply">
       <div class="kpi-label" data-i18n="cardSupply">Gas Supply</div>
@@ -4985,7 +4985,7 @@ initLangToggle("lang-toggle");
 </html>
 
 <script>
-const TEASERS_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/hub/teasers.json.gz?v=36199471820";
+const TEASERS_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/hub/teasers.json.gz?v=36201325435";
 function paintRefreshLabels() {
   document.querySelectorAll(".kpi-when[data-refresh]").forEach(el => {
     const when = el.getAttribute("data-refresh");
