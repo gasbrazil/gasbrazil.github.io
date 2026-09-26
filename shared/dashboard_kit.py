@@ -445,11 +445,9 @@ function showBootError(err, retryFn, containerSelector) {
 }
 """
 
-JS_ESCAPE_HTML = r"""
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-}
-"""
+# escapeHtml is provided as a single source of truth by JS_I18N (below).
+# JS_ESCAPE_HTML is kept as empty string for backward compatibility with dashboard builders.
+JS_ESCAPE_HTML = ""
 
 # Same sun/moon icon convention on every dashboard: the icon shown is the
 # mode a click switches TO. initThemeToggle wires a button to toggle

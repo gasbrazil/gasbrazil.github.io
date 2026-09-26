@@ -458,7 +458,6 @@ def _footer(home_href: str = "./") -> str:
   &middot; <span data-i18n="contact">Contact</span>: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
 </footer>
 <script>
-__SHARED_JS_ESCAPE_HTML__
 __SHARED_JS_DECODE__
 __SHARED_JS_THEME_TOGGLE__
 __SHARED_JS_I18N__
@@ -683,7 +682,6 @@ def _kit_render(template: str, **extra: str) -> str:
         SHARED_JS_I18N=kit.JS_I18N,
         SHARED_JS_BOOT=kit.JS_BOOT,
         SHARED_JS_DECODE=kit.JS_DECODE,
-        SHARED_JS_ESCAPE_HTML=kit.JS_ESCAPE_HTML,
         **extra,
     )
 
