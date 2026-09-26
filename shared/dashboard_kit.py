@@ -586,6 +586,8 @@ const GB_I18N = {
     navAdmin: "Admin Panel",
     navCatGas: "Natural Gas",
     navCatPower: "Power",
+    navCatTrading: "Trading",
+    menuCloseHint: "close",
     filterPlaceholder: "Filter…",
     contact: "Contact",
     copyLink: "Copy link",
@@ -820,6 +822,8 @@ const GB_I18N = {
     navAdmin: "Painel de Administração",
     navCatGas: "Gás Natural",
     navCatPower: "Energia Elétrica",
+    navCatTrading: "Comercialização",
+    menuCloseHint: "fechar",
     filterPlaceholder: "Filtrar…",
     contact: "Contato",
     copyLink: "Copiar link",
@@ -1041,7 +1045,14 @@ function t(key) {
 function applyI18n() {
   document.querySelectorAll("[data-i18n]").forEach(el => {
     const key = el.getAttribute("data-i18n");
-    if (key) el.textContent = t(key);
+    if (key) {
+      const chk = el.querySelector(":scope > .chk");
+      if (chk) {
+        el.innerHTML = chk.outerHTML + escapeHtml(t(key));
+      } else {
+        el.textContent = t(key);
+      }
+    }
   });
   document.querySelectorAll("[data-i18n-aria]").forEach(el => {
     const key = el.getAttribute("data-i18n-aria");
@@ -2744,18 +2755,12 @@ def site_links_js(self_id: str) -> str:
     )
 
 
-# Products dropdown: open on hover (short delay + CSS fade) for pointer
-# devices; click still toggles for touch / keyboard. Scoped to .products-dd
-# so the gap between trigger and menu doesn't immediately dismiss.
+# Products dropdown: click-to-open 2-column popover card.
+# The wordmark navigates home, while the brand dot button toggles the popover.
 _PRODUCTS_DROPDOWN_JS = r"""<script>
 (function () {
-  var OPEN_MS = 160;
-  var CLOSE_MS = 250;
-  var openTimer = null;
-  var closeTimer = null;
-
   function menuLinks(dd) {
-    return Array.prototype.slice.call(dd.querySelectorAll(".dd-menu [role='menuitem'], .dd-sub-trigger"));
+    return Array.prototype.slice.call(dd.querySelectorAll(".dd-menu [role='menuitem']"));
   }
   function setOpen(dd, open) {
     if (!dd) return;
@@ -2764,44 +2769,11 @@ _PRODUCTS_DROPDOWN_JS = r"""<script>
     if (!menu || !btn) return;
     menu.classList.toggle("is-open", !!open);
     btn.setAttribute("aria-expanded", open ? "true" : "false");
-    if (open) {
-      if (window.innerWidth <= 640) {
-        var trig = menu.querySelector(".dd-sub-trigger.has-current");
-        if (trig) {
-          var wrap = trig.closest(".dd-sub-wrap");
-          if (wrap) {
-            wrap.classList.add("is-open");
-            trig.setAttribute("aria-expanded", "true");
-          }
-        }
-      }
-    } else {
-      dd.querySelectorAll(".dd-sub-wrap.is-open").forEach(function (w) {
-        w.classList.remove("is-open");
-        var trig = w.querySelector(".dd-sub-trigger");
-        if (trig) trig.setAttribute("aria-expanded", "false");
-      });
-    }
   }
   function closeAll(except) {
     document.querySelectorAll(".products-dd").forEach(function (dd) {
       if (dd !== except) setOpen(dd, false);
     });
-  }
-  function scheduleOpen(dd) {
-    clearTimeout(closeTimer);
-    clearTimeout(openTimer);
-    openTimer = setTimeout(function () {
-      closeAll(dd);
-      setOpen(dd, true);
-    }, OPEN_MS);
-  }
-  function scheduleClose(dd) {
-    clearTimeout(openTimer);
-    clearTimeout(closeTimer);
-    closeTimer = setTimeout(function () {
-      setOpen(dd, false);
-    }, CLOSE_MS);
   }
   function focusLink(dd, idx) {
     var items = menuLinks(dd).filter(function (el) { return el.offsetParent !== null; });
@@ -2809,43 +2781,14 @@ _PRODUCTS_DROPDOWN_JS = r"""<script>
     var i = ((idx % items.length) + items.length) % items.length;
     items[i].focus();
   }
-  function bind(dd) {
-    if (dd.getAttribute("data-dd-bound") === "1") return;
-    dd.setAttribute("data-dd-bound", "1");
-    dd.addEventListener("mouseenter", function () {
-      if (window.matchMedia && !window.matchMedia("(hover: hover)").matches) return;
-      scheduleOpen(dd);
-    });
-    dd.addEventListener("mouseleave", function () {
-      if (window.matchMedia && !window.matchMedia("(hover: hover)").matches) return;
-      scheduleClose(dd);
-    });
-  }
-  function bindAll() {
-    document.querySelectorAll(".products-dd").forEach(bind);
-  }
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bindAll);
-  else bindAll();
 
   document.addEventListener("click", function (e) {
-    var subTrigger = e.target.closest(".dd-sub-trigger");
-    if (subTrigger) {
-      e.preventDefault();
-      var wrap = subTrigger.closest(".dd-sub-wrap");
-      if (wrap) {
-        var isOpen = wrap.classList.contains("is-open");
-        wrap.classList.toggle("is-open", !isOpen);
-        subTrigger.setAttribute("aria-expanded", !isOpen ? "true" : "false");
-      }
-      return;
-    }
     var trigger = e.target.closest(".dd-trigger");
     if (trigger) {
+      e.preventDefault();
       var dd = trigger.closest(".products-dd");
       var menu = dd && dd.querySelector(".dd-menu");
       if (dd && menu) {
-        clearTimeout(openTimer);
-        clearTimeout(closeTimer);
         var open = !menu.classList.contains("is-open");
         closeAll(open ? dd : null);
         setOpen(dd, open);
@@ -2871,37 +2814,6 @@ _PRODUCTS_DROPDOWN_JS = r"""<script>
     var dd = (inTrigger && inTrigger.closest(".products-dd")) ||
              (inMenu && e.target.closest(".products-dd"));
     if (!dd) return;
-
-    if (e.key === "ArrowRight") {
-      var activeSubTrigger = document.activeElement && document.activeElement.closest(".dd-sub-trigger");
-      if (activeSubTrigger) {
-        e.preventDefault();
-        var wrap = activeSubTrigger.closest(".dd-sub-wrap");
-        if (wrap) {
-          wrap.classList.add("is-open");
-          activeSubTrigger.setAttribute("aria-expanded", "true");
-          var firstSub = wrap.querySelector(".dd-sub-menu [role='menuitem']");
-          if (firstSub) firstSub.focus();
-        }
-        return;
-      }
-    }
-    if (e.key === "ArrowLeft") {
-      var inSub = document.activeElement && document.activeElement.closest(".dd-sub-menu");
-      if (inSub) {
-        e.preventDefault();
-        var wrap = inSub.closest(".dd-sub-wrap");
-        if (wrap) {
-          wrap.classList.remove("is-open");
-          var trig = wrap.querySelector(".dd-sub-trigger");
-          if (trig) {
-            trig.setAttribute("aria-expanded", "false");
-            trig.focus();
-          }
-        }
-        return;
-      }
-    }
 
     var items = menuLinks(dd).filter(function (el) { return el.offsetParent !== null; });
     if (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Home" || e.key === "End") {
@@ -2956,13 +2868,20 @@ NAV_CATEGORIES = [
         "title_en": "Power",
         "products": ["ons", "pld"],
     },
+    {
+        "id": "trading",
+        "title_key": "navCatTrading",
+        "title_en": "Trading",
+        "products": ["desk"],
+    },
 ]
 
 
 def _menu_items_html(self_id: str) -> str:
-    """One menu entry per dashboard site organized into clean sub-menus.
+    """One menu entry per dashboard site organized into a clean 2-column popover card.
 
-    Top-level: The Desk, Natural Gas (sub-menu), Power (sub-menu).
+    Col 1: Natural Gas (monitor, flows, contratos, poc, supply, precos).
+    Col 2: Power (ons, pld) + Trading (desk).
     The current page renders with a checkmark and aria-current="page".
     """
     i18n_keys = {
@@ -2991,37 +2910,32 @@ def _menu_items_html(self_id: str) -> str:
             f'<span class="chk"></span>{html.escape(label)}</a>'
         )
 
-    desk_html = render_link("desk")
-
     gas_keys = ["monitor", "flows", "contratos", "poc", "supply", "precos"]
-    gas_has_current = " has-current" if self_id in gas_keys else ""
     gas_items = "\n      ".join(render_link(k) for k in gas_keys)
 
     power_keys = ["ons", "pld"]
-    power_has_current = " has-current" if self_id in power_keys else ""
     power_items = "\n      ".join(render_link(k) for k in power_keys)
 
+    trading_keys = ["desk"]
+    trading_items = "\n      ".join(render_link(k) for k in trading_keys)
+
     return (
-        f'<div class="dd-sub-wrap">\n'
-        f'  <button type="button" class="dd-sub-trigger{gas_has_current}" aria-haspopup="menu" aria-expanded="false">\n'
-        f'    <span class="chk"></span><span data-i18n="navCatGas">Natural Gas</span>'
-        f'<svg class="dd-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>\n'
-        f'  </button>\n'
-        f'  <div class="dd-sub-menu" role="menu" aria-label="Natural Gas">\n'
+        '<div class="dd-grid">\n'
+        '  <div class="dd-col">\n'
+        '    <div class="dd-col-hdr" data-i18n="navCatGas">Natural Gas</div>\n'
         f'      {gas_items}\n'
-        f'  </div>\n'
-        f'</div>\n'
-        f'<div class="dd-sub-wrap">\n'
-        f'  <button type="button" class="dd-sub-trigger{power_has_current}" aria-haspopup="menu" aria-expanded="false">\n'
-        f'    <span class="chk"></span><span data-i18n="navCatPower">Power</span>'
-        f'<svg class="dd-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>\n'
-        f'  </button>\n'
-        f'  <div class="dd-sub-menu" role="menu" aria-label="Power">\n'
+        '  </div>\n'
+        '  <div class="dd-col dd-col-secondary">\n'
+        '    <div class="dd-col-hdr" data-i18n="navCatPower">Power</div>\n'
         f'      {power_items}\n'
-        f'  </div>\n'
-        f'</div>\n'
-        f'<div class="dd-divider" role="separator"></div>\n'
-        f'{desk_html}'
+        '    <div class="dd-col-hdr dd-col-hdr-spaced" data-i18n="navCatTrading">Trading</div>\n'
+        f'      {trading_items}\n'
+        '  </div>\n'
+        '</div>\n'
+        '<div class="dd-footer">\n'
+        '  <span class="dd-hint"><kbd>Esc</kbd> <span data-i18n="menuCloseHint">close</span></span>\n'
+        '  <span class="dd-hint"><kbd>Ctrl+K</kbd> <span data-i18n="searchBtn">Search</span></span>\n'
+        '</div>'
     )
 
 
