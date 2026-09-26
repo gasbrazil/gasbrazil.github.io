@@ -588,75 +588,61 @@ main.hub .brand-lockup .wordmark,
   font-weight: inherit;
   line-height: inherit;
 }
+/* Products-menu button: a small outlined three-line icon right after the
+   wordmark, styled like the header's PT / theme buttons so it reads as a
+   control (the old flag-blue dot did not). */
 .brand-mark.dd-trigger {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 14px;
-  min-height: 18px;
-  padding: 2px 4px;
-  margin: -2px 0 -2px 1px;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: var(--radius-sm, 3px);
-  color: var(--accent);
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  margin: 0 0 0 10px;
+  align-self: center;
+  background: var(--panel);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm, 5px);
+  color: var(--muted2);
   cursor: pointer;
   font: inherit;
+  line-height: 0;
   flex: none;
   box-sizing: border-box;
-  vertical-align: baseline;
   transition: color .15s ease, background-color .15s ease, border-color .15s ease;
 }
+.brand-menu-icon { display: block; width: 14px; height: 14px; flex: none; }
+main.hub .brand-mark.dd-trigger,
+.hub-header .brand-mark.dd-trigger { width: 30px; height: 30px; margin-left: 12px; }
+main.hub .brand-menu-icon,
+.hub-header .brand-menu-icon { width: 16px; height: 16px; }
 .brand-mark.dd-trigger:hover,
 .brand-mark.dd-trigger[aria-expanded="true"] {
   background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 .brand-mark.dd-trigger:focus-visible {
   outline: 2px solid var(--accent);
-  outline-offset: 1px;
+  outline-offset: 2px;
 }
 [data-theme="dark"] .brand-mark.dd-trigger:hover,
 [data-theme="dark"] .brand-mark.dd-trigger[aria-expanded="true"] {
   background: rgba(255, 223, 0, 0.12);
+  border-color: rgba(255, 223, 0, .58);
+  color: var(--brz-yellow);
 }
 [data-theme="dark"] .brand-mark.dd-trigger:focus-visible {
   outline-color: var(--brz-yellow);
 }
-/* Solid flag-blue dot; on hover or open the dot shifts to flag yellow. */
-.brand-mark-dot,
 .wordmark .dot {
   display: inline-block;
   width: 0.36em;
   height: 0.36em;
-  min-width: 0.36em;
-  min-height: 0.36em;
   border-radius: 50%;
   background: var(--accent);
-  flex-shrink: 0;
   vertical-align: -0.05em;
-  transition: background-color .15s ease;
-}
-.masthead-ident .brand-mark-dot {
-  width: 5px;
-  height: 5px;
-  min-width: 5px;
-  min-height: 5px;
-}
-main.hub .brand-mark-dot,
-.hub-header .brand-mark-dot {
-  width: 6.5px;
-  height: 6.5px;
-  min-width: 6.5px;
-  min-height: 6.5px;
-}
-.brand-mark .dd-caret {
-  display: none;
-}
-.brand-mark.dd-trigger:hover .brand-mark-dot,
-.brand-mark.dd-trigger[aria-expanded="true"] .brand-mark-dot,
-.products-dd:has(.dd-menu.is-open) .brand-mark-dot {
-  background: var(--brz-yellow);
 }
 
 /* Masthead: wordmark-menu · title on the left; Wiki / About on the right. */
@@ -1433,42 +1419,18 @@ header.top #theme-toggle,
     height: 14px;
   }
 
-  /* Mobile menu affordance on brand lockup */
+  /* Mobile: keep the menu button a comfortable 36px touch target. */
   .brand-lockup {
     align-items: center;
   }
-  .brand-mark.dd-trigger {
-    min-width: 36px;
-    min-height: 36px;
-    padding: 0 4px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    margin: -6px 0 -6px -2px;
+  .brand-mark.dd-trigger,
+  main.hub .brand-mark.dd-trigger,
+  .hub-header .brand-mark.dd-trigger {
+    width: 36px;
+    height: 36px;
+    margin-left: 8px;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
-  }
-  .brand-mark .dd-caret {
-    display: inline-block;
-    width: 5px;
-    height: 5px;
-    border-right: 1.5px solid var(--muted2);
-    border-bottom: 1.5px solid var(--muted2);
-    transform: rotate(45deg);
-    margin-left: 4px;
-    vertical-align: 1px;
-    transition: transform 0.15s ease, border-color 0.15s ease;
-  }
-  .brand-mark.dd-trigger[aria-expanded="true"] .dd-caret {
-    transform: rotate(-135deg);
-    vertical-align: -2px;
-    border-color: var(--accent);
-  }
-  .brand-mark.dd-trigger:active .brand-mark-dot {
-    transform: scale(1.3);
-  }
-  [data-theme="dark"] .brand-mark.dd-trigger[aria-expanded="true"] .dd-caret {
-    border-color: var(--brz-yellow);
   }
 }
 
@@ -2864,7 +2826,6 @@ html.gb-locked footer {
   border-radius: var(--radius-sm);
   color: var(--accent);
 }
-
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; font-weight: 300; }
 /* Single-row header: wordmark-menu · title … Wiki/About · PT · theme */
@@ -3318,7 +3279,7 @@ main h3,
 <header class="dash-head">
   <div class="masthead">
       <div class="masthead-ident">
-      <div class="products-dd"><span class="brand-lockup"><a class="masthead-brand" id="link-home" href="/" data-i18n="navHome">GasBrazil</a><button type="button" class="dd-trigger brand-mark" aria-haspopup="menu" aria-expanded="false" aria-controls="gb-products-menu" id="gb-products-trigger" data-i18n-aria="navMenu" aria-label="Menu"><span class="brand-mark-dot" aria-hidden="true"></span><span class="dd-caret" aria-hidden="true"></span></button></span><div class="dd-menu" id="gb-products-menu" role="menu" aria-labelledby="gb-products-trigger">
+      <div class="products-dd"><span class="brand-lockup"><a class="masthead-brand" id="link-home" href="/" data-i18n="navHome">GasBrazil</a><button type="button" class="dd-trigger brand-mark" aria-haspopup="menu" aria-expanded="false" aria-controls="gb-products-menu" id="gb-products-trigger" data-i18n-aria="navMenu" aria-label="Menu"><svg class="brand-menu-icon" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M2.5 4h11M2.5 8h11M2.5 12h11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button></span><div class="dd-menu" id="gb-products-menu" role="menu" aria-labelledby="gb-products-trigger">
 <div class="dd-grid">
   <div class="dd-col">
     <div class="dd-col-hdr" data-i18n="navCatGas">Natural Gas</div>

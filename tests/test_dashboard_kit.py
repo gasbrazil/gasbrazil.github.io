@@ -57,9 +57,9 @@ def test_masthead_menu_aria():
     assert 'aria-haspopup="menu"' in mast
     assert 'id="gb-products-menu"' in mast
     assert 'role="menu"' in mast
-    assert 'class="brand-mark-dot"' in mast
-    assert 'class="dd-caret"' in mast
-    assert "\u2630" not in mast  # no hamburger; menu hangs off the wordmark
+    assert 'class="brand-menu-icon"' in mast
+    assert 'class="brand-mark-dot"' not in mast
+    assert "\u2630" not in mast  # icon is inline SVG, not the ☰ glyph
     assert 'data-i18n-aria="navMenu"' in mast
     assert 'data-i18n="navMenu"' not in mast
     assert "navProducts" not in mast
@@ -117,8 +117,8 @@ def test_products_dropdown_wraps_brand():
     assert html.find("wordmark") < html.find("brand-mark")
     assert html.find("brand-mark") < html.find("dd-menu")
     assert "\u2630" not in html
-    assert 'class="brand-mark-dot"' in html
-    assert 'class="dd-caret"' in html
+    assert 'class="brand-menu-icon"' in html
+    assert 'class="brand-mark-dot"' not in html
 
 
 def test_table_headers_freeze_inside_scroll_wraps():
