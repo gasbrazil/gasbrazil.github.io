@@ -18,7 +18,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: nts-refresh
+  group: site-publish
   cancel-in-progress: false
 
 jobs:

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import html
+import re
 from pathlib import Path
 
 import dashboard_kit as kit
@@ -558,13 +559,18 @@ def test_sub_menu_structure_and_categories():
     cat_ids = [c["id"] for c in kit.NAV_CATEGORIES]
     assert "gas" in cat_ids
     assert "power" in cat_ids
+    assert "trading" in cat_ids
 
     menu = kit.products_dropdown_html("desk", '<div class="wordmark">GasBrazil</div>')
-    assert "dd-sub-wrap" in menu
-    assert "dd-sub-trigger" in menu
-    assert "dd-sub-menu" in menu
+    assert "dd-grid" in menu
+    assert "dd-col" in menu
+    assert "dd-col-hdr" in menu
     assert 'data-i18n="navCatGas"' in menu
     assert 'data-i18n="navCatPower"' in menu
+    assert 'data-i18n="navCatTrading"' in menu
+    assert "dd-sub-menu" not in menu
+    assert "dd-sub-wrap" not in menu
+    assert "dd-sub-trigger" not in menu
 
     # Clean items without emojis or bloated descriptions
     assert "🔥" not in menu
@@ -649,5 +655,56 @@ def test_clean_page_bottoms_and_standard_footers():
     assert "eb@gasbrazil.com" in footer
 
 
+def test_resync_i18n_js_idempotent_and_single_escape_html():
+    """Issue 1 regression test: resync_i18n_js must not duplicate escapeHtml on successive runs."""
+    from resync_built_shells import resync_escape_html, resync_i18n_js
+
+    root = Path(__file__).resolve().parents[1]
+    desk_path = root / "desk" / "index.html"
+    content = desk_path.read_text(encoding="utf-8")
+
+    # Run once
+    step1 = resync_escape_html(content)
+    step1 = resync_i18n_js(step1)
+    assert step1.count("function escapeHtml") == 1
+    assert not re.search(r"^[ \t]*\[c\]\)\);", step1, re.MULTILINE)
+
+    # Run second time
+    step2 = resync_escape_html(step1)
+    step2 = resync_i18n_js(step2)
+    assert step2 == step1
+    assert step2.count("function escapeHtml") == 1
+    assert not re.search(r"^[ \t]*\[c\]\)\);", step2, re.MULTILINE)
 
 
+def test_resync_i18n_js_deduplicates_multiple_copies():
+    from resync_built_shells import resync_i18n_js
+
+    dup_html = """
+    <script>
+    function escapeHtml(s) {
+      return 1;
+    }
+    function escapeHtml(s) {
+      return 2;
+    }
+    function escapeHtml(s) {
+      return 3;
+    }
+    const LANG_KEY = "gasbrazil-lang";
+    /* __GB_I18N_END__ */
+    </script>
+    """
+    resynced = resync_i18n_js(dup_html)
+    assert resynced.count("function escapeHtml") == 1
+    resynced2 = resync_i18n_js(resynced)
+    assert resynced2 == resynced
+    assert resynced2.count("function escapeHtml") == 1
+
+
+def test_shells_have_no_broken_escape_html_remnants():
+    """Ensure no committed dashboard shell contains orphan [c])); syntax error fragments."""
+    root = Path(__file__).resolve().parents[1]
+    for html_file in root.glob("*/index.html"):
+        content = html_file.read_text(encoding="utf-8")
+        assert not re.search(r"^[ \t]*\[c\]\)\);", content, re.MULTILINE), f"Broken escapeHtml fragment found in {html_file}"

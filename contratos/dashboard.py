@@ -1594,8 +1594,11 @@ async function init() {
   document.getElementById("asof-through").textContent = through || "—";
   initStalenessBadgeFor("contratos", through);
   if (DATA.excludedConcluded) {
-    document.getElementById("coverage-note").textContent =
-      `Active Transport & Master contracts \u00b7 ${DATA.excludedConcluded.toLocaleString(numLocale())} concluded excluded`;
+    const covEl = document.getElementById("coverage-note");
+    if (covEl) {
+      covEl.textContent =
+        `Active Transport & Master contracts \u00b7 ${DATA.excludedConcluded.toLocaleString(numLocale())} concluded excluded`;
+    }
   }
   populateSelect(document.getElementById("f-category"), DATA.rows.map(r => r["Contract Category"]));
   buildHeader();

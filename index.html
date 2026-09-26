@@ -322,7 +322,6 @@ html, body {
 .dd-menu,
 .dd-menu a,
 .dd-menu .is-current,
-.dd-sub-trigger,
 footer,
 footer.site,
 footer a,
@@ -555,17 +554,16 @@ footer .asof-strip,
 }
 .navlink:hover { color: var(--accent); border-bottom-color: var(--accent); }
 
-/* Products dropdown lives on the wordmark (leftmost in the frame). Hover
-   the brand cluster to open; the caret is a ghost control for touch/keyboard,
-   not a boxed hamburger. Padding on the wrapper bridges the gap to the menu
-   so the panel doesn't flicker closed on the way down. */
+/* Products dropdown lives on the wordmark (leftmost in the frame). Click
+   the brand dot to toggle the 2-column popover card. Clicking the brand
+   text navigates home. */
 .products-dd {
   position: relative;
   display: inline-flex;
   align-items: center;
   gap: 0;
-  padding: 2px 0 8px;
-  margin: -2px 0 -8px;
+  padding: 0;
+  margin: 0;
 }
 .brand-lockup {
   display: inline-flex;
@@ -602,23 +600,37 @@ main.hub .brand-lockup .wordmark,
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 0.5em;
-  width: auto;
-  height: auto;
-  padding: 0 0 0 0.04em;
-  margin: 0;
+  min-width: 14px;
+  min-height: 18px;
+  padding: 2px 4px;
+  margin: -2px 0 -2px 1px;
   background: transparent;
-  border: none;
-  border-radius: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm, 3px);
   color: var(--accent);
   cursor: pointer;
   font: inherit;
   flex: none;
   box-sizing: border-box;
   vertical-align: baseline;
-  transition: color .15s ease;
+  transition: color .15s ease, background-color .15s ease, border-color .15s ease;
 }
-/* Solid flag-blue dot; on hover only the dot shifts to flag yellow. */
+.brand-mark.dd-trigger:hover,
+.brand-mark.dd-trigger[aria-expanded="true"] {
+  background: var(--accent-soft);
+}
+.brand-mark.dd-trigger:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+[data-theme="dark"] .brand-mark.dd-trigger:hover,
+[data-theme="dark"] .brand-mark.dd-trigger[aria-expanded="true"] {
+  background: rgba(255, 223, 0, 0.12);
+}
+[data-theme="dark"] .brand-mark.dd-trigger:focus-visible {
+  outline-color: var(--brz-yellow);
+}
+/* Solid flag-blue dot; on hover or open the dot shifts to flag yellow. */
 .brand-mark-dot,
 .wordmark .dot {
   display: inline-block;
@@ -648,18 +660,10 @@ main.hub .brand-mark-dot,
 .brand-mark .dd-caret {
   display: none;
 }
-.products-dd:hover .brand-mark-dot,
-.products-dd:focus-within .brand-mark-dot {
+.brand-mark.dd-trigger:hover .brand-mark-dot,
+.brand-mark.dd-trigger[aria-expanded="true"] .brand-mark-dot,
+.products-dd:has(.dd-menu.is-open) .brand-mark-dot {
   background: var(--brz-yellow);
-}
-.dd-trigger:hover, .dd-trigger[aria-expanded="true"] {
-  background: transparent;
-  border: none;
-}
-@media (hover: none) {
-  .products-dd:has(.dd-menu.is-open) .brand-mark-dot {
-    background: var(--brz-yellow);
-  }
 }
 
 /* Masthead: wordmark-menu · title on the left; Wiki / About on the right. */
@@ -669,6 +673,7 @@ main.hub .brand-mark-dot,
 }
 .masthead-ident {
   display: flex; align-items: center; gap: 10px;
+  flex: 1 1 auto;
   min-width: 0;
 }
 .masthead-brand {
@@ -696,27 +701,27 @@ main.hub .brand-mark-dot,
   font-family: var(--font-display);
   font-size: 14px; margin: 0; letter-spacing: -.01em; font-weight: 600;
   color: var(--muted2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  min-width: 0;
+  flex-shrink: 1;
 }
+/* Clean 2-column popover card */
 .dd-menu {
-  /* Kept in-flow for opacity fade (display:none can't animate). Closed
-     state is invisible + non-interactive; .is-open reveals with a quick fade.
-     Solid panel background, not the gradient: the menu floats over page
-     content and must read near-opaque when open. */
   position: absolute;
-  top: calc(100% - 2px);
+  top: calc(100% + 4px);
   left: 0;
-  min-width: 196px;
+  width: 380px;
+  max-width: calc(100vw - 20px);
   background: var(--panel);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius);
-  box-shadow: var(--elevate);
-  padding: 5px;
-  z-index: 50;
+  box-shadow: 0 14px 34px rgba(0,0,0,.20);
+  padding: 10px 10px 6px;
+  z-index: 100;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transform: translateY(-6px);
-  transition: opacity .14s ease, transform .16s ease, visibility 0s linear .14s;
+  transform: translateY(-4px);
+  transition: opacity .14s ease, transform .14s ease, visibility 0s linear .14s;
 }
 .dd-menu:not(.is-open) {
   display: none !important;
@@ -724,27 +729,57 @@ main.hub .brand-mark-dot,
   pointer-events: none !important;
 }
 .dd-menu.is-open {
+  display: block !important;
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
   transform: translateY(0);
-  transition: opacity .14s ease, transform .16s ease, visibility 0s;
+  transition: opacity .14s ease, transform .14s ease, visibility 0s;
+}
+[data-theme="dark"] .dd-menu {
+  box-shadow: 0 16px 38px rgba(0,0,0,.48);
+}
+
+.dd-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.dd-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.dd-col-hdr {
+  font-family: var(--font-display);
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--muted);
+  padding: 4px 8px 3px;
+  margin-bottom: 2px;
+  user-select: none;
+}
+.dd-col-hdr-spaced {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
 }
 
 .dd-menu a,
-.dd-menu .is-current,
-.dd-sub-trigger {
+.dd-menu .is-current {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   width: 100%;
   box-sizing: border-box;
   font-family: var(--font-display);
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 400;
   color: var(--text);
   text-decoration: none;
-  padding: 7px 10px;
+  padding: 5px 8px;
   border-radius: var(--radius-sm);
   background: transparent;
   border: none;
@@ -752,30 +787,21 @@ main.hub .brand-mark-dot,
   text-align: left;
   transition: background .12s ease, color .12s ease;
 }
-.dd-menu a:hover,
-.dd-sub-trigger:hover,
-.dd-sub-wrap:hover > .dd-sub-trigger,
-.dd-sub-wrap:focus-within > .dd-sub-trigger {
+.dd-menu a:hover {
   background: var(--accent-soft);
   color: var(--accent);
 }
-.dd-menu a:focus-visible,
-.dd-sub-trigger:focus-visible {
+.dd-menu a:focus-visible {
   background: var(--accent-soft);
   color: var(--accent);
   outline: 2px solid var(--accent);
   outline-offset: -2px;
 }
 [data-theme="dark"] .dd-menu a:hover,
-[data-theme="dark"] .dd-menu a:focus-visible,
-[data-theme="dark"] .dd-sub-trigger:hover,
-[data-theme="dark"] .dd-sub-wrap:hover > .dd-sub-trigger,
-[data-theme="dark"] .dd-sub-wrap:focus-within > .dd-sub-trigger,
-[data-theme="dark"] .dd-sub-trigger:focus-visible {
+[data-theme="dark"] .dd-menu a:focus-visible {
   color: var(--brz-yellow);
 }
-[data-theme="dark"] .dd-menu a:focus-visible,
-[data-theme="dark"] .dd-sub-trigger:focus-visible {
+[data-theme="dark"] .dd-menu a:focus-visible {
   outline-color: var(--brz-yellow);
 }
 
@@ -787,16 +813,9 @@ main.hub .brand-mark-dot,
 [data-theme="dark"] .dd-menu .is-current {
   color: var(--brz-yellow);
 }
-.dd-sub-trigger.has-current {
-  color: var(--accent);
-  font-weight: 600;
-}
-[data-theme="dark"] .dd-sub-trigger.has-current {
-  color: var(--brz-yellow);
-}
 
 .dd-menu .chk {
-  width: 12px;
+  width: 11px;
   font-size: 11px;
   color: var(--accent);
   flex: none;
@@ -805,87 +824,58 @@ main.hub .brand-mark-dot,
   color: var(--brz-yellow);
 }
 
-.dd-arrow {
-  margin-left: auto;
-  font-size: 14px;
-  line-height: 1;
-  color: var(--muted);
-  transition: transform .15s ease;
-}
-
-/* Sub-menu wrapper & desktop flyout */
-.dd-sub-wrap {
-  position: relative;
-}
-.dd-sub-menu {
-  position: absolute;
-  top: -5px;
-  left: calc(100% + 2px);
-  min-width: 184px;
-  background: var(--panel);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius);
-  box-shadow: var(--elevate);
-  padding: 5px;
-  z-index: 60;
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transform: translateX(-4px);
-  transition: opacity .14s ease, transform .16s ease, visibility 0s linear .14s;
-}
-
-/* Invisible bridge so mouse moving from trigger to flyout doesn't flicker closed */
-.dd-sub-menu::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: -8px;
-  width: 8px;
-}
-
-/* Sub-menu only visible when the main menu is actively open */
-.dd-menu.is-open .dd-sub-wrap:hover > .dd-sub-menu,
-.dd-menu.is-open .dd-sub-wrap:focus-within > .dd-sub-menu,
-.dd-menu.is-open .dd-sub-wrap.is-open > .dd-sub-menu {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-  transform: translateX(0);
-  transition: opacity .14s ease, transform .16s ease, visibility 0s;
-}
-
-.dd-menu:not(.is-open) .dd-sub-menu {
-  display: none !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-}
-
 .dd-divider {
   height: 1px;
   background: var(--border);
   margin: 4px 6px;
 }
 
-/* Mobile: accordion downward instead of flyout */
-@media (max-width: 640px) {
-  .dd-sub-menu {
-    position: static;
-    border: none;
-    box-shadow: none;
-    padding: 0 0 0 12px;
-    display: none;
-    transform: none;
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
+.dd-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  padding: 6px 6px 2px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--muted);
+  user-select: none;
+}
+.dd-footer .dd-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.dd-footer kbd {
+  display: inline-block;
+  padding: 1px 4px;
+  font-size: 9.5px;
+  font-family: inherit;
+  line-height: 1.2;
+  color: var(--muted2);
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  border-radius: 3px;
+}
+
+@media (max-width: 560px) {
+  .dd-menu {
+    width: calc(100vw - 24px);
+    max-width: 340px;
+    padding: 8px 8px 6px;
   }
-  .dd-menu.is-open .dd-sub-wrap.is-open > .dd-sub-menu {
-    display: block !important;
+  .dd-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
   }
-  .dd-sub-wrap.is-open .dd-arrow {
-    transform: rotate(90deg);
+  .dd-col-hdr-spaced {
+    margin-top: 6px;
+    padding-top: 6px;
+  }
+  .dd-menu a,
+  .dd-menu .is-current {
+    padding: 6px 8px;
+    font-size: 13.5px;
   }
 }
 
@@ -1428,8 +1418,65 @@ header.top #theme-toggle,
 }
 @media (max-width: 640px) {
   /* Keep the wordmark menu; Wiki/About remain in the footer. */
-  header.dash-head .nav-trail > .navlink,
-  .hub-controls .nav-trail > .navlink { display: none; }
+  .nav-trail > .navlink { display: none; }
+  .nav-trail {
+    gap: 6px;
+  }
+  .gb-search-btn span,
+  .gb-search-btn kbd,
+  .auth-lock-btn span {
+    display: none;
+  }
+  .gb-search-btn,
+  .auth-lock-btn {
+    min-width: 34px;
+    min-height: 34px;
+    padding: 6px;
+    justify-content: center;
+  }
+  .gb-search-btn svg,
+  .auth-lock-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* Mobile menu affordance on brand lockup */
+  .brand-lockup {
+    align-items: center;
+  }
+  .brand-mark.dd-trigger {
+    min-width: 36px;
+    min-height: 36px;
+    padding: 0 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: -6px 0 -6px -2px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .brand-mark .dd-caret {
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    border-right: 1.5px solid var(--muted2);
+    border-bottom: 1.5px solid var(--muted2);
+    transform: rotate(45deg);
+    margin-left: 4px;
+    vertical-align: 1px;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+  }
+  .brand-mark.dd-trigger[aria-expanded="true"] .dd-caret {
+    transform: rotate(-135deg);
+    vertical-align: -2px;
+    border-color: var(--accent);
+  }
+  .brand-mark.dd-trigger:active .brand-mark-dot {
+    transform: scale(1.3);
+  }
+  [data-theme="dark"] .brand-mark.dd-trigger[aria-expanded="true"] .dd-caret {
+    border-color: var(--brz-yellow);
+  }
 }
 
 /* Keyboard focus visibility site-wide. Buttons, links, chips, and controls
@@ -3040,11 +3087,9 @@ main h3,
 <main class="hub" id="main">
   <div class="hub-header">
     <div class="products-dd"><span class="brand-lockup"><div class="wordmark"><a href="./" id="link-home" data-i18n="navHome">GasBrazil</a></div><button type="button" class="dd-trigger brand-mark" aria-haspopup="menu" aria-expanded="false" aria-controls="gb-products-menu" id="gb-products-trigger" data-i18n-aria="navMenu" aria-label="Menu"><span class="brand-mark-dot" aria-hidden="true"></span><span class="dd-caret" aria-hidden="true"></span></button></span><div class="dd-menu" id="gb-products-menu" role="menu" aria-labelledby="gb-products-trigger">
-<div class="dd-sub-wrap">
-  <button type="button" class="dd-sub-trigger" aria-haspopup="menu" aria-expanded="false">
-    <span class="chk"></span><span data-i18n="navCatGas">Natural Gas</span><svg class="dd-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
-  </button>
-  <div class="dd-sub-menu" role="menu" aria-label="Natural Gas">
+<div class="dd-grid">
+  <div class="dd-col">
+    <div class="dd-col-hdr" data-i18n="navCatGas">Natural Gas</div>
       <a id="link-monitor" href="/monitor/" role="menuitem" data-i18n="navMonitor"><span class="chk"></span>Pipeline Monitor</a>
       <a id="link-flows" href="/flows/" role="menuitem" data-i18n="navFlows"><span class="chk"></span>Pipeline Flows</a>
       <a id="link-contratos" href="/contratos/" role="menuitem" data-i18n="navContratos"><span class="chk"></span>POC Contracts</a>
@@ -3052,18 +3097,18 @@ main h3,
       <a id="link-supply" href="/supply/" role="menuitem" data-i18n="navSupply"><span class="chk"></span>Gas Supply</a>
       <a id="link-precos" href="/precos/" role="menuitem" data-i18n="navPrecos"><span class="chk"></span>ANP Prices</a>
   </div>
-</div>
-<div class="dd-sub-wrap">
-  <button type="button" class="dd-sub-trigger" aria-haspopup="menu" aria-expanded="false">
-    <span class="chk"></span><span data-i18n="navCatPower">Power</span><svg class="dd-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
-  </button>
-  <div class="dd-sub-menu" role="menu" aria-label="Power">
+  <div class="dd-col dd-col-secondary">
+    <div class="dd-col-hdr" data-i18n="navCatPower">Power</div>
       <a id="link-ons" href="/ons/" role="menuitem" data-i18n="navOns"><span class="chk"></span>ONS Balances</a>
       <a id="link-pld" href="/pld/" role="menuitem" data-i18n="navPld"><span class="chk"></span>PLD Prices</a>
+    <div class="dd-col-hdr dd-col-hdr-spaced" data-i18n="navCatTrading">Trading</div>
+      <a id="link-desk" href="/desk/" role="menuitem" data-i18n="navDesk"><span class="chk"></span>The Desk</a>
   </div>
 </div>
-<div class="dd-divider" role="separator"></div>
-<a id="link-desk" href="/desk/" role="menuitem" data-i18n="navDesk"><span class="chk"></span>The Desk</a>
+<div class="dd-footer">
+  <span class="dd-hint"><kbd>Esc</kbd> <span data-i18n="menuCloseHint">close</span></span>
+  <span class="dd-hint"><kbd>Ctrl+K</kbd> <span data-i18n="searchBtn">Search</span></span>
+</div>
 </div></div>
     <div class="hub-controls">
       <div class="nav-trail">
@@ -3090,34 +3135,32 @@ main h3,
     <a class="kpi-cell" href="desk/" data-slug="desk">
       <div class="kpi-label" data-i18n="cardDesk">The Desk</div>
       <div class="kpi-role">Cross-product snapshot</div>
-      <div class="kpi-val" data-en="4375 MWmed gas · PLD SE 106.61" data-pt="4375 MWmed a gás · PLD SE 106.61">4375 MWmed gas · PLD SE 106.61</div>
-      <div class="kpi-when" data-refresh="2026-09-26 03:43 UTC"></div>
+      <div class="kpi-val" data-en="4019 MWmed gas · PLD SE 75.07" data-pt="4019 MWmed a gás · PLD SE 75.07">4019 MWmed gas · PLD SE 75.07</div>
+      <div class="kpi-when" data-refresh="2026-09-26 17:24 UTC"></div>
     </a>
     <a class="kpi-cell" href="ons/" data-slug="ons">
       <div class="kpi-label" data-i18n="cardOns">ONS Balances</div>
       <div class="kpi-role">Grid &amp; gas dispatch</div>
-      <div class="kpi-val" data-en="4,375 MWmed gas" data-pt="4,375 MWmed a gás">4,375 MWmed gas</div>
-      <div class="kpi-when" data-refresh="2026-09-26 03:44 UTC"></div>
+      <div class="kpi-val" data-en="4,019 MWmed gas" data-pt="4,019 MWmed a gás">4,019 MWmed gas</div>
+      <div class="kpi-when" data-refresh="2026-09-26 15:51 UTC"></div>
     </a>
     <a class="kpi-cell" href="pld/" data-slug="pld">
       <div class="kpi-label" data-i18n="cardPld">PLD Prices</div>
       <div class="kpi-role">Power settlement</div>
       <div class="kpi-val" data-en="SE 75.07 R$/MWh · 2026-09-26" data-pt="SE 75.07 R$/MWh · 2026-09-26">SE 75.07 R$/MWh · 2026-09-26</div>
-      <div class="kpi-when" data-refresh="2026-09-26 03:44 UTC"></div>
-      
+      <div class="kpi-when" data-refresh="2026-09-26 17:20 UTC"></div>
     </a>
     <a class="kpi-cell" href="poc/" data-slug="poc">
       <div class="kpi-label" data-i18n="cardPoc">POC Results</div>
       <div class="kpi-role">Capacity auctions</div>
       <div class="kpi-val" data-en="19.24 R$/MMBtu · 10 trades (7d)" data-pt="19.24 R$/MMBtu · 10 negócios (7d)">19.24 R$/MMBtu · 10 trades (7d)</div>
       <div class="kpi-when" data-refresh="2026-09-22"></div>
-      
     </a>
     <a class="kpi-cell" href="contratos/" data-slug="contratos">
       <div class="kpi-label" data-i18n="cardContratos">POC Contracts</div>
       <div class="kpi-role">Firm transport</div>
       <div class="kpi-val" data-en="887 contracts · 181469.7 thousand m³/d" data-pt="887 contratos · 181469.7 mil m³/d">887 contracts · 181469.7 thousand m³/d</div>
-      <div class="kpi-when" data-refresh="2026-09-26 03:44 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-26 15:51 UTC"></div>
     </a>
     <a class="kpi-cell" href="flows/" data-slug="flows">
       <div class="kpi-label" data-i18n="cardFlows">Pipeline Flows</div>
@@ -3128,22 +3171,20 @@ main h3,
     <a class="kpi-cell" href="monitor/" data-slug="monitor">
       <div class="kpi-label" data-i18n="cardMonitor">Pipeline Monitor</div>
       <div class="kpi-role" data-i18n="cardMonitorDesc">Operational line pack &amp; SCADA telemetry.</div>
-      <div class="kpi-val" data-en="TAG 69.43 Mm³ · NTS 43.59 Mm³" data-pt="TAG 69.43 Mm³ · NTS 43.59 Mm³">TAG 69.43 Mm³ · NTS 43.59 Mm³</div>
-      <div class="kpi-when" data-refresh="2026-09-26 05:27 UTC"></div>
-      <svg class="kpi-spark" viewBox="0 0 120 28" width="120" height="28" aria-hidden="true"><polyline points="2.0,26.0 5.0,25.3 7.9,25.2 10.9,24.6 13.9,24.3 16.9,22.6 19.8,21.7 22.8,21.5 25.8,21.0 28.8,20.5 31.7,20.1 34.7,19.7 37.7,19.1 40.7,18.5 43.6,17.6 46.6,17.2 49.6,16.3 52.6,15.7 55.5,15.2 58.5,14.8 61.5,13.2 64.5,12.9 67.4,12.5 70.4,11.3 73.4,10.2 76.4,9.6 79.3,8.7 82.3,8.0 85.3,10.2 88.3,9.3 91.2,8.2 94.2,7.4 97.2,6.5 100.2,5.7 103.1,5.3 106.1,4.5 109.1,3.9 112.1,3.4 115.0,2.7 118.0,2.0"/></svg>
+      <div class="kpi-val" data-en="TAG 69.86 Mm³ · NTS 43.66 Mm³" data-pt="TAG 69.86 Mm³ · NTS 43.66 Mm³">TAG 69.86 Mm³ · NTS 43.66 Mm³</div>
+      <div class="kpi-when" data-refresh="2026-09-26 19:22 UTC"></div>
     </a>
     <a class="kpi-cell" href="supply/" data-slug="supply">
       <div class="kpi-label" data-i18n="cardSupply">Gas Supply</div>
       <div class="kpi-role">National balance</div>
       <div class="kpi-val" data-en="6.7M thousand m³ produced · 2026-07" data-pt="6.7M mil m³ produzidos · 2026-07">6.7M thousand m³ produced · 2026-07</div>
-      <div class="kpi-when" data-refresh="2026-09-26 03:43 UTC"></div>
-      
+      <div class="kpi-when" data-refresh="2026-09-26 15:50 UTC"></div>
     </a>
     <a class="kpi-cell" href="precos/" data-slug="precos">
       <div class="kpi-label" data-i18n="cardPrecos">ANP Prices</div>
       <div class="kpi-role">Disclosed R$/MMBtu</div>
       <div class="kpi-val" data-en="Santos 18.2 R$/MMBtu · 2026-06" data-pt="Santos 18.2 R$/MMBtu · 2026-06">Santos 18.2 R$/MMBtu · 2026-06</div>
-      <div class="kpi-when" data-refresh="2026-09-26 03:43 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-26 15:50 UTC"></div>
     </a>
   </div>
   </nav>
@@ -3156,11 +3197,6 @@ main h3,
   &middot; <span data-i18n="contact">Contact</span>: <a href="mailto:eb@gasbrazil.com">eb@gasbrazil.com</a>
 </footer>
 <script>
-
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-}
-
 
 function b64ToBytes(b64) {
   const bin = atob(b64);
@@ -3312,6 +3348,8 @@ const GB_I18N = {
     navAdmin: "Admin Panel",
     navCatGas: "Natural Gas",
     navCatPower: "Power",
+    navCatTrading: "Trading",
+    menuCloseHint: "close",
     filterPlaceholder: "Filter…",
     contact: "Contact",
     copyLink: "Copy link",
@@ -3546,6 +3584,8 @@ const GB_I18N = {
     navAdmin: "Painel de Administração",
     navCatGas: "Gás Natural",
     navCatPower: "Energia Elétrica",
+    navCatTrading: "Comercialização",
+    menuCloseHint: "fechar",
     filterPlaceholder: "Filtrar…",
     contact: "Contato",
     copyLink: "Copiar link",
@@ -3767,7 +3807,14 @@ function t(key) {
 function applyI18n() {
   document.querySelectorAll("[data-i18n]").forEach(el => {
     const key = el.getAttribute("data-i18n");
-    if (key) el.textContent = t(key);
+    if (key) {
+      const chk = el.querySelector(":scope > .chk");
+      if (chk) {
+        el.innerHTML = chk.outerHTML + escapeHtml(t(key));
+      } else {
+        el.textContent = t(key);
+      }
+    }
   });
   document.querySelectorAll("[data-i18n-aria]").forEach(el => {
     const key = el.getAttribute("data-i18n-aria");
@@ -4842,13 +4889,8 @@ initLangToggle("lang-toggle");
 </script>
 <script>
 (function () {
-  var OPEN_MS = 160;
-  var CLOSE_MS = 250;
-  var openTimer = null;
-  var closeTimer = null;
-
   function menuLinks(dd) {
-    return Array.prototype.slice.call(dd.querySelectorAll(".dd-menu [role='menuitem'], .dd-sub-trigger"));
+    return Array.prototype.slice.call(dd.querySelectorAll(".dd-menu [role='menuitem']"));
   }
   function setOpen(dd, open) {
     if (!dd) return;
@@ -4857,33 +4899,11 @@ initLangToggle("lang-toggle");
     if (!menu || !btn) return;
     menu.classList.toggle("is-open", !!open);
     btn.setAttribute("aria-expanded", open ? "true" : "false");
-    if (!open) {
-      dd.querySelectorAll(".dd-sub-wrap.is-open").forEach(function (w) {
-        w.classList.remove("is-open");
-        var trig = w.querySelector(".dd-sub-trigger");
-        if (trig) trig.setAttribute("aria-expanded", "false");
-      });
-    }
   }
   function closeAll(except) {
     document.querySelectorAll(".products-dd").forEach(function (dd) {
       if (dd !== except) setOpen(dd, false);
     });
-  }
-  function scheduleOpen(dd) {
-    clearTimeout(closeTimer);
-    clearTimeout(openTimer);
-    openTimer = setTimeout(function () {
-      closeAll(dd);
-      setOpen(dd, true);
-    }, OPEN_MS);
-  }
-  function scheduleClose(dd) {
-    clearTimeout(openTimer);
-    clearTimeout(closeTimer);
-    closeTimer = setTimeout(function () {
-      setOpen(dd, false);
-    }, CLOSE_MS);
   }
   function focusLink(dd, idx) {
     var items = menuLinks(dd).filter(function (el) { return el.offsetParent !== null; });
@@ -4891,37 +4911,14 @@ initLangToggle("lang-toggle");
     var i = ((idx % items.length) + items.length) % items.length;
     items[i].focus();
   }
-  function bind(dd) {
-    if (dd.getAttribute("data-dd-bound") === "1") return;
-    dd.setAttribute("data-dd-bound", "1");
-    dd.addEventListener("mouseenter", function () { scheduleOpen(dd); });
-    dd.addEventListener("mouseleave", function () { scheduleClose(dd); });
-  }
-  function bindAll() {
-    document.querySelectorAll(".products-dd").forEach(bind);
-  }
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bindAll);
-  else bindAll();
 
   document.addEventListener("click", function (e) {
-    var subTrigger = e.target.closest(".dd-sub-trigger");
-    if (subTrigger) {
-      e.preventDefault();
-      var wrap = subTrigger.closest(".dd-sub-wrap");
-      if (wrap) {
-        var isOpen = wrap.classList.contains("is-open");
-        wrap.classList.toggle("is-open", !isOpen);
-        subTrigger.setAttribute("aria-expanded", !isOpen ? "true" : "false");
-      }
-      return;
-    }
     var trigger = e.target.closest(".dd-trigger");
     if (trigger) {
+      e.preventDefault();
       var dd = trigger.closest(".products-dd");
       var menu = dd && dd.querySelector(".dd-menu");
       if (dd && menu) {
-        clearTimeout(openTimer);
-        clearTimeout(closeTimer);
         var open = !menu.classList.contains("is-open");
         closeAll(open ? dd : null);
         setOpen(dd, open);
@@ -4947,37 +4944,6 @@ initLangToggle("lang-toggle");
     var dd = (inTrigger && inTrigger.closest(".products-dd")) ||
              (inMenu && e.target.closest(".products-dd"));
     if (!dd) return;
-
-    if (e.key === "ArrowRight") {
-      var activeSubTrigger = document.activeElement && document.activeElement.closest(".dd-sub-trigger");
-      if (activeSubTrigger) {
-        e.preventDefault();
-        var wrap = activeSubTrigger.closest(".dd-sub-wrap");
-        if (wrap) {
-          wrap.classList.add("is-open");
-          activeSubTrigger.setAttribute("aria-expanded", "true");
-          var firstSub = wrap.querySelector(".dd-sub-menu [role='menuitem']");
-          if (firstSub) firstSub.focus();
-        }
-        return;
-      }
-    }
-    if (e.key === "ArrowLeft") {
-      var inSub = document.activeElement && document.activeElement.closest(".dd-sub-menu");
-      if (inSub) {
-        e.preventDefault();
-        var wrap = inSub.closest(".dd-sub-wrap");
-        if (wrap) {
-          wrap.classList.remove("is-open");
-          var trig = wrap.querySelector(".dd-sub-trigger");
-          if (trig) {
-            trig.setAttribute("aria-expanded", "false");
-            trig.focus();
-          }
-        }
-        return;
-      }
-    }
 
     var items = menuLinks(dd).filter(function (el) { return el.offsetParent !== null; });
     if (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Home" || e.key === "End") {
@@ -5021,7 +4987,7 @@ initLangToggle("lang-toggle");
 </html>
 
 <script>
-const TEASERS_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/hub/teasers.json.gz?v=36220813204";
+const TEASERS_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/hub/teasers.json.gz?v=36265816146";
 function paintRefreshLabels() {
   document.querySelectorAll(".kpi-when[data-refresh]").forEach(el => {
     const when = el.getAttribute("data-refresh");

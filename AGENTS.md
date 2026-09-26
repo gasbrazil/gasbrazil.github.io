@@ -14,17 +14,25 @@ After a PR is **merged**, do not keep pushing to the old PR branch assuming it i
 
 Use `git push -u origin <branch>` only when the branch is current with `main` (or the intended base).
 
-## Python
+## Python environment
 
-Use the repo venv: `/workspace/.venv/bin/python` (not bare `python`).
+Ensure dependencies are installed using `uv` (recommended) or `pip`:
+
+```bash
+uv sync --all-extras
+# or: pip install -e ".[dev]"
+```
+
+Run Python with your active environment (e.g. `uv run python ...` or `python ...`).
 
 ## Dashboard HTML shells
 
 Shared chrome/theme changes live in `shared/theme.css` and `shared/dashboard_kit.py`. Regenerate committed shells when needed:
 
 ```bash
-/workspace/.venv/bin/python build_home.py
-/workspace/.venv/bin/python shared/resync_built_shells.py
+python shared/resync_built_shells.py
 ```
+
+`resync_built_shells.py` resyncs all dashboard shells as well as the hub (`home`, `about`, `404`, `admin`). When running locally without R2 or data lake access, `build_home.py` automatically preserves committed sparklines, KPI metrics, and CDN artifact URLs.
 
 Individual dashboards can also be rebuilt with `python <site>/dashboard.py` when parquet/data is available.

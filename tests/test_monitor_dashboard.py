@@ -5,6 +5,8 @@ import re
 import sys
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "shared"))
 sys.path.insert(0, str(ROOT / "monitor"))
@@ -115,6 +117,7 @@ def test_home_hub_and_sitemap_include_monitor():
     assert "TAG" in items["monitor"]["kpiEn"] or "NTS" in items["monitor"]["kpiEn"]
 
 
+@pytest.mark.integration
 def test_build_dashboard_execution(tmp_path):
     import importlib.util
 
@@ -123,7 +126,12 @@ def test_build_dashboard_execution(tmp_path):
     spec.loader.exec_module(mon_dash)
 
     out = tmp_path / "index.html"
-    res = mon_dash.build_dashboard(out)
+    try:
+        res = mon_dash.build_dashboard(out)
+    except RuntimeError as exc:
+        if "NTS linepack parquet not found" in str(exc):
+            pytest.skip(f"Skipping monitor dashboard execution offline: {exc}")
+        raise
     assert res.exists()
     text = res.read_text(encoding="utf-8")
     assert "Pipeline Monitor" in text
