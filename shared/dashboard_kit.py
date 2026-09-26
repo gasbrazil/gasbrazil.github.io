@@ -2751,8 +2751,8 @@ def site_links_js(self_id: str) -> str:
 # so the gap between trigger and menu doesn't immediately dismiss.
 _PRODUCTS_DROPDOWN_JS = r"""<script>
 (function () {
-  var OPEN_MS = 120;
-  var CLOSE_MS = 220;
+  var OPEN_MS = 160;
+  var CLOSE_MS = 250;
   var openTimer = null;
   var closeTimer = null;
 
@@ -2766,6 +2766,13 @@ _PRODUCTS_DROPDOWN_JS = r"""<script>
     if (!menu || !btn) return;
     menu.classList.toggle("is-open", !!open);
     btn.setAttribute("aria-expanded", open ? "true" : "false");
+    if (!open) {
+      dd.querySelectorAll(".dd-sub-wrap.is-open").forEach(function (w) {
+        w.classList.remove("is-open");
+        var trig = w.querySelector(".dd-sub-trigger");
+        if (trig) trig.setAttribute("aria-expanded", "false");
+      });
+    }
   }
   function closeAll(except) {
     document.querySelectorAll(".products-dd").forEach(function (dd) {
@@ -2973,20 +2980,15 @@ def _menu_items_html(self_id: str) -> str:
 
     gas_keys = ["monitor", "flows", "contratos", "poc", "supply", "precos"]
     gas_has_current = " has-current" if self_id in gas_keys else ""
-    gas_expanded = "true" if self_id in gas_keys else "false"
-    gas_sub_open = " is-open" if self_id in gas_keys else ""
     gas_items = "\n      ".join(render_link(k) for k in gas_keys)
 
     power_keys = ["ons", "pld"]
     power_has_current = " has-current" if self_id in power_keys else ""
-    power_expanded = "true" if self_id in power_keys else "false"
-    power_sub_open = " is-open" if self_id in power_keys else ""
     power_items = "\n      ".join(render_link(k) for k in power_keys)
 
     return (
-        f'{desk_html}\n'
-        f'<div class="dd-sub-wrap{gas_sub_open}">\n'
-        f'  <button type="button" class="dd-sub-trigger{gas_has_current}" aria-haspopup="menu" aria-expanded="{gas_expanded}">\n'
+        f'<div class="dd-sub-wrap">\n'
+        f'  <button type="button" class="dd-sub-trigger{gas_has_current}" aria-haspopup="menu" aria-expanded="false">\n'
         f'    <span class="chk"></span><span data-i18n="navCatGas">Natural Gas</span>'
         f'<svg class="dd-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>\n'
         f'  </button>\n'
@@ -2994,15 +2996,17 @@ def _menu_items_html(self_id: str) -> str:
         f'      {gas_items}\n'
         f'  </div>\n'
         f'</div>\n'
-        f'<div class="dd-sub-wrap{power_sub_open}">\n'
-        f'  <button type="button" class="dd-sub-trigger{power_has_current}" aria-haspopup="menu" aria-expanded="{power_expanded}">\n'
+        f'<div class="dd-sub-wrap">\n'
+        f'  <button type="button" class="dd-sub-trigger{power_has_current}" aria-haspopup="menu" aria-expanded="false">\n'
         f'    <span class="chk"></span><span data-i18n="navCatPower">Power</span>'
         f'<svg class="dd-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>\n'
         f'  </button>\n'
         f'  <div class="dd-sub-menu" role="menu" aria-label="Power">\n'
         f'      {power_items}\n'
         f'  </div>\n'
-        f'</div>'
+        f'</div>\n'
+        f'<div class="dd-divider" role="separator"></div>\n'
+        f'{desk_html}'
     )
 
 
