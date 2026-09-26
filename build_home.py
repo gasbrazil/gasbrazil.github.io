@@ -355,6 +355,19 @@ main.hub { flex: 1; width: var(--content-w); max-width: var(--content-max); marg
 .wordmark { font-size: 30px; font-weight: 600; letter-spacing: -.02em; line-height: 1.1; }
 .wordmark .dot { color: var(--accent); }
 .wordmark a { color: inherit; text-decoration: none; }
+/* Logo wordmark: 40px so the flame tittle renders at ~10px (the minimum the
+   brand guide allows); dashboards keep the 17px typeset mark. Flame geometry
+   matches the design-system cover: 0.1932em x 0.2484em, centred 0.15em into
+   the "i", base 0.605em above the baseline. */
+main.hub .brand-lockup, .hub-header .brand-lockup { font-size: 40px; }
+.wm-i { position: relative; display: inline-block; line-height: 1; }
+.wm-stem { display: inline-block; clip-path: inset(.31em -.2em -.3em -.2em); }
+.wm-fl { position: absolute; left: .15em; top: .0516em; width: .1932em; height: .2484em;
+  transform: translateX(-50%); pointer-events: none; }
+.wm-fl-d { display: none; }
+[data-theme="dark"] .wm-fl-l { display: none; }
+[data-theme="dark"] .wm-fl-d { display: block; }
+@media (max-width: 480px) { main.hub .brand-lockup, .hub-header .brand-lockup { font-size: 32px; } }
 .tagline { color: var(--text); font-weight: 600; font-size: 15px; margin: 10px 0 0;
   max-width: 36em; line-height: 1.45; }
 /* Full-width flagband — do not override shared .flagbar width. */
@@ -486,6 +499,21 @@ __SHARED_TYPO_WEIGHT_CSS__
 </style>
 </head>
 """
+
+
+def _hub_wordmark(href: str) -> str:
+    """Hub/About/404 wordmark: the approved logo, set in live type so it stays
+    sharp and themeable. Pacaembu's own "i" keeps its cupped stem (dot clipped
+    away) and the vector flame sits in the dot's place. The brand name is the
+    same in EN and PT, so the link carries an aria-label instead of
+    data-i18n (applyI18n would replace the markup with plain text)."""
+    return (
+        f'<div class="wordmark"><a href="{href}" id="link-home" aria-label="GasBrazil">'
+        'GasBraz<span class="wm-i" aria-hidden="true"><span class="wm-stem">i</span>'
+        '<img class="wm-fl wm-fl-l" src="/shared/brand/gasbrazil-flame.svg" alt="">'
+        '<img class="wm-fl wm-fl-d" src="/shared/brand/gasbrazil-flame-dark.svg" alt="">'
+        '</span>l</a></div>'
+    )
 
 
 def _hub_controls(wiki_href: str, about_href: str) -> str:
@@ -793,7 +821,7 @@ def write_home(out_path: Path | str = DEFAULT_OUT) -> Path:
         "__BRAND_MENU__",
         kit.products_dropdown_html(
             "home",
-            '<div class="wordmark"><a href="./" id="link-home" data-i18n="navHome">GasBrazil</a></div>',
+            _hub_wordmark("./"),
         ),
     )
 
@@ -818,7 +846,7 @@ def write_about(out_path: Path | None = None) -> Path:
         "__BRAND_MENU__",
         kit.products_dropdown_html(
             "home",
-            '<div class="wordmark"><a href="../" id="link-home" data-i18n="navHome">GasBrazil</a></div>',
+            _hub_wordmark("../"),
         ),
     )
     # About lives in /about/, so home-relative links in the footer need ../
@@ -844,7 +872,7 @@ def write_404(out_path: Path | None = None) -> Path:
         "__BRAND_MENU__",
         kit.products_dropdown_html(
             "home",
-            '<div class="wordmark"><a href="./" id="link-home" data-i18n="navHome">GasBrazil</a></div>',
+            _hub_wordmark("./"),
         ),
     )
     html = _kit_render(html)
