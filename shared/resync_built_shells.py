@@ -13,7 +13,7 @@ from pathlib import Path
 import dashboard_kit as kit
 
 ROOT = Path(__file__).resolve().parents[1]
-SITES = ("desk", "ons", "pld", "poc", "contratos", "flows", "supply", "precos", "mago", "nts", "monitor")
+SITES = ("desk", "ons", "pld", "poc", "contratos", "flows", "supply", "precos", "mago", "nts", "monitor", "home")
 THEME_START = "/*\n * GasBrazil.com shared design tokens"
 TYPO_MARKER = "/* Shared header/label"
 PAGE_CSS_MARKERS: dict[str, str] = {
@@ -310,6 +310,17 @@ def resync_chart_export_safe(html: str) -> str:
 
 
 def resync_site(site_id: str) -> None:
+    if site_id == "home":
+        import build_home
+
+        build_home.write_home()
+        build_home.write_about()
+        build_home.write_404()
+        build_home.write_admin()
+        build_home.write_sitemap_and_robots()
+        print("resynced home shells (index, about, 404, admin)")
+        return
+
     path = ROOT / site_id / "index.html"
     html = path.read_text(encoding="utf-8")
     html = resync_boot_js(html)

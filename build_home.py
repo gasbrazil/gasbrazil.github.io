@@ -106,6 +106,27 @@ def _sparkline_svg(values: list[float], *, width: int = 120, height: int = 28) -
     )
 
 
+
+def _extract_existing_sparkline(html: str, slug: str) -> str:
+    """Extract committed sparkline SVG from existing index.html for a given card slug."""
+    pattern = rf'<a class="kpi-cell"[^>]*data-slug="{slug}"[^>]*>[\s\S]*?(<svg class="kpi-spark"[^>]*>[\s\S]*?</svg>)'
+    m = re.search(pattern, html)
+    return m.group(1) if m else ""
+
+
+def _extract_existing_kpi(html: str, slug: str) -> tuple[str | None, str | None, str | None]:
+    """Extract committed KPI values and timestamp from existing index.html for a card slug."""
+    pattern = (
+        rf'<a class="kpi-cell"[^>]*data-slug="{slug}"[^>]*>[\s\S]*?'
+        r'<div class="kpi-val"[^>]*data-en="([^"]*)"[^>]*data-pt="([^"]*)"[^>]*>[\s\S]*?'
+        r'<div class="kpi-when"[^>]*data-refresh="([^"]*)"'
+    )
+    m = re.search(pattern, html)
+    if m:
+        return m.group(1), m.group(2), m.group(3)
+    return None, None, None
+
+
 def collect_status() -> dict:
     """Headline numbers for the hub cards. Missing stores degrade to None."""
     import data_kit as dk  # noqa: E402
@@ -254,6 +275,43 @@ def collect_status() -> dict:
                 status["monitor_spark"] = status["nts_spark"]
     except Exception:
         pass
+
+    # Fall back to committed index.html values when running offline or without R2 data access
+    if DEFAULT_OUT.exists():
+        existing_html = DEFAULT_OUT.read_text(encoding="utf-8")
+        if existing_html:
+            # Preserve public CDN TEASERS_URL if offline or R2 credentials not present
+            if not dk.r2_configured() or status.get("teasers_url") == "hub/teasers.json.gz":
+                m_url = re.search(r'const TEASERS_URL = "(https?://[^"]+)";', existing_html)
+                if m_url:
+                    status["teasers_url"] = m_url.group(1)
+
+            # Preserve sparklines
+            for spark_key, slug in [
+                ("poc_spark", "poc"),
+                ("supply_spark", "supply"),
+                ("pld_spark", "pld"),
+                ("nts_spark", "nts"),
+                ("monitor_spark", "monitor"),
+            ]:
+                if not status.get(spark_key):
+                    ext_spark = _extract_existing_sparkline(existing_html, slug)
+                    if ext_spark:
+                        status[spark_key] = ext_spark
+
+            # Preserve KPIs and refresh timestamps if missing
+            for slug in [
+                "ons", "poc", "contratos", "flows", "supply",
+                "pld", "precos", "desk", "mago", "nts", "monitor"
+            ]:
+                if not status.get(f"{slug}_kpi"):
+                    kpi_en, kpi_pt, when = _extract_existing_kpi(existing_html, slug)
+                    if kpi_en:
+                        status[f"{slug}_kpi"] = kpi_en
+                        status[f"{slug}_kpi_pt"] = kpi_pt or kpi_en
+                        if when and not status.get(f"{slug}_when"):
+                            status[f"{slug}_when"] = when
+
     return status
 
 
@@ -742,6 +800,10 @@ def write_home(out_path: Path | str = DEFAULT_OUT) -> Path:
             '<div class="wordmark"><a href="./" id="link-home" data-i18n="navHome">GasBrazil</a></div>',
         ),
     )
+    for spark_key in ["poc_spark", "supply_spark", "pld_spark", "nts_spark", "monitor_spark"]:
+        if not st.get(spark_key):
+            print(f"[build_home] Warning: {spark_key} is empty (no local parquet and none found in existing {out_path})", file=sys.stderr)
+
     html = _kit_render(html)
     out_path = Path(out_path)
     out_path.write_text(html, encoding="utf-8")
