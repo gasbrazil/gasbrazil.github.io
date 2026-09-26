@@ -1,0 +1,5 @@
+{
+  "hooks": {
+    "SessionStart": "uv sync --all-extras 2>/dev/null || pip install -q -e '.[dev]'"
+  }
+}
