@@ -19,9 +19,9 @@
 <link rel="preload" href="/shared/fonts/IBMPlexSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/shared/fonts/Pacaembu-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
 <!-- home-page teaser marker, read by ../build_home.py:
-     generated: 2026-09-25 23:04 UTC
-     kpi_se: 106.61
-     latest_date: 2026-09-25 -->
+     generated: 2026-09-26 03:44 UTC
+     kpi_se: 75.07
+     latest_date: 2026-09-26 -->
 <script>
 (function(){
   try {
@@ -2816,6 +2816,7 @@ html.gb-locked footer {
   border-radius: var(--radius-sm);
   color: var(--accent);
 }
+
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; font-weight: 300; }
@@ -3223,7 +3224,7 @@ main h3,
 </div>
 <div class="tt" id="chart-tt"></div>
 <script>
-const PAYLOAD_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/pld/payload.json.gz?v=36199471762";
+const PAYLOAD_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/pld/payload.json.gz?v=36215693013";
 
 
 function b64ToBytes(b64) {
@@ -4413,9 +4414,6 @@ function initThemeToggle(buttonId, onChange) {
 if (document.getElementById("theme-toggle")) initThemeToggle("theme-toggle");
 
 
-function escapeHtml(s) {
-  return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-}
 function escapeHtml(s) {
   return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
