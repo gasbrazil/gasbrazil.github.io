@@ -13,6 +13,9 @@ from pathlib import Path
 import dashboard_kit as kit
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 SITES = ("desk", "ons", "pld", "poc", "contratos", "flows", "supply", "precos", "mago", "nts", "monitor", "home")
 THEME_START = "/*\n * GasBrazil.com shared design tokens"
 TYPO_MARKER = "/* Shared header/label"
@@ -152,8 +155,11 @@ def resync_decode_js(html: str) -> str:
 
 def resync_escape_html(html: str) -> str:
     """Remove obsolete standalone JS_ESCAPE_HTML definitions; escapeHtml is provided once by JS_I18N."""
-    pattern = r'[ \t]*function escapeHtml\(s\) \{\s*return String\(s\)\.replace\(/\[&<>"\'\]/g,[\s\S]*?\}\s*'
-    return re.sub(pattern, "", html)
+    pattern_full = r'[ \t]*function escapeHtml\(s\) \{\s*return String\(s\)\.replace\(/\[&<>"\'\]/g,[\s\S]*?\r?\n[ \t]*\}\r?\n?'
+    html = re.sub(pattern_full, "", html)
+    pattern_remnant = r'^[ \t]*\[c\]\)\);\r?\n[ \t]*\}\r?\n?'
+    html = re.sub(pattern_remnant, "", html, flags=re.MULTILINE)
+    return html
 
 
 def resync_i18n_js(html: str) -> str:
@@ -316,8 +322,8 @@ def resync_site(site_id: str) -> None:
         build_home.write_home()
         build_home.write_about()
         build_home.write_404()
-        build_home.write_admin()
-        build_home.write_sitemap_and_robots()
+        build_home.write_admin_page()
+        build_home.write_robots_and_sitemap()
         print("resynced home shells (index, about, 404, admin)")
         return
 

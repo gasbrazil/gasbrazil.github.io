@@ -70,7 +70,10 @@ def test_build_home_preserves_committed_hub_data_when_offline(tmp_path, monkeypa
         encoding="utf-8",
     )
 
+    import publish_teasers as pt
+
     monkeypatch.setattr(build_home, "ROOT", tmp_path)
+    monkeypatch.setattr(pt, "ROOT", tmp_path)
     monkeypatch.setattr(build_home, "DEFAULT_OUT", fake_index)
     monkeypatch.setattr(dk, "r2_configured", lambda: False)
 
