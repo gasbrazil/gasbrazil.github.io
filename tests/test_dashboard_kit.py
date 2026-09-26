@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import html
+import re
 from pathlib import Path
 
 import dashboard_kit as kit
@@ -661,12 +662,14 @@ def test_resync_i18n_js_idempotent_and_single_escape_html():
     step1 = resync_escape_html(content)
     step1 = resync_i18n_js(step1)
     assert step1.count("function escapeHtml") == 1
+    assert not re.search(r"^[ \t]*\[c\]\)\);", step1, re.MULTILINE)
 
     # Run second time
     step2 = resync_escape_html(step1)
     step2 = resync_i18n_js(step2)
     assert step2 == step1
     assert step2.count("function escapeHtml") == 1
+    assert not re.search(r"^[ \t]*\[c\]\)\);", step2, re.MULTILINE)
 
 
 def test_resync_i18n_js_deduplicates_multiple_copies():
@@ -692,3 +695,11 @@ def test_resync_i18n_js_deduplicates_multiple_copies():
     resynced2 = resync_i18n_js(resynced)
     assert resynced2 == resynced
     assert resynced2.count("function escapeHtml") == 1
+
+
+def test_shells_have_no_broken_escape_html_remnants():
+    """Ensure no committed dashboard shell contains orphan [c])); syntax error fragments."""
+    root = Path(__file__).resolve().parents[1]
+    for html_file in root.glob("*/index.html"):
+        content = html_file.read_text(encoding="utf-8")
+        assert not re.search(r"^[ \t]*\[c\]\)\);", content, re.MULTILINE), f"Broken escapeHtml fragment found in {html_file}"
