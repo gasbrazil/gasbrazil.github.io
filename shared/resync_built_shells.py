@@ -113,7 +113,7 @@ def resync_brand_head(html: str, *, social: bool = True) -> str:
 
 
 def resync_products_dropdown_js(html: str) -> str:
-    pattern = r'<script>\s*\(function \(\) \{\s*var OPEN_MS = [\s\S]*?\}\)\(\);\s*</script>'
+    pattern = r'<script>\s*\(function \(\) \{\s*(?:var OPEN_MS =|function menuLinks)[\s\S]*?syncCrossLinks\(\);\s*\}\)\(\);\s*</script>'
     replacement = kit._PRODUCTS_DROPDOWN_JS.strip()
     return re.sub(pattern, lambda _: replacement, html, count=1)
 

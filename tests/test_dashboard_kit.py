@@ -559,13 +559,18 @@ def test_sub_menu_structure_and_categories():
     cat_ids = [c["id"] for c in kit.NAV_CATEGORIES]
     assert "gas" in cat_ids
     assert "power" in cat_ids
+    assert "trading" in cat_ids
 
     menu = kit.products_dropdown_html("desk", '<div class="wordmark">GasBrazil</div>')
-    assert "dd-sub-wrap" in menu
-    assert "dd-sub-trigger" in menu
-    assert "dd-sub-menu" in menu
+    assert "dd-grid" in menu
+    assert "dd-col" in menu
+    assert "dd-col-hdr" in menu
     assert 'data-i18n="navCatGas"' in menu
     assert 'data-i18n="navCatPower"' in menu
+    assert 'data-i18n="navCatTrading"' in menu
+    assert "dd-sub-menu" not in menu
+    assert "dd-sub-wrap" not in menu
+    assert "dd-sub-trigger" not in menu
 
     # Clean items without emojis or bloated descriptions
     assert "🔥" not in menu
