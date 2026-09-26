@@ -660,6 +660,7 @@ main.hub .brand-mark-dot,
 }
 .masthead-ident {
   display: flex; align-items: center; gap: 10px;
+  flex: 1 1 auto;
   min-width: 0;
 }
 .masthead-brand {
@@ -687,6 +688,8 @@ main.hub .brand-mark-dot,
   font-family: var(--font-display);
   font-size: 14px; margin: 0; letter-spacing: -.01em; font-weight: 600;
   color: var(--muted2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  min-width: 0;
+  flex-shrink: 1;
 }
 .dd-menu {
   /* Kept in-flow for opacity fade (display:none can't animate). Closed
@@ -861,6 +864,17 @@ main.hub .brand-mark-dot,
 
 /* Mobile: accordion downward instead of flyout */
 @media (max-width: 640px) {
+  .dd-menu {
+    max-width: calc(100vw - 24px);
+    width: max-content;
+  }
+  .dd-menu a,
+  .dd-menu .is-current,
+  .dd-sub-trigger {
+    padding: 8px 10px;
+    font-size: 14px;
+    min-height: 38px;
+  }
   .dd-sub-menu {
     position: static;
     border: none;
@@ -1419,8 +1433,65 @@ header.top #theme-toggle,
 }
 @media (max-width: 640px) {
   /* Keep the wordmark menu; Wiki/About remain in the footer. */
-  header.dash-head .nav-trail > .navlink,
-  .hub-controls .nav-trail > .navlink { display: none; }
+  .nav-trail > .navlink { display: none; }
+  .nav-trail {
+    gap: 6px;
+  }
+  .gb-search-btn span,
+  .gb-search-btn kbd,
+  .auth-lock-btn span {
+    display: none;
+  }
+  .gb-search-btn,
+  .auth-lock-btn {
+    min-width: 34px;
+    min-height: 34px;
+    padding: 6px;
+    justify-content: center;
+  }
+  .gb-search-btn svg,
+  .auth-lock-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* Mobile menu affordance on brand lockup */
+  .brand-lockup {
+    align-items: center;
+  }
+  .brand-mark.dd-trigger {
+    min-width: 36px;
+    min-height: 36px;
+    padding: 0 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: -6px 0 -6px -2px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .brand-mark .dd-caret {
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    border-right: 1.5px solid var(--muted2);
+    border-bottom: 1.5px solid var(--muted2);
+    transform: rotate(45deg);
+    margin-left: 4px;
+    vertical-align: 1px;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+  }
+  .brand-mark.dd-trigger[aria-expanded="true"] .dd-caret {
+    transform: rotate(-135deg);
+    vertical-align: -2px;
+    border-color: var(--accent);
+  }
+  .brand-mark.dd-trigger:active .brand-mark-dot {
+    transform: scale(1.3);
+  }
+  [data-theme="dark"] .brand-mark.dd-trigger[aria-expanded="true"] .dd-caret {
+    border-color: var(--brz-yellow);
+  }
 }
 
 /* Keyboard focus visibility site-wide. Buttons, links, chips, and controls
@@ -2815,7 +2886,6 @@ html.gb-locked footer {
   border-radius: var(--radius-sm);
   color: var(--accent);
 }
-
 /* Everything below is ons-dashboard's own layout/components. The palette
    (neutral tokens + the shared Brazilian-flag accent) now lives entirely in
    shared/theme.css -- see ADR-001, Decision 2 Option C -- this file only
@@ -3108,7 +3178,18 @@ main h3,
     if (!menu || !btn) return;
     menu.classList.toggle("is-open", !!open);
     btn.setAttribute("aria-expanded", open ? "true" : "false");
-    if (!open) {
+    if (open) {
+      if (window.innerWidth <= 640) {
+        var trig = menu.querySelector(".dd-sub-trigger.has-current");
+        if (trig) {
+          var wrap = trig.closest(".dd-sub-wrap");
+          if (wrap) {
+            wrap.classList.add("is-open");
+            trig.setAttribute("aria-expanded", "true");
+          }
+        }
+      }
+    } else {
       dd.querySelectorAll(".dd-sub-wrap.is-open").forEach(function (w) {
         w.classList.remove("is-open");
         var trig = w.querySelector(".dd-sub-trigger");
@@ -3145,8 +3226,14 @@ main h3,
   function bind(dd) {
     if (dd.getAttribute("data-dd-bound") === "1") return;
     dd.setAttribute("data-dd-bound", "1");
-    dd.addEventListener("mouseenter", function () { scheduleOpen(dd); });
-    dd.addEventListener("mouseleave", function () { scheduleClose(dd); });
+    dd.addEventListener("mouseenter", function () {
+      if (window.matchMedia && !window.matchMedia("(hover: hover)").matches) return;
+      scheduleOpen(dd);
+    });
+    dd.addEventListener("mouseleave", function () {
+      if (window.matchMedia && !window.matchMedia("(hover: hover)").matches) return;
+      scheduleClose(dd);
+    });
   }
   function bindAll() {
     document.querySelectorAll(".products-dd").forEach(bind);

@@ -669,6 +669,7 @@ main.hub .brand-mark-dot,
 }
 .masthead-ident {
   display: flex; align-items: center; gap: 10px;
+  flex: 1 1 auto;
   min-width: 0;
 }
 .masthead-brand {
@@ -696,6 +697,8 @@ main.hub .brand-mark-dot,
   font-family: var(--font-display);
   font-size: 14px; margin: 0; letter-spacing: -.01em; font-weight: 600;
   color: var(--muted2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  min-width: 0;
+  flex-shrink: 1;
 }
 .dd-menu {
   /* Kept in-flow for opacity fade (display:none can't animate). Closed
@@ -870,6 +873,17 @@ main.hub .brand-mark-dot,
 
 /* Mobile: accordion downward instead of flyout */
 @media (max-width: 640px) {
+  .dd-menu {
+    max-width: calc(100vw - 24px);
+    width: max-content;
+  }
+  .dd-menu a,
+  .dd-menu .is-current,
+  .dd-sub-trigger {
+    padding: 8px 10px;
+    font-size: 14px;
+    min-height: 38px;
+  }
   .dd-sub-menu {
     position: static;
     border: none;
@@ -1428,8 +1442,65 @@ header.top #theme-toggle,
 }
 @media (max-width: 640px) {
   /* Keep the wordmark menu; Wiki/About remain in the footer. */
-  header.dash-head .nav-trail > .navlink,
-  .hub-controls .nav-trail > .navlink { display: none; }
+  .nav-trail > .navlink { display: none; }
+  .nav-trail {
+    gap: 6px;
+  }
+  .gb-search-btn span,
+  .gb-search-btn kbd,
+  .auth-lock-btn span {
+    display: none;
+  }
+  .gb-search-btn,
+  .auth-lock-btn {
+    min-width: 34px;
+    min-height: 34px;
+    padding: 6px;
+    justify-content: center;
+  }
+  .gb-search-btn svg,
+  .auth-lock-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* Mobile menu affordance on brand lockup */
+  .brand-lockup {
+    align-items: center;
+  }
+  .brand-mark.dd-trigger {
+    min-width: 36px;
+    min-height: 36px;
+    padding: 0 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: -6px 0 -6px -2px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .brand-mark .dd-caret {
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    border-right: 1.5px solid var(--muted2);
+    border-bottom: 1.5px solid var(--muted2);
+    transform: rotate(45deg);
+    margin-left: 4px;
+    vertical-align: 1px;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+  }
+  .brand-mark.dd-trigger[aria-expanded="true"] .dd-caret {
+    transform: rotate(-135deg);
+    vertical-align: -2px;
+    border-color: var(--accent);
+  }
+  .brand-mark.dd-trigger:active .brand-mark-dot {
+    transform: scale(1.3);
+  }
+  [data-theme="dark"] .brand-mark.dd-trigger[aria-expanded="true"] .dd-caret {
+    border-color: var(--brz-yellow);
+  }
 }
 
 /* Keyboard focus visibility site-wide. Buttons, links, chips, and controls
@@ -3091,19 +3162,19 @@ main h3,
       <div class="kpi-label" data-i18n="cardDesk">The Desk</div>
       <div class="kpi-role">Cross-product snapshot</div>
       <div class="kpi-val" data-en="4375 MWmed gas · PLD SE 75.07" data-pt="4375 MWmed a gás · PLD SE 75.07">4375 MWmed gas · PLD SE 75.07</div>
-      <div class="kpi-when" data-refresh="2026-09-26 08:09 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-26 14:16 UTC"></div>
     </a>
     <a class="kpi-cell" href="ons/" data-slug="ons">
       <div class="kpi-label" data-i18n="cardOns">ONS Balances</div>
       <div class="kpi-role">Grid &amp; gas dispatch</div>
       <div class="kpi-val" data-en="4,375 MWmed gas" data-pt="4,375 MWmed a gás">4,375 MWmed gas</div>
-      <div class="kpi-when" data-refresh="2026-09-26 08:10 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-26 14:16 UTC"></div>
     </a>
     <a class="kpi-cell" href="pld/" data-slug="pld">
       <div class="kpi-label" data-i18n="cardPld">PLD Prices</div>
       <div class="kpi-role">Power settlement</div>
       <div class="kpi-val" data-en="SE 75.07 R$/MWh · 2026-09-26" data-pt="SE 75.07 R$/MWh · 2026-09-26">SE 75.07 R$/MWh · 2026-09-26</div>
-      <div class="kpi-when" data-refresh="2026-09-26 08:10 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-26 14:16 UTC"></div>
       <svg class="kpi-spark" viewBox="0 0 120 28" width="120" height="28" aria-hidden="true"><polyline points="2.0,26.0 5.0,25.3 7.9,25.2 10.9,24.6 13.9,24.3 16.9,22.6 19.8,21.7 22.8,21.5 25.8,21.0 28.8,20.5 31.7,20.1 34.7,19.7 37.7,19.1 40.7,18.5 43.6,17.6 46.6,17.2 49.6,16.3 52.6,15.7 55.5,15.2 58.5,14.8 61.5,13.2 64.5,12.9 67.4,12.5 70.4,11.3 73.4,10.2 76.4,9.6 79.3,8.7 82.3,8.0 85.3,10.2 88.3,9.3 91.2,8.2 94.2,7.4 97.2,6.5 100.2,5.7 103.1,5.3 106.1,4.5 109.1,3.9 112.1,3.4 115.0,2.7 118.0,2.0"/></svg>
     </a>
     <a class="kpi-cell" href="poc/" data-slug="poc">
@@ -3117,7 +3188,7 @@ main h3,
       <div class="kpi-label" data-i18n="cardContratos">POC Contracts</div>
       <div class="kpi-role">Firm transport</div>
       <div class="kpi-val" data-en="887 contracts · 181469.7 thousand m³/d" data-pt="887 contratos · 181469.7 mil m³/d">887 contracts · 181469.7 thousand m³/d</div>
-      <div class="kpi-when" data-refresh="2026-09-26 08:10 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-26 14:16 UTC"></div>
     </a>
     <a class="kpi-cell" href="flows/" data-slug="flows">
       <div class="kpi-label" data-i18n="cardFlows">Pipeline Flows</div>
@@ -3130,7 +3201,7 @@ main h3,
       <div class="kpi-role" data-i18n="cardMonitorDesc">Operational line pack &amp; SCADA telemetry.</div>
       <div class="kpi-val" data-en="TAG 69.72 Mm³ · NTS 43.72 Mm³" data-pt="TAG 69.72 Mm³ · NTS 43.72 Mm³">TAG 69.72 Mm³ · NTS 43.72 Mm³</div>
       <div class="kpi-when" data-refresh="2026-09-26 14:16 UTC"></div>
-      <svg class="kpi-spark" viewBox="0 0 120 28" width="120" height="28" aria-hidden="true"><polyline points="2.0,2.0 5.0,2.3 7.9,2.6 10.9,3.9 13.9,4.1 16.9,4.5 19.8,5.2 22.8,5.7 25.8,5.8 28.8,6.2 31.7,6.8 34.7,7.6 37.7,7.3 40.7,7.4 43.6,8.3 46.6,9.0 49.6,10.2 52.6,10.8 55.5,11.6 58.5,11.6 61.5,12.6 64.5,13.2 67.4,14.1 70.4,15.4 73.4,16.8 76.4,17.3 79.3,17.9 82.3,18.6 85.3,18.8 88.3,19.9 91.2,19.9 94.2,21.1 97.2,21.9 100.2,22.5 103.1,23.2 106.1,23.2 109.1,23.9 112.1,24.8 115.0,25.8 118.0,26.0"/></svg>
+      <svg class="kpi-spark" viewBox="0 0 120 28" width="120" height="28" aria-hidden="true"><polyline points="2.0,2.0 5.0,2.1 7.9,3.1 10.9,3.5 13.9,4.6 16.9,5.5 19.8,6.0 22.8,5.9 25.8,7.2 28.8,8.1 31.7,8.6 34.7,10.0 37.7,10.6 40.7,11.6 43.6,12.2 46.6,12.6 49.6,12.8 52.6,13.6 55.5,14.1 58.5,15.3 61.5,16.0 64.5,16.6 67.4,16.6 70.4,17.2 73.4,18.1 76.4,18.8 79.3,19.6 82.3,20.1 85.3,20.8 88.3,21.5 91.2,21.7 94.2,22.8 97.2,23.2 100.2,23.6 103.1,24.7 106.1,25.1 109.1,25.3 112.1,25.7 115.0,25.7 118.0,26.0"/></svg>
     </a>
     <a class="kpi-cell" href="supply/" data-slug="supply">
       <div class="kpi-label" data-i18n="cardSupply">Gas Supply</div>
@@ -4852,7 +4923,18 @@ initLangToggle("lang-toggle");
     if (!menu || !btn) return;
     menu.classList.toggle("is-open", !!open);
     btn.setAttribute("aria-expanded", open ? "true" : "false");
-    if (!open) {
+    if (open) {
+      if (window.innerWidth <= 640) {
+        var trig = menu.querySelector(".dd-sub-trigger.has-current");
+        if (trig) {
+          var wrap = trig.closest(".dd-sub-wrap");
+          if (wrap) {
+            wrap.classList.add("is-open");
+            trig.setAttribute("aria-expanded", "true");
+          }
+        }
+      }
+    } else {
       dd.querySelectorAll(".dd-sub-wrap.is-open").forEach(function (w) {
         w.classList.remove("is-open");
         var trig = w.querySelector(".dd-sub-trigger");
@@ -4889,8 +4971,14 @@ initLangToggle("lang-toggle");
   function bind(dd) {
     if (dd.getAttribute("data-dd-bound") === "1") return;
     dd.setAttribute("data-dd-bound", "1");
-    dd.addEventListener("mouseenter", function () { scheduleOpen(dd); });
-    dd.addEventListener("mouseleave", function () { scheduleClose(dd); });
+    dd.addEventListener("mouseenter", function () {
+      if (window.matchMedia && !window.matchMedia("(hover: hover)").matches) return;
+      scheduleOpen(dd);
+    });
+    dd.addEventListener("mouseleave", function () {
+      if (window.matchMedia && !window.matchMedia("(hover: hover)").matches) return;
+      scheduleClose(dd);
+    });
   }
   function bindAll() {
     document.querySelectorAll(".products-dd").forEach(bind);

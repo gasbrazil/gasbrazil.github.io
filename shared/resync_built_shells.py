@@ -15,7 +15,6 @@ import dashboard_kit as kit
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
-
 SITES = ("desk", "ons", "pld", "poc", "contratos", "flows", "supply", "precos", "mago", "nts", "monitor", "home")
 THEME_START = "/*\n * GasBrazil.com shared design tokens"
 TYPO_MARKER = "/* Shared header/label"
@@ -114,7 +113,7 @@ def resync_brand_head(html: str, *, social: bool = True) -> str:
 
 
 def resync_products_dropdown_js(html: str) -> str:
-    pattern = r'<script>\s*\(function \(\) \{\s*var OPEN_MS = [\s\S]*?syncCrossLinks\(\);\s*\}\)\(\);\s*</script>'
+    pattern = r'<script>\s*\(function \(\) \{\s*var OPEN_MS = [\s\S]*?\}\)\(\);\s*</script>'
     replacement = kit._PRODUCTS_DROPDOWN_JS.strip()
     return re.sub(pattern, lambda _: replacement, html, count=1)
 

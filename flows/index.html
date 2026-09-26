@@ -661,6 +661,7 @@ main.hub .brand-mark-dot,
 }
 .masthead-ident {
   display: flex; align-items: center; gap: 10px;
+  flex: 1 1 auto;
   min-width: 0;
 }
 .masthead-brand {
@@ -688,6 +689,8 @@ main.hub .brand-mark-dot,
   font-family: var(--font-display);
   font-size: 14px; margin: 0; letter-spacing: -.01em; font-weight: 600;
   color: var(--muted2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  min-width: 0;
+  flex-shrink: 1;
 }
 .dd-menu {
   /* Kept in-flow for opacity fade (display:none can't animate). Closed
@@ -862,6 +865,17 @@ main.hub .brand-mark-dot,
 
 /* Mobile: accordion downward instead of flyout */
 @media (max-width: 640px) {
+  .dd-menu {
+    max-width: calc(100vw - 24px);
+    width: max-content;
+  }
+  .dd-menu a,
+  .dd-menu .is-current,
+  .dd-sub-trigger {
+    padding: 8px 10px;
+    font-size: 14px;
+    min-height: 38px;
+  }
   .dd-sub-menu {
     position: static;
     border: none;
@@ -1420,8 +1434,65 @@ header.top #theme-toggle,
 }
 @media (max-width: 640px) {
   /* Keep the wordmark menu; Wiki/About remain in the footer. */
-  header.dash-head .nav-trail > .navlink,
-  .hub-controls .nav-trail > .navlink { display: none; }
+  .nav-trail > .navlink { display: none; }
+  .nav-trail {
+    gap: 6px;
+  }
+  .gb-search-btn span,
+  .gb-search-btn kbd,
+  .auth-lock-btn span {
+    display: none;
+  }
+  .gb-search-btn,
+  .auth-lock-btn {
+    min-width: 34px;
+    min-height: 34px;
+    padding: 6px;
+    justify-content: center;
+  }
+  .gb-search-btn svg,
+  .auth-lock-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* Mobile menu affordance on brand lockup */
+  .brand-lockup {
+    align-items: center;
+  }
+  .brand-mark.dd-trigger {
+    min-width: 36px;
+    min-height: 36px;
+    padding: 0 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: -6px 0 -6px -2px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .brand-mark .dd-caret {
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    border-right: 1.5px solid var(--muted2);
+    border-bottom: 1.5px solid var(--muted2);
+    transform: rotate(45deg);
+    margin-left: 4px;
+    vertical-align: 1px;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+  }
+  .brand-mark.dd-trigger[aria-expanded="true"] .dd-caret {
+    transform: rotate(-135deg);
+    vertical-align: -2px;
+    border-color: var(--accent);
+  }
+  .brand-mark.dd-trigger:active .brand-mark-dot {
+    transform: scale(1.3);
+  }
+  [data-theme="dark"] .brand-mark.dd-trigger[aria-expanded="true"] .dd-caret {
+    border-color: var(--brz-yellow);
+  }
 }
 
 /* Keyboard focus visibility site-wide. Buttons, links, chips, and controls
@@ -3042,13 +3113,13 @@ main h3,
       <div class="nav-trail"><a class="navlink" href="../wiki/" data-i18n="navWiki">Wiki</a><a class="navlink" href="../about/" data-i18n="navAbout">About</a><button type="button" class="gb-search-btn" id="gb-search-trigger" aria-label="Search (Ctrl+K)" title="Search (Ctrl+K)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><span data-i18n="searchBtn">Search</span> <kbd>Ctrl+K</kbd></button><button type="button" class="auth-lock-btn" id="gb-auth-lock" aria-label="Lock site" title="Lock site" data-i18n-title="authLockBtn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span data-i18n="authLockBtn">Lock</span></button></div>
       <script>
 (function () {
-  var OPEN_MS = 120;
-  var CLOSE_MS = 220;
+  var OPEN_MS = 160;
+  var CLOSE_MS = 250;
   var openTimer = null;
   var closeTimer = null;
 
   function menuLinks(dd) {
-    return Array.prototype.slice.call(dd.querySelectorAll(".dd-menu a"));
+    return Array.prototype.slice.call(dd.querySelectorAll(".dd-menu [role='menuitem'], .dd-sub-trigger"));
   }
   function setOpen(dd, open) {
     if (!dd) return;
@@ -3057,6 +3128,24 @@ main h3,
     if (!menu || !btn) return;
     menu.classList.toggle("is-open", !!open);
     btn.setAttribute("aria-expanded", open ? "true" : "false");
+    if (open) {
+      if (window.innerWidth <= 640) {
+        var trig = menu.querySelector(".dd-sub-trigger.has-current");
+        if (trig) {
+          var wrap = trig.closest(".dd-sub-wrap");
+          if (wrap) {
+            wrap.classList.add("is-open");
+            trig.setAttribute("aria-expanded", "true");
+          }
+        }
+      }
+    } else {
+      dd.querySelectorAll(".dd-sub-wrap.is-open").forEach(function (w) {
+        w.classList.remove("is-open");
+        var trig = w.querySelector(".dd-sub-trigger");
+        if (trig) trig.setAttribute("aria-expanded", "false");
+      });
+    }
   }
   function closeAll(except) {
     document.querySelectorAll(".products-dd").forEach(function (dd) {
@@ -3079,7 +3168,7 @@ main h3,
     }, CLOSE_MS);
   }
   function focusLink(dd, idx) {
-    var items = menuLinks(dd);
+    var items = menuLinks(dd).filter(function (el) { return el.offsetParent !== null; });
     if (!items.length) return;
     var i = ((idx % items.length) + items.length) % items.length;
     items[i].focus();
@@ -3087,8 +3176,14 @@ main h3,
   function bind(dd) {
     if (dd.getAttribute("data-dd-bound") === "1") return;
     dd.setAttribute("data-dd-bound", "1");
-    dd.addEventListener("mouseenter", function () { scheduleOpen(dd); });
-    dd.addEventListener("mouseleave", function () { scheduleClose(dd); });
+    dd.addEventListener("mouseenter", function () {
+      if (window.matchMedia && !window.matchMedia("(hover: hover)").matches) return;
+      scheduleOpen(dd);
+    });
+    dd.addEventListener("mouseleave", function () {
+      if (window.matchMedia && !window.matchMedia("(hover: hover)").matches) return;
+      scheduleClose(dd);
+    });
   }
   function bindAll() {
     document.querySelectorAll(".products-dd").forEach(bind);
@@ -3097,6 +3192,17 @@ main h3,
   else bindAll();
 
   document.addEventListener("click", function (e) {
+    var subTrigger = e.target.closest(".dd-sub-trigger");
+    if (subTrigger) {
+      e.preventDefault();
+      var wrap = subTrigger.closest(".dd-sub-wrap");
+      if (wrap) {
+        var isOpen = wrap.classList.contains("is-open");
+        wrap.classList.toggle("is-open", !isOpen);
+        subTrigger.setAttribute("aria-expanded", !isOpen ? "true" : "false");
+      }
+      return;
+    }
     var trigger = e.target.closest(".dd-trigger");
     if (trigger) {
       var dd = trigger.closest(".products-dd");
@@ -3112,6 +3218,7 @@ main h3,
     }
     if (!e.target.closest(".products-dd")) closeAll(null);
   });
+
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") {
       var openDd = document.querySelector(".products-dd .dd-menu.is-open");
@@ -3128,7 +3235,39 @@ main h3,
     var dd = (inTrigger && inTrigger.closest(".products-dd")) ||
              (inMenu && e.target.closest(".products-dd"));
     if (!dd) return;
-    var items = menuLinks(dd);
+
+    if (e.key === "ArrowRight") {
+      var activeSubTrigger = document.activeElement && document.activeElement.closest(".dd-sub-trigger");
+      if (activeSubTrigger) {
+        e.preventDefault();
+        var wrap = activeSubTrigger.closest(".dd-sub-wrap");
+        if (wrap) {
+          wrap.classList.add("is-open");
+          activeSubTrigger.setAttribute("aria-expanded", "true");
+          var firstSub = wrap.querySelector(".dd-sub-menu [role='menuitem']");
+          if (firstSub) firstSub.focus();
+        }
+        return;
+      }
+    }
+    if (e.key === "ArrowLeft") {
+      var inSub = document.activeElement && document.activeElement.closest(".dd-sub-menu");
+      if (inSub) {
+        e.preventDefault();
+        var wrap = inSub.closest(".dd-sub-wrap");
+        if (wrap) {
+          wrap.classList.remove("is-open");
+          var trig = wrap.querySelector(".dd-sub-trigger");
+          if (trig) {
+            trig.setAttribute("aria-expanded", "false");
+            trig.focus();
+          }
+        }
+        return;
+      }
+    }
+
+    var items = menuLinks(dd).filter(function (el) { return el.offsetParent !== null; });
     if (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Home" || e.key === "End") {
       e.preventDefault();
       setOpen(dd, true);
@@ -3139,6 +3278,31 @@ main h3,
       else focusLink(dd, idx < 0 ? items.length - 1 : idx - 1);
     }
   });
+
+  function syncCrossLinks() {
+    var h = window.location.hostname;
+    if (h === "gasbrazil.github.io") {
+      document.querySelectorAll("a[href*='gasbrazil.com']").forEach(function (a) {
+        if (a.hostname === "gasbrazil.com") {
+          a.href = a.href.replace("https://gasbrazil.com", "https://gasbrazil.github.io")
+                         .replace("http://gasbrazil.com", "https://gasbrazil.github.io");
+        }
+      });
+      var homeLink = document.getElementById("link-home");
+      if (homeLink && (homeLink.getAttribute("href") === "/" || homeLink.href.indexOf("gasbrazil.com") >= 0)) {
+        homeLink.href = "https://gasbrazil.github.io/";
+      }
+    } else if (h === "caissonpoint.github.io" && typeof SITE_LINKS !== "undefined") {
+      var homeLink = document.getElementById("link-home");
+      if (homeLink) homeLink.href = "https://caissonpoint.github.io/gasbrazil-com/";
+      Object.keys(SITE_LINKS).forEach(function (k) {
+        var el = document.getElementById("link-" + k);
+        if (el && SITE_LINKS[k] && SITE_LINKS[k].caissonpoint) el.href = SITE_LINKS[k].caissonpoint;
+      });
+    }
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", syncCrossLinks);
+  else syncCrossLinks();
 })();
 </script>
     </div>
@@ -3564,8 +3728,6 @@ function initCrossLinks() {
   { const el = document.getElementById("link-precos"); if (el) el.href = SITE_LINKS.precos[flavor]; }
   { const el = document.getElementById("link-monitor"); if (el) el.href = SITE_LINKS.monitor[flavor]; }
 }
-
-
 
 
 function gbQueryParams() {
