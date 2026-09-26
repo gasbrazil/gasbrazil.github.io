@@ -559,14 +559,12 @@ HOME_TEMPLATE = """__HEAD__
       <div class="kpi-role">Power settlement</div>
       <div class="kpi-val" data-en="__PLD_KPI__" data-pt="__PLD_KPI_PT__">__PLD_KPI__</div>
       <div class="kpi-when" data-refresh="__PLD_WHEN__"></div>
-      __PLD_SPARK__
     </a>
     <a class="kpi-cell" href="poc/" data-slug="poc">
       <div class="kpi-label" data-i18n="cardPoc">POC Results</div>
       <div class="kpi-role">Capacity auctions</div>
       <div class="kpi-val" data-en="__POC_KPI__" data-pt="__POC_KPI_PT__">__POC_KPI__</div>
       <div class="kpi-when" data-refresh="__POC_WHEN__"></div>
-      __POC_SPARK__
     </a>
     <a class="kpi-cell" href="contratos/" data-slug="contratos">
       <div class="kpi-label" data-i18n="cardContratos">POC Contracts</div>
@@ -585,14 +583,12 @@ HOME_TEMPLATE = """__HEAD__
       <div class="kpi-role" data-i18n="cardMonitorDesc">Operational line pack &amp; SCADA telemetry.</div>
       <div class="kpi-val" data-en="__MONITOR_KPI__" data-pt="__MONITOR_KPI_PT__">__MONITOR_KPI__</div>
       <div class="kpi-when" data-refresh="__MONITOR_WHEN__"></div>
-      __MONITOR_SPARK__
     </a>
     <a class="kpi-cell" href="supply/" data-slug="supply">
       <div class="kpi-label" data-i18n="cardSupply">Gas Supply</div>
       <div class="kpi-role">National balance</div>
       <div class="kpi-val" data-en="__SUPPLY_KPI__" data-pt="__SUPPLY_KPI_PT__">__SUPPLY_KPI__</div>
       <div class="kpi-when" data-refresh="__SUPPLY_WHEN__"></div>
-      __SUPPLY_SPARK__
     </a>
     <a class="kpi-cell" href="precos/" data-slug="precos">
       <div class="kpi-label" data-i18n="cardPrecos">ANP Prices</div>
@@ -800,9 +796,6 @@ def write_home(out_path: Path | str = DEFAULT_OUT) -> Path:
             '<div class="wordmark"><a href="./" id="link-home" data-i18n="navHome">GasBrazil</a></div>',
         ),
     )
-    for spark_key in ["poc_spark", "supply_spark", "pld_spark", "nts_spark", "monitor_spark"]:
-        if not st.get(spark_key):
-            print(f"[build_home] Warning: {spark_key} is empty (no local parquet and none found in existing {out_path})", file=sys.stderr)
 
     html = _kit_render(html)
     out_path = Path(out_path)
