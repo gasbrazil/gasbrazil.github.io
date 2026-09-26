@@ -21,7 +21,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: home-refresh
+  group: site-publish
   cancel-in-progress: false
 
 jobs:

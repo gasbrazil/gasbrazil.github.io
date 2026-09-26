@@ -13,7 +13,7 @@ from pathlib import Path
 import dashboard_kit as kit
 
 ROOT = Path(__file__).resolve().parents[1]
-SITES = ("desk", "ons", "pld", "poc", "contratos", "flows", "supply", "precos", "mago", "nts", "monitor")
+SITES = ("desk", "ons", "pld", "poc", "contratos", "flows", "supply", "precos", "mago", "nts", "monitor", "home")
 THEME_START = "/*\n * GasBrazil.com shared design tokens"
 TYPO_MARKER = "/* Shared header/label"
 PAGE_CSS_MARKERS: dict[str, str] = {
@@ -150,11 +150,18 @@ def resync_decode_js(html: str) -> str:
     return re.sub(pattern, lambda _: replacement, html, count=1)
 
 
+def resync_escape_html(html: str) -> str:
+    """Remove obsolete standalone JS_ESCAPE_HTML definitions; escapeHtml is provided once by JS_I18N."""
+    pattern = r'[ \t]*function escapeHtml\(s\) \{\s*return String\(s\)\.replace\(/\[&<>"\'\]/g,[\s\S]*?\}\s*'
+    return re.sub(pattern, "", html)
+
+
 def resync_i18n_js(html: str) -> str:
+    prefix = r'(?:[ \t]*function escapeHtml\(s\) \{[\s\S]*?\r?\n[ \t]*\}\r?\n\s*)*'
     if "/* __GB_I18N_END__ */" in html:
-        pattern = r"const LANG_KEY = \"gasbrazil-lang\";[\s\S]*?/\* __GB_I18N_END__ \*/"
+        pattern = prefix + r'const LANG_KEY = "gasbrazil-lang";[\s\S]*?/\* __GB_I18N_END__ \*/'
     else:
-        pattern = r"const LANG_KEY = \"gasbrazil-lang\";[\s\S]*?if \(onChange\) onChange\(next\);\s*\}\);\s*\}"
+        pattern = prefix + r'const LANG_KEY = "gasbrazil-lang";[\s\S]*?if \(onChange\) onChange\(next\);\s*\}\);\s*\}'
     replacement = kit.JS_I18N.strip()
     return re.sub(pattern, lambda _: replacement, html, count=1)
 
@@ -303,6 +310,17 @@ def resync_chart_export_safe(html: str) -> str:
 
 
 def resync_site(site_id: str) -> None:
+    if site_id == "home":
+        import build_home
+
+        build_home.write_home()
+        build_home.write_about()
+        build_home.write_404()
+        build_home.write_admin()
+        build_home.write_sitemap_and_robots()
+        print("resynced home shells (index, about, 404, admin)")
+        return
+
     path = ROOT / site_id / "index.html"
     html = path.read_text(encoding="utf-8")
     html = resync_boot_js(html)
@@ -314,6 +332,7 @@ def resync_site(site_id: str) -> None:
     html = resync_font_preloads(html)
     html = resync_head_hints(html)
     html = resync_decode_js(html)
+    html = resync_escape_html(html)
     html = resync_i18n_js(html)
     html = resync_boot_resilience(html)
     html = resync_chart_export_safe(html)

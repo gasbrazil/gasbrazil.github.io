@@ -10,7 +10,13 @@ for i in 1 2 3 4 5; do
     break
   fi
   echo "Push rejected (another workflow likely pushed first) -- rebasing and retrying ($i)..."
-  git pull --rebase origin main
+  if ! git pull --rebase origin main; then
+    echo "ERROR: Rebase conflict occurred. Conflicting files:" >&2
+    git diff --name-only --diff-filter=U >&2 || true
+    git status --short >&2 || true
+    git rebase --abort 2>/dev/null || true
+    exit 1
+  fi
 done
 if [ "$pushed" != "1" ]; then
   echo "ERROR: git push did not succeed after 5 attempts" >&2

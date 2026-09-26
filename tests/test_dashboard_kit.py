@@ -649,5 +649,46 @@ def test_clean_page_bottoms_and_standard_footers():
     assert "eb@gasbrazil.com" in footer
 
 
+def test_resync_i18n_js_idempotent_and_single_escape_html():
+    """Issue 1 regression test: resync_i18n_js must not duplicate escapeHtml on successive runs."""
+    from resync_built_shells import resync_escape_html, resync_i18n_js
+
+    root = Path(__file__).resolve().parents[1]
+    desk_path = root / "desk" / "index.html"
+    content = desk_path.read_text(encoding="utf-8")
+
+    # Run once
+    step1 = resync_escape_html(content)
+    step1 = resync_i18n_js(step1)
+    assert step1.count("function escapeHtml") == 1
+
+    # Run second time
+    step2 = resync_escape_html(step1)
+    step2 = resync_i18n_js(step2)
+    assert step2 == step1
+    assert step2.count("function escapeHtml") == 1
 
 
+def test_resync_i18n_js_deduplicates_multiple_copies():
+    from resync_built_shells import resync_i18n_js
+
+    dup_html = """
+    <script>
+    function escapeHtml(s) {
+      return 1;
+    }
+    function escapeHtml(s) {
+      return 2;
+    }
+    function escapeHtml(s) {
+      return 3;
+    }
+    const LANG_KEY = "gasbrazil-lang";
+    /* __GB_I18N_END__ */
+    </script>
+    """
+    resynced = resync_i18n_js(dup_html)
+    assert resynced.count("function escapeHtml") == 1
+    resynced2 = resync_i18n_js(resynced)
+    assert resynced2 == resynced
+    assert resynced2.count("function escapeHtml") == 1
