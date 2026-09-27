@@ -477,9 +477,10 @@ header.dash-head.flag-glow::after,
   position: sticky;
   top: 0;
   z-index: 40;
-  background: var(--header-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  /* Transparent at rest so the page gradient shows through — a flat --bg fill
+     read as a dark slab over the lighter top wash. Frosted glass only once
+     the header is stuck and content scrolls under it (.flag-glow, via JS). */
+  background: transparent;
   border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
   padding-top: 10px;
   padding-bottom: 10px;
@@ -491,6 +492,12 @@ header.dash-head.flag-glow::after,
   gap: 12px;
   isolation: isolate;
   transition: background-color .2s ease, border-color .2s ease;
+}
+.site-header.flag-glow, header.top.flag-glow,
+header.dash-head.flag-glow, .hub-header.flag-glow {
+  background: var(--header-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 .asof-strip {
   display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px;
@@ -2841,14 +2848,19 @@ main.hub { flex: 1; width: var(--content-w); max-width: var(--content-max); marg
 .hub-header {
   position: sticky; top: 0; z-index: 40;
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  background: var(--header-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  /* Transparent at rest so the page gradient shows through; frosted glass
+     only once stuck and content scrolls under it (.flag-glow, via JS). */
+  background: transparent;
   border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
   padding: 10px 0 10px;
   margin: 0 0 4px;
   isolation: isolate;
   transition: background-color .2s ease, border-color .2s ease;
+}
+.hub-header.flag-glow {
+  background: var(--header-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 @media (max-width: 720px) {
   .hub-header { flex-wrap: wrap; }
@@ -3108,13 +3120,13 @@ main h3,
       <div class="kpi-label" data-i18n="cardOns">ONS Balances</div>
       <div class="kpi-role">Grid &amp; gas dispatch</div>
       <div class="kpi-val" data-en="4,019 MWmed gas" data-pt="4,019 MWmed a gás">4,019 MWmed gas</div>
-      <div class="kpi-when" data-refresh="2026-09-26 23:19 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-27 00:28 UTC"></div>
     </a>
     <a class="kpi-cell" href="pld/" data-slug="pld">
       <div class="kpi-label" data-i18n="cardPld">PLD Prices</div>
       <div class="kpi-role">Power settlement</div>
       <div class="kpi-val" data-en="SE 71.82 R$/MWh · 2026-09-27" data-pt="SE 71.82 R$/MWh · 2026-09-27">SE 71.82 R$/MWh · 2026-09-27</div>
-      <div class="kpi-when" data-refresh="2026-09-26 23:19 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-27 00:29 UTC"></div>
     </a>
     <a class="kpi-cell" href="poc/" data-slug="poc">
       <div class="kpi-label" data-i18n="cardPoc">POC Results</div>
@@ -3126,7 +3138,7 @@ main h3,
       <div class="kpi-label" data-i18n="cardContratos">POC Contracts</div>
       <div class="kpi-role">Firm transport</div>
       <div class="kpi-val" data-en="904 contracts · 191103.8 thousand m³/d" data-pt="904 contratos · 191103.8 mil m³/d">904 contracts · 191103.8 thousand m³/d</div>
-      <div class="kpi-when" data-refresh="2026-09-26 23:19 UTC"></div>
+      <div class="kpi-when" data-refresh="2026-09-27 00:28 UTC"></div>
     </a>
     <a class="kpi-cell" href="flows/" data-slug="flows">
       <div class="kpi-label" data-i18n="cardFlows">Pipeline Flows</div>

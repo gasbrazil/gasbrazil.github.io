@@ -469,9 +469,10 @@ header.dash-head.flag-glow::after,
   position: sticky;
   top: 0;
   z-index: 40;
-  background: var(--header-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  /* Transparent at rest so the page gradient shows through — a flat --bg fill
+     read as a dark slab over the lighter top wash. Frosted glass only once
+     the header is stuck and content scrolls under it (.flag-glow, via JS). */
+  background: transparent;
   border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
   padding-top: 10px;
   padding-bottom: 10px;
@@ -483,6 +484,12 @@ header.dash-head.flag-glow::after,
   gap: 12px;
   isolation: isolate;
   transition: background-color .2s ease, border-color .2s ease;
+}
+.site-header.flag-glow, header.top.flag-glow,
+header.dash-head.flag-glow, .hub-header.flag-glow {
+  background: var(--header-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 .asof-strip {
   display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px;
@@ -2816,7 +2823,6 @@ html.gb-locked footer {
   border-radius: var(--radius-sm);
   color: var(--accent);
 }
-
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; font-weight: 300; }

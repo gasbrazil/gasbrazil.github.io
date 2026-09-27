@@ -331,14 +331,19 @@ main.hub { flex: 1; width: var(--content-w); max-width: var(--content-max); marg
 .hub-header {
   position: sticky; top: 0; z-index: 40;
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  background: var(--header-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  /* Transparent at rest so the page gradient shows through; frosted glass
+     only once stuck and content scrolls under it (.flag-glow, via JS). */
+  background: transparent;
   border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
   padding: 10px 0 10px;
   margin: 0 0 4px;
   isolation: isolate;
   transition: background-color .2s ease, border-color .2s ease;
+}
+.hub-header.flag-glow {
+  background: var(--header-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 @media (max-width: 720px) {
   .hub-header { flex-wrap: wrap; }
