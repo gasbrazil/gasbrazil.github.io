@@ -2943,16 +2943,19 @@ _BRAND_MARK_BUTTON = (
     '<button type="button" class="dd-trigger brand-mark" aria-haspopup="menu" '
     'aria-expanded="false" aria-controls="gb-products-menu" '
     'id="gb-products-trigger" data-i18n-aria="navMenu" aria-label="Menu">'
-    '<svg class="brand-menu-icon" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" '
-    'focusable="false"><path d="M2.5 4h11M2.5 8h11M2.5 12h11" fill="none" stroke="currentColor" '
-    'stroke-width="1.6" stroke-linecap="round"/></svg></button>'
+    # viewBox is cropped to the strokes so the bottom line is the icon's
+    # bottom edge, which CSS aligns to the wordmark's baseline.
+    '<svg class="brand-menu-icon" viewBox="0 0 16 11" aria-hidden="true" focusable="false">'
+    '<path d="M1 .75h14M1 5.5h14M1 10.25h14" fill="none" stroke="currentColor" '
+    'stroke-width="1.5" stroke-linecap="round"/></svg></button>'
 )
 
 
 def products_dropdown_html(self_id: str, brand_html: str) -> str:
     """Wordmark + menu-icon control + products menu. brand_html is the
-    clickable (or static) title; the outlined three-line icon button after it
-    (.brand-mark) opens the products menu."""
+    clickable (or static) title; the small three-line gray icon after it
+    (.brand-mark), sitting on the wordmark's baseline, opens the products
+    menu."""
     return (
         '<div class="products-dd">'
         '<span class="brand-lockup">'
