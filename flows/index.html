@@ -19,8 +19,8 @@
 <link rel="preload" href="/shared/fonts/IBMPlexSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/shared/fonts/Pacaembu-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
 <!-- home-page teaser marker, read by ../build_home.py -- not otherwise used by this page:
-     generated: 2026-09-24 17:09 UTC
-     kpi_total_7d: 2765322.1
+     generated: 2026-09-28 19:42 UTC
+     kpi_total_7d: 2538488.1
      n_points: 357 -->
 <script>
 (function(){
@@ -2823,6 +2823,7 @@ html.gb-locked footer {
   border-radius: var(--radius-sm);
   color: var(--accent);
 }
+
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; }
@@ -3245,7 +3246,7 @@ main h3,
 </div>
 <div class="tt" id="chart-tt"></div>
 <script>
-const PAYLOAD_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/flows/payload.json.gz?v=36031931210";
+const PAYLOAD_URL = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/flows/payload.json.gz?v=36473675110";
 
 
 function b64ToBytes(b64) {
@@ -3564,6 +3565,7 @@ function initCrossLinks() {
   { const el = document.getElementById("link-precos"); if (el) el.href = SITE_LINKS.precos[flavor]; }
   { const el = document.getElementById("link-monitor"); if (el) el.href = SITE_LINKS.monitor[flavor]; }
 }
+
 
 
 function gbQueryParams() {
