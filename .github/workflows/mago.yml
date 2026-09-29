@@ -1,10 +1,11 @@
 name: Refresh TAG Mago dashboard
 
 # Mago publishes hourly EMPACOTAMENTOS JSON snapshots (line pack + zone
-# forecasts). Poll several times per day so GasBrazil stays near real time.
+# forecasts). Poll hourly so GasBrazil stays near real time without rebuilding
+# the home hub on every tick (see Refresh home hub step — schedule-only skip).
 on:
   schedule:
-    - cron: "25 */6 * * *"
+    - cron: "10 * * * *"
   workflow_dispatch: {}
   push:
     branches: [main]
@@ -17,7 +18,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: site-publish
+  group: mago-refresh
   cancel-in-progress: false
 
 jobs:
@@ -80,6 +81,7 @@ jobs:
           git push || bash .github/scripts/push-with-rebase.sh
 
       - name: Refresh home hub (TAG Mago card)
+        if: github.event_name != 'schedule'
         working-directory: .
         env:
           GASBRAZIL_DATA_BASE_URL: ${{ secrets.GASBRAZIL_DATA_BASE_URL }}

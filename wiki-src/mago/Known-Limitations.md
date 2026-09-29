@@ -4,7 +4,7 @@ TAG Mago data relies on periodic snapshots published by Transportadora Associada
 
 ## Data Cadence and Availability
 
-- Snapshots are polled and refreshed automatically via GitHub Actions every few hours.
+- Snapshots are polled and refreshed automatically via GitHub Actions about once per hour (scheduled UTC runs for Mago and NTS, which rebuild `/monitor/` and publish payloads to R2).
 - If TAG's API endpoint is unavailable or returns an error, the latest cached snapshot is retained until connectivity is restored.
 
 ## Scope of Measurements

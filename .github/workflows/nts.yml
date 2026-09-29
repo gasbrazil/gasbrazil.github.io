@@ -2,10 +2,11 @@ name: Refresh NTS OnTime dashboard
 
 # NTS publishes real-time SCADA telemetry for the Southeast gas transmission
 # system via https://www.ntsbrasil.com/wp-json/ontime/v1/estoque.
-# Poll every 4 hours to keep GasBrazil telemetry and historical series fresh.
+# Poll hourly (offset from Mago) so telemetry stays fresh without rebuilding
+# the home hub on every scheduled run.
 on:
   schedule:
-    - cron: "45 */4 * * *"
+    - cron: "40 * * * *"
   workflow_dispatch: {}
   push:
     branches: [main]
@@ -18,7 +19,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: site-publish
+  group: nts-refresh
   cancel-in-progress: false
 
 jobs:
@@ -81,6 +82,7 @@ jobs:
           git push || bash .github/scripts/push-with-rebase.sh
 
       - name: Refresh home hub (NTS OnTime card)
+        if: github.event_name != 'schedule'
         working-directory: .
         env:
           GASBRAZIL_DATA_BASE_URL: ${{ secrets.GASBRAZIL_DATA_BASE_URL }}
