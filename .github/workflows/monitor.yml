@@ -1,29 +1,32 @@
-name: Refresh TAG Mago dashboard
+name: Refresh Pipeline Monitor (TAG Mago + NTS)
 
-# Mago publishes hourly EMPACOTAMENTOS JSON snapshots (line pack + zone
-# forecasts). Poll several times per day so GasBrazil stays near real time.
+# TAG Mago (hourly snapshots) and NTS OnTime (near-real-time SCADA) feed the
+# unified /monitor/ dashboard. One hourly job fetches both, rebuilds monitor
+# once, and publishes R2 payloads — without rebuilding the home hub on cron.
 on:
   schedule:
-    - cron: "25 */6 * * *"
+    - cron: "15 * * * *"
   workflow_dispatch: {}
   push:
     branches: [main]
     paths:
       - "mago/**"
+      - "nts/**"
+      - "monitor/**"
       - "shared/**"
-      - ".github/workflows/mago.yml"
+      - ".github/workflows/monitor.yml"
 
 permissions:
   contents: write
 
 concurrency:
-  group: site-publish
+  group: monitor-refresh
   cancel-in-progress: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     env:
       R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
       R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
@@ -32,9 +35,6 @@ jobs:
       GASBRAZIL_ARTIFACTS_BUCKET: ${{ secrets.GASBRAZIL_ARTIFACTS_BUCKET }}
       GASBRAZIL_DATA_BASE_URL: ${{ secrets.GASBRAZIL_DATA_BASE_URL }}
       GASBRAZIL_DATA_CACHE_BUST: ${{ github.run_id }}
-    defaults:
-      run:
-        working-directory: mago
     steps:
       - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
 
@@ -42,9 +42,12 @@ jobs:
         with:
           enable-cache: true
           python-version: "3.12"
-          cache-dependency-glob: "mago/requirements.txt"
+          cache-dependency-glob: |
+            mago/requirements.txt
+            nts/requirements.txt
 
-      - run: uv pip install -r requirements.txt -c ../shared/constraints.txt
+      - name: Install dependencies
+        run: uv pip install -r mago/requirements.txt -c shared/constraints.txt
 
       - name: Cache key for this month
         id: ym
@@ -58,29 +61,44 @@ jobs:
           restore-keys: |
             mago-raw-
 
-      - name: Fetch recent Mago snapshots
+      - name: Restore NTS raw snapshots
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: nts/raw
+          key: nts-raw-${{ steps.ym.outputs.ym }}
+          restore-keys: |
+            nts-raw-
+
+      - name: Fetch TAG Mago snapshots
+        working-directory: mago
         run: python mago_pipeline.py fetch --days 14
 
-      - name: Build parquet + dashboard
+      - name: Fetch NTS OnTime snapshots
+        working-directory: nts
+        run: python nts_pipeline.py fetch --days 7
+
+      - name: Build pipelines and dashboards
         run: |
-          python mago_pipeline.py build
-          python dashboard.py
-          python ../monitor/dashboard.py
+          python mago/mago_pipeline.py build
+          python mago/dashboard.py
+          python nts/nts_pipeline.py build
+          python nts/dashboard.py
+          python monitor/dashboard.py
 
       - name: Commit dashboard artifacts
-        working-directory: .
         env:
           GASBRAZIL_DATA_BASE_URL: ${{ secrets.GASBRAZIL_DATA_BASE_URL }}
           GASBRAZIL_DATA_CACHE_BUST: ${{ github.run_id }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add mago/index.html monitor/index.html
-          git diff --staged --quiet || git commit -m "chore(mago): refresh TAG Mago and Pipeline Monitor dashboards"
+          git add mago/index.html nts/index.html monitor/index.html
+          git add nts/data/nts_linepack_series.parquet lake/transport/nts_linepack_series.parquet 2>/dev/null || true
+          git diff --staged --quiet || git commit -m "chore(monitor): refresh TAG Mago, NTS OnTime, and Pipeline Monitor"
           git push || bash .github/scripts/push-with-rebase.sh
 
-      - name: Refresh home hub (TAG Mago card)
-        working-directory: .
+      - name: Refresh home hub (Mago + NTS cards)
+        if: github.event_name != 'schedule'
         env:
           GASBRAZIL_DATA_BASE_URL: ${{ secrets.GASBRAZIL_DATA_BASE_URL }}
           GASBRAZIL_DATA_CACHE_BUST: ${{ github.run_id }}
@@ -95,5 +113,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html about/index.html 404.html robots.txt sitemap.xml hub/teasers.json.gz 2>/dev/null || true
-          git diff --staged --quiet || git commit -m "home: refresh hub after TAG Mago update"
+          git diff --staged --quiet || git commit -m "home: refresh hub after Pipeline Monitor update"
           git push || bash .github/scripts/push-with-rebase.sh

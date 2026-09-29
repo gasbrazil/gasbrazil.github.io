@@ -2027,7 +2027,7 @@ function showPayloadError() {
   const banner = document.createElement("div");
   banner.className = "panel";
   banner.setAttribute("role", "alert");
-  banner.innerHTML = '<p class="sub" style="color:var(--text);margin:0">Could not load TAG Mago data. The dashboard payload may not be published yet — it refreshes automatically every few hours. If this persists, check that the Mago CI workflow completed on <code>main</code>.</p>';
+  banner.innerHTML = '<p class="sub" style="color:var(--text);margin:0">Could not load TAG Mago data. The dashboard payload may not be published yet — it refreshes automatically about once per hour. If this persists, check that the Mago CI workflow completed on <code>main</code>.</p>';
   const wrap = document.querySelector(".wrap");
   if (wrap && wrap.firstChild) wrap.insertBefore(banner, wrap.children[1] || wrap.firstChild);
 }
