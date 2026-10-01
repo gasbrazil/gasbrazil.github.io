@@ -50,7 +50,11 @@ def test_monitor_dashboard_rendered():
 
     # Payloads and 7-day reference line
     assert 'id="nts-payload"' in content
-    assert "fetchMagoPayloadJson" in content
+    assert "fetchMonitorPayloads" in content
+    assert "MONITOR_PAYLOAD_R2" in content
+    assert "refreshMonitorPayloads" in content
+    assert "data-tag-range" in content
+    assert "setTagChartRange" in content
     assert "getMago7dAvg" in content
     assert "7d Avg:" in content
     assert "tagCandidate" in content
