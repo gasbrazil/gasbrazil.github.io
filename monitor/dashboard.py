@@ -259,10 +259,15 @@ __SHARED_TYPO_WEIGHT_CSS__
 
   <section class="panel panel-tight">
     <div class="panel-head-row">
-      <div style="display:flex;align-items:center;">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
         <h2 data-i18n="magoLinepackTitle">TAG Line Pack — Integrated Network</h2>
+        <div id="linepack-zone-pill" class="zone-pill">—</div>
       </div>
-      <div id="linepack-zone-pill" class="zone-pill">—</div>
+      <div class="range-toggle-group" role="group" aria-label="TAG chart time window">
+        <button type="button" class="range-btn active" data-tag-range="24h" onclick="setTagChartRange('24h')">24H</button>
+        <button type="button" class="range-btn" data-tag-range="7d" onclick="setTagChartRange('7d')">7D</button>
+        <button type="button" class="range-btn" data-tag-range="all" onclick="setTagChartRange('all')" data-i18n="rangeAll">All</button>
+      </div>
     </div>
     <div class="chart-box chart-lp-box"><div id="chart-lp"></div></div>
     <div class="legend">
@@ -441,7 +446,35 @@ __NTS_PAYLOAD_JSON__
 
 <script>
 const PAYLOAD_URL = "__PAYLOAD_URL__";
+const MONITOR_PAYLOAD_R2 = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/monitor/payload.json.gz";
 const MAGO_PAYLOAD_R2 = "https://pub-c07957ad735e48b796eae989fa9e678d.r2.dev/mago/payload.json.gz";
+/** Re-fetch published artifacts (CDN max-age is ~5m; CI publishes hourly). */
+const PAYLOAD_REFRESH_MS = 5 * 60 * 1000;
+
+function bustArtifactUrl(url) {
+  if (!url) return url;
+  try {
+    const u = new URL(url, window.location.href);
+    u.searchParams.set("v", String(Date.now()));
+    return u.toString();
+  } catch (e) {
+    const base = String(url).split("?")[0];
+    return base + "?v=" + Date.now();
+  }
+}
+
+function artifactBaseUrls() {
+  const seen = new Set();
+  const out = [];
+  for (const raw of [PAYLOAD_URL, MONITOR_PAYLOAD_R2, MAGO_PAYLOAD_R2]) {
+    if (!raw) continue;
+    const base = String(raw).split("?")[0];
+    if (seen.has(base)) continue;
+    seen.add(base);
+    out.push(base);
+  }
+  return out;
+}
 
 __SHARED_JS_DECODE__
 __SHARED_JS_ESCAPE_HTML__
@@ -594,6 +627,50 @@ try {
 }
 
 let ntsActiveRange = "24h";
+let tagActiveRange = "24h";
+
+function tagSnapshotMs(tagPayload) {
+  if (!tagPayload) return 0;
+  const s = tagPayload.snapshotIso || tagPayload.snapshotAt;
+  if (!s) return 0;
+  const norm = (s.length > 10 && !s.endsWith("Z") && !s.includes("+")) ? s + "Z" : s;
+  const t = new Date(norm).getTime();
+  return isNaN(t) ? 0 : t;
+}
+
+function ntsSnapshotMs(payload) {
+  if (!payload) return 0;
+  const kpis = payload.kpis || {};
+  const s = payload.last_updated_iso || payload.last_updated_utc
+    || kpis.last_updated_iso || kpis.last_updated_utc;
+  if (s) {
+    const norm = (s.length > 10 && !s.endsWith("Z") && !s.includes("+")) ? s + "Z" : s;
+    const t = new Date(norm).getTime();
+    if (!isNaN(t)) return t;
+  }
+  const series = payload.series || [];
+  if (series.length) return series[series.length - 1][0] * 1000;
+  return 0;
+}
+
+function filterTagRowsByRange(rows, range) {
+  if (!rows || !rows.length || range === "all") return rows || [];
+  const ms = rows.map(r => tsMs(r.observedAt)).filter(t => !isNaN(t));
+  if (!ms.length) return rows;
+  const latest = Math.max(...ms);
+  let cutoff = 0;
+  if (range === "24h") cutoff = latest - 24 * 3600 * 1000;
+  else if (range === "7d") cutoff = latest - 7 * 86400 * 1000;
+  return rows.filter(r => tsMs(r.observedAt) >= cutoff);
+}
+
+function setTagChartRange(range) {
+  tagActiveRange = range;
+  document.querySelectorAll("#monitor-view-tag .range-btn[data-tag-range]").forEach(btn => {
+    btn.classList.toggle("active", btn.getAttribute("data-tag-range") === range);
+  });
+  packLinepack();
+}
 
 function fmtNumNts(n, decimals) {
   if (n === null || n === undefined || isNaN(n)) return "—";
@@ -616,7 +693,7 @@ function filterNtsSeries(range) {
 
 function setNtsChartRange(range) {
   ntsActiveRange = range;
-  document.querySelectorAll(".range-btn[data-range]").forEach(btn => {
+  document.querySelectorAll("#monitor-view-nts .range-btn[data-range]").forEach(btn => {
     btn.classList.toggle("active", btn.getAttribute("data-range") === range);
   });
   renderNtsChart();
@@ -1444,12 +1521,22 @@ function drawLines(hostId, seriesList, yFmt, bands) {
 
 function packLinepack() {
   if (!DATA) return;
-  const actualPts = (LP.actual?.times || []).map((t, i) => ({ x: tsMs(t), y: LP.actual.values[i] }));
-  const forePts = (LP.forecast?.times || []).map((t, i) => ({ x: tsMs(t), y: LP.forecast.values[i] }));
-  const series = [
-    { name: "Actual", color: "var(--tso-tag, #0066cc)", points: actualPts },
-    { name: "Forecast", color: "#888", dash: "4 3", points: forePts },
-  ];
+  if (tagActiveRange === "24h") {
+    const actualPts = (LP.actual?.times || []).map((t, i) => ({ x: tsMs(t), y: LP.actual.values[i] }));
+    const forePts = (LP.forecast?.times || []).map((t, i) => ({ x: tsMs(t), y: LP.forecast.values[i] }));
+    const series = [
+      { name: "Actual", color: "var(--tso-tag, #0066cc)", points: actualPts.filter(p => p.y != null && isFinite(p.y)) },
+      { name: "Forecast", color: "#888", dash: "4 3", points: forePts.filter(p => p.y != null && isFinite(p.y)) },
+    ];
+    drawLines("chart-lp", series, v => (v / 1e6).toFixed(1), DATA.toleranceBands);
+    return;
+  }
+  let rows = filterTagRowsByRange(LP_ROWS || [], tagActiveRange);
+  const pts = rows
+    .map(r => ({ x: tsMs(r.observedAt), y: r.valueM3 }))
+    .filter(p => p.y != null && isFinite(p.y))
+    .sort((a, b) => a.x - b.x);
+  const series = [{ name: "Actual", color: "var(--tso-tag, #0066cc)", points: pts }];
   drawLines("chart-lp", series, v => (v / 1e6).toFixed(1), DATA.toleranceBands);
 }
 
@@ -1619,29 +1706,83 @@ function paintAsof() {
   if (thrEl) thrEl.textContent = DATA.snapshotAt || "—";
 }
 
-async function fetchMagoPayloadJson() {
-  const urls = [PAYLOAD_URL, MAGO_PAYLOAD_R2];
+async function fetchMonitorPayloads() {
+  let bestTag = null;
+  let bestTagMs = -1;
+  let bestNts = null;
+  let bestNtsMs = -1;
   let lastErr;
-  for (const u of urls) {
-    if (!u) continue;
+  for (const base of artifactBaseUrls()) {
+    const url = bustArtifactUrl(base);
     try {
-      const text = await inflateGzipUrl(u);
+      const text = await inflateGzipUrl(url, 2, 800);
       const parsed = parseDashboardJson(text);
       const tagCandidate = (parsed && parsed.tag) ? parsed.tag : parsed;
-      if (tagCandidate && (tagCandidate.linepack || tagCandidate.kpiLinepackMm3 != null || (tagCandidate.linepackHistoryRows && tagCandidate.linepackHistoryRows.length))) {
-        if (parsed && parsed.nts && parsed.nts.payload) {
-          NTS_PAYLOAD = parsed.nts.payload;
+      if (tagCandidate && (tagCandidate.linepack || tagCandidate.kpiLinepackMm3 != null
+          || (tagCandidate.linepackHistoryRows && tagCandidate.linepackHistoryRows.length))) {
+        const tms = tagSnapshotMs(tagCandidate);
+        if (tms >= bestTagMs) {
+          bestTagMs = tms;
+          bestTag = tagCandidate;
         }
-        return tagCandidate;
       }
-      if (parsed && parsed.nts && parsed.nts.payload) {
-        NTS_PAYLOAD = parsed.nts.payload;
+      const ntsCandidate = (parsed && parsed.nts && parsed.nts.payload) ? parsed.nts.payload : null;
+      if (ntsCandidate) {
+        const nms = ntsSnapshotMs(ntsCandidate);
+        if (nms >= bestNtsMs) {
+          bestNtsMs = nms;
+          bestNts = ntsCandidate;
+        }
       }
     } catch (e) {
       lastErr = e;
     }
   }
-  throw lastErr || new Error("Mago payload unavailable");
+  if (!bestTag && !bestNts) {
+    throw lastErr || new Error("Monitor payload unavailable");
+  }
+  return { tag: bestTag, nts: bestNts };
+}
+
+function applyMonitorPayloads(result) {
+  const tag = result && result.tag;
+  const nts = result && result.nts;
+  if (tag) {
+    DATA = tag;
+    LP = DATA.linepack || {};
+    LP_HIST = DATA.linepackHistory || {};
+    LP_ROWS = DATA.linepackHistoryRows || [];
+    ZONE_SERIES = DATA.zoneSeries || {};
+    GROUP_SERIES = DATA.groupSeries || {};
+    if (!selectedGroups || !selectedGroups.size) {
+      selectedGroups = new Set(DATA.groups || []);
+    }
+    if (!selectedZones || !selectedZones.size) {
+      selectedZones = new Set((DATA.zones || []).slice(0, 6));
+    }
+    setMagoKpis();
+    renderFaixasTable();
+    renderHeatmap();
+    renderLpTable();
+    renderFilters();
+    packLinepack();
+    packLinepackHistory();
+    packZones();
+    paintAsof();
+  }
+  if (nts) {
+    NTS_PAYLOAD = nts;
+    renderNtsChart();
+    populateNtsTable();
+  }
+  updateTelemetryHealth();
+  updateNationalGridKpis();
+}
+
+async function refreshMonitorPayloads() {
+  const result = await fetchMonitorPayloads();
+  applyMonitorPayloads(result);
+  return result;
 }
 
 /* ==================== GLOBAL INIT ==================== */
@@ -1674,10 +1815,6 @@ async function init() {
   initCrossLinks();
   gbCopyLink("btn-share");
   applyI18n();
-
-  // Wire NTS static elements
-  renderNtsChart();
-  populateNtsTable();
 
   // Wire Mago buttons
   const btnCsv = document.getElementById("btn-lp-csv");
@@ -1751,41 +1888,24 @@ async function init() {
     });
   }
 
-  // Initialize telemetry health pulse and periodic update
   updateTelemetryHealth();
   setInterval(updateTelemetryHealth, 60000);
+
   const langToggle = document.getElementById("lang-toggle");
   if (langToggle) langToggle.addEventListener("click", () => setTimeout(updateNationalGridKpis, 60));
 
-  // Fetch TAG Mago JSON in background
   try {
-    DATA = await fetchMagoPayloadJson();
-    if (NTS_PAYLOAD && monitorTab === "nts") {
+    await refreshMonitorPayloads();
+  } catch (err) {
+    console.error("Monitor payload refresh failed; using embedded snapshot:", err);
+    if (NTS_PAYLOAD && Object.keys(NTS_PAYLOAD).length) {
       renderNtsChart();
       populateNtsTable();
     }
-    LP = DATA.linepack || {};
-    LP_HIST = DATA.linepackHistory || {};
-    LP_ROWS = DATA.linepackHistoryRows || [];
-    ZONE_SERIES = DATA.zoneSeries || {};
-    GROUP_SERIES = DATA.groupSeries || {};
-    selectedGroups = new Set(DATA.groups || []);
-    selectedZones = new Set((DATA.zones || []).slice(0, 6));
-
-    setMagoKpis();
-    renderFaixasTable();
-    renderHeatmap();
-    renderLpTable();
-    renderFilters();
-    packLinepack();
-    packLinepackHistory();
-    packZones();
-    paintAsof();
-    updateTelemetryHealth();
-    updateNationalGridKpis();
-  } catch (err) {
-    console.error("TAG Mago payload could not be loaded:", err);
   }
+  setInterval(() => {
+    refreshMonitorPayloads().catch(err => console.warn("Periodic monitor refresh:", err));
+  }, PAYLOAD_REFRESH_MS);
 
   window.addEventListener("resize", () => {
     if (monitorTab === "nts") renderNtsChart();
