@@ -3021,7 +3021,7 @@ main h3,
 <p>TAG Mago data relies on periodic snapshots published by Transportadora Associada de Gás (TAG).</p>
 <h2>Data Cadence and Availability</h2>
 <ul>
-<li>Snapshots are polled and refreshed automatically via GitHub Actions about once per hour (a single combined workflow rebuilds <code>/monitor/</code> and publishes payloads to R2).</li>
+<li>Snapshots are polled and refreshed automatically via GitHub Actions about once per hour (a single combined workflow rebuilds <code>/monitor/</code> and publishes payloads to R2). The monitor page also re-fetches published artifacts every few minutes in the browser.</li>
 <li>If TAG's API endpoint is unavailable or returns an error, the latest cached snapshot is retained until connectivity is restored.</li>
 </ul>
 <h2>Scope of Measurements</h2>
